@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { cn } from '@/lib/utils'
 
 import { StatusBadge, type StatusBadgeProps } from './status-badge'
@@ -63,6 +64,7 @@ type GroupBadgeProps = Omit<
   ratio?: number | null
   ratioLabel?: string
   containerClassName?: string
+  showIdentifier?: boolean
 }
 
 function getGroupLabel(params: {
@@ -71,21 +73,27 @@ function getGroupLabel(params: {
   isAutoGroup: boolean
   isEmptyGroup: boolean
   t: (key: string) => string
+  displayName: (group: string, showIdentifier?: boolean) => string
+  showIdentifier: boolean
 }): string {
   if (params.labelOverride) return params.labelOverride
   if (params.isEmptyGroup) return params.t('User Group')
   if (params.isAutoGroup) return params.t('Auto')
-  return params.groupName ?? ''
+  return params.groupName
+    ? params.displayName(params.groupName, params.showIdentifier)
+    : ''
 }
 
 export function GroupBadge(props: GroupBadgeProps) {
   const { t } = useTranslation()
+  const displayName = useGroupDisplayName()
   const {
     group,
     label: labelOverride,
     ratio,
     ratioLabel,
     containerClassName,
+    showIdentifier = false,
     copyable = false,
     showDot,
     className,
@@ -101,6 +109,8 @@ export function GroupBadge(props: GroupBadgeProps) {
     isAutoGroup,
     isEmptyGroup,
     t,
+    displayName,
+    showIdentifier,
   })
 
   const badge = (

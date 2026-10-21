@@ -1110,6 +1110,7 @@ export function useChannelsColumns(
                 <GroupBadge
                   key={g}
                   group={g}
+                  showIdentifier
                   label={sensitiveVisible ? undefined : SENSITIVE_MASK}
                   size='sm'
                 />

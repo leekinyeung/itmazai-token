@@ -7318,6 +7318,10 @@
     "Zhipu": "Zhipu",
     "Zhipu GLM": "Zhipu GLM",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Localized group names": "Tên nhóm theo ngôn ngữ",
+    "JSON map of group identifiers to display names for each interface language.": "Ánh xạ JSON từ mã định danh nhóm đến tên hiển thị cho từng ngôn ngữ giao diện.",
+    "Configure the name shown for each interface language.": "Cấu hình tên hiển thị cho từng ngôn ngữ giao diện.",
+    "Expected a JSON map of group identifiers to localized names": "Cần ánh xạ JSON từ mã định danh nhóm đến tên theo ngôn ngữ"
   }
 }

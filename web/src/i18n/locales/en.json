@@ -7318,6 +7318,10 @@
     "Zhipu": "Zhipu",
     "Zhipu GLM": "Zhipu GLM",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Localized group names": "Localized group names",
+    "JSON map of group identifiers to display names for each interface language.": "JSON map of group identifiers to display names for each interface language.",
+    "Configure the name shown for each interface language.": "Configure the name shown for each interface language.",
+    "Expected a JSON map of group identifiers to localized names": "Expected a JSON map of group identifiers to localized names"
   }
 }

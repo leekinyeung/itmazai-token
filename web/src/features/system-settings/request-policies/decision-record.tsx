@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
+
 import type { PolicyEvent } from './api'
 import { policyLabel } from './policy-label'
 
@@ -8,6 +10,7 @@ export function PolicyDecisionRecord(props: {
   channelNames?: Record<number, string>
 }) {
   const { t } = useTranslation()
+  const formatGroupName = useGroupDisplayName()
   return (
     <ol aria-label={t('Request decision flow')} className='space-y-0 text-sm'>
       {(props.events ?? []).map((event, index) => (
@@ -39,7 +42,7 @@ export function PolicyDecisionRecord(props: {
           <p className='text-muted-foreground text-xs break-words'>
             {event.attempt > 0 ? `${t('Attempt')} ${event.attempt} · ` : ''}
             {event.elapsed_ms} ms
-            {event.group ? ` · ${event.group}` : ''}
+            {event.group ? ` · ${formatGroupName(event.group, true)}` : ''}
             {event.rule ? ` · ${event.rule}` : ''}
             {event.status ? ` · HTTP ${event.status}` : ''}
           </p>

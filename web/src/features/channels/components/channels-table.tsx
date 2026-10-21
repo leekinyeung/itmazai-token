@@ -45,6 +45,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { useMediaQuery } from '@/hooks'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
 import { hasPermission } from '@/lib/admin-permissions'
@@ -104,6 +105,7 @@ function isDisabledChannelRow(channel: Channel) {
 
 export function ChannelsTable() {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const {
     enableTagMode,
     sorting,
@@ -225,10 +227,10 @@ export function ChannelsTable() {
   const groupOptions = useMemo(
     () =>
       (groupsData?.data || []).map((g) => ({
-        label: g,
+        label: displayGroupName(g, true),
         value: g,
       })),
-    [groupsData]
+    [displayGroupName, groupsData]
   )
 
   // Fetch channels data

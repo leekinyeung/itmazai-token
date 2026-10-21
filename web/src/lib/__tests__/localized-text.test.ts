@@ -19,6 +19,10 @@ For commercial licensing, please contact support@quantumnous.com
 import { describe, expect, test } from 'vitest'
 
 import {
+  formatGroupDisplayName,
+  resolveGroupDisplayName,
+} from '../group-display-name'
+import {
   resolveLocalizedText,
   type LocalizedTextValue,
 } from '../localized-text'
@@ -112,5 +116,62 @@ describe('resolveLocalizedText', () => {
     },
   ])('$name', ({ value, language, expected }) => {
     expect(resolveLocalizedText(value, language)).toBe(expected)
+  })
+})
+
+describe('resolveGroupDisplayName', () => {
+  const displayNames = {
+    default: {
+      en: 'Default',
+      zh: '默认',
+      'zh-TW': '預設',
+      fr: 'Par défaut',
+      ja: 'デフォルト',
+      ru: 'По умолчанию',
+      vi: 'Mặc định',
+    },
+    regional: { en: 'Regional', fr: 'Régional' },
+    englishOnly: { en: 'English only' },
+  }
+
+  test.each([
+    ['en', 'Default'],
+    ['zhCN', '默认'],
+    ['zhTW', '預設'],
+    ['fr', 'Par défaut'],
+    ['ja', 'デフォルト'],
+    ['ru', 'По умолчанию'],
+    ['vi', 'Mặc định'],
+  ])('resolves the %s interface language', (language, expected) => {
+    expect(resolveGroupDisplayName('default', displayNames, language)).toBe(
+      expected
+    )
+  })
+
+  test('falls back from a regional locale to its primary language', () => {
+    expect(resolveGroupDisplayName('regional', displayNames, 'fr-CA')).toBe(
+      'Régional'
+    )
+    expect(resolveGroupDisplayName('default', displayNames, 'zh-HK')).toBe(
+      '默认'
+    )
+  })
+
+  test('falls back to English and then the original identifier', () => {
+    expect(resolveGroupDisplayName('englishOnly', displayNames, 'ja')).toBe(
+      'English only'
+    )
+    expect(resolveGroupDisplayName('custom', displayNames, 'zhCN')).toBe(
+      'custom'
+    )
+  })
+
+  test('keeps the identifier in administrative labels', () => {
+    expect(formatGroupDisplayName('default', displayNames, 'zhCN', true)).toBe(
+      '默认 · default'
+    )
+    expect(formatGroupDisplayName('custom', displayNames, 'zhCN', true)).toBe(
+      'custom'
+    )
   })
 })

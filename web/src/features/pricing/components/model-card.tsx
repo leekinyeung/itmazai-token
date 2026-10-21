@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next'
 import { CopyButton } from '@/components/copy-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 import { useSystemConfigStore } from '@/stores/system-config-store'
@@ -57,6 +58,7 @@ export interface ModelCardProps {
 
 export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   const { t, i18n } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const tokenUnit = props.tokenUnit ?? DEFAULT_TOKEN_UNIT
   const priceRate = props.priceRate ?? 1
   const usdExchangeRate = props.usdExchangeRate ?? 1
@@ -65,6 +67,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   const tokenUnitLabel = tokenUnit === 'K' ? '1K' : '1M'
   const tags = parseTags(props.model.tags)
   const groups = props.model.enable_groups || []
+  const groupLabels = groups.map((group) => displayGroupName(group))
   const endpoints = props.model.supported_endpoint_types || []
   const modelIconKey = props.model.icon || props.model.vendor_icon
   const modelIcon = modelIconKey ? getLobeIcon(modelIconKey, 28) : null
@@ -357,13 +360,13 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
                   {t('Groups')}
                 </dt>
                 <dd className='flex min-w-0 items-baseline gap-1'>
-                  <span className='truncate' title={groups.join(', ')}>
-                    {groups[0]}
+                  <span className='truncate' title={groupLabels.join(', ')}>
+                    {groupLabels[0]}
                   </span>
                   {groups.length > 1 && (
                     <span
                       className='text-muted-foreground shrink-0'
-                      title={groups.slice(1).join(', ')}
+                      title={groupLabels.slice(1).join(', ')}
                     >
                       +{groups.length - 1}
                     </span>

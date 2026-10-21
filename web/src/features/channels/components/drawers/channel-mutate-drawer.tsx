@@ -104,6 +104,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { SecureVerificationDialog } from '@/features/auth/secure-verification'
 import { PluginIcon } from '@/features/task-plugins/components/plugin-icon'
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
@@ -408,6 +409,7 @@ export function ChannelMutateDrawer({
   currentRow,
 }: ChannelMutateDrawerProps) {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const queryClient = useQueryClient()
   const { setOpen } = useChannels()
   const currentUser = useAuthStore((s) => s.auth.user)
@@ -747,9 +749,9 @@ export function ChannelMutateDrawer({
     const allGroups = new Set([...groupsData.data, ...(currentGroups || [])])
     return [...allGroups].map((group) => ({
       value: group,
-      label: group,
+      label: displayGroupName(group, true),
     }))
-  }, [groupsData, currentGroups])
+  }, [currentGroups, displayGroupName, groupsData])
 
   // Parse current models as array
   const currentModelsArray = useMemo(

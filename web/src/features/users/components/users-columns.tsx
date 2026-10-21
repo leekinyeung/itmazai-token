@@ -201,7 +201,11 @@ export function useUsersColumns(): ColumnDef<User>[] {
           const group = row.getValue('group') as string
           return (
             <BadgeCell>
-              <GroupBadge group={group} className='font-normal' />
+              <GroupBadge
+                group={group}
+                showIdentifier
+                className='font-normal'
+              />
             </BadgeCell>
           )
         },

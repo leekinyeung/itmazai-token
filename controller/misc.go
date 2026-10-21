@@ -91,6 +91,7 @@ func GetStatus(c *gin.Context) {
 		"password_login_enabled":        common.PasswordLoginEnabled,
 		"password_register_enabled":     common.PasswordRegisterEnabled,
 		"default_use_auto_group":        setting.DefaultUseAutoGroup,
+		"group_display_names":           setting.GetGroupDisplayNamesCopy(),
 
 		"password_login_encryption_enabled": common.PasswordLoginEncryptionEnabled,
 

@@ -649,6 +649,7 @@ export function useCommonLogsColumns(
                 {group ? (
                   <GroupBadge
                     group={group}
+                    showIdentifier={isAdmin}
                     label={sensitiveVisible ? undefined : '••••'}
                     type='text'
                     size='sm'

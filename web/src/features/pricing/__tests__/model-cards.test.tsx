@@ -29,6 +29,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createJSONStorage } from 'zustand/middleware'
 
+import { GroupDisplayNameProvider } from '@/context/group-display-name-provider'
 import { api } from '@/lib/api'
 import {
   DEFAULT_CURRENCY_CONFIG,
@@ -301,6 +302,39 @@ describe('model cards', () => {
         'Token-based'
       )
     ).toBeVisible()
+  })
+
+  it('shows localized group names in card metadata while keeping group values unchanged', () => {
+    queryClient.setQueryData(['status'], {
+      group_display_names: {
+        Anthropic官方特惠: { en: 'Anthropic Official Offer' },
+        premium: { en: 'Premium' },
+      },
+    })
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <GroupDisplayNameProvider>
+          <ModelCard
+            model={pricingModel({
+              enable_groups: ['Anthropic官方特惠', 'premium'],
+            })}
+            onClick={vi.fn()}
+          />
+        </GroupDisplayNameProvider>
+      </QueryClientProvider>
+    )
+
+    const groupField = screen.getByText('Groups').parentElement
+    if (!groupField) throw new Error('Expected labeled group field')
+    expect(
+      within(groupField).getByText('Anthropic Official Offer')
+    ).toHaveAttribute('title', 'Anthropic Official Offer, Premium')
+    expect(within(groupField).getByText('+1')).toHaveAttribute(
+      'title',
+      'Premium'
+    )
+    expect(screen.queryByText('Anthropic官方特惠')).not.toBeInTheDocument()
   })
 
   it('omits metadata fields when the model has no groups, endpoints or tags', () => {

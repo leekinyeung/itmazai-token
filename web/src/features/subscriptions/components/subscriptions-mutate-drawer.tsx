@@ -62,6 +62,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { getPaymentErrorTranslation } from '@/features/wallet/lib/payment'
 import { getCurrencyDisplay, getCurrencyLabel } from '@/lib/currency'
 import { handleServerError } from '@/lib/handle-server-error'
@@ -96,6 +97,7 @@ export function SubscriptionsMutateDrawer({
   currentRow,
 }: Props) {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const isEdit = !!currentRow?.plan?.id
   const { triggerRefresh } = useSubscriptions()
   const { meta: currencyMeta } = getCurrencyDisplay()
@@ -413,7 +415,7 @@ export function SubscriptionsMutateDrawer({
                             { value: '__none__', label: t('No Upgrade') },
                             ...groupOptions.map((g) => ({
                               value: g,
-                              label: g,
+                              label: displayGroupName(g, true),
                             })),
                           ]}
                           onValueChange={(v) =>
@@ -444,7 +446,7 @@ export function SubscriptionsMutateDrawer({
                             },
                             ...groupOptions.map((g) => ({
                               value: g,
-                              label: g,
+                              label: displayGroupName(g, true),
                             })),
                           ]}
                           onValueChange={(v) =>

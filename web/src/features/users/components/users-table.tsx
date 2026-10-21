@@ -28,6 +28,7 @@ import {
   DataTablePage,
   useDataTable,
 } from '@/components/data-table'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { useMediaQuery } from '@/hooks'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
 import {
@@ -64,6 +65,7 @@ function isDisabledUserRow(user: User) {
 
 export function UsersTable() {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const columns = useUsersColumns()
   const { refreshTrigger } = useUsers()
   const isMobile = useMediaQuery('(max-width: 640px)')
@@ -246,7 +248,7 @@ export function UsersTable() {
             columnId: 'group',
             title: t('User Group'),
             options: (groupsData?.data ?? []).map((group) => ({
-              label: group,
+              label: displayGroupName(group, true),
               value: group,
             })),
             singleSelect: true,

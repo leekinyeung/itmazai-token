@@ -30,6 +30,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { handleServerError } from '@/lib/handle-server-error'
 import { requireServerSuccess } from '@/lib/server-error-message'
 
@@ -54,6 +55,7 @@ export function TagBatchEditDialog({
   onOpenChange,
 }: TagBatchEditDialogProps) {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const { currentTag } = useChannels()
   const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState(false)
@@ -77,9 +79,9 @@ export function TagBatchEditDialog({
     const allGroups = new Set([...groupsData.data, ...groups])
     return [...allGroups].map((group) => ({
       value: group,
-      label: group,
+      label: displayGroupName(group, true),
     }))
-  }, [groupsData, groups])
+  }, [displayGroupName, groups, groupsData])
 
   useEffect(() => {
     if (open && currentTag) {

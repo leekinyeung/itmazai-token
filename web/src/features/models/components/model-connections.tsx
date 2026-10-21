@@ -62,7 +62,7 @@ export function ModelConnections(props: { model: Model }) {
         <h3 className='font-medium'>{t('Enable Groups')}</h3>
         <div className='flex flex-wrap gap-2'>
           {props.model.enable_groups?.map((group) => (
-            <GroupBadge key={group} group={group} />
+            <GroupBadge key={group} group={group} showIdentifier />
           ))}
           {!props.model.enable_groups?.length && (
             <span className='text-muted-foreground text-sm'>

@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
 import { Label } from '@/components/ui/label'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { formatQuota, formatCompactNumber } from '@/lib/format'
 import { handleServerError } from '@/lib/handle-server-error'
 
@@ -49,6 +50,7 @@ export function UserInfoDialog({
   onOpenChange,
 }: UserInfoDialogProps) {
   const { t } = useTranslation()
+  const formatGroupName = useGroupDisplayName()
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -126,7 +128,10 @@ export function UserInfoDialog({
               value={formatCompactNumber(userInfo.request_count)}
             />
             {userInfo.group && (
-              <InfoItem label={t('User Group')} value={userInfo.group} />
+              <InfoItem
+                label={t('User Group')}
+                value={formatGroupName(userInfo.group, true)}
+              />
             )}
           </div>
 

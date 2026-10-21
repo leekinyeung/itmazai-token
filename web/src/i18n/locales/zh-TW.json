@@ -7318,6 +7318,10 @@
     "Zhipu": "智譜",
     "Zhipu GLM": "智譜GLM",
     "Zhipu V4": "智譜 V4",
-    "Zoom": "縮放"
+    "Zoom": "縮放",
+    "Localized group names": "多語言分組名稱",
+    "JSON map of group identifiers to display names for each interface language.": "分組識別碼到各介面語言顯示名稱的 JSON 對應。",
+    "Configure the name shown for each interface language.": "設定各介面語言中顯示的名稱。",
+    "Expected a JSON map of group identifiers to localized names": "應為分組識別碼到多語言名稱的 JSON 對應"
   }
 }

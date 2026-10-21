@@ -38,6 +38,7 @@ const defaults = {
   GroupRatio: '{"default":1,"vip":0.8}',
   TopupGroupRatio: '{"vip":1.2}',
   UserUsableGroups: '{"default":"Standard access","vip":"Premium access"}',
+  GroupDisplayNames: '{}',
   GroupGroupRatio: '{}',
   AutoGroups: '["default","vip"]',
   MaxTokenAutoGroups: 5,
@@ -49,6 +50,7 @@ const schema = z.object({
   GroupRatio: z.string(),
   TopupGroupRatio: z.string(),
   UserUsableGroups: z.string(),
+  GroupDisplayNames: z.string(),
   GroupGroupRatio: z.string(),
   AutoGroups: z.string(),
   MaxTokenAutoGroups: positiveIntegerSchema('Enter a positive integer'),
@@ -128,7 +130,9 @@ describe('group settings workspace', () => {
         .map((input) => input.value)
     ).toEqual(['group_2', 'group_1', 'default', 'vip'])
 
-    await user.click(screen.getByRole('button', { name: 'Save group settings' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Save group settings' })
+    )
     await waitFor(() => expect(onSave).toHaveBeenCalled())
     const saved = onSave.mock.calls[0][0]
     expect(JSON.parse(saved.GroupRatio)).toEqual({
@@ -201,7 +205,9 @@ describe('group settings workspace', () => {
     expect(screen.getByRole('button', { name: 'Move vip up' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Move vip down' })).toBeDisabled()
     await user.click(screen.getByRole('tab', { name: 'Pricing groups' }))
-    await user.click(screen.getByRole('button', { name: 'Save group settings' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Save group settings' })
+    )
     await waitFor(() => expect(onSave).toHaveBeenCalled())
     expect(onSave.mock.calls[0]?.[0]).toEqual(
       expect.objectContaining({
@@ -244,7 +250,9 @@ describe('group settings workspace', () => {
     )
     expect(screen.getByText('Not in pricing table')).toBeVisible()
     await user.click(screen.getByRole('tab', { name: 'Pricing groups' }))
-    await user.click(screen.getByRole('button', { name: 'Save group settings' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Save group settings' })
+    )
     await waitFor(() => expect(onSave).toHaveBeenCalled())
     expect(JSON.parse(onSave.mock.calls[0][0].AutoGroups)).toEqual([
       'vip',
@@ -286,7 +294,9 @@ describe('group settings workspace', () => {
       { target: { value: '0' } }
     )
     await user.click(screen.getByRole('tab', { name: 'Pricing groups' }))
-    await user.click(screen.getByRole('button', { name: 'Save group settings' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Save group settings' })
+    )
     await waitFor(() =>
       expect(
         screen.getByRole('tab', { name: 'Auto group order' })
@@ -341,5 +351,67 @@ describe('group settings workspace', () => {
     expect(
       screen.getAllByRole('textbox', { name: 'Group description' })[1]
     ).toHaveValue('Updated description')
+  })
+
+  it('edits localized names and migrates them when the group identifier changes', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn(async (_values: typeof defaults) => {})
+    render(
+      <Fixture
+        onSave={onSave}
+        initial={{
+          GroupDisplayNames: '{"default":{"en":"Default","zh":"默认"}}',
+        }}
+      />
+    )
+
+    const defaultInput = screen.getByDisplayValue('default')
+    const row = defaultInput.closest('tr')
+    expect(row).not.toBeNull()
+    if (!row) throw new Error('Expected default group row')
+    await user.click(within(row).getByRole('button', { name: 'Details' }))
+    const englishName = screen.getByLabelText('English')
+    expect(englishName).toHaveValue('Default')
+    await user.clear(englishName)
+    await user.type(englishName, 'Standard')
+    await user.keyboard('{Escape}')
+
+    await user.click(screen.getByRole('button', { name: 'Switch to JSON' }))
+    expect(screen.getByText('Localized group names')).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Switch to Visual' }))
+
+    const restoredDefaultInput = screen.getByDisplayValue('default')
+    await user.clear(restoredDefaultInput)
+    await user.type(restoredDefaultInput, 'primary')
+    await user.click(
+      screen.getByRole('button', { name: 'Save group settings' })
+    )
+    await waitFor(() => expect(onSave).toHaveBeenCalled())
+    expect(JSON.parse(onSave.mock.calls[0][0].GroupDisplayNames)).toEqual({
+      primary: { en: 'Standard', zh: '默认' },
+    })
+  })
+
+  it('removes localized names when a group is deleted', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn(async (_values: typeof defaults) => {})
+    render(
+      <Fixture
+        onSave={onSave}
+        initial={{
+          GroupDisplayNames: '{"default":{"en":"Default"}}',
+        }}
+      />
+    )
+
+    const row = screen.getByDisplayValue('default').closest('tr')
+    expect(row).not.toBeNull()
+    if (!row) throw new Error('Expected default group row')
+    await user.click(within(row).getByRole('button', { name: 'Delete' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Save group settings' })
+    )
+    await waitFor(() => expect(onSave).toHaveBeenCalled())
+    expect(JSON.parse(onSave.mock.calls[0][0].GroupDisplayNames)).toEqual({})
   })
 })

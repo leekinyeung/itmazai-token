@@ -79,8 +79,13 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { toIntlLocale } from '@/i18n/languages'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
+import { INTERFACE_LANGUAGE_OPTIONS, toIntlLocale } from '@/i18n/languages'
 import { formatNumber } from '@/lib/format'
+import {
+  formatGroupDisplayName,
+  type GroupDisplayNames,
+} from '@/lib/group-display-name'
 
 import { safeJsonParse } from '../utils/json-parser'
 import { GroupSpecialUsableRulesEditor } from './group-special-usable-editor'
@@ -98,6 +103,7 @@ type GroupRatioVisualEditorProps = {
   groupRatio: string
   topupGroupRatio: string
   userUsableGroups: string
+  groupDisplayNames: string
   groupGroupRatio: string
   autoGroups: string
   maxTokenAutoGroupsField: ReactNode
@@ -107,6 +113,7 @@ type GroupRatioVisualEditorProps = {
 
 type GroupPricingRow = {
   _id: string
+  displayNameKey: string
   name: string
   ratio: string
   topupRatio: string
@@ -147,6 +154,22 @@ function parseUsableMap(value: string): Record<string, string> {
   })
 }
 
+function parseGroupDisplayNames(value: string): GroupDisplayNames {
+  return safeJsonParse<GroupDisplayNames>(value, {
+    fallback: {},
+    silent: true,
+  })
+}
+
+const groupDisplayNameLocales = INTERFACE_LANGUAGE_OPTIONS.map(
+  ({ code, label }) => {
+    let locale: string = code
+    if (code === 'zhCN') locale = 'zh'
+    if (code === 'zhTW') locale = 'zh-TW'
+    return { locale, label }
+  }
+)
+
 function parseNestedRatioMap(
   value: string
 ): Record<string, Record<string, number>> {
@@ -172,6 +195,7 @@ function buildGroupPricingRows(
 
   return [...names].map((name) => ({
     _id: createGroupPricingId(),
+    displayNameKey: name,
     name,
     ratio: String(normalizeRatio(ratioMap[name])),
     topupRatio: Object.hasOwn(topupMap, name) ? String(topupMap[name]) : '',
@@ -242,9 +266,11 @@ type GroupNameSelectProps = {
   placeholder: string
   onValueChange: (value: string) => void
   className?: string
+  getLabel?: (name: string) => string
 }
 
 function GroupNameSelect(props: GroupNameSelectProps) {
+  const displayGroupName = useGroupDisplayName()
   const options = useMemo(() => {
     if (props.value && !props.options.includes(props.value)) {
       return [props.value, ...props.options]
@@ -254,7 +280,10 @@ function GroupNameSelect(props: GroupNameSelectProps) {
 
   return (
     <Combobox
-      options={options.map((name) => ({ value: name, label: name }))}
+      options={options.map((name) => ({
+        value: name,
+        label: props.getLabel?.(name) ?? displayGroupName(name, true),
+      }))}
       value={props.value}
       onValueChange={(value) => {
         if (value) props.onValueChange(value)
@@ -273,6 +302,7 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
   groupRatio,
   topupGroupRatio,
   userUsableGroups,
+  groupDisplayNames,
   groupGroupRatio,
   autoGroups,
   maxTokenAutoGroupsField,
@@ -280,8 +310,23 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
   onChange,
 }: GroupRatioVisualEditorProps) {
   const { t, i18n } = useTranslation()
-  const locale = toIntlLocale(i18n.resolvedLanguage || i18n.language)
+  const interfaceLanguage = i18n.resolvedLanguage || i18n.language
+  const locale = toIntlLocale(interfaceLanguage)
   const [detailGroup, setDetailGroup] = useState<string | null>(null)
+  const parsedDisplayNames = useMemo(
+    () => parseGroupDisplayNames(groupDisplayNames),
+    [groupDisplayNames]
+  )
+  const formatAdminGroup = useCallback(
+    (group: string) =>
+      formatGroupDisplayName(
+        group,
+        parsedDisplayNames,
+        interfaceLanguage,
+        true
+      ),
+    [interfaceLanguage, parsedDisplayNames]
+  )
 
   const registry = useMemo<RegistryEntry[]>(() => {
     const ratioMap = parseRatioMap(groupRatio)
@@ -370,6 +415,8 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
           groupRatio={groupRatio}
           userUsableGroups={userUsableGroups}
           topupGroupRatio={topupGroupRatio}
+          groupDisplayNames={groupDisplayNames}
+          interfaceLanguage={interfaceLanguage}
           onChange={onChange}
           onShowDetail={setDetailGroup}
         />
@@ -405,6 +452,7 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
                 value={null}
                 className='w-full'
                 placeholder={t('Add group')}
+                getLabel={formatAdminGroup}
                 onValueChange={handleAutoGroupAdd}
               />
               {autoGroupsList.length === 0 ? (
@@ -430,6 +478,7 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
                     <AutoGroupOrderItem
                       key={group}
                       group={group}
+                      label={formatAdminGroup(group)}
                       index={index}
                       count={autoGroupsList.length}
                       onMove={handleAutoGroupMove}
@@ -466,6 +515,9 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
         groupGroupRatio={groupGroupRatio}
         autoGroups={autoGroupsList}
         groupSpecialUsableGroup={groupSpecialUsableGroup}
+        groupDisplayNames={groupDisplayNames}
+        interfaceLanguage={interfaceLanguage}
+        onChange={onChange}
       />
     </Tabs>
   )
@@ -475,6 +527,8 @@ type GroupPricingTableProps = {
   groupRatio: string
   userUsableGroups: string
   topupGroupRatio: string
+  groupDisplayNames: string
+  interfaceLanguage: string
   onChange: (field: string, value: string) => void
   onShowDetail: (name: string) => void
 }
@@ -483,10 +537,16 @@ function GroupPricingTable({
   groupRatio,
   userUsableGroups,
   topupGroupRatio,
+  groupDisplayNames,
+  interfaceLanguage,
   onChange,
   onShowDetail,
 }: GroupPricingTableProps) {
   const { t } = useTranslation()
+  const displayNames = useMemo(
+    () => parseGroupDisplayNames(groupDisplayNames),
+    [groupDisplayNames]
+  )
   const [search, setSearch] = useState('')
   const [rows, setRows] = useState<GroupPricingRow[]>(() =>
     buildGroupPricingRows(groupRatio, userUsableGroups, topupGroupRatio)
@@ -524,14 +584,52 @@ function GroupPricingTable({
   const updateRow = useCallback(
     (
       id: string,
-      field: Exclude<keyof GroupPricingRow, '_id'>,
+      field: Exclude<keyof GroupPricingRow, '_id' | 'displayNameKey'>,
       value: string | number | boolean
     ) => {
+      const currentRow = rows.find((row) => row._id === id)
+      let nextDisplayNameKey = currentRow?.displayNameKey ?? ''
+      if (field === 'name' && currentRow) {
+        const oldName = currentRow.displayNameKey
+        const newName = String(value).trim()
+        if (
+          oldName !== newName &&
+          oldName &&
+          newName &&
+          Object.hasOwn(displayNames, oldName)
+        ) {
+          const nextDisplayNames = { ...displayNames }
+          const oldDisplayNames = nextDisplayNames[oldName] ?? {}
+          delete nextDisplayNames[oldName]
+          nextDisplayNames[newName] = {
+            ...oldDisplayNames,
+            ...nextDisplayNames[newName],
+          }
+          nextDisplayNameKey = newName
+          onChange(
+            'GroupDisplayNames',
+            JSON.stringify(nextDisplayNames, null, 2)
+          )
+        }
+        if (!Object.hasOwn(displayNames, oldName) && newName) {
+          nextDisplayNameKey = newName
+        }
+      }
       emitRows(
-        rows.map((row) => (row._id === id ? { ...row, [field]: value } : row))
+        rows.map((row) =>
+          row._id === id
+            ? {
+                ...row,
+                [field]: value,
+                ...(field === 'name'
+                  ? { displayNameKey: nextDisplayNameKey }
+                  : {}),
+              }
+            : row
+        )
       )
     },
-    [emitRows, rows]
+    [displayNames, emitRows, onChange, rows]
   )
 
   const addRow = useCallback(() => {
@@ -546,6 +644,7 @@ function GroupPricingTable({
     emitRows([
       {
         _id: createGroupPricingId(),
+        displayNameKey: name,
         name,
         ratio: '1',
         topupRatio: '',
@@ -558,9 +657,16 @@ function GroupPricingTable({
 
   const removeRow = useCallback(
     (id: string) => {
+      const row = rows.find((item) => item._id === id)
+      const name = row?.displayNameKey || row?.name.trim()
+      if (name && Object.hasOwn(displayNames, name)) {
+        const nextDisplayNames = { ...displayNames }
+        delete nextDisplayNames[name]
+        onChange('GroupDisplayNames', JSON.stringify(nextDisplayNames, null, 2))
+      }
       emitRows(rows.filter((row) => row._id !== id))
     },
-    [emitRows, rows]
+    [displayNames, emitRows, onChange, rows]
   )
 
   const duplicateNames = useMemo(() => {
@@ -580,6 +686,9 @@ function GroupPricingTable({
     (row) =>
       !query ||
       row.name.toLowerCase().includes(query) ||
+      formatGroupDisplayName(row.name.trim(), displayNames, interfaceLanguage)
+        .toLowerCase()
+        .includes(query) ||
       row.description.toLowerCase().includes(query)
   )
 
@@ -657,16 +766,32 @@ function GroupPricingTable({
                 id: 'group',
                 header: t('Group name'),
                 className: 'min-w-40',
-                cell: (row) => (
-                  <Input
-                    value={row.name}
-                    aria-label={t('Group name')}
-                    onChange={(event) =>
-                      updateRow(row._id, 'name', event.target.value)
-                    }
-                    aria-invalid={duplicateNames.includes(row.name.trim())}
-                  />
-                ),
+                cell: (row) => {
+                  const name = row.name.trim()
+                  const displayName = formatGroupDisplayName(
+                    name,
+                    displayNames,
+                    interfaceLanguage,
+                    true
+                  )
+                  return (
+                    <div className='space-y-1'>
+                      <Input
+                        value={row.name}
+                        aria-label={t('Group name')}
+                        onChange={(event) =>
+                          updateRow(row._id, 'name', event.target.value)
+                        }
+                        aria-invalid={duplicateNames.includes(name)}
+                      />
+                      {name && displayName !== name && (
+                        <p className='text-muted-foreground px-1 text-xs'>
+                          {displayName}
+                        </p>
+                      )}
+                    </div>
+                  )
+                },
               },
               {
                 id: 'ratio',
@@ -799,6 +924,7 @@ function GroupOverrideRules({
   onChange,
 }: GroupOverrideRulesProps) {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const [userGroupDialogOpen, setUserGroupDialogOpen] = useState(false)
   const [userGroupInput, setUserGroupInput] = useState<string | null>(null)
   const [overrideDialogOpen, setOverrideDialogOpen] = useState(false)
@@ -948,7 +1074,10 @@ function GroupOverrideRules({
                           />
                         }
                         aria-label={t('Rules for {{group}}', {
-                          group: userGroupData.userGroup,
+                          group: displayGroupName(
+                            userGroupData.userGroup,
+                            true
+                          ),
                         })}
                       >
                         <ChevronDown
@@ -956,7 +1085,7 @@ function GroupOverrideRules({
                           aria-hidden='true'
                         />
                         <span className='min-w-0 truncate font-semibold'>
-                          {userGroupData.userGroup}
+                          {displayGroupName(userGroupData.userGroup, true)}
                         </span>
                         {!registryNames.includes(userGroupData.userGroup) && (
                           <AlertTriangle
@@ -985,7 +1114,10 @@ function GroupOverrideRules({
                           variant='ghost'
                           size='sm'
                           aria-label={t('Remove {{group}}', {
-                            group: userGroupData.userGroup,
+                            group: displayGroupName(
+                              userGroupData.userGroup,
+                              true
+                            ),
                           })}
                           onClick={() =>
                             handleUserGroupDelete(userGroupData.userGroup)
@@ -1011,9 +1143,15 @@ function GroupOverrideRules({
                                   <span className='inline-flex max-w-48 items-center gap-1.5'>
                                     <span
                                       className='truncate'
-                                      title={override.targetGroup}
+                                      title={displayGroupName(
+                                        override.targetGroup,
+                                        true
+                                      )}
                                     >
-                                      {override.targetGroup}
+                                      {displayGroupName(
+                                        override.targetGroup,
+                                        true
+                                      )}
                                     </span>
                                     {!registryNames.includes(
                                       override.targetGroup
@@ -1157,6 +1295,7 @@ function GroupOverrideDialog({
   baseRatioByName,
 }: GroupOverrideDialogProps) {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const [targetGroup, setTargetGroup] = useState<string | null>(null)
   const [ratio, setRatio] = useState('')
 
@@ -1192,7 +1331,7 @@ function GroupOverrideDialog({
         userGroup
           ? t(
               'Configure a custom ratio for "{{userGroup}}" users when using a specific token group.',
-              { userGroup }
+              { userGroup: displayGroupName(userGroup, true) }
             )
           : t(
               'Configure a custom ratio for when users use a specific token group.'
@@ -1243,8 +1382,12 @@ function GroupOverrideDialog({
               : t(
                   'Multiplier applied when {{userGroup}} uses {{targetGroup}}',
                   {
-                    userGroup: userGroup || t('this user group'),
-                    targetGroup: targetGroup || t('this token group'),
+                    userGroup: userGroup
+                      ? displayGroupName(userGroup, true)
+                      : t('this user group'),
+                    targetGroup: targetGroup
+                      ? displayGroupName(targetGroup, true)
+                      : t('this token group'),
                   }
                 )}
           </p>
@@ -1263,6 +1406,9 @@ type GroupDetailSheetProps = {
   groupGroupRatio: string
   autoGroups: string[]
   groupSpecialUsableGroup: string
+  groupDisplayNames: string
+  interfaceLanguage: string
+  onChange: (field: string, value: string) => void
 }
 
 type VisibilityRule = {
@@ -1286,7 +1432,40 @@ function parseSpecialGroupKey(rawKey: string): {
 
 function GroupDetailSheet(props: GroupDetailSheetProps) {
   const { t } = useTranslation()
+  const { onChange } = props
   const name = props.groupName
+  const displayNames = useMemo(
+    () => parseGroupDisplayNames(props.groupDisplayNames),
+    [props.groupDisplayNames]
+  )
+  const formatAdminGroup = useCallback(
+    (group: string) =>
+      formatGroupDisplayName(
+        group,
+        displayNames,
+        props.interfaceLanguage,
+        true
+      ),
+    [displayNames, props.interfaceLanguage]
+  )
+  const updateDisplayName = useCallback(
+    (locale: string, value: string) => {
+      if (!name) return
+      const nextDisplayNames = { ...displayNames }
+      const existingNames = nextDisplayNames[name]
+      const localizedNames = existingNames ? { ...existingNames } : {}
+      if (value.trim()) localizedNames[locale] = value
+      else delete localizedNames[locale]
+
+      if (Object.keys(localizedNames).length > 0) {
+        nextDisplayNames[name] = localizedNames
+      } else {
+        delete nextDisplayNames[name]
+      }
+      onChange('GroupDisplayNames', JSON.stringify(nextDisplayNames, null, 2))
+    },
+    [displayNames, name, onChange]
+  )
 
   const detail = useMemo(() => {
     if (!name) return null
@@ -1359,7 +1538,7 @@ function GroupDetailSheet(props: GroupDetailSheetProps) {
         <SheetHeader className={sideDrawerHeaderClassName()}>
           <SheetTitle>
             {t('Group details')}
-            {name ? `: ${name}` : ''}
+            {name ? `: ${formatAdminGroup(name)}` : ''}
           </SheetTitle>
           <SheetDescription>
             {t('Everything configured for this group, in one place.')}
@@ -1368,6 +1547,35 @@ function GroupDetailSheet(props: GroupDetailSheetProps) {
 
         {detail && (
           <div className={sideDrawerFormClassName('gap-5')}>
+            <section className='space-y-3'>
+              <div className='space-y-1'>
+                <h3 className='text-sm font-semibold'>
+                  {t('Localized group names')}
+                </h3>
+                <p className='text-muted-foreground text-sm'>
+                  {t('Configure the name shown for each interface language.')}
+                </p>
+              </div>
+              <div className='grid gap-3 sm:grid-cols-2'>
+                {groupDisplayNameLocales.map(({ locale, label }) => (
+                  <div key={locale} className='space-y-1.5'>
+                    <Label htmlFor={`group-display-name-${locale}`}>
+                      {label}
+                    </Label>
+                    <Input
+                      id={`group-display-name-${locale}`}
+                      value={name ? (displayNames[name]?.[locale] ?? '') : ''}
+                      onChange={(event) =>
+                        updateDisplayName(locale, event.target.value)
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <Separator />
+
             <section className='space-y-2'>
               <h3 className='text-sm font-semibold'>{t('Overview')}</h3>
               <dl className='space-y-1.5 text-sm'>
@@ -1428,7 +1636,9 @@ function GroupDetailSheet(props: GroupDetailSheetProps) {
                       className='flex justify-between rounded-md border px-3 py-1.5'
                     >
                       <span>
-                        {t('Users in {{group}}', { group: item.userGroup })}
+                        {t('Users in {{group}}', {
+                          group: formatAdminGroup(item.userGroup),
+                        })}
                       </span>
                       <span className='font-medium'>{item.ratio}</span>
                     </li>
@@ -1452,7 +1662,7 @@ function GroupDetailSheet(props: GroupDetailSheetProps) {
                     >
                       <span>
                         {t('When billed as {{group}}', {
-                          group: item.targetGroup,
+                          group: formatAdminGroup(item.targetGroup),
                         })}
                       </span>
                       <span className='font-medium'>{item.ratio}</span>
@@ -1478,10 +1688,10 @@ function GroupDetailSheet(props: GroupDetailSheetProps) {
                       <span>
                         {rule.visible
                           ? t('Extra visible to {{group}}', {
-                              group: rule.userGroup,
+                              group: formatAdminGroup(rule.userGroup),
                             })
                           : t('Hidden from {{group}}', {
-                              group: rule.userGroup,
+                              group: formatAdminGroup(rule.userGroup),
                             })}
                       </span>
                       <StatusBadge

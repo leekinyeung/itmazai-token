@@ -26,6 +26,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { useMediaQuery } from '@/hooks'
 import { cn } from '@/lib/utils'
 
@@ -40,6 +41,7 @@ type ApiKeyGroupCellProps = {
 
 export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const isMobile = useMediaQuery('(max-width: 640px)')
 
   const group = props.group?.trim() || ''
@@ -50,7 +52,9 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
       <TruncatedCell
         className={isMobile ? 'w-full' : 'max-w-50'}
         tabIndex={0}
-        tooltipContent={group || t('Follow user group')}
+        tooltipContent={
+          group ? displayGroupName(group) : t('Follow user group')
+        }
         tooltipClassName='break-all'
       >
         <GroupBadge

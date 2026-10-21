@@ -7318,6 +7318,10 @@
     "Zhipu": "Zhipu",
     "Zhipu GLM": "Zhipu GLM",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム"
+    "Zoom": "ズーム",
+    "Localized group names": "ローカライズされたグループ名",
+    "JSON map of group identifiers to display names for each interface language.": "グループ識別子と各インターフェース言語の表示名を対応付ける JSON マップです。",
+    "Configure the name shown for each interface language.": "各インターフェース言語で表示する名前を設定します。",
+    "Expected a JSON map of group identifiers to localized names": "グループ識別子とローカライズ名を対応付ける JSON マップを指定してください"
   }
 }

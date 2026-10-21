@@ -24,6 +24,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 import { IconBadge, type IconBadgeTone } from '@/components/ui/icon-badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { getUserAvatarFallback, getUserAvatarStyle } from '@/lib/avatar'
 import { formatCompactNumber, formatQuota } from '@/lib/format'
 import { getRoleLabel } from '@/lib/roles'
@@ -42,6 +43,7 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
   const { t } = useTranslation()
+  const formatGroupName = useGroupDisplayName()
 
   if (loading) {
     return (
@@ -155,7 +157,9 @@ export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
               {profile.group && (
                 <>
                   <span>•</span>
-                  <span className='truncate'>{profile.group}</span>
+                  <span className='truncate'>
+                    {formatGroupName(profile.group)}
+                  </span>
                 </>
               )}
             </div>

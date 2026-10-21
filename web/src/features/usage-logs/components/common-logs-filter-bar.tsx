@@ -39,6 +39,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { getGroups } from '@/features/users/api'
 import { useMediaQuery } from '@/hooks'
 import { getUserGroups } from '@/lib/api'
@@ -120,6 +121,7 @@ export function CommonLogsFilterBar<TData>(
   props: CommonLogsFilterBarProps<TData>
 ) {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const isMobile = useMediaQuery('(max-width: 640px)')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -143,8 +145,11 @@ export function CommonLogsFilterBar<TData>(
       : Object.keys(userGroups?.data ?? {})
     return groups
       .filter((group) => group !== 'auto')
-      .map((group) => ({ label: group, value: group }))
-  }, [isAdmin, adminGroups, userGroups])
+      .map((group) => ({
+        label: displayGroupName(group, isAdmin),
+        value: group,
+      }))
+  }, [adminGroups, displayGroupName, isAdmin, userGroups])
 
   const searchState = useMemo<CommonLogDraft>(() => {
     const { start, end } = getDefaultTimeRange()

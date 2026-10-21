@@ -27,6 +27,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
@@ -152,6 +153,7 @@ export const PricingSidebar = memo(function PricingSidebar(
   props: PricingSidebarProps
 ) {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const counts = useMemo(() => {
     const vendors = new Map<string, number>()
     const tags = new Map<string, number>()
@@ -208,7 +210,7 @@ export const PricingSidebar = memo(function PricingSidebar(
     },
     ...props.groups.map((group) => ({
       value: group,
-      label: group,
+      label: displayGroupName(group),
       suffix: formatGroupRatio(props.groupRatios?.[group]),
     })),
   ]

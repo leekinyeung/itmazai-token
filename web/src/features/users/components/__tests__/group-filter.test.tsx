@@ -29,6 +29,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { GroupDisplayNameProvider } from '@/context/group-display-name-provider'
 import { api } from '@/lib/api'
 import { Route as UsersRoute } from '@/routes/_authenticated/users/index'
 import { useAuthStore } from '@/stores/auth-store'
@@ -100,11 +101,16 @@ async function renderUsers(initialEntry = '/users/') {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
+  client.setQueryData(['status'], {
+    group_display_names: { premium: { en: 'Premium' } },
+  })
   clients.push(client)
   await router.load()
   render(
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
+      <GroupDisplayNameProvider>
+        <RouterProvider router={router} />
+      </GroupDisplayNameProvider>
     </QueryClientProvider>
   )
   await screen.findByText('premium-user')
@@ -129,11 +135,13 @@ it('searches only the selected user group and lists all users again after the fi
   })
 
   await user.click(getGroupFilterTrigger())
-  await user.click(await screen.findByRole('option', { name: /^premium/ }))
+  await user.click(
+    await screen.findByRole('option', { name: 'Premium · premium' })
+  )
 
   await waitFor(() => expect(get).toHaveBeenLastCalledWith(premiumSearchUrl))
   expect(router.state.location.search).toMatchObject({ group: ['premium'] })
-  expect(getGroupFilterTrigger()).toHaveTextContent('premium')
+  expect(getGroupFilterTrigger()).toHaveTextContent('Premium · premium')
 
   await user.click(screen.getByRole('option', { name: 'Clear filters' }))
 
@@ -150,5 +158,5 @@ it('restores the user group filter from the page URL on load', async () => {
 
   expect(get).toHaveBeenCalledWith(premiumSearchUrl)
   expect(get).not.toHaveBeenCalledWith('/api/user/', expect.anything())
-  expect(getGroupFilterTrigger()).toHaveTextContent('premium')
+  expect(getGroupFilterTrigger()).toHaveTextContent('Premium · premium')
 })

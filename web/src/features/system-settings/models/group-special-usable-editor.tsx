@@ -51,6 +51,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 
 const sectionCardClassName = 'min-w-0 shadow-none'
 const sectionHeaderClassName = 'gap-2 border-b'
@@ -139,6 +140,7 @@ type GroupSelectProps = {
 }
 
 function GroupSelect(props: GroupSelectProps) {
+  const displayGroupName = useGroupDisplayName()
   const knownOptions = useMemo(() => {
     if (props.value && !props.options.includes(props.value)) {
       return [props.value, ...props.options]
@@ -148,7 +150,10 @@ function GroupSelect(props: GroupSelectProps) {
 
   return (
     <Combobox
-      options={knownOptions.map((name) => ({ value: name, label: name }))}
+      options={knownOptions.map((name) => ({
+        value: name,
+        label: displayGroupName(name, true),
+      }))}
       value={props.value}
       onValueChange={(value) => {
         if (value) props.onValueChange(value)
@@ -178,8 +183,10 @@ type GroupSectionProps = {
 
 function GroupSection(props: GroupSectionProps) {
   const { t } = useTranslation()
+  const displayGroupName = useGroupDisplayName()
   const [open, setOpen] = useState(true)
   const isKnownGroup = props.groupOptions.includes(props.groupName)
+  const groupLabel = displayGroupName(props.groupName, true)
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -192,16 +199,14 @@ function GroupSection(props: GroupSectionProps) {
                 className='h-auto min-w-0 justify-start whitespace-normal'
               />
             }
-            aria-label={t('Rules for {{group}}', { group: props.groupName })}
+            aria-label={t('Rules for {{group}}', { group: groupLabel })}
           >
             {open ? (
               <ChevronUp className='h-4 w-4' />
             ) : (
               <ChevronDown className='h-4 w-4' />
             )}
-            <span className='min-w-0 truncate font-semibold'>
-              {props.groupName}
-            </span>
+            <span className='min-w-0 truncate font-semibold'>{groupLabel}</span>
             {!isKnownGroup && (
               <StatusBadge variant='danger' copyable={false}>
                 <AlertTriangle className='mr-1 h-3 w-3' />
@@ -229,7 +234,7 @@ function GroupSection(props: GroupSectionProps) {
               variant='ghost'
               size='sm'
               className='text-destructive h-7 w-7 p-0'
-              aria-label={t('Remove {{group}}', { group: props.groupName })}
+              aria-label={t('Remove {{group}}', { group: groupLabel })}
               onClick={() => props.onRemoveGroup(props.groupName)}
             >
               <Trash2 className='h-4 w-4' />

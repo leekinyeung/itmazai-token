@@ -55,6 +55,10 @@ export function AutoGroupOrderEditor(props: AutoGroupOrderEditorProps) {
     Number.isInteger(props.maxCount) && props.maxCount > 0 ? props.maxCount : 5
   const isInheriting = props.mode === 'inherit'
   const atLimit = props.value.length >= maxCount
+  const optionLabels = useMemo(
+    () => new Map(props.options.map((option) => [option.value, option.label])),
+    [props.options]
+  )
   const candidates = useMemo(
     () =>
       props.options.filter(
@@ -220,6 +224,7 @@ export function AutoGroupOrderEditor(props: AutoGroupOrderEditorProps) {
             <AutoGroupOrderItem
               key={group}
               group={group}
+              label={optionLabels.get(group)}
               index={index}
               count={props.value.length}
               onMove={handleMove}

@@ -28,6 +28,7 @@ function PricingFixture() {
     GroupRatio: '{"default":1}',
     TopupGroupRatio: '{}',
     UserUsableGroups: '{}',
+    GroupDisplayNames: '{}',
   })
   return (
     <>
@@ -38,6 +39,7 @@ function PricingFixture() {
         groupRatio={settings.GroupRatio}
         topupGroupRatio={settings.TopupGroupRatio}
         userUsableGroups={settings.UserUsableGroups}
+        groupDisplayNames={settings.GroupDisplayNames}
         groupGroupRatio='{}'
         autoGroups='[]'
         maxTokenAutoGroupsField={null}

@@ -59,6 +59,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 
@@ -373,12 +374,22 @@ ModelSelector.displayName = 'ModelSelector'
 export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
   ({ selectedGroup, groups, onGroupChange, className, disabled = false }) => {
     const { t } = useTranslation()
+    const displayGroupName = useGroupDisplayName()
     const [open, setOpen] = useState(false)
     const isMobile = useIsMobile()
+    const localizedGroups = useMemo(
+      () =>
+        groups.map((group) => ({
+          ...group,
+          label:
+            group.value === 'auto' ? t('Auto') : displayGroupName(group.value),
+        })),
+      [displayGroupName, groups, t]
+    )
 
     const currentGroup = useMemo(
-      () => groups.find((g) => g.value === selectedGroup),
-      [groups, selectedGroup]
+      () => localizedGroups.find((g) => g.value === selectedGroup),
+      [localizedGroups, selectedGroup]
     )
 
     const handleGroupChange = useCallback(
@@ -398,7 +409,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
             : 'rounded-lg'
         )}
         filter={(value, search) => {
-          const group = groups.find((g) => g.value === value)
+          const group = localizedGroups.find((g) => g.value === value)
           if (!group || !search) return 1
 
           const searchTerm = search.toLowerCase()
@@ -422,7 +433,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
             <div className='text-muted-foreground px-2 py-1 text-[10px] font-medium'>
               {t('Model Group')}
             </div>
-            {groups.map((group) => (
+            {localizedGroups.map((group) => (
               <CommandItem
                 key={group.value}
                 value={group.value}
@@ -475,7 +486,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
           </DrawerHeader>
           <div className='max-h-[calc(80vh-100px)] overflow-y-auto px-4 pb-6'>
             <div className='space-y-2'>
-              {groups.map((group) => (
+              {localizedGroups.map((group) => (
                 <Button
                   key={group.value}
                   variant='outline'

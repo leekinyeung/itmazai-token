@@ -187,7 +187,7 @@ export function useSubscriptionsColumns(): ColumnDef<PlanRecord>[] {
           }
           return (
             <BadgeCell>
-              <GroupBadge group={group} />
+              <GroupBadge group={group} showIdentifier />
             </BadgeCell>
           )
         },
