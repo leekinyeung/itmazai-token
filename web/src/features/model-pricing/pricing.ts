@@ -53,7 +53,7 @@ export type PricingValues = Partial<
 }
 export type PricingOptions = Record<PricingKey, string>
 
-export type CacheWriteMode = 'none' | 'standard' | 'claude_ttl'
+export type CacheWriteMode = 'none' | 'standard' | 'claude_ttl' | 'openai_ttl'
 
 export type LegacyBillingDetails = {
   audio_input_price?: number
@@ -90,6 +90,7 @@ export function modelPricingDisplay(
       !(
         entry.cache_write_mode === 'standard' ||
         entry.cache_write_mode === 'claude_ttl' ||
+        entry.cache_write_mode === 'openai_ttl' ||
         entry.configured?.CreateCacheRatio !== undefined
       )
         ? undefined

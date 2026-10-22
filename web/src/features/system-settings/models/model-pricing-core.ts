@@ -27,7 +27,11 @@ import type {
   CacheWriteMode,
   LegacyBillingDetails,
 } from '@/features/model-pricing/pricing'
-import { combineBillingExpr } from '@/features/pricing/lib/billing-expr'
+import {
+  CLAUDE_CACHE_CREATION_1H_MULTIPLIER,
+  OPENAI_CACHE_CREATION_12H_MULTIPLIER,
+  combineBillingExpr,
+} from '@/features/pricing/lib/billing-expr'
 import { formatBillingCondition } from '@/features/pricing/lib/billing-expression/condition-display'
 
 import { formatPricingNumber } from './pricing-format'
@@ -279,6 +283,12 @@ export function buildPreviewRows(
       currency
     )
   }
+  let createCacheLabel = t('Cache write price')
+  if (cacheWriteMode === 'claude_ttl') {
+    createCacheLabel = t('Cache Creation (5m)')
+  } else if (cacheWriteMode === 'openai_ttl') {
+    createCacheLabel = t('Cache Creation (30m)')
+  }
   const rows: PreviewRow[] = [
     {
       key: 'inputPrice',
@@ -305,10 +315,7 @@ export function buildPreviewRows(
     },
     {
       key: 'createCache',
-      label:
-        cacheWriteMode === 'claude_ttl'
-          ? t('Cache Creation (5m)')
-          : t('Cache write price'),
+      label: createCacheLabel,
       value:
         laneEnabled.createCache && lanePrices.createCache
           ? formatPricingAmount(lanePrices.createCache, currency)
@@ -342,7 +349,21 @@ export function buildPreviewRows(
       key: 'createCache1h',
       label: t('Cache create (1h) price'),
       value: formatPricingAmount(
-        Number(lanePrices.createCache) * (6 / 3.75),
+        Number(lanePrices.createCache) * CLAUDE_CACHE_CREATION_1H_MULTIPLIER,
+        currency
+      ),
+    })
+  }
+  if (
+    cacheWriteMode === 'openai_ttl' &&
+    laneEnabled.createCache &&
+    lanePrices.createCache
+  ) {
+    rows.splice(4, 0, {
+      key: 'createCache12h',
+      label: t('Cache create (12h) price'),
+      value: formatPricingAmount(
+        Number(lanePrices.createCache) * OPENAI_CACHE_CREATION_12H_MULTIPLIER,
         currency
       ),
     })
