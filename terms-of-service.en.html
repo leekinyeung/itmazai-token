@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TaoDock User Agreement and Terms of Service: account responsibilities, acceptable use, API pricing, subscriptions, refunds, AI outputs and service conditions.">
+  <meta name="referrer" content="no-referrer">
+  <title>User Agreement · TaoDock</title>
+  <style>
+    body { margin: 0; background: #f5f6f8; }
+    .user-agreement {
+      --text: #202938;
+      --muted: #596579;
+      --line: #dde3ec;
+      --accent: #244dc0;
+      box-sizing: border-box;
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 54px 64px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      color: var(--text);
+      font: 16px/1.9 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      overflow-wrap: anywhere;
+    }
+    .user-agreement *, .user-agreement *::before, .user-agreement *::after { box-sizing: border-box; }
+    .user-agreement .brand { margin: 0 0 20px; color: var(--accent); font-size: 17px; font-weight: 750; letter-spacing: .06em; }
+    .user-agreement h1 { margin: 0 0 12px; font-size: 36px; line-height: 1.35; letter-spacing: -.03em; }
+    .user-agreement .lead { margin: 0 0 18px; color: var(--muted); }
+    .user-agreement .meta { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-bottom: 30px; color: var(--muted); font-size: 14px; }
+    .user-agreement .draft { margin: 0 0 30px; padding: 18px 22px; border: 1px solid #e4c87c; border-radius: 10px; background: #fffbeb; color: #654d15; font-size: 14px; }
+    .user-agreement .draft summary { cursor: pointer; font-weight: 700; }
+    .user-agreement .draft p { margin: 10px 0 0; }
+    .user-agreement .pending { color: #8d4c0c; font-weight: 600; }
+    .user-agreement .identity { margin: 24px 0; padding: 20px 24px; border-left: 3px solid var(--accent); background: #f3f6fc; }
+    .user-agreement .identity p { margin: 4px 0; }
+    .user-agreement nav { margin: 30px 0 34px; padding: 22px 26px; border: 1px solid var(--line); border-radius: 10px; }
+    .user-agreement nav h2 { margin: 0 0 12px; padding: 0; border: 0; font-size: 17px; }
+    .user-agreement nav ol { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 30px; margin: 0; padding-left: 24px; font-size: 14px; }
+    .user-agreement a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    .user-agreement a:hover { color: #16348a; }
+    .user-agreement a:focus-visible, .user-agreement summary:focus-visible { outline: 3px solid #799aef; outline-offset: 4px; border-radius: 2px; }
+    .user-agreement section { scroll-margin-top: 24px; }
+    .user-agreement h2 { margin: 38px 0 16px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 22px; line-height: 1.5; }
+    .user-agreement h3 { margin: 22px 0 8px; font-size: 17px; line-height: 1.6; }
+    .user-agreement p { margin: 10px 0; }
+    .user-agreement ul, .user-agreement ol { margin: 12px 0; padding-left: 24px; }
+    .user-agreement li { margin: 6px 0; }
+    .user-agreement .notice { margin: 18px 0; padding: 16px 20px; border-radius: 8px; background: #f3f6fc; }
+    .user-agreement .table-wrap { margin: 18px 0; overflow-x: auto; }
+    .user-agreement table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.8; }
+    .user-agreement caption { margin-bottom: 10px; color: var(--muted); font-size: 14px; text-align: left; }
+    .user-agreement th, .user-agreement td { padding: 13px 15px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .user-agreement th { background: #f5f7fa; font-weight: 650; }
+    .user-agreement th:first-child { width: 21%; }
+    .user-agreement .small { color: var(--muted); font-size: 14px; }
+    .user-agreement footer { margin-top: 38px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .user-agreement footer p { margin: 5px 0; }
+    @media (max-width: 680px) {
+      body { background: #fff; }
+      .user-agreement { margin: 0; padding: 30px 20px; border: 0; border-radius: 0; font-size: 15px; }
+      .user-agreement h1 { font-size: 30px; }
+      .user-agreement h2 { font-size: 20px; }
+      .user-agreement nav { padding: 18px 20px; }
+      .user-agreement nav ol { grid-template-columns: 1fr; }
+      .user-agreement .identity { padding: 16px 18px; }
+      .user-agreement th, .user-agreement td { padding: 10px; }
+      .user-agreement .draft { padding: 15px 17px; }
+    }
+    @media print {
+      @page { margin: 18mm; }
+      body { background: #fff; }
+      .user-agreement { max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; font-size: 10.5pt; line-height: 1.75; }
+      .user-agreement h1 { font-size: 24pt; }
+      .user-agreement h2 { font-size: 15pt; break-after: avoid; }
+      .user-agreement h3 { font-size: 12pt; break-after: avoid; }
+      .user-agreement nav { display: none; }
+      .user-agreement .draft { break-inside: avoid; }
+      .user-agreement table { font-size: 9pt; }
+      .user-agreement tr { break-inside: avoid; }
+      .user-agreement a { color: inherit; }
+    }
+  </style>
+</head>
+<body>
+  <main class="user-agreement" aria-labelledby="agreement-title">
+    <header>
+      <p class="brand">TaoDock</p>
+      <h1 id="agreement-title">User Agreement</h1>
+      <p class="lead">Terms of Service for the TaoDock website, management console, AI API access and related services.</p>
+      <div class="meta">
+        <span>Prepared: <time datetime="2026-10-23">October 23, 2026</time></span>
+        <span>Effective upon official publication and legally valid acceptance</span>
+        <span>Version: 1.2 (operating draft)</span>
+      </div>
+    </header>
+
+    <!-- Proposed operating terms: implement support, refund and other promised workflows before publication. -->
+    <details class="draft" open>
+      <summary>Operating draft: commercial rules proposed for adoption</summary>
+      <p>The confirmed name and domain are TaoDock and https://taodock.com. This version supplies proposed age, refund and response rules, and uses verified service settings where stated. Proposed rules become contractual commitments only after official publication and legally valid acceptance; they do not certify that support, refund, retention or labeling workflows are already implemented. No operator identity, personal address or direct email address is specified. A real request channel and required legal disclosures must be in place before publication.</p>
+    </details>
+
+    <div class="identity">
+      <p><strong>Service name:</strong> TaoDock</p>
+      <p><strong>Official website:</strong> <a href="https://taodock.com" target="_blank" rel="noopener noreferrer">https://taodock.com</a></p>
+      <p><strong>Related document:</strong> <a href="privacy-policy.en.html">Privacy Policy</a></p>
+    </div>
+
+    <p>This User Agreement (the "Terms") is between you and the service operator of https://taodock.com ("we", "us" or "our"). It governs the TaoDock services supplied by that operator. Independently deployed instances operated by others have their own service terms.</p>
+    <div class="notice">
+      <p><strong>Please review the following provisions before registering, purchasing or making API requests:</strong></p>
+      <ul>
+        <li><a href="#pricing">Section 5:</a> pricing, temporary quota reservations and usage-based charges.</li>
+        <li><a href="#subscriptions">Section 6:</a> subscription limits, possible wallet charges and automatic renewal where enabled.</li>
+        <li><a href="#refunds">Section 7:</a> refund eligibility, cancellation and billing disputes.</li>
+        <li><a href="#ai-content">Section 8:</a> request processing and limitations of AI outputs.</li>
+        <li><a href="#termination">Section 12</a> and <a href="#liability">Section 13:</a> suspension, termination and responsibility.</li>
+      </ul>
+      <p>We will explain material terms on request. These Terms do not remove rights or remedies that applicable law does not permit you to waive.</p>
+    </div>
+
+    <nav aria-label="User Agreement contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#agreement">Agreement and eligibility</a></li>
+        <li><a href="#services">Scope of services</a></li>
+        <li><a href="#accounts">Accounts and credentials</a></li>
+        <li><a href="#acceptable-use">Acceptable use</a></li>
+        <li><a href="#pricing">Pricing, credits and billing</a></li>
+        <li><a href="#subscriptions">Subscriptions and renewals</a></li>
+        <li><a href="#refunds">Refunds and billing disputes</a></li>
+        <li><a href="#ai-content">Inputs and AI-generated outputs</a></li>
+        <li><a href="#intellectual-property">Intellectual property and licenses</a></li>
+        <li><a href="#privacy">Privacy and personal information</a></li>
+        <li><a href="#availability">Availability and service changes</a></li>
+        <li><a href="#termination">Suspension and termination</a></li>
+        <li><a href="#liability">Responsibility and liability</a></li>
+        <li><a href="#changes">Notices and changes to these Terms</a></li>
+        <li><a href="#disputes">Applicable law and disputes</a></li>
+        <li><a href="#contact">Service information and requests</a></li>
+      </ol>
+    </nav>
+
+    <section id="agreement" aria-labelledby="agreement-section-title">
+      <h2 id="agreement-section-title">1. Agreement and eligibility</h2>
+      <p>These Terms will be made available before you are asked to accept them during registration, ordering or another relevant service flow. You accept them through the affirmative action identified in that flow, or another legally valid method. Simply viewing an informational page does not create a payment obligation or provide consent for unrelated personal information processing.</p>
+      <p>You must have the legal capacity and any permissions required to use the service and enter into these Terms. If you use the service for an organization, you must have authority to act for it and to commit it to the relevant obligations.</p>
+      <p><strong>Proposed eligibility rule:</strong> users must be at least 18 years old and have capacity to enter into these Terms. Access is available only where TaoDock and the selected service may lawfully be supplied. Do not bypass geographic or legally applicable access restrictions. Offering services to minors would require a separately reviewed arrangement and appropriate safeguards; this draft does not authorize that offering.</p>
+      <p>A separately agreed order or enterprise agreement may define the specific service, price and support commitments. Material differences from these Terms must be clearly identified and agreed. Mandatory law prevails over conflicting contractual terms.</p>
+    </section>
+
+    <section id="services" aria-labelledby="services-title">
+      <h2 id="services-title">2. Scope of services</h2>
+      <p>TaoDock provides an AI API gateway, account and credential management, model access, request processing, usage reporting and related features. Depending on the actual deployment, it may also provide an online model playground, file or media processing, asynchronous tasks, subscriptions, referrals and a desktop client. Only enabled features and accepted orders form part of the service we supply.</p>
+      <p>The available models, interfaces, context limits, supported parameters, processing times and geographic availability depend on the selected service and its configuration. API compatibility does not establish that every parameter or behavior of another interface is supported.</p>
+      <p>Material conditions affecting the selected service must be disclosed before selection or purchase through its description, order or other accessible notice. Any additional terms requiring your agreement must be presented through an appropriate acceptance process. Technical processing may involve third parties as described in the Privacy Policy.</p>
+      <p>If you configure an external connection using your own account or credentials, you must have the right to do so. Charges arising under a separate contract you enter into remain subject to that contract; any charges payable to TaoDock must be separately disclosed.</p>
+    </section>
+
+    <section id="accounts" aria-labelledby="accounts-title">
+      <h2 id="accounts-title">3. Accounts and credentials</h2>
+      <ul>
+        <li>Provide accurate information necessary for registration, payment and service administration, and keep your contact details current.</li>
+        <li>Protect your password, API tokens, personal access tokens, recovery codes and external credentials. Use permissions, expiry dates, access restrictions and spending controls appropriate to your application where available.</li>
+        <li>Provide access only to people you are authorized to permit, and comply with any clearly disclosed account or seat restrictions. Do not use stolen credentials or impersonate another person or organization.</li>
+        <li>Review usage and session activity. Promptly revoke exposed credentials, end suspicious sessions and notify us if you suspect unauthorized access.</li>
+      </ul>
+      <p>We may request proportionate verification when needed for account recovery, sensitive changes, payment disputes or security incidents. We will not ask you to send passwords, complete API keys or recovery codes to support. Responsibility for unauthorized activity depends on the circumstances and applicable law; an account or token appearing in a log does not by itself resolve a disputed charge.</p>
+    </section>
+
+    <section id="acceptable-use" aria-labelledby="acceptable-use-title">
+      <h2 id="acceptable-use-title">4. Acceptable use</h2>
+      <p>Use the service in accordance with applicable law, these Terms and the relevant provider restrictions disclosed to you. You must not use it to:</p>
+      <ul>
+        <li>Create, obtain, distribute or facilitate unlawful content or activities, including fraud, unlawful threats, child sexual abuse material, exploitation or incitement of violence.</li>
+        <li>Infringe intellectual property, privacy, confidentiality, publicity or other rights; submit another person's information without a lawful basis.</li>
+        <li>Impersonate others, conduct phishing, distribute malware, steal credentials, or perform unauthorized access, attacks or vulnerability exploitation. Security testing must remain within express authorization and the agreed scope.</li>
+        <li>Evade authentication, access restrictions, rate limits, payment obligations or legally applicable provider restrictions; manipulate usage or payment records; or exploit a fault to obtain unauthorized service or credits.</li>
+        <li>Send requests that intentionally disrupt the platform or other users, or operate abusive automation that exceeds disclosed service limits.</li>
+        <li>Mislead recipients about the origin or nature of generated content, or maliciously remove, alter, forge or conceal legally required AI-generated content labels.</li>
+      </ul>
+      <p>When publishing or distributing AI-generated content, comply with applicable disclosure and labeling requirements and the rules of the destination platform. If your application is subject to sector-specific permissions, assessments, filings or restrictions, obtain and maintain those before offering the relevant service. Our gateway access does not supply those permissions for you.</p>
+      <p>You may report suspected abuse or rights violations using Section 16. Include enough information for us to locate and assess the issue without sending unnecessary sensitive information.</p>
+    </section>
+
+    <section id="pricing" aria-labelledby="pricing-title">
+      <h2 id="pricing-title">5. Pricing, credits and billing</h2>
+      <h3>5.1 Rates and payment information</h3>
+      <p>Applicable prices and charging methods are those clearly disclosed for the model, account group, plan or order at the relevant time. Depending on the service, charges may use input and output tokens, cache categories, images, audio or video duration, requests, task units or other disclosed quantities. Model parameters and additional capabilities may affect the price where identified in the applicable rate rules.</p>
+      <p><strong>Payment and credit rules:</strong> the reviewed service displays wallet quota in USD, using 500,000 internal quota units per displayed USD unit. These are accounting units, not a fixed number of model tokens. The payment amount, actual settlement currency, conversion, taxes, minimum top-up and any compulsory fee must be shown before payment; a displayed USD credit balance does not guarantee that the payment provider settles in USD. Under the proposed commercial rule, purchased wallet credits have no automatic expiry unless a lawful expiry is clearly agreed before purchase, and are not transferable without TaoDock approval. They are service entitlements, not a deposit, investment or interest-bearing account.</p>
+      <h3>5.2 Reservations and final charges</h3>
+      <p>The platform may temporarily reserve an estimated amount of wallet balance or subscription quota before processing a request or task. The reservation is reconciled under the applicable charging rules when the outcome or billable usage is determined; any excess reservation should be released. A temporary reservation is distinct from a final usage charge and from a cash refund to a payment method.</p>
+      <p>Usage may be based on provider-reported quantities or disclosed estimation methods where reliable provider usage is unavailable. Request status alone may not determine whether billable work occurred: for example, a client disconnect or timeout may occur after an external task has started. Failed, partial, interrupted or retried requests must be assessed under the disclosed rules and the work actually performed. We will investigate and correct verified billing errors.</p>
+      <p><strong>Proposed failed-request and task billing rule:</strong> a request rejected before any billable processing should not produce a final usage charge, and its reservation should be released. For partial work, interrupted streams or accepted asynchronous tasks, charge only for the billable event and quantity disclosed for that service, using reliable provider usage where available and an identified estimation method otherwise. Reconcile when the terminal result or usage becomes available; investigate unresolved reservations on request. Do not assume that a timeout or cancellation request stopped external processing. Independent retries can create separately billable work. These rules require verification against the actual model configuration.</p>
+      <h3>5.3 Credits, promotions and price changes</h3>
+      <p>We will clearly distinguish purchased value from trial credits, referral rewards or promotional allowances and disclose any conditions or expiry before they are obtained. Promotional allowances do not automatically have a cash redemption value. Their treatment does not remove rights relating to paid balances.</p>
+      <p>Price changes apply prospectively after appropriate notice. They do not retrospectively change the agreed price for completed usage or an accepted prepaid service commitment. If an advertised price or charge is incorrect, we will explain the issue and resolve it fairly under the relevant order and applicable law, rather than treating our records as conclusive.</p>
+    </section>
+
+    <section id="subscriptions" aria-labelledby="subscriptions-title">
+      <h2 id="subscriptions-title">6. Subscriptions and renewals</h2>
+      <p>The purchase page or order must identify a plan's duration, included allowance, eligible models, access restrictions, reset schedule, rollover or expiry rules, and any purchase limit. A periodic quota reset replenishes the applicable allowance under the plan; it does not by itself mean that a new payment is taken.</p>
+      <p><strong>Wallet overflow:</strong> some plans can allow additional eligible usage to be charged to your wallet after the included allowance is exhausted. Whether this is enabled, the applicable rates and available controls must be disclosed before purchase. Review the selected plan and billing preferences before making further requests.</p>
+      <p><strong>Current review snapshot:</strong> no enabled subscription plan was found in the reviewed configuration on October 23, 2026. The server time zone is Asia/Shanghai (UTC+8). If plans are later offered, disclose their exact duration, reset time zone, unused-allowance treatment, expiry and wallet overflow controls before purchase. A quota reset must not be described as a payment renewal.</p>
+      <p>Automatic renewal applies only when it is actually offered, clearly disclosed and authorized through the applicable checkout process. Before authorization, we will explain the renewal amount or calculation, billing frequency, renewal date and cancellation method, and provide advance reminders where required by law. Cancellation stops future renewals according to the disclosed cut-off; treatment of the current paid period is governed by the agreed plan and Section 7.</p>
+      <p><strong>Proposed renewal rule:</strong> a wallet top-up does not authorize recurring charges. No recurring subscription is offered through the reviewed enabled-plan configuration. Before enabling one, identify the payment provider, obtain explicit recurring-payment authorization, provide required advance reminders and a working cancellation method with confirmation. Cancellation received before the next charge must stop that next renewal, subject to any clearly disclosed and lawful processing cut-off; it must not be made unnecessarily difficult.</p>
+      <p>Deleting your TaoDock account or an API token is separate from canceling a recurring payment mandate. If you request account closure, we will explain and coordinate the steps needed to stop any associated renewals. Subscription entitlements and payment-provider billing records may take time to synchronize; contact us if they do not match.</p>
+    </section>
+
+    <section id="refunds" aria-labelledby="refunds-title">
+      <h2 id="refunds-title">7. Refunds and billing disputes</h2>
+      <p>You may request a review of an incorrect charge, an uncredited payment, an undelivered paid service, an unused prepaid balance or another applicable cancellation or refund entitlement. Eligibility depends on the order, service actually supplied and applicable law. Statutory withdrawal, cancellation, refund and consumer remedies remain available where applicable.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>How common billing issues are handled</caption>
+          <thead><tr><th scope="col">Issue</th><th scope="col">Approach</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Duplicate or incorrect charge</th><td>We will compare payment, usage and task records and correct a verified error through an appropriate balance adjustment, release or monetary refund.</td></tr>
+            <tr><th scope="row">Payment not credited</th><td>Provide the order reference and payment confirmation with sensitive details redacted. We will reconcile the payment and either deliver the purchased entitlement or arrange an appropriate refund where it cannot be supplied.</td></tr>
+            <tr><th scope="row">Unused paid value or subscription cancellation</th><td>Apply the refund terms clearly disclosed before purchase and any mandatory legal rights. Paid value, consumed service and promotional allowances must be identified separately when calculating any refund.</td></tr>
+            <tr><th scope="row">Partial or interrupted AI task</th><td>Check actual processing and the disclosed charging event. We will correct unjustified charges; a transport error or cancellation request does not by itself establish whether external processing stopped.</td></tr>
+            <tr><th scope="row">Service discontinued or materially undelivered</th><td>We will address affected paid commitments and unused prepaid value through continued performance, an agreed alternative or a refund as required by the contract and applicable law.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Proposed commercial refund policy:</strong> you may request a refund of the unused paid portion of a wallet top-up within seven calendar days after payment, or cancellation of a new subscription before its paid service begins. Calculate the eligible unused value from the amount actually paid and service already supplied; promotional credits have no cash value. Do not impose an additional TaoDock refund handling fee. A verified billing error, an undelivered paid service or a mandatory statutory remedy is not excluded merely because the seven-day commercial window has passed. Target a review decision within five business days after necessary verification and, once approved, submit the refund to the original payment route within ten business days. Payment-provider posting time is separate. If that route is unavailable, explain and agree a lawful alternative. These proposed commitments require an operational request and refund process before publication.</p>
+      <p>Submit requests using Section 16 with the relevant account identifier, order or request reference, date and reason. We may verify identity proportionately. Where permitted and practicable, an approved monetary refund will use the original payment method; any alternative arrangement must be explained. Payment-provider processing times may differ from our review period.</p>
+      <p>A genuine dispute or use of a lawful payment dispute procedure is not by itself misuse. We may proportionately restrict the disputed entitlement while investigating an objectively identified fraud or payment risk. Your right to seek payment-provider assistance, complain to an authority or pursue another lawful remedy is preserved.</p>
+    </section>
+
+    <section id="ai-content" aria-labelledby="ai-content-title">
+      <h2 id="ai-content-title">8. Inputs and AI-generated outputs</h2>
+      <p>"Inputs" means the prompts, conversations, files, images, audio, video, links and other material you submit. "Outputs" means the responses or generated material returned through the service. You must have the rights and permissions needed for the processing you request, including where Inputs contain another person's confidential or personal information.</p>
+      <p>Inputs and relevant context are processed by the platform and routed to the selected service. Task records or temporary files may be needed to complete asynchronous processing. Data retention, staff access and third-party processing are described in the <a href="privacy-policy.en.html">Privacy Policy</a> and relevant provider disclosures.</p>
+      <p><strong>AI outputs may be incorrect, incomplete, outdated, biased, unsuitable or similar to content generated for others. You should assess them before relying on or distributing them.</strong> Output is not a substitute for advice from a qualified professional. Do not rely on it as the sole basis for decisions with significant effects on health, safety, legal rights, employment, credit or other important interests without appropriate verification and lawful human oversight.</p>
+      <p>Output may involve third-party rights. Access to a model does not guarantee exclusive rights, copyright protection, non-infringement or permission for every commercial use. Before use, consider applicable law, the selected provider's disclosed terms and the rights in your Inputs.</p>
+      <p><strong>Proposed AI labeling rule:</strong> use the visible notice "AI-generated content" in the applicable interaction or output display and preserve existing labels and relevant file metadata during copying, download, export and API forwarding. Add the visual, audio or metadata markings required for the actual content type and jurisdiction. The reviewed deployment has not been verified to implement every such mechanism; this text is an implementation requirement, not a certification. Users distributing generated material must preserve required labels and use applicable destination-platform declarations. TaoDock remains responsible for duties the law places on the service.</p>
+    </section>
+
+    <section id="intellectual-property" aria-labelledby="intellectual-property-title">
+      <h2 id="intellectual-property-title">9. Intellectual property and licenses</h2>
+      <p>You retain the rights you hold in your Inputs. As between you and us, we do not claim ownership of your Inputs or rights in Outputs that belong to you under applicable law or valid provider terms. The existence and scope of rights in Outputs may depend on those laws and terms; these Terms do not transfer rights that neither party owns.</p>
+      <p>You authorize us, and the service providers involved in your request, to host, process, transmit and display your Inputs and Outputs only as necessary to supply the requested service, support it, address security issues or fulfill applicable legal duties, as described in the Privacy Policy. Separate training, advertising or other independent uses require their own disclosed lawful basis and any required consent.</p>
+      <p>Subject to these Terms and your service entitlement, we permit you to access and use the hosted service and relevant interfaces. This does not transfer ownership of TaoDock branding, proprietary service materials or third-party trademarks. Do not represent yourself as the operator or as another organization's representative without permission.</p>
+      <p>Open-source software and third-party components remain governed by their respective licenses. These Terms govern the hosted service and do not restrict rights those licenses grant in the software. Report an alleged rights violation using the support details in Section 16, identifying the material, relevant rights and supporting facts.</p>
+    </section>
+
+    <section id="privacy" aria-labelledby="privacy-title">
+      <h2 id="privacy-title">10. Privacy and personal information</h2>
+      <p>Our <a href="privacy-policy.en.html">Privacy Policy</a> explains the information we process, purposes, recipients, storage locations, retention periods and methods for exercising privacy rights. Read it before submitting personal information or selecting a provider. Acceptance of these Terms does not replace consent or separate consent where legally required.</p>
+      <p>If you provide services to your own users through TaoDock, make the necessary privacy disclosures and obtain any required permissions before sending their information. Where we process information on your behalf, an applicable data processing agreement should specify the relevant instructions, scope, responsibilities and safeguards.</p>
+      <p>We will take security measures appropriate to the service and applicable legal requirements. Please cooperate with reasonable steps to contain a security incident, but do not send usable authentication credentials in a support request.</p>
+    </section>
+
+    <section id="availability" aria-labelledby="availability-title">
+      <h2 id="availability-title">11. Availability and service changes</h2>
+      <p>We will provide the service in accordance with accepted orders and applicable law, and use reasonable care to maintain its operation. Availability, latency and outputs may be affected by maintenance, network conditions, provider capacity, model changes or other operational factors. A guaranteed service level, dedicated capacity or specific support response time applies only if expressly agreed.</p>
+      <p>We will give reasonable advance notice of planned changes or maintenance that materially affect use where practicable, and take reasonable steps to reduce disruption. Emergency security or legal requirements may require immediate action. If a model or feature becomes unavailable, we will explain available options; a materially different substitute for a paid commitment requires appropriate notice and agreement where applicable.</p>
+      <p>For events legally qualifying as force majeure, any relief from responsibility is limited to what applicable law permits. The affected party should notify the other party where required and take reasonable steps to mitigate loss. Ordinary operational or external problems are not automatically force majeure.</p>
+      <p>Keep appropriate copies of content and records needed for your own operations. This does not relieve us of contractual or legal storage and protection duties. Paid commitments affected by discontinuation or material non-performance are addressed under Sections 7 and 13.</p>
+    </section>
+
+    <section id="termination" aria-labelledby="termination-title">
+      <h2 id="termination-title">12. Suspension and termination</h2>
+      <p>We may proportionately restrict a request, credential, feature or account where reasonably necessary to address a material breach of these Terms, an identified security threat, fraudulent activity, unpaid amounts properly due, or a binding legal requirement. The scope and duration should correspond to the issue. We will normally explain the reason and provide an opportunity to remedy it or request review, unless urgency or law prevents this.</p>
+      <p>You may stop using the service and request account deletion through the account security page or support. Ending service does not automatically cancel an external recurring payment mandate or eliminate amounts lawfully incurred; we will explain the relevant cancellation and settlement steps. Contact us to resolve remaining paid value before closure where appropriate, without losing mandatory refund rights.</p>
+      <p>If we end a service for business reasons, we will provide the notices required by law and the relevant agreement, and address unused paid value and outstanding service commitments. Account suspension or closure does not automatically justify forfeiture of all paid balances.</p>
+      <p>On termination, access may end and pending tasks will be handled according to their actual status and agreed rules. Personal information is retained or deleted under the Privacy Policy and applicable law. Provisions that reasonably need to continue, including payment reconciliation, confidentiality where applicable, intellectual property and dispute handling, continue only to the extent needed.</p>
+      <p>To appeal a restriction, contact us with the account or request reference and supporting information. We will review it and explain the outcome through the process in Section 16.</p>
+    </section>
+
+    <section id="liability" aria-labelledby="liability-title">
+      <h2 id="liability-title">13. Responsibility and liability</h2>
+      <p>Each party is responsible for its own breach of these Terms or applicable law to the extent established by the relevant facts and legal requirements. Remedies may include correction, continued performance, replacement service where agreed, refund or compensation as applicable. Any assessment of loss should consider causation, fault, foreseeability and reasonable mitigation under the applicable law.</p>
+      <p>The technical limitations of AI and the involvement of external providers are relevant to assessing a particular incident, but do not automatically release us from our own contractual or legal obligations. You are responsible for the lawful use of your Inputs and the applications you operate, according to your actual conduct and applicable law.</p>
+      <p><strong>Nothing in these Terms excludes or limits liability for fraud, intentional misconduct, gross negligence, personal injury or another matter where exclusion or limitation is prohibited by applicable law. Mandatory consumer, data protection and other statutory remedies remain available.</strong></p>
+      <p>Any separately negotiated enterprise allocation of risk must be express, lawful and consistent with rights that cannot be waived.</p>
+    </section>
+
+    <section id="changes" aria-labelledby="changes-title">
+      <h2 id="changes-title">14. Notices and changes to these Terms</h2>
+      <p>We may send operational, payment, security and contractual notices through the service, your registered contact details or another suitable channel. Material changes to pricing, renewal, cancellation, rights or responsibilities will be brought to your attention in an appropriate way before they take effect, except where a lawful urgent change is necessary.</p>
+      <p>Updated Terms will show their version and effective date. Where acceptance is required, we will obtain it through a legally valid process. Continued use will be treated as acceptance only where the applicable law and the notice and acceptance process permit it. If you do not agree to a material change, you may stop future use and request resolution of affected prepaid commitments under the existing agreement and applicable law.</p>
+      <p>Changes do not retrospectively authorize an earlier breach or alter completed transactions. We will make the applicable version available for you to save or consult. Separate consent required for personal information processing remains subject to the Privacy Policy and applicable law.</p>
+    </section>
+
+    <section id="disputes" aria-labelledby="disputes-title">
+      <h2 id="disputes-title">15. Applicable law and disputes</h2>
+      <p><strong>Applicable law:</strong> this version makes no exclusive contractual choice of a country's law. The law applicable to a particular dispute is determined under the relevant conflict-of-law rules, including mandatory consumer, contract and personal information protections. Product branding and server time zone do not determine legal domicile.</p>
+      <p>Please first contact us using Section 16 so that we can try to resolve a concern promptly. Informal discussion is not a condition that prevents you from seeking an urgent remedy, complaining to an authority or exercising another statutory right.</p>
+      <p><strong>Dispute forum:</strong> a dispute may be brought before a court with jurisdiction under applicable law, including any mandatory consumer jurisdiction. This version imposes no exclusive location, compulsory arbitration or waiver of a statutory complaint or court remedy.</p>
+      <p>If a provision is held invalid or unenforceable, the remaining provisions continue to the extent permitted by law. Any resulting gap is resolved under applicable law and the agreement's lawful purpose. Neither party has a unilateral right of final interpretation of these Terms.</p>
+    </section>
+
+    <section id="contact" aria-labelledby="contact-title">
+      <h2 id="contact-title">16. Service information and requests</h2>
+      <p>Official website: <a href="https://taodock.com" target="_blank" rel="noopener noreferrer">https://taodock.com</a>. Use only a communication channel expressly published there or actually supplied to you by TaoDock through your account or purchase correspondence. This draft does not designate a direct email address, and the website address alone is not a refund or complaint submission form. A functioning request channel must be made available before the proposed service commitments are adopted.</p>
+      <p><strong>Proposed response targets:</strong> acknowledge received support or complaint requests within three business days and provide a substantive response within 15 business days after necessary verification. The more specific refund timing in Section 7 applies to refund reviews. A shorter mandatory legal deadline prevails. Explain any permitted extension.</p>
+      <p>Include the relevant account, order or request reference, a short explanation and supporting evidence with sensitive details redacted. Never submit passwords, complete API keys or recovery codes. Statutory complaint and dispute channels remain available independently of the TaoDock support workflow.</p>
+    </section>
+
+    <footer>
+      <p>TaoDock · User Agreement / Terms of Service</p>
+      <p>Related document: <a href="privacy-policy.en.html">Privacy Policy</a>.</p>
+      <p>Drafting references (Chinese text): <a href="https://www.cac.gov.cn/2020-06/01/c_15925617772683192.htm" target="_blank" rel="noopener noreferrer">Civil Code of the People's Republic of China, Book Three: Contracts</a>; <a href="https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2024/art_0aea188276a44f0baf940ab95ee00e0a.html" target="_blank" rel="noopener noreferrer">Regulations on the Implementation of the Consumer Rights Protection Law</a>; <a href="https://www.cac.gov.cn/2023-07/13/c_1690898327029107.htm" target="_blank" rel="noopener noreferrer">Interim Measures for the Management of Generative AI Services</a>; and <a href="https://www.cac.gov.cn/2025-03/14/c_1743654684782215.htm" target="_blank" rel="noopener noreferrer">Measures for Labeling AI-Generated Synthetic Content</a>. Applicability depends on the actual operator, service, user and processing activities, and the law in force.</p>
+    </footer>
+  </main>
+</body>
+</html>

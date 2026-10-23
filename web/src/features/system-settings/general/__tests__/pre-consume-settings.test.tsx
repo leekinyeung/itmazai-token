@@ -79,6 +79,24 @@ beforeEach(() => {
   vi.spyOn(api, 'put').mockResolvedValue({ data: { success: true } })
 })
 
+test('non-zero invitation rewards can be saved without a compliance prompt', async () => {
+  const user = userEvent.setup()
+  await renderSettings()
+  expect(
+    screen.queryByText(/require compliance confirmation/)
+  ).not.toBeInTheDocument()
+  const input = screen.getByRole('spinbutton', { name: 'Inviter Reward' })
+  await user.clear(input)
+  await user.type(input, '100')
+  await user.click(screen.getByRole('button', { name: 'Save Changes' }))
+  await waitFor(() =>
+    expect(api.put).toHaveBeenCalledWith('/api/option/', {
+      key: 'QuotaForInviter',
+      value: 100,
+    })
+  )
+})
+
 test.each(['0.5', '1.5', '2.5', '0.0001'])(
   'typing multiplier %s preserves the decimal and saves its numeric value',
   async (value) => {

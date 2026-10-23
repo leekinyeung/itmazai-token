@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TaoDock Privacy Policy: how we process account information, API content, usage logs and information involving third-party services, and how to exercise your privacy rights.">
+  <meta name="referrer" content="no-referrer">
+  <title>Privacy Policy · TaoDock</title>
+  <style>
+    body { margin: 0; background: #f5f6f8; }
+    .privacy-policy {
+      --text: #202938;
+      --muted: #596579;
+      --line: #dde3ec;
+      --accent: #244dc0;
+      box-sizing: border-box;
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 54px 64px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      color: var(--text);
+      font: 16px/1.9 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      overflow-wrap: anywhere;
+    }
+    .privacy-policy *, .privacy-policy *::before, .privacy-policy *::after { box-sizing: border-box; }
+    .privacy-policy .brand { margin: 0 0 20px; color: var(--accent); font-size: 17px; font-weight: 750; letter-spacing: .06em; }
+    .privacy-policy h1 { margin: 0 0 12px; font-size: 36px; line-height: 1.35; letter-spacing: -.03em; }
+    .privacy-policy .lead { margin: 0 0 18px; color: var(--muted); }
+    .privacy-policy .meta { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-bottom: 30px; color: var(--muted); font-size: 14px; }
+    .privacy-policy .draft { margin: 0 0 30px; padding: 18px 22px; border: 1px solid #e4c87c; border-radius: 10px; background: #fffbeb; color: #654d15; font-size: 14px; }
+    .privacy-policy .draft summary { cursor: pointer; font-weight: 700; }
+    .privacy-policy .draft p { margin: 10px 0 0; }
+    .privacy-policy .pending { color: #8d4c0c; font-weight: 600; }
+    .privacy-policy .identity { margin: 24px 0; padding: 20px 24px; border-left: 3px solid var(--accent); background: #f3f6fc; }
+    .privacy-policy .identity p { margin: 4px 0; }
+    .privacy-policy nav { margin: 30px 0 34px; padding: 22px 26px; border: 1px solid var(--line); border-radius: 10px; }
+    .privacy-policy nav h2 { margin: 0 0 12px; padding: 0; border: 0; font-size: 17px; }
+    .privacy-policy nav ol { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 30px; margin: 0; padding-left: 24px; font-size: 14px; }
+    .privacy-policy a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    .privacy-policy a:hover { color: #16348a; }
+    .privacy-policy a:focus-visible, .privacy-policy summary:focus-visible { outline: 3px solid #799aef; outline-offset: 4px; border-radius: 2px; }
+    .privacy-policy section { scroll-margin-top: 24px; }
+    .privacy-policy h2 { margin: 38px 0 16px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 22px; line-height: 1.5; }
+    .privacy-policy h3 { margin: 22px 0 8px; font-size: 17px; line-height: 1.6; }
+    .privacy-policy p { margin: 10px 0; }
+    .privacy-policy ul, .privacy-policy ol { margin: 12px 0; padding-left: 24px; }
+    .privacy-policy li { margin: 6px 0; }
+    .privacy-policy .notice { margin: 18px 0; padding: 16px 20px; border-radius: 8px; background: #f3f6fc; }
+    .privacy-policy .table-wrap { margin: 18px 0; overflow-x: auto; }
+    .privacy-policy table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.8; }
+    .privacy-policy caption { margin-bottom: 10px; color: var(--muted); font-size: 14px; text-align: left; }
+    .privacy-policy th, .privacy-policy td { padding: 13px 15px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .privacy-policy th { background: #f5f7fa; font-weight: 650; }
+    .privacy-policy th:first-child { width: 21%; }
+    .privacy-policy .small { color: var(--muted); font-size: 14px; }
+    .privacy-policy footer { margin-top: 38px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .privacy-policy footer p { margin: 5px 0; }
+    @media (max-width: 680px) {
+      body { background: #fff; }
+      .privacy-policy { margin: 0; padding: 30px 20px; border: 0; border-radius: 0; font-size: 15px; }
+      .privacy-policy h1 { font-size: 30px; }
+      .privacy-policy h2 { font-size: 20px; }
+      .privacy-policy nav { padding: 18px 20px; }
+      .privacy-policy nav ol { grid-template-columns: 1fr; }
+      .privacy-policy .identity { padding: 16px 18px; }
+      .privacy-policy th, .privacy-policy td { padding: 10px; }
+      .privacy-policy .draft { padding: 15px 17px; }
+    }
+    @media print {
+      @page { margin: 18mm; }
+      body { background: #fff; }
+      .privacy-policy { max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; font-size: 10.5pt; line-height: 1.75; }
+      .privacy-policy h1 { font-size: 24pt; }
+      .privacy-policy h2 { font-size: 15pt; break-after: avoid; }
+      .privacy-policy h3 { font-size: 12pt; break-after: avoid; }
+      .privacy-policy nav { display: none; }
+      .privacy-policy .draft { break-inside: avoid; }
+      .privacy-policy table { font-size: 9pt; }
+      .privacy-policy tr { break-inside: avoid; }
+      .privacy-policy a { color: inherit; }
+    }
+  </style>
+</head>
+<body>
+  <main class="privacy-policy" aria-labelledby="policy-title">
+    <header>
+      <p class="brand">TaoDock</p>
+      <h1 id="policy-title">Privacy Policy</h1>
+      <p class="lead">This Policy explains how we process your personal information and how you can manage and protect it.</p>
+      <div class="meta">
+        <span>Updated: <time datetime="2026-10-23">October 23, 2026</time></span>
+        <span>Effective upon official publication, subject to any required notice or consent</span>
+        <span>Version: 1.2 (operating draft)</span>
+      </div>
+    </header>
+
+    <!-- Operating draft: verify the proposed retention measures, third-party processing disclosures, physical storage regions and a working request channel before publication. -->
+    <details class="draft" open>
+      <summary>Operating draft: verified facts and proposed commitments</summary>
+      <p>The service name, domain, USD quota display, and Asia/Shanghai server time zone were checked on October 23, 2026. The retention schedule and response targets below are proposed operating commitments, not a claim that cleanup jobs or support workflows have already been implemented. Physical storage regions, infrastructure and payment recipient details, and a functioning request channel still require verification before publication. No operator identity, personal address or direct email address is specified in this version.</p>
+    </details>
+
+    <div class="identity">
+      <p><strong>Service name:</strong> TaoDock</p>
+      <p><strong>Official website:</strong> <a href="https://taodock.com" target="_blank" rel="noopener noreferrer">https://taodock.com</a></p>
+      <p><strong>Related document:</strong> <a href="terms-of-service.en.html">User Agreement</a></p>
+    </div>
+
+    <p>This Policy applies to the websites, management console, AI API access and request forwarding, online model playground and related services provided through TaoDock by the service operator of https://taodock.com ("we", "us" or "our"). If we provide a corresponding desktop client, its processing of personal information is also covered by this Policy. Other parties that independently deploy software with the same name or based on the same source code are responsible for explaining their own personal information processing practices.</p>
+    <p><strong>TaoDock provides access to AI models and forwards requests. The platform processes the content you submit and sends it to the relevant external provider according to the selected model, API and service routing. Please pay particular attention to Sections 4, 5 and 6.</strong> This Policy describes our processing practices. Where consent or separate consent is required by law, we will follow the relevant procedure; merely viewing this page does not constitute authorization.</p>
+
+    <nav aria-label="Privacy Policy contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#collection">Personal information we process</a></li>
+        <li><a href="#purpose">Purposes and legal bases</a></li>
+        <li><a href="#storage">Cookies and local storage</a></li>
+        <li><a href="#ai-content">AI requests, outputs and logs</a></li>
+        <li><a href="#third-parties">Third parties and information sharing</a></li>
+        <li><a href="#cross-border">Storage locations and international transfers</a></li>
+        <li><a href="#retention">Retention periods</a></li>
+        <li><a href="#security">Security and incident response</a></li>
+        <li><a href="#rights">Your rights and how to exercise them</a></li>
+        <li><a href="#minors">Children's and minors' information</a></li>
+        <li><a href="#customer-data">Information about others that you submit</a></li>
+        <li><a href="#updates">Changes to this Policy</a></li>
+        <li><a href="#contact">Service information and requests</a></li>
+      </ol>
+    </nav>
+
+    <section id="collection" aria-labelledby="collection-title">
+      <h2 id="collection-title">1. Personal information we process</h2>
+      <p>We process information according to the features you actually use. A feature being supported by the project does not mean it is enabled in this service. Information associated with an optional feature is processed only when you use or enable that feature.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Information associated with the main service features and its purposes</caption>
+          <thead><tr><th scope="col">Activity</th><th scope="col">Information involved</th><th scope="col">Main purposes</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Registration and account profile</th><td>Username, display name, password verification information, email address when required for registration, account linking or a relevant feature, account identifier, registration time and account settings</td><td>Create and manage your account, verify your identity, send necessary notices and provide the features you choose</td></tr>
+            <tr><th scope="row">Sign-in and security verification</th><td>Sign-in method, sign-in and session times, IP address, browser or client information and session credentials; verification codes, multi-factor authentication settings, recovery credentials, passkey public keys and credential identifiers, according to the features you enable</td><td>Authenticate users, recover accounts, manage sessions, identify unusual sign-ins and verify sensitive actions</td></tr>
+            <tr><th scope="row">Third-party sign-in or account linking</th><td>Third-party account identifiers you authorize us to receive, and information such as usernames or email addresses supplied by that sign-in method and necessary for sign-in or linking</td><td>Complete third-party sign-in, link accounts and verify identity</td></tr>
+            <tr><th scope="row">API calls and online playground</th><td>Text, prompts, conversation context, files, images, audio, video, links or other inputs in requests, and generated outputs; model names, request identifiers, call times, status, latency and task information</td><td>Receive, forward and process requests, return outputs, manage asynchronous tasks and troubleshoot failures</td></tr>
+            <tr><th scope="row">API credential management</th><td>API tokens or personal access tokens you create, including their names, permissions, usage restrictions, expiry and usage records; service connection credentials you submit as an administrator</td><td>Verify request permissions, enforce access restrictions and connect to the external connections you configure</td></tr>
+            <tr><th scope="row">Top-ups, subscriptions and usage history</th><td>Account identifiers, top-up or subscription orders, transaction references, amounts, currencies, payment methods, payment status, payment provider customer identifiers, usage and charge records</td><td>Complete transactions, verify payment results, manage subscriptions, display usage and charges, handle transaction disputes and meet legal obligations</td></tr>
+            <tr><th scope="row">Referrals and preferences</th><td>Referral codes, referral relationships and reward records; language, theme, notification and interface preferences</td><td>Apply published referral rules, save preferences and improve your experience</td></tr>
+            <tr><th scope="row">Service operations and support</th><td>Access times, IP addresses, request paths, response status, client information, security events and administrative action records; contact details, issue descriptions and troubleshooting materials you provide</td><td>Maintain service operations, prevent abuse, conduct security audits and respond to inquiries and complaints</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>If you do not provide information necessary for a particular feature, that feature may be unavailable. You may decline to provide optional information or disable optional features unrelated to the basic service without affecting other features that do not depend on that information.</p>
+      <p>When you use a passkey, the service processes the public key and credential information needed for verification. On-device biometric checks, such as fingerprint or facial verification, are performed by your device or authenticator. We do not obtain the underlying biometric data through the passkey feature. If your inputs contain sensitive personal information, such as health information, financial account details or identity information, that information may also be processed as part of your request. Submit it only when necessary and when you have a lawful basis to do so.</p>
+    </section>
+
+    <section id="purpose" aria-labelledby="purpose-title">
+      <h2 id="purpose-title">2. Purposes and legal bases</h2>
+      <p>We rely on the legal basis applicable to each processing activity. Depending on the activity, this may include processing necessary to enter into or perform a contract to which you are a party, to fulfill statutory duties or legal obligations, or your consent where required by law. We do not apply a single legal basis indiscriminately to every processing activity.</p>
+      <ul>
+        <li><strong>Providing the service:</strong> managing accounts, authenticating requests, forwarding model calls, delivering results and maintaining orders and service entitlements.</li>
+        <li><strong>Security and compliance:</strong> identifying unusual access, troubleshooting failures, addressing abuse and complaints, and fulfilling applicable cybersecurity and record retention obligations.</li>
+        <li><strong>Communication and support:</strong> sending verification codes, service changes, security alerts and transaction notices, and responding to your inquiries.</li>
+        <li><strong>Optional features:</strong> processing information for account linking, referrals, saved preferences and other features you choose.</li>
+      </ul>
+      <p>If we intend to use information for a new purpose incompatible with the original purpose, we will explain the change in advance and obtain renewed consent where required by law. Accepting this Policy does not provide blanket authorization for marketing messages, non-essential tracking or similar activities.</p>
+    </section>
+
+    <section id="storage" aria-labelledby="storage-title">
+      <h2 id="storage-title">3. Cookies and local storage</h2>
+      <p>We use cookies, browser local storage or other necessary client-side storage mechanisms to maintain sign-in sessions, perform security verification and save language, theme, notification and interface preferences. The online model playground stores some conversation content and parameter settings in your current browser's local storage so that your working state can be restored.</p>
+      <p>Locally stored conversations remain within the device and browser environment you use. When you actually send a model request, the relevant conversation context is still transmitted to the platform and the corresponding external provider as part of the request. Clearing local conversations or website data does not automatically delete platform logs, task records or copies retained by third parties.</p>
+      <p>You can clear website data or restrict cookies through your browser settings. Clearing or restricting necessary storage may sign you out, remove saved preferences or prevent some features from working properly. After using a public or shared device, sign out and clear website data as appropriate. If we introduce non-essential analytics, advertising or tracking technologies, we will explain their purposes, providers and opt-out methods, and obtain consent in advance where required by law.</p>
+    </section>
+
+    <section id="ai-content" aria-labelledby="ai-content-title">
+      <h2 id="ai-content-title">4. AI requests, outputs and logs</h2>
+      <h3>4.1 Request forwarding and task processing</h3>
+      <p>To provide the AI service you select, the platform reads and processes request content, makes necessary format conversions according to the model and routing configuration, and sends the content and parameters relevant to completing that request to the corresponding external provider. Asynchronous tasks may involve storing task identifiers, status, necessary task data, generated outputs or output links. Files and external links in your inputs may also be accessed by the platform or external provider as required by the relevant API.</p>
+      <h3>4.2 Usage logs and content retention</h3>
+      <p>The platform may record account associations, models, call times, usage, charges, latency, status, request identifiers and error information in usage logs. Whether complete inputs or outputs are persistently retained depends on the service's actual content logging practices. Some task records, error messages, debug logs or support materials may also contain excerpts from content you submit.</p>
+      <p><strong>Proposed content handling rule:</strong> ordinary API Inputs and Outputs are processed to complete the request rather than retained as a permanent conversation archive. Request bodies may temporarily use memory or disk buffering; normal request cleanup releases that buffer. Task data, result references and error or diagnostic excerpts may persist separately. Under the proposed schedule, task data and diagnostic excerpts are removed within 30 days after the task or investigation ends, subject to legal preservation. This is a target operating rule that must be checked against the deployed version and logging configuration. External retention is separate and may be longer.</p>
+      <p>You can manage the "Record IP Address" option for usage and error logs in your account security settings. This option only controls IP recording in those particular logs. It does not affect other IP processing necessary for sign-in sessions, security audits, network access or legal obligations. Disabling the option does not automatically delete existing records.</p>
+      <h3>4.3 Training, staff access and processing rules</h3>
+      <p>We process inputs and outputs to provide the service you request. If we intend to use that content separately for model training, advertising or another independent purpose, we will explain the specific purpose, scope and rules in advance and obtain additional consent where required by law. Staff handling troubleshooting or security incidents should access information only to the extent necessary and within their authorized permissions.</p>
+      <p>Processing may involve separate retention, security monitoring or model-improvement rules, depending on the feature and applicable arrangements. This Policy does not promise that every processing route has zero retention or excludes all content from training. Material processing conditions must be disclosed before the relevant activity, with any legally required consent obtained separately.</p>
+    </section>
+
+    <section id="third-parties" aria-labelledby="third-parties-title">
+      <h2 id="third-parties-title">5. Third parties and information sharing</h2>
+      <p>Providing the service may require technical processing by third parties. We limit information sharing to the purposes and scope necessary for the requested feature. Processing on our behalf must be covered by appropriate instructions and security arrangements. Any specific recipient notice or separate consent required by applicable law must be provided before the relevant transfer.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Categories of third-party processing</caption>
+          <thead><tr><th scope="col">Service category</th><th scope="col">Purpose</th><th scope="col">Information involved</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">AI processing</th><td>Complete the model request or generation task selected by the user.</td><td>Necessary request content, context, files, parameters and technical request information.</td></tr>
+            <tr><th scope="row">Hosting and data services</th><td>Operate, secure, store and back up the platform's service data.</td><td>Business records, request data, logs and network information needed for those functions.</td></tr>
+            <tr><th scope="row">Payment processing</th><td>Complete a payment and reconcile the corresponding order.</td><td>Order reference, amount, payment method, status and payment information necessary for that transaction.</td></tr>
+            <tr><th scope="row">Optional identity or security functions</th><td>Authenticate an account or assess a security challenge, only when the relevant feature is enabled and selected or otherwise lawfully required.</td><td>The identity, authorization or verification information necessary for the specific flow.</td></tr>
+            <tr><th scope="row">Email delivery</th><td>Deliver necessary notifications or other messages where the relevant email feature is enabled.</td><td>Recipient address, necessary message content and delivery metadata.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Separate retention rules:</strong> some processing routes may involve evidence retention without an automatic expiry. Ordinary log cleanup or local history deletion may not remove such records. Any such retention must have an appropriate basis and follow applicable notice and rights requirements. This Policy does not guarantee the deletion of every independent recipient's copy when a TaoDock record is deleted.</p>
+      <p>We do not sell your personal information. Public disclosure, a transfer associated with a corporate change, or a response to an authority must have a lawful basis and be limited to the necessary information. These category descriptions do not replace additional recipient-specific disclosures or consent where required.</p>
+    </section>
+
+    <section id="cross-border" aria-labelledby="cross-border-title">
+      <h2 id="cross-border-title">6. Storage locations and international transfers</h2>
+      <p>Platform business data, logs and caches are processed in the TaoDock hosting environment. The physical countries or regions of the primary host, backups and all external processing have not been verified in this draft. A server time zone, domain name, IP registration or business registration address does not by itself establish where personal information is stored.</p>
+      <p>Browser-local data remains in the device and browser environment you use. Completing a request may require external technical processing. No guarantee is made that all processing stays within your country or within a single country.</p>
+      <p>Before a cross-border activity requiring specific disclosure, consent, assessment or a data export procedure is offered, TaoDock must complete the applicable requirements, including recipient details, processing purposes and methods, information categories and rights-request procedures. Selecting a model, submitting a request or accepting this Policy does not replace legally required separate consent.</p>
+    </section>
+
+    <section id="retention" aria-labelledby="retention-title">
+      <h2 id="retention-title">7. Retention periods</h2>
+      <p>The following is a proposed operating schedule for adoption after the necessary cleanup and review processes are verified. It is not a statement that the current deployment already enforces each deadline. The 365-day user-interface query limit observed during review is not proof of a 365-day deletion policy. Information must not be retained longer than necessary unless a longer period has a documented legal basis.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Proposed retention commitments to implement before publication</caption>
+          <thead><tr><th scope="col">Information category</th><th scope="col">Proposed rule and starting point</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Account and linked account information</th><td>Retain while the account exists and is needed for the service. Delete or anonymize unnecessary profile data within 30 calendar days after a verified account closure request, except for justified legal or dispute records.</td></tr>
+            <tr><th scope="row">API inputs, outputs and task data</th><td>Ordinary request buffers are released through normal request cleanup. Task records, output references and diagnostic excerpts: up to 30 calendar days after completion or incident resolution, unless preservation is justified. External copies follow the external rules, including separate retention rules described in Section 5.</td></tr>
+            <tr><th scope="row">Usage and error logs</th><td>Up to 12 months from the event, followed by deletion or anonymization. Logs subject to an applicable statutory minimum must be kept for that minimum. A security hold must be limited and documented.</td></tr>
+            <tr><th scope="row">Sessions, security and audit records</th><td>Sessions follow their validity periods. Target cleanup for revoked session artifacts: seven days after revocation, subject to required replay-protection windows. Security and audit logs: six calendar months from the event, or longer where specifically required by law.</td></tr>
+            <tr><th scope="row">Orders and financial records</th><td>Order and dispute records: three years after transaction completion or dispute resolution, whichever is later. Accounting or tax records requiring a longer statutory period are retained for that period with restricted access.</td></tr>
+            <tr><th scope="row">Support materials</th><td>Up to 90 calendar days after the matter is closed, except where a documented dispute or legal obligation justifies a longer period.</td></tr>
+            <tr><th scope="row">Backups</th><td>Target a rolling 30-day backup cycle. Data deleted from primary storage should expire from ordinary backups within a further 30 days. Restore procedures must reapply deletion and processing restrictions.</td></tr>
+            <tr><th scope="row">Browser-local data</th><td>Until you clear the relevant website data or the feature, browser or device removes it. Local deletion does not delete external or server-side records.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Legal preservation is an exception for the specific information and period needed, not an indefinite extension for all data. Where information must remain because a statutory period has not expired or deletion is temporarily technically difficult, restrict processing to storage and necessary security protection. Revoking credentials, disabling a setting or closing an account does not automatically remove independent third-party copies.</p>
+    </section>
+
+    <section id="security" aria-labelledby="security-title">
+      <h2 id="security-title">8. Security and incident response</h2>
+      <p>We will take necessary technical and organizational measures appropriate to the types, purposes and risks of the information processed. These include access controls, identity verification, necessary protection in transit, credential protection, action auditing, and backup and security management measures appropriate to the actual deployment. Passwords should be verified and stored using one-way password hashing. API tokens, external keys and other credentials needed to authenticate or forward requests are subject to access restrictions and protection appropriate to their purposes.</p>
+      <p>Protect your account, tokens and verification information, enable multi-factor authentication or passkeys as appropriate, and promptly change passwords, revoke tokens or end unusual sessions if you suspect exposure. Before sending support materials, redact passwords, verification codes, recovery codes, complete keys and personal information unrelated to the issue.</p>
+      <p>If a personal information breach, alteration, loss or similar security incident occurs or may occur, we will take remedial measures and make reports and notifications required by applicable law, explaining the information involved, potential impacts, measures taken and protective steps you can take.</p>
+    </section>
+
+    <section id="rights" aria-labelledby="rights-title">
+      <h2 id="rights-title">9. Your rights and how to exercise them</h2>
+      <p>To the extent provided by applicable law, you may exercise the following rights:</p>
+      <ul>
+        <li><strong>Access and copies:</strong> view relevant information through account profile, token, session and log pages. Where log exports are enabled, you can export your own usage logs. You may request information unavailable through the interface through the request process in Section 13.</li>
+        <li><strong>Correction and completion:</strong> update editable information in the relevant settings or contact us to correct inaccurate or incomplete information.</li>
+        <li><strong>Deletion:</strong> request deletion when the processing purpose has been fulfilled, a retention period has expired, consent has been withdrawn or another statutory condition applies. Browser-local records, platform data and external copies involve distinct processing scopes.</li>
+        <li><strong>Withdrawal of consent and restriction:</strong> disable optional features, unlink accounts or contact us to withdraw relevant consent or request restricted processing. Withdrawal does not affect processing lawfully performed before withdrawal or necessary processing supported by another lawful basis.</li>
+        <li><strong>Account deletion:</strong> use "Delete Account" on the account security page or contact us. Before deletion, you may export information, address outstanding transactions and save necessary records. Account deletion does not remove our legal retention and protection obligations.</li>
+        <li><strong>Transfer and explanation:</strong> where the conditions under applicable law are met, request the transfer of your personal information or ask us to explain this Policy and related processing rules.</li>
+      </ul>
+      <p>Use a service communication channel actually published or supplied to you by TaoDock, identifying the relevant account and the specific action requested. Section 13 explains the current request-channel status. We may conduct identity verification proportionate to the risk and collect only information necessary for that verification. We will not ask for your account password, complete API key or recovery codes.</p>
+      <p><strong>Proposed response target:</strong> acknowledge a received request within three business days and provide a substantive response within 15 business days after necessary identity verification. A shorter mandatory deadline prevails; any permitted extension must be explained. These are proposed service commitments that require a functioning request channel. If a request cannot be fulfilled, explain the reason and available further steps. Statutory complaint and dispute remedies remain available.</p>
+    </section>
+
+    <section id="minors" aria-labelledby="minors-title">
+      <h2 id="minors-title">10. Children's and minors' information</h2>
+      <p>The proposed eligibility rule in the User Agreement limits service use to people aged 18 or over with the necessary legal capacity. This draft does not propose an offering to minors. Any later offering to minors would require a separate review and the safeguards applicable to their information.</p>
+      <p>Personal information of children under fourteen is sensitive personal information. If we intend to provide services to them and process their information, we will obtain parental or guardian consent and establish dedicated rules as required by law. We should not actively collect such information before the relevant conditions are met. If you are a parent or guardian and believe we have processed a child's information without appropriate authorization, contact us using Section 13. We will verify the matter and respond in accordance with the law.</p>
+    </section>
+
+    <section id="customer-data" aria-labelledby="customer-data-title">
+      <h2 id="customer-data-title">11. Information about others that you submit</h2>
+      <p>If you submit personal information about customers, employees, users or other people through the API, online playground or task interfaces, ensure you have a lawful basis and have fulfilled necessary notice, authorization or other obligations. Pay particular attention to sensitive personal information, minors' information and international transfers.</p>
+      <p>If you use the platform to provide applications to your own users, provide them with privacy information that accurately reflects the actual processing. Where we process information on your behalf, the scope and responsibilities of each party should also be specified in an applicable data processing agreement. We remain responsible under applicable law for processing we independently carry out for account management, security, legal obligations and similar purposes.</p>
+    </section>
+
+    <section id="updates" aria-labelledby="updates-title">
+      <h2 id="updates-title">12. Changes to this Policy</h2>
+      <p>We will update this Policy when service features, partners, processing practices or legal requirements change, and identify the effective date and version. We will provide notice through service announcements, relevant page notices or other appropriate means of changes with a material impact on the operator, main processing purposes, information categories, third-party disclosures, international arrangements or methods for exercising rights. Where renewed consent is required by law, the relevant processing will begin after that procedure is completed.</p>
+      <p>You may save or print this Policy. An updated policy does not automatically provide retroactive authorization for processing that was not previously authorized.</p>
+    </section>
+
+    <section id="contact" aria-labelledby="contact-title">
+      <h2 id="contact-title">13. Service information and requests</h2>
+      <p>Official service website: <a href="https://taodock.com" target="_blank" rel="noopener noreferrer">https://taodock.com</a>. Use only a communication channel expressly published there or actually supplied to you by TaoDock through your account or purchase correspondence. The website address alone is not a request-submission form, and this draft does not designate a direct email address.</p>
+      <p>A functioning channel for privacy requests must be established and disclosed before this draft is used as the complete published notice. Include only the account identification and request details needed to handle a request. Never send passwords, complete API keys, recovery codes or other usable authentication credentials.</p>
+    </section>
+
+    <footer>
+      <p>TaoDock · Privacy Policy</p>
+      <p>Related legislation (Chinese text): <a href="https://www.cac.gov.cn/2021-08/20/c_1631050028355286.htm" target="_blank" rel="noopener noreferrer">Personal Information Protection Law of the People's Republic of China</a>; <a href="https://www.gjbmj.gov.cn/n1/2026/0421/c409088-40705863.html" target="_blank" rel="noopener noreferrer">Cybersecurity Law of the People's Republic of China (as amended in 2025)</a>; and <a href="https://www.cac.gov.cn/2024-03/22/c_1712776611775634.htm" target="_blank" rel="noopener noreferrer">Provisions on Promoting and Regulating Cross-Border Data Flows</a>. The laws applicable to a particular processing activity depend on their scope and the provisions in force at the relevant time.</p>
+    </footer>
+  </main>
+</body>
+</html>

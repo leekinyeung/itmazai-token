@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TaoDock 隐私政策：了解账户信息、API 请求内容、调用日志和第三方服务涉及的个人信息处理，以及您的隐私权利。">
+  <meta name="referrer" content="no-referrer">
+  <title>隐私政策 · TaoDock</title>
+  <style>
+    body { margin: 0; background: #f5f6f8; }
+    .privacy-policy {
+      --text: #202938;
+      --muted: #596579;
+      --line: #dde3ec;
+      --accent: #244dc0;
+      box-sizing: border-box;
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 54px 64px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      color: var(--text);
+      font: 16px/1.9 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      overflow-wrap: anywhere;
+    }
+    .privacy-policy *, .privacy-policy *::before, .privacy-policy *::after { box-sizing: border-box; }
+    .privacy-policy .brand { margin: 0 0 20px; color: var(--accent); font-size: 17px; font-weight: 750; letter-spacing: .06em; }
+    .privacy-policy h1 { margin: 0 0 12px; font-size: 36px; line-height: 1.35; letter-spacing: -.03em; }
+    .privacy-policy .lead { margin: 0 0 18px; color: var(--muted); }
+    .privacy-policy .meta { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-bottom: 30px; color: var(--muted); font-size: 14px; }
+    .privacy-policy .draft { margin: 0 0 30px; padding: 18px 22px; border: 1px solid #e4c87c; border-radius: 10px; background: #fffbeb; color: #654d15; font-size: 14px; }
+    .privacy-policy .draft summary { cursor: pointer; font-weight: 700; }
+    .privacy-policy .draft p { margin: 10px 0 0; }
+    .privacy-policy .pending { color: #8d4c0c; font-weight: 600; }
+    .privacy-policy .identity { margin: 24px 0; padding: 20px 24px; border-left: 3px solid var(--accent); background: #f3f6fc; }
+    .privacy-policy .identity p { margin: 4px 0; }
+    .privacy-policy nav { margin: 30px 0 34px; padding: 22px 26px; border: 1px solid var(--line); border-radius: 10px; }
+    .privacy-policy nav h2 { margin: 0 0 12px; padding: 0; border: 0; font-size: 17px; }
+    .privacy-policy nav ol { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 30px; margin: 0; padding-left: 24px; font-size: 14px; }
+    .privacy-policy a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    .privacy-policy a:hover { color: #16348a; }
+    .privacy-policy a:focus-visible, .privacy-policy summary:focus-visible { outline: 3px solid #799aef; outline-offset: 4px; border-radius: 2px; }
+    .privacy-policy section { scroll-margin-top: 24px; }
+    .privacy-policy h2 { margin: 38px 0 16px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 22px; line-height: 1.5; }
+    .privacy-policy h3 { margin: 22px 0 8px; font-size: 17px; line-height: 1.6; }
+    .privacy-policy p { margin: 10px 0; }
+    .privacy-policy ul, .privacy-policy ol { margin: 12px 0; padding-left: 24px; }
+    .privacy-policy li { margin: 6px 0; }
+    .privacy-policy .notice { margin: 18px 0; padding: 16px 20px; border-radius: 8px; background: #f3f6fc; }
+    .privacy-policy .table-wrap { margin: 18px 0; overflow-x: auto; }
+    .privacy-policy table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.8; }
+    .privacy-policy caption { margin-bottom: 10px; color: var(--muted); font-size: 14px; text-align: left; }
+    .privacy-policy th, .privacy-policy td { padding: 13px 15px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .privacy-policy th { background: #f5f7fa; font-weight: 650; }
+    .privacy-policy th:first-child { width: 21%; }
+    .privacy-policy .small { color: var(--muted); font-size: 14px; }
+    .privacy-policy footer { margin-top: 38px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .privacy-policy footer p { margin: 5px 0; }
+    @media (max-width: 680px) {
+      body { background: #fff; }
+      .privacy-policy { margin: 0; padding: 30px 20px; border: 0; border-radius: 0; font-size: 15px; }
+      .privacy-policy h1 { font-size: 30px; }
+      .privacy-policy h2 { font-size: 20px; }
+      .privacy-policy nav { padding: 18px 20px; }
+      .privacy-policy nav ol { grid-template-columns: 1fr; }
+      .privacy-policy .identity { padding: 16px 18px; }
+      .privacy-policy th, .privacy-policy td { padding: 10px; }
+      .privacy-policy .draft { padding: 15px 17px; }
+    }
+    @media print {
+      @page { margin: 18mm; }
+      body { background: #fff; }
+      .privacy-policy { max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; font-size: 10.5pt; line-height: 1.75; }
+      .privacy-policy h1 { font-size: 24pt; }
+      .privacy-policy h2 { font-size: 15pt; break-after: avoid; }
+      .privacy-policy h3 { font-size: 12pt; break-after: avoid; }
+      .privacy-policy nav { display: none; }
+      .privacy-policy .draft { break-inside: avoid; }
+      .privacy-policy table { font-size: 9pt; }
+      .privacy-policy tr { break-inside: avoid; }
+      .privacy-policy a { color: inherit; }
+    }
+  </style>
+</head>
+<body>
+  <main class="privacy-policy" aria-labelledby="policy-title">
+    <header>
+      <p class="brand">TaoDock</p>
+      <h1 id="policy-title">隐私政策</h1>
+      <p class="lead">本政策说明我们如何处理您的个人信息，以及您如何管理和保护自己的信息。</p>
+      <div class="meta">
+        <span>更新日期：<time datetime="2026-10-23">2026 年 10 月 23 日</time></span>
+        <span>正式发布并完成必要告知或同意程序后生效</span>
+        <span>版本：1.2（运营规则草稿）</span>
+      </div>
+    </header>
+
+    <!-- 发布前核实建议清理规则、第三方处理告知、实际存储地区及可用的申请渠道。 -->
+    <details class="draft" open>
+      <summary>运营规则草稿：已核实事实与建议承诺</summary>
+      <p>产品名称、域名、美元额度显示和 Asia/Shanghai 服务器时区已于 2026 年 10 月 23 日核对。下列保存期限及响应时限属于拟采用的运营承诺，不代表线上已经配置相应清理任务或客服流程。实际存储地区、基础设施及支付接收方资料和有效申请渠道仍需在发布前核实。本版不列运营者身份、个人地址或直接邮箱。</p>
+    </details>
+
+    <div class="identity">
+      <p><strong>服务名称：</strong>TaoDock</p>
+      <p><strong>官方网站：</strong><a href="https://taodock.com" target="_blank" rel="noopener noreferrer">https://taodock.com</a></p>
+      <p><strong>关联文件：</strong><a href="terms-of-service.en.html">用户协议（英文）</a></p>
+    </div>
+
+    <p>本政策适用于https://taodock.com 的服务运营方（以下简称“我们”）通过 TaoDock 提供的网站、管理控制台、AI API 接入与转发、在线模型体验及相关配套服务；如我们提供相应桌面客户端，其涉及的个人信息处理亦适用本政策。其他主体自行部署的同名或同源软件，由其另行说明个人信息处理规则。</p>
+    <p><strong>TaoDock 提供 AI 模型接入与请求转发服务。您提交的请求内容会由平台处理，并按所选模型、接口及服务路由发送至相应外部服务商。请重点阅读第四条、第五条和第六条。</strong>本政策是信息处理说明；对于法律要求取得同意或单独同意的活动，我们将另行履行相应程序，不以您浏览本页面作为授权。</p>
+
+    <nav aria-label="隐私政策目录">
+      <h2>目录</h2>
+      <ol>
+        <li><a href="#collection">我们处理哪些个人信息</a></li>
+        <li><a href="#purpose">处理目的与合法性依据</a></li>
+        <li><a href="#storage">Cookie 与本地存储</a></li>
+        <li><a href="#ai-content">AI 请求、生成结果与日志</a></li>
+        <li><a href="#third-parties">第三方、委托处理与信息提供</a></li>
+        <li><a href="#cross-border">存储地区与跨境处理</a></li>
+        <li><a href="#retention">个人信息的保存期限</a></li>
+        <li><a href="#security">信息安全与事件处理</a></li>
+        <li><a href="#rights">您的权利与申请方式</a></li>
+        <li><a href="#minors">未成年人个人信息</a></li>
+        <li><a href="#customer-data">您提交的他人信息</a></li>
+        <li><a href="#updates">政策更新</a></li>
+        <li><a href="#contact">服务信息与申请</a></li>
+      </ol>
+    </nav>
+
+    <section id="collection" aria-labelledby="collection-title">
+      <h2 id="collection-title">一、我们处理哪些个人信息</h2>
+      <p>我们按您实际使用的功能处理相应信息。项目支持某项功能，不代表该功能已在本服务启用；可选功能的信息仅在您使用或启用时处理。</p>
+      <div class="table-wrap">
+        <table>
+          <caption>主要功能涉及的信息及用途</caption>
+          <thead><tr><th scope="col">使用场景</th><th scope="col">信息种类</th><th scope="col">主要用途</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">账户注册与资料管理</th><td>用户名、显示名称、密码校验信息、邮箱（当注册、绑定或相关功能需要时）、账户标识、注册时间及账户设置</td><td>创建和管理账户、验证身份、发送必要通知、提供您选择的功能</td></tr>
+            <tr><th scope="row">登录与安全验证</th><td>登录方式、登录及会话时间、IP 地址、浏览器或客户端信息、会话凭据；按您启用的功能处理验证码、多因素认证配置、恢复凭据、通行密钥公钥及凭据标识</td><td>身份验证、账户恢复、会话管理、异常登录识别及敏感操作验证</td></tr>
+            <tr><th scope="row">第三方账户登录或绑定</th><td>您授权的第三方账户标识，以及该登录方式提供且为登录或绑定所必要的用户名、邮箱等资料</td><td>完成第三方登录、账户关联与身份校验</td></tr>
+            <tr><th scope="row">API 调用与在线体验</th><td>请求中的文本、提示词、对话上下文、文件、图片、音频、视频、链接或其他输入，以及生成结果；模型名称、请求标识、调用时间、状态、耗时和任务信息</td><td>接收、转发和处理请求、返回生成结果、管理异步任务、定位故障</td></tr>
+            <tr><th scope="row">API 凭据管理</th><td>您创建的 API 令牌或个人访问令牌及其名称、权限、使用限制、有效期和使用记录；您作为管理员提交的外部接入凭据</td><td>验证调用权限、执行访问限制、连接您配置的外部服务</td></tr>
+            <tr><th scope="row">充值、订阅与消费查询</th><td>账户标识、充值或订阅订单、交易流水号、金额、币种、支付方式、支付状态、支付平台客户标识、调用用量和费用记录</td><td>完成交易、核对支付结果、管理订阅、展示消费明细、处理交易争议及履行法定义务</td></tr>
+            <tr><th scope="row">邀请与账户偏好</th><td>邀请码、邀请关联关系及奖励记录；语言、主题、通知及界面偏好</td><td>执行已公布的邀请规则、保存偏好和改善使用体验</td></tr>
+            <tr><th scope="row">服务运行与客户支持</th><td>访问时间、IP 地址、请求路径、响应状态、客户端信息、安全事件及管理操作记录；您主动提供的联系方式、问题描述和排障材料</td><td>维护服务运行、防范滥用、开展安全审计、回应咨询和投诉</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>未提供实现特定功能所必需的信息，可能使该功能无法使用。对于与基本服务无关的可选信息或功能，您可以拒绝提供或关闭，不影响其他不依赖该信息的功能。</p>
+      <p>使用通行密钥时，本服务处理用于验证的公钥和凭据资料；指纹、面容等本机生物识别验证由您的设备或认证器完成，我们不通过通行密钥功能取得这些生物识别原始数据。若输入内容本身含有医疗健康、金融账户、身份信息等敏感个人信息，相关内容也可能随请求进入处理流程，请仅在确有必要且具备合法依据时提交。</p>
+    </section>
+
+    <section id="purpose" aria-labelledby="purpose-title">
+      <h2 id="purpose-title">二、处理目的与合法性依据</h2>
+      <p>我们根据具体处理活动适用相应合法性依据，包括为订立、履行您作为一方当事人的合同所必需，履行法定职责或法定义务，以及在依法需要时取得您的同意。我们不会将同一项依据无差别适用于所有处理活动。</p>
+      <ul>
+        <li><strong>提供服务：</strong>管理账户、验证请求、转发模型调用、交付结果、维护订单及服务权益。</li>
+        <li><strong>安全与合规：</strong>识别异常访问、排查故障、处理滥用与投诉、履行网络安全及依法适用的记录保存义务。</li>
+        <li><strong>沟通与支持：</strong>发送验证码、服务变更、安全提醒、交易通知，并回应您的咨询。</li>
+        <li><strong>可选功能：</strong>根据您的选择处理第三方绑定、邀请活动、偏好保存等功能涉及的信息。</li>
+      </ul>
+      <p>如需将信息用于与原目的不相容的新用途，我们会事先说明，并在依法需要时重新取得同意。营销推送、非必要追踪等活动不以接受本政策作为一揽子授权。</p>
+    </section>
+
+    <section id="storage" aria-labelledby="storage-title">
+      <h2 id="storage-title">三、Cookie 与本地存储</h2>
+      <p>我们使用 Cookie、浏览器本地存储或其他必要的客户端存储机制维持登录状态、进行安全验证，以及保存语言、主题、通知和界面偏好。在线模型体验功能会将部分对话内容和参数配置保存在您当前浏览器的本地存储中，以便恢复使用状态。</p>
+      <p>本地存储中的对话保存在您使用的设备和浏览器环境内；您实际发起模型调用时，相关对话上下文仍会作为请求发送至平台和对应外部。清除本地对话或网站数据，不会自动删除平台日志、任务记录或第三方留存的副本。</p>
+      <p>您可以通过浏览器设置清除网站数据或限制 Cookie。清除或限制必要存储可能导致退出登录、偏好丢失或部分功能无法正常工作。使用公共或共享设备后，请退出账户并按需清除网站数据。若另行启用非必要统计、广告或追踪技术，我们会说明其用途、提供方与关闭方式，并在依法需要时先取得同意。</p>
+    </section>
+
+    <section id="ai-content" aria-labelledby="ai-content-title">
+      <h2 id="ai-content-title">四、AI 请求、生成结果与日志</h2>
+      <h3>4.1 请求转发与任务处理</h3>
+      <p>为完成您选择的 AI 服务，平台会读取并处理请求内容，根据模型和路由配置进行必要的格式转换，再向对应外部发送与完成该请求有关的内容和参数。异步任务可能保存任务标识、状态、必要的任务数据，以及生成结果或结果链接。输入中的文件及外部链接还可能由平台或外部按接口要求读取。</p>
+      <h3>4.2 调用日志与内容留存</h3>
+      <p>平台可以记录账户关联信息、模型、调用时间、用量、费用、耗时、状态、请求标识和错误信息等调用日志。完整输入或输出的持久化留存应以实际内容记录策略为准；部分任务记录、错误信息、调试日志或客服排障材料也可能包含您提交的内容片段。</p>
+      <p><strong>建议内容处理规则：</strong>普通 API 输入、输出用于完成请求，不作为永久对话档案保存。请求体可能暂存在内存或磁盘缓冲中，并通过正常请求清理释放；任务数据、结果引用及错误或诊断片段可能另行保存。建议在任务完成或问题处理结束后 30 个自然日内清理这些资料，依法需要保全的部分除外。该规则仍需与线上版本及日志配置核对，不代表现有系统已落实所有期限。外部保存规则另行适用，可能更长。</p>
+      <p>您可以在账户安全设置中管理调用及错误日志的“记录 IP 地址”选项。该选项仅控制相应日志中的 IP 记录，不影响为登录会话、安全审计、网络访问或法律义务所必需的其他 IP 信息处理；关闭该选项也不会自动删除已有记录。</p>
+      <h3>4.3 训练、人工访问与第三方规则</h3>
+      <p>我们为提供您请求的服务处理输入和输出。如拟将这些内容另行用于模型训练、广告或其他独立用途，我们会事先说明具体目的、范围和规则，并在依法需要时另行取得同意。工作人员处理排障或安全事件时，仅应在必要范围及相应权限内访问信息。</p>
+      <p>具体处理活动可能适用不同的保存、安全监测或模型改进规则，取决于功能和相应安排。本政策不承诺所有处理路径均为“零留存”或一律“不用于训练”；影响用户权益的具体处理条件，应在相应活动发生前说明，并依法另行取得必要同意。</p>
+    </section>
+
+    <section id="third-parties" aria-labelledby="third-parties-title">
+      <h2 id="third-parties-title">五、第三方、委托处理与信息提供</h2>
+      <p>提供服务可能需要第三方参与技术处理。信息提供应限于相应功能所需目的和范围；受托处理应具有相应指令和安全约定。依法需要具体接收方告知或单独同意的，应在相应传输前完成。</p>
+      <div class="table-wrap">
+        <table>
+          <caption>第三方处理的功能类别</caption>
+          <thead><tr><th scope="col">服务类别</th><th scope="col">处理目的</th><th scope="col">必要信息范围</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">AI 技术处理</th><td>完成用户选择的模型请求或生成任务。</td><td>必要的请求内容、上下文、文件、参数及请求技术信息。</td></tr>
+            <tr><th scope="row">主机与数据服务</th><td>支持平台运行、安全、数据保存和备份。</td><td>相应功能所需业务记录、请求数据、日志及网络信息。</td></tr>
+            <tr><th scope="row">支付处理</th><td>完成付款及订单对账。</td><td>相应交易所需订单号、金额、支付方式、状态及必要支付信息。</td></tr>
+            <tr><th scope="row">可选身份与安全功能</th><td>仅在功能启用并被选择或具有其他合法依据时，完成身份或安全验证。</td><td>该流程所需身份、授权或验证信息。</td></tr>
+            <tr><th scope="row">邮件发送</th><td>仅在相应邮件功能启用时，发送必要通知或其他消息。</td><td>收件地址、必要消息内容及投递信息。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>单独保存规则：</strong>部分处理路径可能涉及无自动到期规则的证据保存，普通日志清理或本地记录删除不一定会清除此类资料。相关保存应具备相应依据并履行适用的告知和权利保障要求。删除 TaoDock 记录不代表所有独立接收方副本都会同步删除。</p>
+      <p>我们不出售个人信息。公开披露、经营主体变更涉及的数据转移或有权机关请求，均应具有合法依据并限于必要信息。本节功能类别说明不替代依法需要的具体接收方告知或同意。</p>
+    </section>
+
+    <section id="cross-border" aria-labelledby="cross-border-title">
+      <h2 id="cross-border-title">六、存储地区与跨境处理</h2>
+      <p>业务数据、日志及缓存由 TaoDock 部署环境处理。本稿尚未核实主机、备份及所有外部处理的实际国家或地区。服务器时区、域名、IP 注册信息和企业注册地址都不能单独证明个人信息实际存储位置。</p>
+      <p>浏览器本地数据保存在您使用的设备及浏览器中。完成请求可能需要外部技术处理，本稿不作全部处理始终限于某一个国家或您所在地区的承诺。</p>
+      <p>在提供依法需要专门告知、同意、评估或数据出境程序的服务前，应先完成相应要求，包括接收方信息、处理目的和方式、信息种类及权利申请方式。选择模型、提交请求或接受本政策不替代依法需要的单独同意程序。</p>
+    </section>
+
+    <section id="retention" aria-labelledby="retention-title">
+      <h2 id="retention-title">七、个人信息的保存期限</h2>
+      <p>下表为完成清理和复核流程后拟采用的运营规则，不代表当前部署已经执行所有期限。核对到的 365 天界面查询范围不等于自动删除期限。除有明确合法依据外，保存不应超过实现处理目的所需时间。</p>
+      <div class="table-wrap">
+        <table>
+          <caption>发布前需落实的建议保存规则</caption>
+          <thead><tr><th scope="col">信息类别</th><th scope="col">建议期限及起算点</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">账户与绑定资料</th><td>账户存续及服务必要期间保存；核实注销申请后 30 个自然日内删除或匿名化不再必要的资料，依法保留或争议处理所需部分除外。</td></tr>
+            <tr><th scope="row">请求、输出及任务资料</th><td>普通请求缓冲通过正常请求清理释放；任务记录、结果引用及诊断片段，在任务完成或问题解决后最长保留 30 个自然日，有正当保全依据的除外。外部副本另按外部规则处理。</td></tr>
+            <tr><th scope="row">调用及错误日志</th><td>从事件发生起最长保留 12 个月，之后删除或匿名化；适用法定最低期限的，应满足该期限，特定保全应限于必要范围并记录依据。</td></tr>
+            <tr><th scope="row">会话、安全及审计记录</th><td>会话依其有效期处理，建议在撤销后 7 天清理相应会话资料，并满足防重放所需窗口。安全和审计日志从事件发生起保留 6 个自然月；法律明确要求更长的，从其规定。</td></tr>
+            <tr><th scope="row">订单与财务记录</th><td>订单及争议资料自交易完成或争议解决之较晚时间起保留 3 年；财税、会计资料依法需要更长期限的，仅在该法定期限和必要权限内保存。</td></tr>
+            <tr><th scope="row">客服资料</th><td>事项结束后最长保留 90 个自然日；有记录的争议或法定义务确需更长时间的除外。</td></tr>
+            <tr><th scope="row">备份</th><td>建议采用 30 天滚动备份周期；主库已删除信息应在之后 30 天内从普通备份到期移除，恢复备份时重新执行删除和限制处理。</td></tr>
+            <tr><th scope="row">浏览器本地数据</th><td>保留至您清理网站数据，或由功能、浏览器、设备机制移除；本地清理不等于服务器或外部副本删除。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>法定保全只适用于有依据的特定信息和期限，不应成为全部信息无限期保存的理由。因法定期限未满或技术上暂时无法删除而保留的，应限于存储及必要安全保护。注销、撤销凭据或关闭设置不会自动删除独立第三方副本。</p>
+    </section>
+
+    <section id="security" aria-labelledby="security-title">
+      <h2 id="security-title">八、信息安全与事件处理</h2>
+      <p>我们将根据所处理信息的种类、目的和风险，采取必要的技术与管理措施，包括访问权限控制、身份验证、必要的传输保护、凭据保护、操作审计，以及与实际部署相适应的备份和安全管理措施。密码应以不可逆密码散列进行校验和存储；API 令牌、外部密钥及其他需用于请求验证或转发的凭据，按其用途采取访问限制和保护措施。</p>
+      <p>请妥善保管账户、令牌和验证资料，按需启用多因素认证或通行密钥，并在发现泄露风险时及时修改密码、撤销令牌或终止异常会话。向客服提交材料时，请先遮盖密码、验证码、恢复码、完整密钥和与问题无关的个人信息。</p>
+      <p>如发生或可能发生个人信息泄露、篡改、丢失等安全事件，我们会采取补救措施，并按适用法律要求报告及通知相关个人，说明涉及信息、可能影响、已采取措施及您可采取的保护方式。</p>
+    </section>
+
+    <section id="rights" aria-labelledby="rights-title">
+      <h2 id="rights-title">九、您的权利与申请方式</h2>
+      <p>在适用法律规定的范围内，您可以行使以下权利：</p>
+      <ul>
+        <li><strong>查阅与复制：</strong>通过账户资料、令牌、会话及日志等页面查看相关信息；日志导出功能开放时，可导出自己的调用日志。页面未提供的信息可按第十三条说明的途径申请。</li>
+        <li><strong>更正与补充：</strong>在相关设置中修改可编辑资料，或联系更正不准确、不完整的信息。</li>
+        <li><strong>删除：</strong>在处理目的已实现、保存期限届满、撤回同意或其他法定情形下申请删除。清除浏览器本地记录、平台数据和外部副本属于不同处理范围。</li>
+        <li><strong>撤回同意与限制处理：</strong>通过关闭可选功能、解除绑定或联系我们撤回相应同意或申请限制处理。撤回不影响此前已依法开展的处理，也不影响其他具备合法依据的必要处理。</li>
+        <li><strong>注销账户：</strong>通过账户安全页面的“删除账户”功能或联系我们申请。注销前可按需导出资料、处理未完成交易并保存必要凭证；注销不免除我们依法应履行的保留和保护义务。</li>
+        <li><strong>转移与解释说明：</strong>在符合适用法律规定条件时，申请个人信息转移，或要求我们解释本政策及相关处理规则。</li>
+      </ul>
+      <p>请使用 TaoDock 实际公布或向您提供的服务沟通渠道说明账户关联信息和申请事项；当前申请渠道状态见第十三条。我们可能进行与风险相适应的身份核验，仅收集核验所必需的信息，且不会要求您提供账户密码、完整 API 密钥或恢复码。</p>
+      <p><strong>建议响应目标：</strong>收到申请后 3 个工作日内确认收悉，在完成必要身份核验后 15 个工作日内给出实质答复；法定期限更短的优先适用，依法可延期的应说明理由。该承诺以建立有效申请渠道为前提。不能满足申请的，应说明理由及后续途径；法定投诉与争议解决权利不受影响。</p>
+    </section>
+
+    <section id="minors" aria-labelledby="minors-title">
+      <h2 id="minors-title">十、未成年人个人信息</h2>
+      <p>用户协议拟采用仅限年满 18 周岁且具有相应民事行为能力人士使用的规则，本稿不拟向未成年人提供服务。未来如另行提供，应先评估并落实相应个人信息保护要求。</p>
+      <p>不满十四周岁未成年人的个人信息属于敏感个人信息。若拟向其提供服务并处理相关信息，我们会依法取得监护人同意并制定专门规则；在具备相应条件前，不应主动收集此类信息。若您是监护人并认为我们未经适当授权处理了相关信息，请通过第十三条联系我们，我们会核实并依法处理。</p>
+    </section>
+
+    <section id="customer-data" aria-labelledby="customer-data-title">
+      <h2 id="customer-data-title">十一、您提交的他人信息</h2>
+      <p>如果您通过 API、在线模型体验或任务接口提交客户、员工、用户或其他人的个人信息，请确保具有合法处理依据，并已履行必要的告知、授权或其他义务，尤其应关注敏感个人信息、未成年人信息和跨境传输。</p>
+      <p>您通过本平台向自己的用户提供应用服务时，应向其提供与实际处理活动一致的隐私说明。对我们受您委托处理的信息，双方的处理范围和责任还应由适用的数据处理约定明确；对我们为账户、安全及法定义务等目的独立开展的处理，由我们依法承担相应责任。</p>
+    </section>
+
+    <section id="updates" aria-labelledby="updates-title">
+      <h2 id="updates-title">十二、政策更新</h2>
+      <p>服务功能、合作方、处理方式或法律要求变化时，我们会相应更新本政策，并标注生效日期和版本。对运营主体、主要处理目的、信息种类、第三方提供、跨境安排或权利行使方式等有实质影响的变更，我们会通过站内公告、相关页面提示或其他适当方式告知；依法需要重新取得同意的，在完成相应程序后开展处理。</p>
+      <p>您可以保存或打印本政策。更新后的政策不当然追溯授权此前未获授权的处理活动。</p>
+    </section>
+
+    <section id="contact" aria-labelledby="contact-title">
+      <h2 id="contact-title">十三、服务信息与申请</h2>
+      <p>官方网站：<a href="https://taodock.com" target="_blank" rel="noopener noreferrer">https://taodock.com</a>。请仅使用网站明确公布，或 TaoDock 通过账户、订单沟通实际向您提供的联系渠道。网站地址本身不是申请提交表单，本稿不指定直接邮箱。</p>
+      <p>在将本稿作为完整隐私告知正式发布前，应建立并公布可用的隐私申请渠道。提交材料应限于识别账户和处理申请所需内容；请勿发送密码、完整 API 密钥、恢复码或其他可直接使用的认证凭据。</p>
+    </section>
+
+    <footer>
+      <p>TaoDock · 隐私政策</p>
+      <p>相关法律文本：<a href="https://www.cac.gov.cn/2021-08/20/c_1631050028355286.htm" target="_blank" rel="noopener noreferrer">《中华人民共和国个人信息保护法》</a>、<a href="https://www.gjbmj.gov.cn/n1/2026/0421/c409088-40705863.html" target="_blank" rel="noopener noreferrer">《中华人民共和国网络安全法》（2025 年修正）</a>、<a href="https://www.cac.gov.cn/2024-03/22/c_1712776611775634.htm" target="_blank" rel="noopener noreferrer">《促进和规范数据跨境流动规定》</a>。具体处理活动适用的法律，以其适用范围及届时有效规定为准。</p>
+    </footer>
+  </main>
+</body>
+</html>

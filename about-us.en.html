@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learn about TaoDock, an AI API platform for connecting applications, exploring models, managing API access and tracking usage.">
+  <meta name="referrer" content="no-referrer">
+  <title>About Us · TaoDock</title>
+  <style>
+    body { margin: 0; background: #f5f6f8; }
+    .about-us {
+      --text: #202938;
+      --muted: #596579;
+      --line: #dde3ec;
+      --accent: #244dc0;
+      box-sizing: border-box;
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 54px 64px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      color: var(--text);
+      font: 16px/1.85 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-wrap: break-word;
+    }
+    .about-us *, .about-us *::before, .about-us *::after { box-sizing: border-box; }
+    .about-us .brand { margin: 0 0 20px; color: var(--accent); font-size: 17px; font-weight: 750; letter-spacing: .06em; }
+    .about-us h1 { margin: 0 0 14px; font-size: 36px; line-height: 1.35; letter-spacing: -.03em; }
+    .about-us .lead { max-width: 620px; margin: 0; color: var(--muted); font-size: 20px; line-height: 1.65; }
+    .about-us .website { margin-top: 18px; font-size: 14px; }
+    .about-us h2 { margin: 36px 0 14px; padding-top: 26px; border-top: 1px solid var(--line); font-size: 23px; line-height: 1.5; }
+    .about-us h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.5; }
+    .about-us p { margin: 10px 0; }
+    .about-us a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    .about-us a:hover { color: #16348a; }
+    .about-us a:focus-visible { outline: 3px solid #799aef; outline-offset: 4px; border-radius: 2px; }
+    .about-us .features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 20px 0 0; padding: 0; list-style: none; }
+    .about-us .features li { padding: 22px; border: 1px solid var(--line); border-radius: 10px; }
+    .about-us .features p { margin: 0; color: var(--muted); font-size: 15px; }
+    .about-us .audience { margin: 14px 0; padding-left: 23px; }
+    .about-us .audience li { margin: 8px 0; }
+    .about-us .small { color: var(--muted); font-size: 14px; }
+    .about-us .start { margin-top: 34px; padding: 24px 28px; border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; background: #f3f6fc; }
+    .about-us .start h2 { margin: 0 0 10px; padding: 0; border: 0; }
+    .about-us .start p { margin: 8px 0 16px; }
+    .about-us .visit { display: inline-block; padding: 10px 19px; border: 1px solid var(--accent); border-radius: 7px; background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; text-decoration: none; }
+    .about-us .visit:hover { border-color: #16348a; background: #16348a; color: #fff; }
+    .about-us footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .about-us footer p { margin: 0; }
+    .about-us .legal-links { display: flex; flex-wrap: wrap; gap: 10px 22px; }
+    @media (max-width: 680px) {
+      body { background: #fff; }
+      .about-us { margin: 0; padding: 30px 20px; border: 0; border-radius: 0; font-size: 15px; }
+      .about-us h1 { font-size: 30px; }
+      .about-us h2 { font-size: 21px; }
+      .about-us .lead { font-size: 18px; }
+      .about-us .features { grid-template-columns: 1fr; gap: 12px; }
+      .about-us .features li { padding: 19px; }
+      .about-us .start { padding: 21px; }
+    }
+    @media print {
+      @page { margin: 18mm; }
+      body { background: #fff; }
+      .about-us { max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; font-size: 10.5pt; line-height: 1.7; }
+      .about-us h1 { font-size: 24pt; }
+      .about-us h2 { font-size: 15pt; break-after: avoid; }
+      .about-us h3 { font-size: 12pt; break-after: avoid; }
+      .about-us .features li, .about-us .start { break-inside: avoid; }
+      .about-us a { color: inherit; }
+      .about-us .visit { border-color: #596579; background: #fff; color: #202938; }
+    }
+  </style>
+</head>
+<body>
+  <main class="about-us" aria-labelledby="about-title">
+    <header>
+      <p class="brand">TaoDock</p>
+      <h1 id="about-title">About Us</h1>
+      <p class="lead">One place to connect, explore and manage AI.</p>
+      <p class="website">Official website: <a href="https://taodock.com" target="_blank" rel="noopener noreferrer">https://taodock.com</a></p>
+    </header>
+
+    <section id="platform" aria-labelledby="platform-title">
+      <h2 id="platform-title">AI access with a practical workspace</h2>
+      <p>TaoDock is an AI API platform for developers, teams and individuals who want to bring AI into their applications and everyday workflows. It brings model access, API credentials, a playground and usage information together in one dashboard.</p>
+      <p>Our goal is to make the path from trying an idea to connecting it to an application easier to manage. Explore the available models, configure your integration and review how your requests are being used from the same workspace.</p>
+    </section>
+
+    <section id="features" aria-labelledby="features-title">
+      <h2 id="features-title">What you can do with TaoDock</h2>
+      <ul class="features">
+        <li>
+          <h3>Connect your application</h3>
+          <p>Use a shared API entry point to connect supported AI capabilities to your application, scripts or development tools.</p>
+        </li>
+        <li>
+          <h3>Explore models and prompts</h3>
+          <p>Try the available models in the playground, adjust request settings and review responses before building an integration.</p>
+        </li>
+        <li>
+          <h3>Manage API access</h3>
+          <p>Create and manage API keys, review their permissions and apply available expiry, access and usage restrictions.</p>
+        </li>
+        <li>
+          <h3>Understand your usage</h3>
+          <p>Review request history, usage quantities and recorded charges to understand how your applications consume services.</p>
+        </li>
+        <li>
+          <h3>Work across content types</h3>
+          <p>Build with text and supported image, audio or video interfaces according to the capabilities of the selected model.</p>
+        </li>
+        <li>
+          <h3>Keep account settings together</h3>
+          <p>Manage your profile, preferences, account security options and wallet information through the dashboard.</p>
+        </li>
+      </ul>
+      <p class="small">Available models, interfaces and features depend on the current service configuration and your account access. Check the relevant service pages for supported capabilities, limits and pricing.</p>
+    </section>
+
+    <section id="audience" aria-labelledby="audience-title">
+      <h2 id="audience-title">Built for different ways of working</h2>
+      <ul class="audience">
+        <li><strong>Developers</strong> connecting AI to products, tools and automated workflows.</li>
+        <li><strong>Teams</strong> organizing application credentials and reviewing usage across their work.</li>
+        <li><strong>Individual users</strong> exploring prompts, models and supported creative tasks.</li>
+      </ul>
+    </section>
+
+    <section id="approach" aria-labelledby="approach-title">
+      <h2 id="approach-title">Our approach</h2>
+      <p><strong>Keep integration practical.</strong> Bring the controls needed to explore a model, connect an application and manage access into a consistent workspace.</p>
+      <p><strong>Make usage easier to understand.</strong> Give users a place to review requests, usage and charges alongside their account controls.</p>
+      <p><strong>Encourage thoughtful use.</strong> Help users choose capabilities that fit their tasks, review generated results and understand the service rules before relying on an integration.</p>
+    </section>
+
+    <section id="get-started" class="start" aria-labelledby="get-started-title">
+      <h2 id="get-started-title">Start with TaoDock</h2>
+      <p>Visit the official website to explore the available services, review pricing and access your account.</p>
+      <a class="visit" href="https://taodock.com" target="_blank" rel="noopener noreferrer">Visit TaoDock</a>
+    </section>
+
+    <footer>
+      <p>TaoDock · Connect, explore and manage AI.</p>
+      <nav class="legal-links" aria-label="Service policies">
+        <a href="privacy-policy.en.html">Privacy Policy</a>
+        <a href="terms-of-service.en.html">User Agreement</a>
+      </nav>
+    </footer>
+  </main>
+</body>
+</html>

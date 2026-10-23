@@ -351,7 +351,7 @@ func UpdateOptionsBulk(values map[string]string) error {
 }
 
 func updateOptionMap(key string, value string) (err error) {
-	if key == retiredThemeOptionKey || key == legacyAccessTokenRetireAtKey {
+	if key == retiredThemeOptionKey || key == legacyAccessTokenRetireAtKey || strings.HasPrefix(key, "payment_setting.compliance_") {
 		common.OptionMapRWMutex.Lock()
 		delete(common.OptionMap, key)
 		common.OptionMapRWMutex.Unlock()

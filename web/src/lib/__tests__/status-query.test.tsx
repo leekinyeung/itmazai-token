@@ -30,6 +30,7 @@ import {
 import {
   STATUS_QUERY_KEY,
   ensureStatus,
+  mapStatusDataToConfig,
   statusQueryOptions,
 } from '@/lib/status-query'
 import { useSystemConfigStore } from '@/stores/system-config-store'
@@ -87,6 +88,22 @@ afterEach(() => {
   apiClient.get = originalGet
   window.localStorage.clear()
   useSystemConfigStore.setState(useSystemConfigStore.getInitialState(), true)
+})
+
+describe('system branding defaults', () => {
+  test.each([
+    { label: 'missing', status: {}, expected: 'Taodock' },
+    { label: 'empty', status: { system_name: '' }, expected: 'Taodock' },
+    {
+      label: 'customized',
+      status: { system_name: 'Custom Gateway' },
+      expected: 'Custom Gateway',
+    },
+  ])('uses the expected name when the status name is $label', (scenario) => {
+    expect(mapStatusDataToConfig(scenario.status).systemName).toBe(
+      scenario.expected
+    )
+  })
 })
 
 describe('shared status query deduplication', () => {

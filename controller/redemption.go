@@ -8,7 +8,6 @@ import (
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/model"
-	"github.com/QuantumNous/new-api/setting/operation_setting"
 
 	"github.com/gin-gonic/gin"
 )
@@ -61,11 +60,6 @@ func GetRedemption(c *gin.Context) {
 }
 
 func AddRedemption(c *gin.Context) {
-	if !operation_setting.IsPaymentComplianceConfirmed() {
-		common.ApiErrorT(c, "Payment, redemption, subscription, and invitation reward features are disabled. The administrator must confirm compliance terms before enabling them.")
-		return
-	}
-
 	redemption := model.Redemption{}
 	err := c.ShouldBindJSON(&redemption)
 	if err != nil {
