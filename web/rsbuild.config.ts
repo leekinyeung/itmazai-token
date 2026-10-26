@@ -28,6 +28,8 @@ export default defineConfig(({ envMode }) => {
     // Rsbuild 2: replaces deprecated `performance.chunkSplit` (RSPack 2 aligned)
     splitChunks: {
       preset: 'default',
+      // Do not promote dependencies used only by lazy admin routes into boot assets.
+      chunks: 'async',
       cacheGroups: {
         'vendor-react': {
           test: /node_modules[\\/](react|react-dom)[\\/]/,
@@ -39,14 +41,14 @@ export default defineConfig(({ envMode }) => {
         'vendor-ui-primitives': {
           test: /node_modules[\\/](@base-ui|@radix-ui)[\\/]/,
           name: 'vendor-ui-primitives',
-          chunks: 'all',
+          chunks: 'initial',
           priority: 0,
           enforce: true,
         },
         'vendor-tanstack': {
           test: /node_modules[\\/]@tanstack[\\/]/,
           name: 'vendor-tanstack',
-          chunks: 'all',
+          chunks: 'initial',
           priority: 0,
           enforce: true,
         },

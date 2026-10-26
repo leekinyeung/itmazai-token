@@ -16,67 +16,95 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useQuery } from '@tanstack/react-query'
 import i18next from 'i18next'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 import { isHttpUrl } from '@/lib/content-format'
 import { handleServerError } from '@/lib/handle-server-error'
+import {
+  createServerError,
+  requireServerSuccess,
+} from '@/lib/server-error-message'
 
 import { getHomePageContent } from '../api'
 import type { HomePageContentResult } from '../types'
 
-const STORAGE_KEY = 'home_page_content'
+const STORAGE_KEY = 'newapi:home-page:v1'
 
-/**
- * Hook to load and manage custom home page content
- * Supports both Markdown/HTML content and iframe URLs
- */
+/** Empty content is a confirmed default homepage; undefined means unknown. */
+function readCachedHomePageContent(): string | undefined {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    if (raw !== null) {
+      const cached: unknown = JSON.parse(raw)
+      if (
+        cached &&
+        typeof cached === 'object' &&
+        'content' in cached &&
+        typeof cached.content === 'string'
+      ) {
+        return cached.content
+      }
+      return undefined
+    }
+    // Older releases stored only non-empty custom content in this key.
+    return window.localStorage.getItem('home_page_content') || undefined
+  } catch {
+    return undefined
+  }
+}
+
 export function useHomePageContent(): HomePageContentResult {
-  const [content, setContent] = useState<string>('')
-  const [isLoaded, setIsLoaded] = useState(false)
+  const query = useQuery({
+    queryKey: ['homePageContent'],
+    queryFn: async ({ signal }) => {
+      const response = requireServerSuccess(await getHomePageContent(signal))
+      const content = response.data
+      if (typeof content !== 'string') {
+        throw createServerError(response, 'Failed to load home page content')
+      }
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ content }))
+        window.localStorage.removeItem('home_page_content')
+      } catch {
+        // Storage failures must not discard a valid network response.
+      }
+      return content
+    },
+    initialData: readCachedHomePageContent,
+    initialDataUpdatedAt: 0,
+    staleTime: 60_000,
+    retry: false,
+    meta: { errorToast: false, errorRedirect: false },
+  })
 
   useEffect(() => {
-    let mounted = true
-
-    const loadContent = async () => {
-      // Load from localStorage first for immediate display
-      const cached = localStorage.getItem(STORAGE_KEY)
-      if (cached && mounted) {
-        setContent(cached)
-      }
-
-      try {
-        const response = await getHomePageContent()
-        const { success, data } = response
-
-        if (!mounted) return
-
-        if (success && data) {
-          setContent(data)
-          localStorage.setItem(STORAGE_KEY, data)
-        } else {
-          // Clear content if API returns empty
-          setContent('')
-          localStorage.removeItem(STORAGE_KEY)
-        }
-      } catch (error) {
-        if (!mounted) return
-        handleServerError(error, i18next.t('Failed to load home page content'))
-      } finally {
-        if (mounted) {
-          setIsLoaded(true)
-        }
-      }
+    if (query.error && query.data !== undefined) {
+      handleServerError(
+        query.error,
+        i18next.t('Failed to load home page content')
+      )
     }
+  }, [query.error, query.data])
 
-    loadContent()
-
-    return () => {
-      mounted = false
-    }
-  }, [])
-
+  const content = query.data ?? ''
   const isUrl = isHttpUrl(content)
+  let status: HomePageContentResult['status'] = 'unknown'
+  if (query.data !== undefined) {
+    status = content ? 'custom' : 'default'
+  } else if (query.isError) {
+    status = 'error'
+  }
 
-  return { content, isLoaded, isUrl }
+  return {
+    content,
+    status,
+    isUrl,
+    isRefreshing: query.isFetching,
+    error: query.error,
+    retry: async () => {
+      await query.refetch()
+    },
+  }
 }

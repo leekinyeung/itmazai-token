@@ -23,6 +23,7 @@ import { toast } from 'sonner'
 
 import { Combobox } from '@/components/ui/combobox'
 import { TitledCard } from '@/components/ui/titled-card'
+import { changeInterfaceLanguage } from '@/i18n/config'
 import {
   INTERFACE_LANGUAGE_OPTIONS,
   normalizeInterfaceLanguage,
@@ -64,9 +65,9 @@ export function LanguagePreferencesCard(props: LanguagePreferencesCardProps) {
     const previousLanguage = currentLanguage
     setCurrentLanguage(nextLanguage)
     setSaving(true)
-    await i18n.changeLanguage(nextLanguage)
 
     try {
+      if (!(await changeInterfaceLanguage(nextLanguage))) return
       const response = await updateUserLanguage(nextLanguage)
       if (!response.success) {
         throw createServerError(response, t('Failed to update settings'))
@@ -90,7 +91,9 @@ export function LanguagePreferencesCard(props: LanguagePreferencesCardProps) {
       toast.success(t('Language preference saved'))
     } catch (error) {
       setCurrentLanguage(previousLanguage)
-      await i18n.changeLanguage(previousLanguage)
+      await changeInterfaceLanguage(previousLanguage).catch(() => {
+        // A previously selected language may itself be using the English fallback.
+      })
       handleServerError(error, t('Failed to update settings'))
     } finally {
       setSaving(false)

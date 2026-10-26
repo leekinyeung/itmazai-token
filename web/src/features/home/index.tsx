@@ -19,8 +19,10 @@ For commercial licensing, please contact support@quantumnous.com
 import { useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { PublicLayout } from '@/components/layout'
+import { ErrorState } from '@/components/error-state'
 import { Footer } from '@/components/layout/components/footer'
+import { PublicLayout } from '@/components/layout/components/public-layout'
+import { LoadingState } from '@/components/loading-state'
 import { RichContent } from '@/components/rich-content'
 import { useTheme } from '@/context/theme-provider'
 import { isLikelyHtml } from '@/lib/content-format'
@@ -35,7 +37,7 @@ export function Home() {
   const { resolvedTheme } = useTheme()
   const { auth } = useAuthStore()
   const isAuthenticated = !!auth.user
-  const { content, isLoaded, isUrl } = useHomePageContent()
+  const { content, status, isUrl, retry } = useHomePageContent()
 
   const syncIframePreferences = useCallback(() => {
     try {
@@ -58,11 +60,20 @@ export function Home() {
     }
   }, [isUrl, syncIframePreferences])
 
-  if (!isLoaded) {
+  if (status === 'unknown' || status === 'error') {
     return (
       <PublicLayout showMainContainer={false}>
         <main className='flex min-h-screen items-center justify-center'>
-          <div className='text-muted-foreground'>{t('Loading...')}</div>
+          {status === 'error' ? (
+            <ErrorState
+              title={t('Failed to load home page content')}
+              onRetry={() => {
+                void retry()
+              }}
+            />
+          ) : (
+            <LoadingState />
+          )}
         </main>
       </PublicLayout>
     )

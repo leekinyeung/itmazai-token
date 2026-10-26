@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Languages, Check } from 'lucide-react'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
@@ -27,11 +27,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { changeInterfaceLanguage } from '@/i18n/config'
 import {
   INTERFACE_LANGUAGE_OPTIONS,
   normalizeInterfaceLanguage,
 } from '@/i18n/languages'
 import { api } from '@/lib/api'
+import { handleServerError } from '@/lib/handle-server-error'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -39,23 +41,32 @@ export function LanguageSwitcher() {
   const { i18n, t } = useTranslation()
   const user = useAuthStore((s) => s.auth.user)
   const currentLanguage = normalizeInterfaceLanguage(i18n.language)
+  const [changing, setChanging] = useState(false)
   const handleChangeLanguage = useCallback(
     async (code: string) => {
-      await i18n.changeLanguage(code)
-      if (user) {
-        try {
-          await api.put('/api/user/self', { language: code })
-        } catch {
-          // Best-effort persistence; don't block the UI on failure
+      setChanging(true)
+      try {
+        if (!(await changeInterfaceLanguage(code))) return
+        if (user) {
+          try {
+            await api.put('/api/user/self', { language: code })
+          } catch {
+            // Best-effort persistence; don't block the UI on failure
+          }
         }
+      } catch (error) {
+        handleServerError(error, t('Failed to update settings'))
+      } finally {
+        setChanging(false)
       }
     },
-    [i18n, user]
+    [t, user]
   )
 
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger
+        disabled={changing}
         render={<Button variant='ghost' size='icon' className='h-9 w-9' />}
       >
         <Languages className='size-[1.2rem]' />
@@ -65,6 +76,7 @@ export function LanguageSwitcher() {
         {INTERFACE_LANGUAGE_OPTIONS.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
+            disabled={changing}
             onClick={() => handleChangeLanguage(lang.code)}
           >
             {lang.label}

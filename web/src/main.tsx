@@ -18,21 +18,21 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { StrictMode } from 'react'
+import { StrictMode, Suspense, use } from 'react'
 import ReactDOM from 'react-dom/client'
 
 import { installBuildMetadata } from '@/lib/build-metadata'
 import { applyFaviconToDom } from '@/lib/dom-utils'
 import '@/lib/dayjs'
-import { initializeFrontendCache } from '@/lib/frontend-cache'
 import { createAppQueryClient } from '@/lib/query-client'
 import { readCachedStatus, statusQueryOptions } from '@/lib/status-query'
 
+import { Skeleton } from './components/ui/skeleton'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { GroupDisplayNameProvider } from './context/group-display-name-provider'
 import { ThemeProvider } from './context/theme-provider'
-import './i18n/config'
+import i18n, { i18nReady } from './i18n/config'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 
@@ -41,7 +41,6 @@ import './styles/index.css'
 
 // Ensure VChart theme is initialized before any chart mounts (prevents white default theme flash)
 // VChart theme is driven by our ThemeProvider (html.light/html.dark) via per-chart `theme` prop.
-initializeFrontendCache()
 installBuildMetadata()
 
 const queryClient = createAppQueryClient(() => {
@@ -101,21 +100,42 @@ if (!rootElement) {
     /* empty */
   }
 })()
+export function App() {
+  use(i18nReady)
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GroupDisplayNameProvider>
+        <ThemeProvider>
+          <FontProvider>
+            <DirectionProvider>
+              <RouterProvider router={router} />
+            </DirectionProvider>
+          </FontProvider>
+        </ThemeProvider>
+      </GroupDisplayNameProvider>
+    </QueryClientProvider>
+  )
+}
+
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <GroupDisplayNameProvider>
-          <ThemeProvider>
-            <FontProvider>
-              <DirectionProvider>
-                <RouterProvider router={router} />
-              </DirectionProvider>
-            </FontProvider>
-          </ThemeProvider>
-        </GroupDisplayNameProvider>
-      </QueryClientProvider>
+      <Suspense
+        fallback={
+          <main
+            aria-busy='true'
+            aria-label={i18n.t('Loading...', { lng: 'en' })}
+            className='mx-auto flex min-h-svh max-w-6xl flex-col gap-8 px-6 py-24'
+          >
+            <Skeleton className='h-10 w-40' />
+            <Skeleton className='h-40 w-full max-w-xl' />
+            <Skeleton className='h-12 w-64' />
+          </main>
+        }
+      >
+        <App />
+      </Suspense>
     </StrictMode>
   )
 }
