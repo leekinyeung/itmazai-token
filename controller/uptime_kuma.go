@@ -2,13 +2,13 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/setting/console_setting"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +51,7 @@ func getAndDecode(ctx context.Context, client *http.Client, url string, dest any
 		return errors.New("non-200 status")
 	}
 
-	return json.NewDecoder(resp.Body).Decode(dest)
+	return common.DecodeJson(resp.Body, dest)
 }
 
 func fetchGroupData(ctx context.Context, client *http.Client, groupConfig map[string]any) UptimeGroupResult {
@@ -130,6 +130,17 @@ func fetchGroupData(ctx context.Context, client *http.Client, groupConfig map[st
 
 func GetUptimeKumaStatus(c *gin.Context) {
 	groups := console_setting.GetUptimeKumaGroups()
+	if c.GetInt("role") < common.RoleAdminUser {
+		results := make([]UptimeGroupResult, 0, len(groups))
+		for _, group := range groups {
+			name, _ := group["categoryName"].(string)
+			results = append(results, UptimeGroupResult{CategoryName: name,
+				Monitors: []Monitor{{Name: name, Uptime: 1, Status: 1}},
+			})
+		}
+		c.JSON(http.StatusOK, gin.H{"success": true, "message": "", "data": results})
+		return
+	}
 	if len(groups) == 0 {
 		c.JSON(http.StatusOK, gin.H{"success": true, "message": "", "data": []UptimeGroupResult{}})
 		return

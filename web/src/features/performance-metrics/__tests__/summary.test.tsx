@@ -17,13 +17,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { PerformanceOverview } from '@/features/dashboard/components/models/performance-overview'
 import { PerformanceHealthPanel } from '@/features/dashboard/components/overview/performance-health-panel'
 import { ModelDetailsPerformance } from '@/features/pricing/components/model-details-performance'
 import { UptimeSparkline } from '@/features/pricing/components/model-details-uptime-sparkline'
+import { api } from '@/lib/api'
+import { useAuthStore } from '@/stores/auth-store'
+
+import { performanceQueryKeys, performanceViewer } from '../hooks'
 
 const chart = vi.hoisted(() =>
   vi.fn(
@@ -44,7 +48,11 @@ beforeEach(() => {
     defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   })
 })
-afterEach(() => client.clear())
+afterEach(() => {
+  client.clear()
+  useAuthStore.getState().auth.reset()
+  vi.restoreAllMocks()
+})
 
 const summary = { success_rate: 99.01, avg_latency_ms: 1009, avg_tps: 5 }
 const windowStart = 1789387200
@@ -85,25 +93,28 @@ const groups = [
 ]
 
 function renderModelDetails() {
-  client.setQueryData(['perf-metrics', 'test-model'], {
-    success: true,
-    data: {
-      model_name: 'test-model',
-      summary,
-      series: [
-        {
-          ts: windowStart,
-          avg_ttft_ms: 100,
-          avg_latency_ms: 1009,
-          success_rate: 99.01,
-          avg_tps: 5,
-        },
-      ],
-      window_start: windowStart,
-      window_end: windowEnd,
-      groups,
-    },
-  })
+  client.setQueryData(
+    performanceQueryKeys.detail(performanceViewer(), 'test-model'),
+    {
+      success: true,
+      data: {
+        model_name: 'test-model',
+        summary,
+        series: [
+          {
+            ts: windowStart,
+            avg_ttft_ms: 100,
+            avg_latency_ms: 1009,
+            success_rate: 99.01,
+            avg_tps: 5,
+          },
+        ],
+        window_start: windowStart,
+        window_end: windowEnd,
+        groups,
+      },
+    }
+  )
   return render(
     <QueryClientProvider client={client}>
       <ModelDetailsPerformance
@@ -121,10 +132,128 @@ function renderModelDetails() {
 }
 
 describe('server performance summaries', () => {
+  it('replaces administrator metrics when the viewer changes to an ordinary account', async () => {
+    useAuthStore.getState().auth.setUser({ id: 1, username: 'admin', role: 10 })
+    const request = vi.spyOn(api, 'get').mockResolvedValue({
+      data: { success: true, data: { summary, models: [] } },
+    })
+    render(
+      <QueryClientProvider client={client}>
+        <PerformanceHealthPanel />
+      </QueryClientProvider>
+    )
+    await screen.findByText('99.01%')
+    request.mockResolvedValue({
+      data: {
+        success: true,
+        data: { summary: { ...summary, success_rate: 100 }, models: [] },
+      },
+    })
+    act(() =>
+      useAuthStore.getState().auth.setUser({ id: 2, username: 'user', role: 1 })
+    )
+    expect(screen.queryByText('99.01%')).not.toBeInTheDocument()
+    await screen.findByText('100.00%')
+  })
+
+  it.each(['logout', 'role', 'group', 'session'] as const)(
+    'discards cached metrics after a %s change',
+    async (change) => {
+      useAuthStore
+        .getState()
+        .auth.setUser({ id: 1, username: 'admin', role: 10, group: 'default' })
+      const oldKey = performanceQueryKeys.summary(performanceViewer())
+      const request = vi.spyOn(api, 'get').mockResolvedValue({
+        data: { success: true, data: { summary, models: [] } },
+      })
+      render(
+        <QueryClientProvider client={client}>
+          <PerformanceHealthPanel />
+        </QueryClientProvider>
+      )
+      await screen.findByText('99.01%')
+      request.mockResolvedValue({
+        data: {
+          success: true,
+          data: { summary: { ...summary, success_rate: 100 }, models: [] },
+        },
+      })
+      act(() => {
+        if (change === 'logout') {
+          useAuthStore.getState().auth.reset()
+        } else if (change === 'session') {
+          useAuthStore.setState((state) => ({
+            auth: {
+              ...state.auth,
+              session: {
+                sid: 'new-session',
+                current: true,
+                login_method: 'password',
+                ip: '',
+                user_agent: '',
+                created_at: 1,
+                last_active_at: 1,
+                expires_at: 2,
+              },
+            },
+          }))
+        } else {
+          useAuthStore.getState().auth.setUser({
+            id: 1,
+            username: 'admin',
+            role: change === 'role' ? 1 : 10,
+            group: change === 'group' ? 'premium' : 'default',
+          })
+        }
+      })
+      expect(screen.queryByText('99.01%')).not.toBeInTheDocument()
+      expect(client.getQueryData(oldKey)).toBeUndefined()
+      await screen.findByText('100.00%')
+    }
+  )
+
+  it('cancels the old identity request and ignores its late administrator response', async () => {
+    useAuthStore.getState().auth.setUser({ id: 1, username: 'admin', role: 10 })
+    let finishOld: () => void = () => {
+      throw new Error('Request has not started')
+    }
+    const request = vi
+      .spyOn(api, 'get')
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishOld = () =>
+              resolve({
+                data: { success: true, data: { summary, models: [] } },
+              })
+          })
+      )
+      .mockResolvedValue({
+        data: {
+          success: true,
+          data: { summary: { ...summary, success_rate: 100 }, models: [] },
+        },
+      })
+    render(
+      <QueryClientProvider client={client}>
+        <PerformanceHealthPanel />
+      </QueryClientProvider>
+    )
+    await waitFor(() => expect(request).toHaveBeenCalledTimes(1))
+    const oldSignal = request.mock.calls[0][1]?.signal
+    act(() => useAuthStore.getState().auth.reset())
+    expect(oldSignal?.aborted).toBe(true)
+    await screen.findByText('100.00%')
+    await act(async () => {
+      finishOld()
+    })
+    expect(screen.queryByText('99.01%')).not.toBeInTheDocument()
+    expect(screen.getByText('100.00%')).toBeVisible()
+  })
   it.each([PerformanceHealthPanel, PerformanceOverview])(
     'uses the weighted server result across models',
     (Component) => {
-      client.setQueryData(['perf-metrics-summary', 24], {
+      client.setQueryData(performanceQueryKeys.summary(performanceViewer()), {
         success: true,
         data: {
           summary,
@@ -193,7 +322,7 @@ describe('server performance summaries', () => {
   })
 
   it('keeps an empty summary unknown instead of inventing a zero success rate', () => {
-    client.setQueryData(['perf-metrics-summary', 24], {
+    client.setQueryData(performanceQueryKeys.summary(performanceViewer()), {
       success: true,
       data: { models: [], summary: null },
     })

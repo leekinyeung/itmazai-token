@@ -30,6 +30,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createJSONStorage } from 'zustand/middleware'
 
 import { GroupDisplayNameProvider } from '@/context/group-display-name-provider'
+import {
+  performanceQueryKeys,
+  performanceViewer,
+} from '@/features/performance-metrics/hooks'
 import { api } from '@/lib/api'
 import {
   DEFAULT_CURRENCY_CONFIG,
@@ -89,6 +93,40 @@ afterEach(() => {
 })
 
 describe('model cards', () => {
+  it('shows a complete green status strip and populated simulated metrics for an idle model', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue({
+      data: {
+        success: true,
+        data: {
+          models: [
+            {
+              model_name: 'example-model',
+              success_rate: 100,
+              avg_latency_ms: 800,
+              avg_tps: 120,
+              recent_success_series: Array.from({ length: 24 }, (_, hour) => ({
+                ts: hour * 3600,
+                success_rate: 100,
+              })),
+            },
+          ],
+        },
+      },
+    })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ModelCardGrid models={[pricingModel()]} onModelClick={vi.fn()} />
+      </QueryClientProvider>
+    )
+    await screen.findByText('100.00%')
+    const strip = screen.getByRole('img', { name: 'Success rate' })
+    expect(strip.children).toHaveLength(24)
+    for (const bar of strip.children) {
+      expect(bar).toHaveClass('bg-emerald-500')
+    }
+    expect(screen.getByText('800ms')).toBeVisible()
+    expect(screen.getByText('120.0t/s')).toBeVisible()
+  })
   it('shows separate generic and image cache prices including a free image cache', () => {
     render(
       <CachedPriceCell
@@ -237,6 +275,8 @@ describe('model cards', () => {
     expect(request).toHaveBeenCalledWith('/api/perf-metrics/summary', {
       params: { hours: 24, recent_model: ['active-model', 'idle-model'] },
       paramsSerializer: { indexes: null },
+      signal: expect.any(AbortSignal),
+      disableDuplicate: true,
     })
     const [active, idle] = screen.getAllByLabelText(
       'Performance metrics for the last 24 hours'
@@ -640,16 +680,18 @@ describe('model cards', () => {
     )
     await waitFor(() =>
       expect(
-        queryClient.getQueryState([
-          'perf-metrics-summary',
-          24,
-          ['example-model'],
-        ])?.status
+        queryClient.getQueryState(
+          performanceQueryKeys.summary(performanceViewer(), 24, [
+            'example-model',
+          ])
+        )?.status
       ).toBe('error')
     )
     expect(request).toHaveBeenCalledWith('/api/perf-metrics/summary', {
       params: { hours: 24, recent_model: ['example-model'] },
       paramsSerializer: { indexes: null },
+      signal: expect.any(AbortSignal),
+      disableDuplicate: true,
     })
     expect(
       within(
@@ -682,6 +724,8 @@ describe('model cards', () => {
         recent_model: models.slice(0, 20).map((model) => model.model_name),
       },
       paramsSerializer: { indexes: null },
+      signal: expect.any(AbortSignal),
+      disableDuplicate: true,
     })
     await user.click(screen.getByRole('button', { name: 'Next page' }))
     expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(1)
@@ -689,6 +733,8 @@ describe('model cards', () => {
     expect(request).toHaveBeenLastCalledWith('/api/perf-metrics/summary', {
       params: { hours: 24, recent_model: ['model-21'] },
       paramsSerializer: { indexes: null },
+      signal: expect.any(AbortSignal),
+      disableDuplicate: true,
     })
     expect(screen.getByRole('button', { name: 'Next page' })).toBeDisabled()
     await user.click(screen.getByRole('button', { name: 'Previous page' }))
@@ -696,10 +742,13 @@ describe('model cards', () => {
   })
 
   it('switches the card grid to three columns at the xl breakpoint instead of 2xl', () => {
-    queryClient.setQueryData(['perf-metrics-summary', 24, ['example-model']], {
-      success: true,
-      data: { models: [] },
-    })
+    queryClient.setQueryData(
+      performanceQueryKeys.summary(performanceViewer(), 24, ['example-model']),
+      {
+        success: true,
+        data: { models: [] },
+      }
+    )
     render(
       <QueryClientProvider client={queryClient}>
         <ModelCardGrid models={[pricingModel()]} onModelClick={vi.fn()} />

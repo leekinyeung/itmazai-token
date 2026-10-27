@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, HeartPulse, Timer } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,7 +25,7 @@ import {
   staticDataTableClassNames as tableStyles,
 } from '@/components/data-table'
 import { GroupBadge } from '@/components/group-badge'
-import { getPerfMetrics } from '@/features/performance-metrics/api'
+import { usePerformanceMetrics } from '@/features/performance-metrics/hooks'
 import {
   formatLatency,
   formatThroughput,
@@ -37,7 +36,6 @@ import type {
   PerformanceGroup,
   PerformanceSeriesPoint,
 } from '@/features/performance-metrics/types'
-import { requireServerSuccess } from '@/lib/server-error-message'
 import { cn } from '@/lib/utils'
 
 import type { UptimeDayPoint } from '../lib/mock-stats'
@@ -123,12 +121,7 @@ function toGroupUptimeSeries(group: PerformanceGroup): UptimeDayPoint[] {
 
 export function ModelDetailsPerformance(props: { model: PricingModel }) {
   const { t } = useTranslation()
-  const metricsQuery = useQuery({
-    queryKey: ['perf-metrics', props.model.model_name],
-    queryFn: async () =>
-      requireServerSuccess(await getPerfMetrics(props.model.model_name, 24)),
-    staleTime: 60 * 1000,
-  })
+  const metricsQuery = usePerformanceMetrics(props.model.model_name)
   const groups = useMemo(
     () => metricsQuery.data?.data.groups ?? [],
     [metricsQuery.data]

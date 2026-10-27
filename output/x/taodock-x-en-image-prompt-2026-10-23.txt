@@ -1,0 +1,18 @@
+Generation mode: built-in imagegen tool, localized edit of the original Chinese poster
+
+Use case: text-localization.
+Asset type: finished English promotional image for an X post.
+Input image 1 is the edit target: the existing square Taodock promotional poster.
+Primary request: replace ALL Chinese text with the English copy specified below. Preserve the original square composition, navy grid background, 3D glass docking hub, six illuminated icon blocks and their positions, connecting light paths, cyan and coral lighting, brand wordmark, and website footer. This is a careful localization of the same design.
+Text replacements (verbatim):
+- Replace the two large Chinese headline lines with these two lines:
+"One API gateway."
+"More time to build."
+- Replace the Chinese benefits line with:
+"Multi-model access · Unified management · Usage tracking"
+- Replace the Chinese call-to-action button text with:
+"Start building with AI"
+- Keep the top brand wordmark exactly "Taodock".
+- Keep the footer website exactly "taodock.com".
+Typography: crisp professional geometric English sans-serif, large bold high-contrast headline. Keep the first headline white. In the second line keep "More time" cyan and "to build." warm coral, consistent with the original accent colors. Resize the text as needed to fit elegantly within the existing areas and generous side margins. Benefits should be easy to read on a phone and fit on one line. Keep the cyan pill-shaped CTA with dark text.
+Constraints: change text only, with the minimal spacing and font-size changes needed to fit the English. Preserve all illustration details and overall visual style. No Chinese characters anywhere in the output. No extra text, no third-party logos, no watermark, no QR code. Output one square image.

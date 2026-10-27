@@ -22,6 +22,9 @@ bun run dev
 | `quick-start.md` | 新用户首次调用流程 |
 | `guide/console.md` | 控制台使用 |
 | `guide/clients.md` | 客户端通用配置 |
+| `guide/models.md` | TaoDock 模型、接口与分组选择 |
+| `guide/api-keys.md` | 密钥的创建、限制与停用 |
+| `guide/wallet.md` | 钱包、额度与用量核对 |
 | `api/overview.md` | API 地址与基本调用说明 |
 | `faq.md` | 常见问题 |
 | `en/` | 与中文文章路径一一对应的英文手册 |
@@ -45,6 +48,9 @@ bun run dev
 | `quick-start.md` | `en/quick-start.md` |
 | `guide/console.md` | `en/guide/console.md` |
 | `guide/clients.md` | `en/guide/clients.md` |
+| `guide/models.md` | `en/guide/models.md` |
+| `guide/api-keys.md` | `en/guide/api-keys.md` |
+| `guide/wallet.md` | `en/guide/wallet.md` |
 | `api/overview.md` | `en/api/overview.md` |
 | `faq.md` | `en/faq.md` |
 
@@ -221,7 +227,7 @@ curl --fail -I https://taodock.com/
 - 续期验证：`certbot renew --cert-name docs.taodock.com --dry-run --non-interactive --no-random-sleep-on-renew` 成功。
 - 主站配置校验：`sha256sum --check /root/taodock-docs-backups/20261023T062617Z/main-nginx.sha256` 成功，应用镜像 ID 与部署前相同。
 - 验证限制：线上自动浏览器预览未响应；语言切换和搜索此前已在本地生产预览中验证。
-- 主站接入待办：上线核对时 `docs_link` 仍为上游地址，需由管理员按下节改为 `https://docs.taodock.com`。
+- 主站入口：首次上线时仍为上游地址；2026-10-26 复核 `/api/status`，已指向 `https://docs.taodock.com`。
 
 如需停用这次新建的文档站，在服务器执行以下命令保留配置副本，并在语法检查通过后重载：
 
@@ -235,6 +241,40 @@ systemctl reload nginx
 '
 ```
 
+### 2026-10-26 专属手册更新记录
+
+- 发布版本：`20261026T061954Z`，来自本次手册工作区；中英文各九页。
+- 内容：统一使用 TaoDock 实际域名、入口和已核对模型 ID；新增模型、API 密钥、钱包指南，完善客户端配置、终端和程序调用、排错步骤。
+- 发布目录：`/var/www/taodock-handbook/releases/20261026T061954Z/site`。
+- 上一版：`/var/www/taodock-handbook/releases/20261023T062617Z/site`，保留以便回退。
+- 本次备份：`/root/taodock-docs-backups/20261026T061954Z`，其中 `previous-target` 保存旧站点目标，`nginx.sha256` 保存部署前配置校验值。
+- 发布包 SHA-256：`1d8311c161da47db0a49209c4e3451d2a534e7615f78f825ce1682267c7a3872`，服务器安装前已核对。
+- 更新方式：校验后解压至新目录，保留旧版本静态资源以兼容已打开的页面，原子替换 `current` 链接；未修改 Nginx、证书或主站应用。
+- 实测：`bun run build` 成功；中英文文章路径对齐、内部路径与锚点、公开文案占位内容扫描均通过；Python / JavaScript 代码以模拟响应校验请求地址、认证头、模型和输出；Bash / Zsh 语法检查通过。没有使用真实密钥进行计费调用，PowerShell 代码未在 Windows 环境执行。
+- 线上：18 个页面通过 HTTPS 获取，并逐字节匹配本次构建；主站 `/api/status` 返回成功，文档入口正确；Nginx 配置校验值和主站镜像 ID 与本次部署前一致。
+- 验证限制：自动浏览器仍未响应，未完成本次浏览器交互复验。
+
+回退本次静态内容时，在服务器执行以下命令；无需修改 Nginx 配置或重载服务：
+
+```sh
+sudo bash -euc '
+docs_previous=$(cat /root/taodock-docs-backups/20261026T061954Z/previous-target)
+test -s "$docs_previous/index.html"
+test -L /var/www/taodock-handbook/current
+test ! -e /var/www/taodock-handbook/current.rollback.20261026T061954Z
+ln -s "$docs_previous" /var/www/taodock-handbook/current.rollback.20261026T061954Z
+mv -Tf /var/www/taodock-handbook/current.rollback.20261026T061954Z /var/www/taodock-handbook/current
+'
+```
+
+### 2026-10-26 地址填写说明修正
+
+- 发布版本：`20261026T064941Z`；发布包 SHA-256：`2f5af27436d2e04ce0145b2e4b729d6c34cc4b1b65650ea3aa7044057801fe0e`，上传后已核对。
+- 明确地址由客户端追加的路径决定：追加 `/chat/completions` 时填写带 `/v1` 的地址；追加 `/v1/chat/completions` 时填写站点根地址。中英文客户端指南、FAQ、API 说明和密钥指南保持一致。
+- 本次备份：`/root/taodock-docs-backups/20261026T064941Z`；旧站点目标保存在其中的 `previous-target`，上一版为 `20261026T061954Z`。
+- 验证：`bun run build`、内容与链接检查通过；八个修改页面的线上内容逐字节匹配构建；主站状态正常，Nginx 配置和应用镜像未改动。
+- 回退方式与上一节一致，使用本次备份中的 `previous-target` 原子切换 `current` 链接。
+
 ## 接入主站
 
 确认线上文档可访问后，使用管理员账号进入主站：
@@ -245,7 +285,9 @@ systemctl reload nginx
 
 ## 发布内容前
 
-本次提供的是可以继续完善的初始手册。请按实际部署补充站点地址、已开放功能、具体客户端的操作截图和联系方式，使用测试账号验证首次调用教程。示例密钥、域名和模型 ID 都必须按文章说明替换。
+公开手册使用 TaoDock 的实际域名、控制台路径和已核对的模型 ID。维护时同步更新中英文对应文章，不得重新引入占位域名、虚构密钥或未经核对的模型名称。密钥由用户自己输入，不能将测试凭据写入公开页面。
+
+2026-10-26 内容核对来源为主站 `/api/status`、`/api/pricing`、`/api/about` 的公开信息及当前前端路由与密钥操作实现。注册要求、模型可用性和价格可能变化，每次修改相关内容时重新核对；客户端配置另外参考 Cherry Studio 和 Open WebUI 的官方说明。未使用真实密钥发起计费生成调用。
 
 ## 官方参考
 

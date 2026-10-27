@@ -22,9 +22,12 @@ import type { PerformanceMetricsData, PerfSummaryAllData } from './types'
 
 export async function getPerfMetricsSummary(
   hours = 24,
-  recentModels?: string[]
+  recentModels?: string[],
+  signal?: AbortSignal
 ): Promise<PerfSummaryAllData> {
   const res = await api.get<PerfSummaryAllData>('/api/perf-metrics/summary', {
+    signal,
+    disableDuplicate: true,
     params: { hours, recent_model: recentModels },
     paramsSerializer: { indexes: null },
   })
@@ -33,9 +36,12 @@ export async function getPerfMetricsSummary(
 
 export async function getPerfMetrics(
   modelName: string,
-  hours = 24
+  hours = 24,
+  signal?: AbortSignal
 ): Promise<PerformanceMetricsData> {
   const res = await api.get<PerformanceMetricsData>('/api/perf-metrics', {
+    signal,
+    disableDuplicate: true,
     params: {
       model: modelName,
       hours,

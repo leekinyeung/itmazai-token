@@ -16,18 +16,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useQuery } from '@tanstack/react-query'
 import { Activity, RotateCw } from 'lucide-react'
-import { memo, useEffect, useState } from 'react'
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { IconBadge } from '@/components/ui/icon-badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { getUptimeStatus } from '@/features/dashboard/api'
-import type {
-  UptimeGroupResult,
-  UptimeMonitor,
-} from '@/features/dashboard/types'
+import type { UptimeMonitor } from '@/features/dashboard/types'
+import {
+  performanceQueryKeys,
+  usePerformanceViewer,
+} from '@/features/performance-metrics/hooks'
+import { requireServerSuccess } from '@/lib/server-error-message'
 import { cn } from '@/lib/utils'
 
 import { PanelWrapper } from '../ui/panel-wrapper'
@@ -47,52 +50,19 @@ const StatusDot = memo(function StatusDot(props: { status: number }) {
 
 export function UptimePanel() {
   const { t } = useTranslation()
-  const [groups, setGroups] = useState<UptimeGroupResult[]>([])
-  const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
-
-  useEffect(() => {
-    const abortController = new AbortController()
-
-    void getUptimeStatus()
-      .then((res) => {
-        if (abortController.signal.aborted) return
-        setGroups(res?.data || [])
-      })
-      .catch(() => {
-        if (abortController.signal.aborted) return
-        setGroups([])
-      })
-      .finally(() => {
-        if (!abortController.signal.aborted) {
-          setLoading(false)
-        }
-      })
-
-    return () => {
-      abortController.abort()
-    }
-  }, [])
-
-  const handleRefresh = () => {
-    const abortController = new AbortController()
-    setRefreshing(true)
-
-    void getUptimeStatus()
-      .then((res) => {
-        if (abortController.signal.aborted) return
-        setGroups(res?.data || [])
-      })
-      .catch(() => {
-        if (abortController.signal.aborted) return
-        setGroups([])
-      })
-      .finally(() => {
-        if (!abortController.signal.aborted) {
-          setRefreshing(false)
-        }
-      })
-  }
+  const viewer = usePerformanceViewer()
+  const query = useQuery({
+    queryKey: performanceQueryKeys.uptime(viewer),
+    queryFn: async ({ signal }) =>
+      requireServerSuccess(await getUptimeStatus(signal)),
+    staleTime: 60 * 1000,
+    gcTime: 0,
+    retry: false,
+    meta: { errorToast: false },
+  })
+  const groups = query.data?.data ?? []
+  const loading = query.isLoading
+  const refreshing = query.isFetching
 
   return (
     <PanelWrapper
@@ -114,7 +84,7 @@ export function UptimePanel() {
         <Button
           variant='ghost'
           size='sm'
-          onClick={handleRefresh}
+          onClick={() => void query.refetch()}
           disabled={refreshing}
           className='size-7 p-0'
         >

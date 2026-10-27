@@ -2,8 +2,8 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: 'Taodock 使用手册',
-  description: '了解 Taodock 控制台、配置 API 接入并排查常见问题。',
+  title: 'TaoDock 使用手册',
+  description: 'TaoDock 专属使用指南：账号与密钥、模型选择、客户端配置、API 调用、钱包与用量排查。',
   srcExclude: ['README.md'],
   locales: {
     root: {
@@ -13,14 +13,14 @@ export default defineConfig({
     en: {
       label: 'English',
       lang: 'en',
-      title: 'Taodock User Guide',
-      description: 'Learn how to use the Taodock console, connect to the API, and troubleshoot common issues.',
+      title: 'TaoDock User Guide',
+      description: 'Connect to TaoDock: account setup, API keys, models, clients, API requests, wallet, and troubleshooting.',
       themeConfig: {
         nav: [
           { text: 'Quick start', link: '/en/quick-start' },
           { text: 'API integration', link: '/en/api/overview' },
           { text: 'FAQ', link: '/en/faq' },
-          { text: 'Open Taodock', link: 'https://taodock.com' },
+          { text: 'Open TaoDock', link: 'https://taodock.com' },
         ],
         sidebar: [
           {
@@ -34,7 +34,10 @@ export default defineConfig({
             text: 'User guides',
             items: [
               { text: 'Using the console', link: '/en/guide/console' },
+              { text: 'Choose a model', link: '/en/guide/models' },
+              { text: 'Manage API keys', link: '/en/guide/api-keys' },
               { text: 'Connect an AI client', link: '/en/guide/clients' },
+              { text: 'Wallet and usage', link: '/en/guide/wallet' },
               { text: 'API integration', link: '/en/api/overview' },
               { text: 'FAQ', link: '/en/faq' },
             ],
@@ -56,7 +59,7 @@ export default defineConfig({
           linkText: 'Go home',
         },
         footer: {
-          message: 'Available models, features, and quota depend on your site configuration.',
+          message: 'TaoDock · Console and API: taodock.com · Documentation: docs.taodock.com',
         },
       },
     },
@@ -66,7 +69,7 @@ export default defineConfig({
       { text: '快速开始', link: '/quick-start' },
       { text: 'API 接入', link: '/api/overview' },
       { text: '常见问题', link: '/faq' },
-      { text: '进入 Taodock', link: 'https://taodock.com' },
+      { text: '进入 TaoDock', link: 'https://taodock.com' },
     ],
     sidebar: [
       {
@@ -80,7 +83,10 @@ export default defineConfig({
         text: '使用指南',
         items: [
           { text: '控制台使用', link: '/guide/console' },
+          { text: '选择模型和接口', link: '/guide/models' },
+          { text: 'API 密钥管理', link: '/guide/api-keys' },
           { text: '连接 AI 客户端', link: '/guide/clients' },
+          { text: '钱包与用量', link: '/guide/wallet' },
           { text: 'API 接入说明', link: '/api/overview' },
           { text: '常见问题', link: '/faq' },
         ],
@@ -137,7 +143,7 @@ export default defineConfig({
       linkText: '返回首页',
     },
     footer: {
-      message: '可用模型、功能与额度以你所在站点的实际配置为准。',
+      message: 'TaoDock · 控制台与 API：taodock.com · 使用手册：docs.taodock.com',
     },
   },
 })

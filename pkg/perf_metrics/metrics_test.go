@@ -3,6 +3,7 @@ package perfmetrics
 import (
 	"context"
 	"errors"
+	"math"
 	"os"
 	"path/filepath"
 	"testing"
@@ -16,6 +17,73 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestSimulatedPerformanceIsStableBoundedAndComplete(t *testing.T) {
+	now := time.Date(2026, 10, 26, 12, 30, 0, 0, time.UTC)
+	params := QueryParams{Model: "idle-model", Hours: 24, AllowedGroups: []string{"b", "a", "a"}}
+	result := SimulatedQuery(params, now)
+	require.NotNil(t, result.Summary)
+	require.Len(t, result.Groups, 2)
+	require.Len(t, result.Series, 24)
+	assert.Equal(t, now.Truncate(time.Hour).Add(-23*time.Hour).Unix(), result.WindowStart)
+	assert.Equal(t, now.Unix(), result.WindowEnd)
+	assert.Equal(t, result.Series, SimulatedQuery(params, now.Add(time.Minute)).Series)
+	assert.Equal(t, result.Summary, SimulatedQuery(params, now.Add(time.Minute)).Summary)
+	var latency, count int64
+	var tps float64
+	for _, group := range result.Groups {
+		require.Len(t, group.Series, 24)
+		assert.Equal(t, 100.0, group.SuccessRate)
+		for i, point := range group.Series {
+			assert.Equal(t, result.WindowStart+int64(i)*3600, point.Ts)
+			assert.Equal(t, 100.0, point.SuccessRate)
+			assert.GreaterOrEqual(t, point.AvgTtftMs, int64(150))
+			assert.LessOrEqual(t, point.AvgTtftMs, int64(250))
+			assert.GreaterOrEqual(t, point.AvgLatencyMs, int64(600))
+			assert.LessOrEqual(t, point.AvgLatencyMs, int64(1200))
+			assert.GreaterOrEqual(t, point.AvgTps, 80.0)
+			assert.LessOrEqual(t, point.AvgTps, 160.0)
+			latency += point.AvgLatencyMs
+			tps += point.AvgTps
+			count++
+		}
+	}
+	assert.NotEqual(t, result.Groups[0].Series, result.Groups[1].Series)
+	assert.NotEqual(t, result.Series[0].AvgTps, result.Series[1].AvgTps)
+	assert.Equal(t, latency/count, result.Summary.AvgLatencyMs)
+	assert.Equal(t, math.Round(tps/float64(count)*100)/100, result.Summary.AvgTps)
+	summary := SimulatedSummary(map[string][]string{"idle-model": {"a", "b"}}, 24, []string{"idle-model"}, now)
+	assert.Equal(t, result.Summary, summary.Summary)
+	require.Len(t, summary.Models, 1)
+	assert.Equal(t, result.Summary.AvgLatencyMs, summary.Models[0].AvgLatencyMs)
+	assert.Equal(t, result.Summary.AvgTps, summary.Models[0].AvgTps)
+	assert.Len(t, summary.RecentSuccessSeries["idle-model"], 24)
+	params.Group = "a"
+	filtered := SimulatedQuery(params, now)
+	require.Len(t, filtered.Groups, 1)
+	assert.Equal(t, result.Groups[0], filtered.Groups[0])
+	params.Group = "private"
+	assert.Nil(t, SimulatedQuery(params, now).Summary)
+}
+
+func TestSimulatedPerformanceWindowsAndEmptyCatalog(t *testing.T) {
+	now := time.Date(2026, 10, 26, 12, 0, 0, 0, time.UTC)
+	for _, tc := range []struct{ hours, points int }{{0, 24}, {-1, 24}, {1, 1}, {1000, 720}} {
+		result := SimulatedQuery(QueryParams{Model: "model", Hours: tc.hours, AllowedGroups: []string{"default"}}, now)
+		assert.Len(t, result.Series, tc.points)
+		assert.Equal(t, now.Unix(), result.Series[len(result.Series)-1].Ts)
+	}
+	empty := SimulatedQuery(QueryParams{Model: "unknown"}, now)
+	assert.Nil(t, empty.Summary)
+	assert.Empty(t, empty.Groups)
+	summary := SimulatedSummary(nil, 24, nil, now)
+	assert.Nil(t, summary.Summary)
+	assert.Empty(t, summary.Models)
+	summary = SimulatedSummary(map[string][]string{"z-model": {"default"}, "a-model": {"default"}}, 24, nil, now)
+	require.Len(t, summary.Models, 2)
+	assert.Equal(t, "a-model", summary.Models[0].ModelName)
+	assert.Equal(t, "z-model", summary.Models[1].ModelName)
+}
 
 func TestClassifyRelayOutcome(t *testing.T) {
 	canceled, cancel := context.WithCancel(context.Background())

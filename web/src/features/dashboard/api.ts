@@ -85,9 +85,10 @@ export async function getFlowQuotaDates(
 }
 
 // Get uptime monitoring status for all services
-export async function getUptimeStatus() {
+export async function getUptimeStatus(signal?: AbortSignal) {
   const res = await api.get<{ success: boolean; data: UptimeGroupResult[] }>(
-    '/api/uptime/status'
+    '/api/uptime/status',
+    { signal, disableDuplicate: true }
   )
   return res.data
 }

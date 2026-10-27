@@ -1,0 +1,15 @@
+Generation mode: built-in imagegen tool
+
+Use case: ads-marketing.
+Asset type: a finished square 1:1 Facebook feed promotional image for Taodock, aimed at Chinese-speaking developers and small software teams. Target 1536 x 1536 if possible.
+Primary request: create one polished Chinese SaaS advertising poster introducing a unified AI API gateway. Editorial art direction, strong visual hierarchy, beautifully composed and ready to publish.
+Scene/backdrop: deep ink-navy with a very subtle fine grid, soft cyan illumination and restrained warm coral highlights. Main illustrative subject is a beautifully rendered translucent glass docking hub, several precise luminous paths from small abstract rounded modules converging into one elegant central port. This is a conceptual illustration, not a real product screenshot. Do not put any text or numbers in the illustration.
+Composition: spacious clean margins of about 7 percent, brand wordmark at upper left, large headline across upper third, premium 3D glass hub illustration in middle, short benefits line below illustration, clear restrained cyan CTA and website footer. Large high-contrast Chinese type that stays legible on a phone. Avoid a dense dashboard or an overloaded infographic. Brand wordmark should just say Taodock in a refined geometric sans-serif; do not invent an emblem.
+Text (verbatim, Simplified Chinese; render all characters correctly):
+Top wordmark: "Taodock"
+Large headline in two lines: "一个 API 入口" / "让 AI 应用更快落地"
+Small benefits line: "多模型接入 · 统一管理 · 用量可查"
+CTA: "开启你的 AI 项目"
+Footer website: "taodock.com"
+Style/medium: premium contemporary technology campaign, sculptural 3D materials, restrained glow, precise typography, generous negative space, finished professional ad design.
+Constraints: use only the exact text above, no additional text, no prices or discounts, no performance claims, no third-party brand names or logos, no watermark, no tiny illegible print, no QR code.

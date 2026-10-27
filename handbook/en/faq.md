@@ -1,29 +1,69 @@
 # FAQ
 
-## Which API address should I use?
+## In what order should I troubleshoot? {#troubleshoot}
 
-Use the API address from your service site. The documentation domain does not provide model APIs. Clients usually require either the site URL or a base URL ending in `/v1`, depending on whether they append the path automatically. See the [URL guide](./api/overview.md).
+1. Check how the client builds URLs and confirm that the final text chat endpoint is `https://taodock.com/v1/chat/completions`.
+2. Check that the key comes from [TaoDock API Keys](https://taodock.com/keys), is enabled, and has not expired.
+3. Query `https://taodock.com/v1/models` to confirm the model ID and key access.
+4. Check both [Wallet](https://taodock.com/wallet) balance and the key's remaining quota.
+5. Find the request by time and model in [Common Logs](https://taodock.com/usage-logs/common), keeping the specific error.
 
-## My API key is invalid or access is denied
+## My registration verification email did not arrive {#email}
 
-Check that the key was copied in full, is active, has not expired, and permits the model and access method you are using. For direct HTTP requests, check that the header is `Authorization: Bearer YOUR_API_KEY`.
+TaoDock currently requires email verification for registration. Check the address, spam folder, and mail filters. Wait for the resend countdown before trying again. If messages still do not arrive, note the time and page error and use the support contact offered on TaoDock.
 
-## The model does not exist or is unavailable
+Do not share email verification codes or use them as API keys.
 
-Copy the full model ID again from Model Square and check that both your account and API key can use it. If the name and permissions are correct, ask your administrator to check the model service status.
+## Which API address should I enter? {#address}
 
-## I do not have enough quota
+| How the request path is completed | Value to enter |
+| --- | --- |
+| Client appends `/chat/completions` | `https://taodock.com/v1` |
+| Client appends `/v1/chat/completions` | `https://taodock.com` |
+| Direct cURL chat request | `https://taodock.com/v1/chat/completions` |
 
-Check your available wallet balance, plan status, and API key quota limit. Refer to the error response and site pages for the specific restriction.
+The first two rows describe different clients: choose the matching row. They produce the same endpoint. A field name such as Base URL or Host alone cannot tell you whether to include `/v1`.
 
-## I am being rate limited
+Read guides at `https://docs.taodock.com`. If you receive HTML, a 404, or a duplicated `/v1/v1` path, correct the address first. See [client setup](./guide/clients.md).
 
-Reduce the number of concurrent requests and retry later according to the response instructions. If requests remain limited, give your administrator the time and error message.
+## 401, invalid key, or access denied {#credentials}
 
-## Requests time out or cannot connect
+Copy the complete TaoDock key, removing accidental whitespace, newlines, or quotation marks. Check that it is not a password or another platform's key. Verify key status, expiration, and IP and model restrictions.
 
-Check the domain, network connection, and client proxy settings, then try a simple request with the same model. If the issue persists, provide the time, model name, and error message to your administrator.
+Programs use the `Authorization: Bearer` header. Keep the key out of public URLs.
 
-## How do I report a problem?
+## Model not found or no available channel {#model}
 
-Include the time, client name and version, model name, steps to reproduce, HTTP status code, and full error message. Include a request ID if one is displayed. Before sharing, remove API keys, personal information, and private conversation content.
+Copy the exact model ID from [Model Square](https://taodock.com/pricing) or `/v1/models`, and check the protocol and key group. Do not change punctuation or add provider prefixes yourself.
+
+If the model and permissions are correct but the service consistently reports no available channel, report the model, time, and request ID. Repeatedly editing the client's model name usually cannot resolve service availability.
+
+## I have a balance but requests report insufficient quota {#quota}
+
+Account balance and key quota are separate limits. Check [Wallet](https://taodock.com/wallet), then the key's remaining quota, restrictions, and expiration on [API Keys](https://taodock.com/keys). If using a plan, also check its validity.
+
+Unlimited quota on a key does not mean free or unlimited account usage. See [Wallet and usage](./guide/wallet.md).
+
+## 429 or too many requests {#rate-limit}
+
+Reduce concurrency. Follow any retry timing in the response, and implement backoff with progressively longer waits rather than immediate repeated requests. Keep the response and time if limits persist.
+
+## Timeouts, 502, or 503 {#connection}
+
+Check your network and client proxy settings, then compare a simple request using the same key and model. Check [usage logs](https://taodock.com/usage-logs/common) to see whether the request executed.
+
+Keep HTTPS certificate verification enabled. Check the domain, system clock, and proxy first. If multiple applications fail for the same model, report the error to TaoDock.
+
+## Playground works, but my client does not {#client}
+
+Playground uses account access; the client is also subject to its API key's group, model, IP, and quota restrictions. Select the same model in both and review the [client settings](./guide/clients.md#settings).
+
+## My task was submitted, but there is no result yet {#tasks}
+
+Check the status and task ID in [Task Logs](https://taodock.com/usage-logs/task). Submission is not completion. Follow the task status rather than creating duplicate tasks while waiting.
+
+## How do I report an issue? {#support}
+
+Include the time and time zone, client name and version, model ID, HTTP status, error response, and any request or task ID. For funding issues, include the order ID and amount.
+
+Remove complete API keys, passwords, verification codes, and private conversations before using the contact channel actually offered on TaoDock. See the [About page](https://taodock.com/about) for platform information.

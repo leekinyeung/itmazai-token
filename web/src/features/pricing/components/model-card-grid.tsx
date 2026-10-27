@@ -16,14 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useQuery } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
-import { getPerfMetricsSummary } from '@/features/performance-metrics/api'
-import { requireServerSuccess } from '@/lib/server-error-message'
+import { usePerformanceSummary } from '@/features/performance-metrics/hooks'
 
 import { DEFAULT_PRICING_PAGE_SIZE, DEFAULT_TOKEN_UNIT } from '../constants'
 import type { PricingModel, TokenUnit } from '../types'
@@ -55,14 +53,7 @@ export const ModelCardGrid = memo(function ModelCardGrid(
     return props.models.slice(start, start + pageSize)
   }, [currentPage, pageSize, props.models])
   const recentModels = pagedModels.map((model) => model.model_name || '')
-  const perfQuery = useQuery({
-    queryKey: ['perf-metrics-summary', 24, recentModels],
-    queryFn: async () =>
-      requireServerSuccess(await getPerfMetricsSummary(24, recentModels)),
-    enabled: recentModels.length > 0,
-    staleTime: 60 * 1000,
-    retry: false,
-  })
+  const perfQuery = usePerformanceSummary(24, recentModels)
 
   const perfMap = useMemo(() => {
     const map = new Map<string, ModelPerfBadgeData>()
