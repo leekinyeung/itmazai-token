@@ -29,7 +29,9 @@ import {
   CONTENT_LAYOUT_VALUES,
   type ContentLayout,
   DEFAULT_THEME_CUSTOMIZATION,
+  normalizeThemeColor,
   resolveThemeFont,
+  themeColorForeground,
   THEME_FONT_VALUES,
   THEME_PRESET_VALUES,
   THEME_RADIUS_VALUES,
@@ -61,6 +63,7 @@ type ThemeCustomizationContextType = {
   defaults: ThemeCustomization
   customization: ThemeCustomization
   setPreset: (preset: ThemePreset) => void
+  setCustomColor: (color: string) => void
   setFont: (font: ThemeFont) => void
   setRadius: (radius: ThemeRadius) => void
   setScale: (scale: ThemeScale) => void
@@ -76,6 +79,7 @@ const FALLBACK_CONTEXT: ThemeCustomizationContextType = {
   defaults: DEFAULT_THEME_CUSTOMIZATION,
   customization: DEFAULT_THEME_CUSTOMIZATION,
   setPreset: () => {},
+  setCustomColor: () => {},
   setFont: () => {},
   setRadius: () => {},
   setScale: () => {},
@@ -103,6 +107,13 @@ export function ThemeCustomizationProvider(props: {
       DEFAULT_THEME_CUSTOMIZATION.font
     )
   )
+  const [customColor, _setCustomColor] = useState(() =>
+    readThemePreference(
+      THEME_STORAGE_KEYS.customColor,
+      normalizeThemeColor,
+      DEFAULT_THEME_CUSTOMIZATION.customColor
+    )
+  )
   const [radius, _setRadius] = useState<ThemeRadius>(() =>
     readThemePreference<ThemeRadius>(
       THEME_STORAGE_KEYS.radius,
@@ -126,13 +137,26 @@ export function ThemeCustomizationProvider(props: {
   )
 
   // Mirror state to the <body> via data-* attributes so theme-presets.css can
-  // override CSS variables at the right cascade layer.
+  // override CSS variables at the right cascade layer. Only the CSS base/Auto
+  // values omit an attribute; deployment defaults still need their selectors.
   useEffect(() => {
+    const style = document.body.style
+    if (preset === 'custom') {
+      style.setProperty('--custom-primary', customColor)
+      style.setProperty(
+        '--custom-primary-foreground',
+        themeColorForeground(customColor)
+      )
+    } else {
+      style.removeProperty('--custom-primary')
+      style.removeProperty('--custom-primary-foreground')
+    }
+    applyAttribute('data-theme-preset', preset === 'default' ? null : preset)
     applyAttribute(
-      'data-theme-preset',
-      preset === DEFAULT_THEME_CUSTOMIZATION.preset ? null : preset
+      'data-theme-custom-color',
+      preset === 'custom' ? customColor : null
     )
-  }, [preset])
+  }, [preset, customColor])
 
   // Resolve Auto into the preset font or the browser's sans-serif while
   // keeping an explicit Sans choice distinct from that browser fallback.
@@ -141,17 +165,11 @@ export function ThemeCustomizationProvider(props: {
   }, [font, preset])
 
   useEffect(() => {
-    applyAttribute(
-      'data-theme-radius',
-      radius === DEFAULT_THEME_CUSTOMIZATION.radius ? null : radius
-    )
+    applyAttribute('data-theme-radius', radius === 'default' ? null : radius)
   }, [radius])
 
   useEffect(() => {
-    applyAttribute(
-      'data-theme-scale',
-      scale === DEFAULT_THEME_CUSTOMIZATION.scale ? null : scale
-    )
+    applyAttribute('data-theme-scale', scale === 'default' ? null : scale)
   }, [scale])
 
   useEffect(() => {
@@ -171,6 +189,16 @@ export function ThemeCustomizationProvider(props: {
     writeThemePreference(
       THEME_STORAGE_KEYS.font,
       value === DEFAULT_THEME_CUSTOMIZATION.font ? null : value
+    )
+  }, [])
+
+  const setCustomColor = useCallback((value: string) => {
+    const normalized = normalizeThemeColor(value)
+    if (!normalized) return
+    _setCustomColor(normalized)
+    writeThemePreference(
+      THEME_STORAGE_KEYS.customColor,
+      normalized === DEFAULT_THEME_CUSTOMIZATION.customColor ? null : normalized
     )
   }, [])
 
@@ -200,17 +228,33 @@ export function ThemeCustomizationProvider(props: {
 
   const resetCustomization = useCallback(() => {
     setPreset(DEFAULT_THEME_CUSTOMIZATION.preset)
+    setCustomColor(DEFAULT_THEME_CUSTOMIZATION.customColor)
     setFont(DEFAULT_THEME_CUSTOMIZATION.font)
     setRadius(DEFAULT_THEME_CUSTOMIZATION.radius)
     setScale(DEFAULT_THEME_CUSTOMIZATION.scale)
     setContentLayout(DEFAULT_THEME_CUSTOMIZATION.contentLayout)
-  }, [setPreset, setFont, setRadius, setScale, setContentLayout])
+  }, [
+    setPreset,
+    setCustomColor,
+    setFont,
+    setRadius,
+    setScale,
+    setContentLayout,
+  ])
 
   const value = useMemo<ThemeCustomizationContextType>(
     () => ({
       defaults: DEFAULT_THEME_CUSTOMIZATION,
-      customization: { preset, font, radius, scale, contentLayout },
+      customization: {
+        preset,
+        customColor,
+        font,
+        radius,
+        scale,
+        contentLayout,
+      },
       setPreset,
+      setCustomColor,
       setFont,
       setRadius,
       setScale,
@@ -219,11 +263,13 @@ export function ThemeCustomizationProvider(props: {
     }),
     [
       preset,
+      customColor,
       font,
       radius,
       scale,
       contentLayout,
       setPreset,
+      setCustomColor,
       setFont,
       setRadius,
       setScale,

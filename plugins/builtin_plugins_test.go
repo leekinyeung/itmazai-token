@@ -412,3 +412,84 @@ func TestBuiltInPluginsAddressNewAPIUpstreamOnNativeRoutes(t *testing.T) {
 		}
 	})
 }
+
+func TestBuiltInMultipartJSONValidationKeepsPublicErrors(t *testing.T) {
+	generation := jsplugin.DefaultRegistry.Generation()
+	for _, tc := range []struct {
+		pluginKey string
+		protocol  string
+		model     string
+		field     string
+		message   string
+	}{
+		{"hailuo", "openai_video", "", "metadata", "metadata must be a JSON object string"},
+		{"kling", "openai_video", "", "metadata", "metadata must be a JSON object string"},
+		{"sora", "openai_video", "", "metadata", "metadata must be a JSON object string"},
+		{"jimeng", "openai_video", "", "metadata", "metadata must be a JSON object string"},
+		{"vidu", "openai_video", "", "metadata", "metadata must be a JSON object string"},
+		{"doubao", "openai_video", "", "metadata", "metadata must be a JSON object string"},
+		{"alibaba", "openai_video", "", "metadata", "metadata must be a JSON object string"},
+		{"doubao", "openai_image", "doubao-seedream-4-0-250828", "tools", "tools must be a JSON string"},
+		{"alibaba", "openai_image", "qwen-image-plus", "parameters", "parameters must be a JSON object string"},
+	} {
+		t.Run(tc.pluginKey+"/"+tc.protocol, func(t *testing.T) {
+			plugin, found := generation.Get(tc.pluginKey)
+			require.True(t, found)
+			model := tc.model
+			if model == "" {
+				require.NotEmpty(t, plugin.Meta.Models)
+				model = plugin.Meta.Models[0]
+			}
+			_, err := plugin.Engine.CallPath(t.Context(), "protocols", []string{tc.protocol, "decodeRequest"}, map[string]any{
+				"model":     model,
+				"operation": "generate",
+				"body": map[string]any{"kind": "multipart", "fields": map[string][]string{
+					"model": {model}, tc.field: {"{private-input-marker"},
+				}},
+			})
+			var hookError *jsplugin.HookError
+			require.ErrorAs(t, err, &hookError)
+			assert.Equal(t, tc.message, hookError.Message)
+			assert.NotContains(t, hookError.Message, "private-input-marker")
+		})
+	}
+}
+
+func TestAlibabaImageArtifactsKeepTheirRequestedIndex(t *testing.T) {
+	plugin, found := jsplugin.DefaultRegistry.Generation().Get("alibaba")
+	require.True(t, found)
+	data := map[string]any{"output": map[string]any{"choices": []any{
+		map[string]any{"message": map[string]any{"content": []any{
+			map[string]any{"image": "https://cdn.example/first.png"},
+			map[string]any{"text": "Interleaved explanation"},
+			map[string]any{"image": "https://cdn.example/second.png"},
+		}}},
+	}}}
+	for _, tc := range []struct {
+		key string
+		url string
+	}{
+		{"image-1", "https://cdn.example/first.png"},
+		{"image-2", "https://cdn.example/second.png"},
+		{"image-3", ""},
+	} {
+		t.Run(tc.key, func(t *testing.T) {
+			value, err := plugin.Engine.Call(t.Context(), "buildContentRequest", map[string]any{
+				"artifactKey": tc.key, "data": data,
+				"clientRequest": map[string]any{"method": "HEAD"},
+			})
+			if tc.url == "" {
+				require.ErrorContains(t, err, "artifact_not_found")
+				return
+			}
+			require.NoError(t, err)
+			encoded, err := common.Marshal(value)
+			require.NoError(t, err)
+			var descriptor map[string]any
+			require.NoError(t, common.Unmarshal(encoded, &descriptor))
+			assert.Equal(t, tc.url, descriptor["url"])
+			assert.Equal(t, "HEAD", descriptor["method"])
+			assert.Equal(t, true, descriptor["credentialless"])
+		})
+	}
+}

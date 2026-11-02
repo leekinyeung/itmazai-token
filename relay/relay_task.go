@@ -1,7 +1,6 @@
 package relay
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -12,6 +11,7 @@ import (
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
+	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
@@ -72,19 +72,13 @@ func ResolveOriginTask(c *gin.Context, info *relaycommon.RelayInfo) *dto.TaskErr
 		return service.TaskErrorWrapperLocal(errors.New("task_origin_not_exist"), "task_not_exist", http.StatusBadRequest)
 	}
 
-	// 从原始任务推导模型名称
+	// Only the persisted public identity can supply an omitted client model.
+	// A provider payload or upstream property is not a public model contract.
 	if info.OriginModelName == "" {
-		if originTask.Properties.OriginModelName != "" {
-			info.OriginModelName = originTask.Properties.OriginModelName
-		} else if originTask.Properties.UpstreamModelName != "" {
-			info.OriginModelName = originTask.Properties.UpstreamModelName
-		} else {
-			var taskData map[string]any
-			_ = common.Unmarshal(originTask.Data, &taskData)
-			if m, ok := taskData["model"].(string); ok && m != "" {
-				info.OriginModelName = m
-			}
+		if originTask.Properties.OriginModelName == "" {
+			return service.TaskErrorWrapperLocal(errors.New(i18n.T(c, i18n.MsgRelayPublicModelUnavailable)), "public_model_unavailable", http.StatusInternalServerError)
 		}
+		info.OriginModelName = originTask.Properties.OriginModelName
 	}
 
 	// 锁定到原始任务的渠道（重试时复用同一渠道，轮换 key）
@@ -457,7 +451,7 @@ func RelayTaskFetch(c *gin.Context, relayMode int) (taskResp *dto.TaskError) {
 	}
 
 	c.Writer.Header().Set("Content-Type", "application/json")
-	_, err := io.Copy(c.Writer, bytes.NewBuffer(respBody))
+	_, err := common.WritePublicModelBytes(c, respBody)
 	if err != nil {
 		taskResp = service.TaskErrorWrapper(err, "copy_response_body_failed", http.StatusInternalServerError)
 		return
@@ -483,6 +477,10 @@ func videoFetchByIDRespBodyBuilder(c *gin.Context) (respBody []byte, taskResp *d
 	}
 
 	isOpenAIVideoAPI := strings.HasPrefix(c.Request.RequestURI, "/v1/videos/")
+	if isOpenAIVideoAPI && originTask.Properties.OriginModelName == "" {
+		return nil, service.TaskErrorWrapperLocal(errors.New(i18n.T(c, i18n.MsgRelayPublicModelUnavailable)), "public_model_unavailable", http.StatusInternalServerError)
+	}
+	service.BindTaskPublicModel(c, originTask)
 
 	// Gemini/Vertex 支持实时查询：用户 fetch 时直接从上游拉取最新状态
 	if realtimeResp := tryRealtimeFetch(originTask, isOpenAIVideoAPI); len(realtimeResp) > 0 {
@@ -510,10 +508,23 @@ func videoFetchByIDRespBodyBuilder(c *gin.Context) (respBody []byte, taskResp *d
 		return
 	}
 
-	// 通用 TaskDto 格式
+	// The legacy query keeps its result payload, but never serializes private
+	// task properties or an unprojected provider envelope.
+	publicTask := TaskModel2Dto(originTask)
+	properties := originTask.Properties
+	properties.UpstreamModelName = ""
+	publicTask.Properties = properties
+	publicTask.FailReason = common.RedactModelNames(publicTask.FailReason, properties.OriginModelName, originTask.Properties.UpstreamModelName)
+	if originTask.Status != model.TaskStatusSuccess {
+		publicTask.ResultURL = ""
+	}
+	publicTask.Data, err = service.ProjectTaskModelData(originTask)
+	if err != nil {
+		return nil, service.TaskErrorWrapperLocal(err, "invalid_response_metadata", http.StatusInternalServerError)
+	}
 	respBody, err = common.Marshal(dto.TaskResponse[any]{
 		Code: "success",
-		Data: TaskModel2Dto(originTask),
+		Data: publicTask,
 	})
 	if err != nil {
 		taskResp = service.TaskErrorWrapper(err, "marshal_response_failed", http.StatusInternalServerError)

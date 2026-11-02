@@ -1,0 +1,83 @@
+{
+  "name": "taodock",
+  "displayName": "TaoDock — 众妙之门 AI Models",
+  "description": "%extension.description%",
+  "version": "0.1.0",
+  "publisher": "taodock",
+  "author": "TaoDock",
+  "license": "AGPL-3.0-only",
+  "icon": "assets/icon.png",
+  "homepage": "https://taodock.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leekinyeung/itmazai-token.git",
+    "directory": "extensions/taodock-vscode"
+  },
+  "engines": {
+    "vscode": "^1.104.0"
+  },
+  "categories": ["AI", "Chat"],
+  "keywords": ["taodock", "众妙之门", "byok", "gpt", "claude", "language model"],
+  "main": "./dist/extension.js",
+  "l10n": "./l10n",
+  "extensionKind": ["workspace"],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    }
+  },
+  "contributes": {
+    "languageModelChatProviders": [
+      {
+        "vendor": "taodock",
+        "displayName": "TaoDock",
+        "managementCommand": "taodock.manage"
+      }
+    ],
+    "commands": [
+      {
+        "command": "taodock.manage",
+        "title": "%command.manage%",
+        "category": "TaoDock"
+      },
+      {
+        "command": "taodock.refreshModels",
+        "title": "%command.refresh%",
+        "category": "TaoDock"
+      },
+      {
+        "command": "taodock.removeKey",
+        "title": "%command.remove%",
+        "category": "TaoDock"
+      },
+      {
+        "command": "taodock.openConsole",
+        "title": "%command.console%",
+        "category": "TaoDock"
+      },
+      {
+        "command": "taodock.openDocs",
+        "title": "%command.docs%",
+        "category": "TaoDock"
+      }
+    ]
+  },
+  "scripts": {
+    "localize": "node scripts/localize.mjs",
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "vscode:prepublish": "bun run typecheck && bun run build",
+    "package": "vsce package --no-dependencies",
+    "publish:openvsx": "node scripts/publish-openvsx.mjs"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.4",
+    "@types/node": "22",
+    "@types/vscode": "1.104.0",
+    "@vscode/vsce": "4.1.0",
+    "esbuild": "0.28.2",
+    "ovsx": "1.3.0",
+    "typescript": "7.0.2"
+  }
+}

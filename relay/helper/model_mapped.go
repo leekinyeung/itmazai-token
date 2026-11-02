@@ -12,6 +12,7 @@ import (
 )
 
 func ModelMappedHelper(c *gin.Context, info *relaycommon.RelayInfo, request dto.Request) error {
+	info.BindPublicModel(c)
 	if info.ChannelMeta == nil {
 		info.ChannelMeta = &relaycommon.ChannelMeta{}
 	}
@@ -51,6 +52,7 @@ func ModelMappedHelper(c *gin.Context, info *relaycommon.RelayInfo, request dto.
 					return errors.New("model_mapping_contains_cycle")
 				}
 				visitedModels[mappedModel] = true
+				info.RememberPrivateModel(mappedModel)
 				currentModel = mappedModel
 				info.IsModelMapped = true
 			} else {

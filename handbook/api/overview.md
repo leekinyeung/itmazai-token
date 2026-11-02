@@ -1,6 +1,11 @@
+---
+title: "AI API 接入：cURL、Python 与 JavaScript 示例"
+description: "使用众妙之门 TaoDock API 地址，通过 cURL、Python 或 JavaScript 查询模型并发起对话，了解流式响应与常见接口错误。"
+---
+
 # API 接入说明
 
-TaoDock 的 API 服务地址是 **https://taodock.com**，OpenAI 兼容 Base URL 为 **`https://taodock.com/v1`**。以下代码已使用 TaoDock 的真实地址，密钥从你自己的终端或环境变量读取。
+众妙之门 TaoDock 的 API 服务地址是 **https://taodock.com**，OpenAI 兼容 Base URL 为 **`https://taodock.com/v1`**。以下代码已使用 众妙之门 TaoDock 的真实地址，密钥从你自己的终端或环境变量读取。
 
 ## 地址与接口 {#endpoints}
 
@@ -19,10 +24,10 @@ TaoDock 的 API 服务地址是 **https://taodock.com**，OpenAI 兼容 Base URL
 
 ## 准备密钥 {#credentials}
 
-先在 [TaoDock API 密钥](https://taodock.com/keys)创建密钥。cURL 和 JavaScript 代码使用 `TAODOCK_API_KEY` 环境变量；在 Bash / Zsh 中按下面的方式读取，避免将密钥直接写进脚本。
+先在 [众妙之门 TaoDock API 密钥](https://taodock.com/keys)创建密钥。cURL 和 JavaScript 代码使用 `TAODOCK_API_KEY` 环境变量；在 Bash / Zsh 中按下面的方式读取，避免将密钥直接写进脚本。
 
 ```bash
-printf '请输入 TaoDock API 密钥：'
+printf '请输入 众妙之门 TaoDock API 密钥：'
 read -r -s TAODOCK_API_KEY
 printf '\n'
 export TAODOCK_API_KEY
@@ -45,7 +50,7 @@ curl --fail-with-body --silent --show-error https://taodock.com/v1/models \
 curl --fail-with-body --silent --show-error https://taodock.com/v1/chat/completions \
   -H "Authorization: Bearer $TAODOCK_API_KEY" \
   -H 'Content-Type: application/json' \
-  -d '{"model":"gpt-6.1-sol","messages":[{"role":"user","content":"请简要介绍 TaoDock 的 API 接入方式。"}]}'
+  -d '{"model":"gpt-6.1-sol","messages":[{"role":"user","content":"请简要介绍 众妙之门 TaoDock 的 API 接入方式。"}]}'
 ```
 
 ## Python {#python}
@@ -59,7 +64,7 @@ import os
 import urllib.error
 import urllib.request
 
-api_key = os.environ.get("TAODOCK_API_KEY") or getpass.getpass("TaoDock API Key: ")
+api_key = os.environ.get("TAODOCK_API_KEY") or getpass.getpass("众妙之门 TaoDock API Key: ")
 payload = {
     "model": "gpt-6.1-sol",
     "messages": [{"role": "user", "content": "你好，请用一句话介绍你自己。"}],

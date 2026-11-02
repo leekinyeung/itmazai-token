@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
+import { Loader2, LockKeyhole, UserRound } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -37,6 +37,11 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
 import { register, wechatLoginByCode } from '@/features/auth/api'
 import { LegalConsent } from '@/features/auth/components/legal-consent'
@@ -258,9 +263,20 @@ export function SignUpForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t('Username')}</FormLabel>
-              <FormControl>
-                <Input placeholder={t('Enter your username')} {...field} />
-              </FormControl>
+              <InputGroup>
+                <InputGroupAddon>
+                  <UserRound className='size-[18px]' aria-hidden='true' />
+                </InputGroupAddon>
+                <FormControl>
+                  <InputGroupInput
+                    placeholder={t('Enter your username')}
+                    autoComplete='username'
+                    autoCapitalize='none'
+                    spellCheck={false}
+                    {...field}
+                  />
+                </FormControl>
+              </InputGroup>
               <FormMessage />
             </FormItem>
           )}
@@ -276,6 +292,8 @@ export function SignUpForm({
               <FormControl>
                 <PasswordInput
                   placeholder={t('Enter password (8–128 characters)')}
+                  autoComplete='new-password'
+                  startIcon={<LockKeyhole className='size-[18px]' />}
                   {...field}
                 />
               </FormControl>
@@ -292,7 +310,12 @@ export function SignUpForm({
             <FormItem>
               <FormLabel>{t('Confirm password')}</FormLabel>
               <FormControl>
-                <PasswordInput placeholder={t('Confirm password')} {...field} />
+                <PasswordInput
+                  placeholder={t('Confirm password')}
+                  autoComplete='new-password'
+                  startIcon={<LockKeyhole className='size-[18px]' />}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

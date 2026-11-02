@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { AxiosHeaders, type InternalAxiosRequestConfig } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { api } from '@/lib/api'
@@ -60,7 +61,18 @@ afterEach(() => vi.restoreAllMocks())
 
 /** The body a PUT sends over the wire: undefined fields are left out. */
 function sentBody(put: { mock: { calls: unknown[][] } }): unknown {
-  return JSON.parse(JSON.stringify(put.mock.calls[0][1]))
+  const headers = new AxiosHeaders()
+  const config: InternalAxiosRequestConfig = {
+    method: 'put',
+    url: '/api/user/setting',
+    headers,
+  }
+  let body = put.mock.calls[0][1]
+  for (const transform of [api.defaults.transformRequest].flat()) {
+    if (transform) body = transform.call(config, body, headers)
+  }
+  expect(typeof body).toBe('string')
+  return JSON.parse(body as string)
 }
 
 describe('user settings saves across profile and security', () => {

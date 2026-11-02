@@ -1,0 +1,269 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+.auth-page {
+  --auth-action: color-mix(in oklch, var(--primary) 45%, oklch(0.45 0.2 255));
+  --auth-link: var(--auth-action);
+  display: grid;
+  position: relative;
+  min-height: 100svh;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  background: var(--background);
+}
+
+.auth-header {
+  position: absolute;
+  z-index: 10;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 6rem;
+  padding: 1.5rem clamp(1.5rem, 4.5vw, 4rem);
+}
+
+.auth-brand {
+  max-width: 40%;
+}
+
+.auth-brand > span {
+  font-size: 1.375rem;
+}
+
+.auth-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.auth-brand-panel {
+  --auth-panel-padding: clamp(2rem, 5.5vw, 5rem);
+  display: flex;
+  min-width: 0;
+  min-height: 100svh;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  padding: clamp(9rem, 19.5svh, 13rem) var(--auth-panel-padding) 2rem;
+  background: #eaf5ff url('../assets/auth/sky-backdrop.webp') center / cover;
+}
+
+.auth-brand-copy {
+  width: 100%;
+  max-width: 32rem;
+}
+
+.auth-brand-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1em;
+  font-size: clamp(2.5rem, 4.5vw, 3.75rem);
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+.auth-accent {
+  color: var(--auth-link);
+}
+
+.auth-brand-description {
+  max-width: 26rem;
+  margin-top: 1.5rem;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.auth-brand-art {
+  width: calc(100% + var(--auth-panel-padding) * 5);
+  max-width: none;
+  /* Fill the remaining panel height without enlarging the page. */
+  height: 0;
+  min-height: 0;
+  flex: 1 1 0;
+  margin-top: 0;
+  margin-bottom: -3rem;
+  object-fit: contain;
+  object-position: center top;
+  pointer-events: none;
+  user-select: none;
+}
+
+.auth-form-area {
+  display: flex;
+  min-width: 0;
+  min-height: 100svh;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem clamp(2rem, 5.5vw, 5rem) 4.5rem;
+}
+
+.auth-form-content {
+  width: 100%;
+  max-width: 25.5rem;
+}
+
+.auth-heading {
+  font-size: clamp(2rem, 3.5vw, 2.5rem);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.035em;
+}
+
+.auth-description {
+  margin-top: 0.75rem;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  line-height: 1.65;
+}
+
+.auth-page form {
+  gap: 1.5rem;
+}
+
+.auth-page form input {
+  font-size: 1rem;
+}
+
+.auth-page [data-slot='form-label'] {
+  font-size: 0.9375rem;
+}
+
+.auth-page [data-slot='input'],
+.auth-page input[data-slot='form-control'],
+.auth-page [data-slot='input-group'] {
+  height: 3rem;
+  border-radius: 0.75rem;
+}
+
+.auth-page [data-slot='input-group'] input {
+  height: 100%;
+}
+
+.auth-page form button[aria-pressed] {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.auth-page [data-slot='input-group-addon'] {
+  padding-inline-start: 0.875rem;
+  padding-inline-end: 0.25rem;
+}
+
+.auth-page button[type='submit'] {
+  min-height: 3rem;
+  border-radius: 1.25rem;
+  background-color: var(--auth-action);
+  color: var(--primary-foreground);
+  font-size: 0.9375rem;
+}
+
+.auth-page form a,
+.auth-switch a {
+  color: var(--auth-link);
+}
+
+.auth-switch {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.auth-switch p {
+  min-width: 0;
+  flex-shrink: 1;
+  text-align: center;
+}
+
+.auth-switch [data-slot='separator'] {
+  width: auto;
+  flex: 1;
+}
+
+.dark .auth-page {
+  --auth-link: color-mix(in oklch, var(--primary) 65%, var(--foreground));
+}
+
+.dark .auth-brand-panel {
+  background: #151d29 url('../assets/auth/sky-backdrop-dark.webp') center /
+    cover;
+}
+
+.dark .auth-brand-art {
+  margin-bottom: -1rem;
+  transform: translateY(0.5rem);
+}
+
+@media (max-width: 899px) {
+  .auth-page {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .auth-header {
+    position: relative;
+    min-height: 5rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .auth-brand-panel {
+    display: none;
+  }
+
+  .auth-form-area {
+    min-height: 0;
+    flex: 1;
+    padding: 3rem 1.5rem 4rem;
+  }
+
+  .auth-brand {
+    max-width: calc(100% - 6rem);
+  }
+
+  .auth-toolbar {
+    gap: 0;
+  }
+
+  .auth-toolbar [data-slot='dropdown-menu-trigger'] {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .auth-home,
+  .auth-toolbar > [aria-hidden='true'] {
+    display: none;
+  }
+
+  .auth-heading {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 359px) {
+  .auth-switch {
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+  }
+}

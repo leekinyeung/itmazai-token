@@ -70,6 +70,7 @@ import { cn } from '@/lib/utils'
 import { AuditDetailFields } from '../../audit/components/audit-detail-fields'
 import type { UsageLog } from '../../data/schema'
 import {
+  formatModelName,
   parseLogOther,
   getParamOverrideActionLabel,
   parseAuditLine,
@@ -521,6 +522,10 @@ export function DetailsDialog(props: DetailsDialogProps) {
   const { t } = useTranslation()
   const { copiedText, copyToClipboard } = useCopyToClipboard({ notify: false })
   const other = parseLogOther(props.log.other)
+  const modelInfo = formatModelName(props.log, props.isAdmin)
+  const paramAudit = props.isAdmin
+    ? (other?.admin_info?.po ?? other?.po)
+    : undefined
   const typeConfig = getLogTypeConfig(props.log.type)
 
   const isViolation = isViolationFeeLog(other)
@@ -1182,15 +1187,15 @@ export function DetailsDialog(props: DetailsDialogProps) {
           />
         )}
 
-        {other?.response_model && (
+        {modelInfo.responseModel && (
           <DetailSection label={t('Response Model')}>
-            <ResponseModelDetails observation={other.response_model} />
+            <ResponseModelDetails observation={modelInfo.responseModel} />
           </DetailSection>
         )}
         {/* Model mapping for logs without response observations */}
-        {!other?.response_model &&
-          other?.is_model_mapped &&
-          other?.upstream_model_name && (
+        {!modelInfo.responseModel &&
+          modelInfo.isMapped &&
+          modelInfo.actualModel && (
             <DetailSection label={t('Model Mapping')}>
               <DetailRow
                 label={t('Request Model')}
@@ -1199,7 +1204,7 @@ export function DetailsDialog(props: DetailsDialogProps) {
               />
               <DetailRow
                 label={t('Actual Model')}
-                value={other.upstream_model_name}
+                value={modelInfo.actualModel}
                 mono
               />
             </DetailSection>
@@ -1354,13 +1359,13 @@ export function DetailsDialog(props: DetailsDialogProps) {
         )}
 
         {/* Param override */}
-        {other?.po && Array.isArray(other.po) && other.po.length > 0 && (
+        {paramAudit && Array.isArray(paramAudit) && paramAudit.length > 0 && (
           <DetailSection
             icon={<Settings2 className='size-3.5' aria-hidden='true' />}
             iconTone='chart-3'
-            label={`${t('Param Override')} (${other.po.length})`}
+            label={`${t('Param Override')} (${paramAudit.length})`}
           >
-            {other.po.filter(Boolean).map((line) => {
+            {paramAudit.filter(Boolean).map((line) => {
               const parsed = parseAuditLine(line)
               if (!parsed) return null
               return (

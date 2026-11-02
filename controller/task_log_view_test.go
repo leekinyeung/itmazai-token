@@ -1,14 +1,33 @@
 package controller
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/service"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestTaskErrorProjectsOnlyClientCopy(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	c.Request = httptest.NewRequest(http.MethodGet, "/v1/video/generations/task_public", nil)
+	service.BindTaskPublicModel(c, &model.Task{Properties: model.Properties{OriginModelName: "public-pro", UpstreamModelName: "private-model"}})
+	taskErr := &dto.TaskError{Code: "provider_limit", Message: "private-model capacity exhausted", StatusCode: http.StatusBadRequest,
+		Data: map[string]any{"model": "private-model", "output": map[string]any{"model": "private-model"}}}
+	respondTaskError(c, taskErr)
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	assert.JSONEq(t, `{"code":"provider_limit","message":"public-pro capacity exhausted","data":{"model":"public-pro","output":{"model":"private-model"}}}`, recorder.Body.String())
+	assert.Equal(t, "private-model capacity exhausted", taskErr.Message)
+	assert.Equal(t, "private-model", taskErr.Data.(map[string]any)["model"])
+}
 
 func TestTaskLogDTOSeparatesUserAdminAndRootDetails(t *testing.T) {
 	task := &model.Task{
@@ -134,4 +153,19 @@ func TestTaskLogDTOKeepsFailureReasonAndDoesNotMarkPluginTaskLegacy(t *testing.T
 	assert.False(t, pluginView.LegacyVideoAvailable)
 	assert.Empty(t, pluginView.ResultURL)
 	assert.Empty(t, pluginView.FailReason)
+}
+
+func TestTaskLogModelProjectionDoesNotMutateStoredTask(t *testing.T) {
+	task := &model.Task{TaskID: "task_public", Properties: model.Properties{OriginModelName: "public-pro", UpstreamModelName: "[private-route]gemini-pro"}, Data: []byte(`{"model":"[private-route]gemini-pro"}`), FailReason: "model [private-route]gemini-pro unavailable"}
+	user := tasksToDto([]*model.Task{task}, false, common.RoleCommonUser)[0]
+	encoded, err := common.Marshal(user)
+	require.NoError(t, err)
+	assert.NotContains(t, string(encoded), "[private-route]")
+	assert.NotContains(t, string(encoded), "upstream_model_name")
+	admin := tasksToDto([]*model.Task{task}, false, common.RoleAdminUser)[0]
+	encoded, err = common.Marshal(admin)
+	require.NoError(t, err)
+	assert.Contains(t, string(encoded), "[private-route]gemini-pro")
+	assert.Equal(t, "[private-route]gemini-pro", task.Properties.UpstreamModelName)
+	assert.Contains(t, string(task.Data), "[private-route]gemini-pro")
 }

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"maps"
 	"slices"
@@ -23,6 +24,10 @@ var legacySensitiveLogOtherKeys = []string{
 	"channel_name",
 	"channel_type",
 	"reject_reason",
+	"upstream_model_name",
+	"is_model_mapped",
+	"response_model",
+	"po",
 }
 
 type logOtherVisibility int
@@ -234,6 +239,13 @@ func formatLogOtherJSON(value string, visibility logOtherVisibility) string {
 		return ""
 	}
 
+	// Some historical writers stored an encoded JSON object as a JSON string.
+	if strings.HasPrefix(strings.TrimSpace(value), `"`) {
+		var decoded string
+		if common.UnmarshalJsonStr(value, &decoded) == nil {
+			value = decoded
+		}
+	}
 	var values map[string]json.RawMessage
 	if err := common.UnmarshalJsonStr(value, &values); err != nil {
 		if visibility == logOtherVisibilityRoot {
@@ -244,20 +256,31 @@ func formatLogOtherJSON(value string, visibility logOtherVisibility) string {
 
 	changed := false
 	if visibility == logOtherVisibilityUser {
-		for _, key := range []string{logOtherAdminInfoKey, logOtherRootInfoKey, logOtherAuditInfoKey} {
-			if _, exists := values[key]; exists {
-				delete(values, key)
-				changed = true
-			}
+		projected := publicLogOtherJSON(values)
+		var public map[string]json.RawMessage
+		if common.UnmarshalJsonStr(projected, &public) == nil && maps.EqualFunc(values, public, func(a, b json.RawMessage) bool { return bytes.Equal(a, b) }) {
+			return value
 		}
-		for _, key := range legacySensitiveLogOtherKeys {
-			if _, exists := values[key]; exists {
-				delete(values, key)
-				changed = true
-			}
-		}
+		return projected
 	} else {
 		changed = normalizeLegacyRejectReason(values)
+		adminInfo := make(map[string]json.RawMessage)
+		_ = common.Unmarshal(values[logOtherAdminInfoKey], &adminInfo)
+		if adminInfo == nil {
+			adminInfo = make(map[string]json.RawMessage)
+		}
+		for _, key := range []string{"upstream_model_name", "is_model_mapped", "response_model", "po"} {
+			if raw, exists := values[key]; exists {
+				if _, scoped := adminInfo[key]; !scoped {
+					adminInfo[key] = raw
+				}
+				delete(values, key)
+				changed = true
+			}
+		}
+		if len(adminInfo) > 0 && changed {
+			values[logOtherAdminInfoKey], _ = common.Marshal(adminInfo)
+		}
 		if visibility == logOtherVisibilityAdmin {
 			if _, exists := values[logOtherRootInfoKey]; exists {
 				delete(values, logOtherRootInfoKey)

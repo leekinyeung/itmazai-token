@@ -41,6 +41,6 @@ func (a *Adaptor) doSGLangRerankResponse(c *gin.Context, resp *http.Response, in
 	// Per-result counts therefore cannot account for the full request; use the
 	// existing prompt estimate, as with other rerank providers without usage.
 	response.Usage = dto.Usage{PromptTokens: info.GetEstimatePromptTokens(), TotalTokens: info.GetEstimatePromptTokens()}
-	c.JSON(http.StatusOK, response)
+	common.WritePublicModelJSON(c, http.StatusOK, response)
 	return &response.Usage, nil
 }

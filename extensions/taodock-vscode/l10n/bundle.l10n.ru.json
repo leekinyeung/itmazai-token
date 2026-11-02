@@ -1,0 +1,18 @@
+{
+  "Connect TaoDock": "Подключить TaoDock",
+  "Paste an API key from taodock.com/keys. It will be stored in VS Code Secret Storage.": "Вставьте API-ключ с taodock.com/keys. Он будет сохранён в защищённом хранилище VS Code.",
+  "Enter a complete API key without spaces or line breaks.": "Введите полный API-ключ без пробелов и переносов строк.",
+  "This key has no supported chat models. Check its group and model permissions in TaoDock.": "Для этого ключа нет совместимых чат-моделей. Проверьте группу и права доступа в TaoDock.",
+  "TaoDock connected. Choose a TaoDock model in the chat model picker.": "TaoDock подключён. Выберите модель TaoDock в списке моделей чата.",
+  "TaoDock API key removed from this editor. Revoke it in the console to disable it everywhere.": "API-ключ TaoDock удалён из этого редактора. Для полного отключения отзовите его в консоли.",
+  "TaoDock models refreshed. Open the chat model picker to choose a model.": "Список моделей TaoDock обновлён. Выберите модель в чате.",
+  "Provided by TaoDock. Availability and charges follow your account and key permissions.": "Предоставлено TaoDock. Доступность и оплата зависят от аккаунта и прав ключа.",
+  "Set your TaoDock API key before sending a message.": "Перед отправкой сообщения задайте API-ключ TaoDock.",
+  "TaoDock could not complete the request. Please try again.": "TaoDock не удалось выполнить запрос. Повторите попытку.",
+  "Your TaoDock API key is invalid, expired or disabled. Set a valid key and try again.": "API-ключ TaoDock недействителен, просрочен или отключён. Задайте действующий ключ.",
+  "TaoDock denied this request. Check your balance, key quota and model access in the console.": "TaoDock отклонил запрос. Проверьте баланс, лимит ключа и доступ к модели в консоли.",
+  "TaoDock rate limit reached. Please wait before trying again.": "Достигнут лимит запросов TaoDock. Подождите перед повторной попыткой.",
+  "TaoDock returned an incomplete or unsupported response. Check model compatibility and request logs.": "TaoDock вернул неполный или неподдерживаемый ответ. Проверьте совместимость модели и журналы запросов.",
+  "The TaoDock request timed out. Check request logs before retrying.": "Время ожидания TaoDock истекло. Перед повтором проверьте журналы запросов.",
+  "Could not connect to TaoDock. Check your network and try again.": "Не удалось подключиться к TaoDock. Проверьте сеть и повторите попытку."
+}

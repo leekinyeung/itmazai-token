@@ -27,6 +27,7 @@ import {
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { DEFAULT_SYSTEM_NAME } from '@/lib/constants'
+import { getSystemDisplayName } from '@/lib/system-branding'
 import { cn } from '@/lib/utils'
 
 type SystemBrandProps = {
@@ -52,7 +53,10 @@ export function SystemBrand(props: SystemBrandProps) {
   const { logo } = useSystemConfig()
 
   const variant = props.variant ?? 'sidebar'
-  const name = status?.system_name || props.defaultName || DEFAULT_SYSTEM_NAME
+  const name = getSystemDisplayName(
+    status?.system_name || props.defaultName || DEFAULT_SYSTEM_NAME,
+    t
+  )
   const version =
     status?.version || props.defaultVersion || t('Unknown version')
 

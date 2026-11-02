@@ -17,11 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import type { SVGProps } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { DEFAULT_SYSTEM_NAME } from '@/lib/constants'
+import { getSystemDisplayName } from '@/lib/system-branding'
 import { cn } from '@/lib/utils'
 
 export function Logo({ className, ...props }: SVGProps<SVGSVGElement>) {
+  const { t } = useTranslation()
   return (
     <svg
       id='newapi-logo'
@@ -37,7 +40,7 @@ export function Logo({ className, ...props }: SVGProps<SVGSVGElement>) {
       className={cn('size-6', className)}
       {...props}
     >
-      <title>{DEFAULT_SYSTEM_NAME}</title>
+      <title>{getSystemDisplayName(DEFAULT_SYSTEM_NAME, t)}</title>
       <path d='M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3' />
     </svg>
   )

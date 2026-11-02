@@ -21,6 +21,10 @@ type WebAssets struct {
 func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.HandlerFunc) {
 	frontendFS := common.EmbedFolder(assets.BuildFS, "web/dist")
 	compress := gzip.Gzip(gzip.DefaultCompression)
+	var pageMetadata *publicPageMetadataRenderer
+	if manifest, err := assets.BuildFS.ReadFile("web/dist/page-metadata.json"); err == nil {
+		pageMetadata = newPublicPageMetadataRenderer(assets.IndexPage, manifest)
+	}
 
 	router.NoRoute(
 		pluginDispatcher,
@@ -41,7 +45,11 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 				return
 			}
 			c.Header("Cache-Control", "no-cache")
-			c.Data(http.StatusOK, "text/html; charset=utf-8", assets.IndexPage)
+			page := assets.IndexPage
+			if rendered := pageMetadata.render(c.Request.URL.EscapedPath()); rendered != nil {
+				page = rendered
+			}
+			c.Data(http.StatusOK, "text/html; charset=utf-8", page)
 		},
 	)
 }

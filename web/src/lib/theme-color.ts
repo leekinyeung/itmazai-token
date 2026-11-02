@@ -62,7 +62,7 @@ export function useThemeColor(cssVariable: string): string | undefined {
     })
     observer.observe(document.body, {
       attributes: true,
-      attributeFilter: ['data-theme-preset'],
+      attributeFilter: ['data-theme-preset', 'data-theme-custom-color'],
     })
     return () => observer.disconnect()
   }, [cssVariable])

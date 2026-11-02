@@ -33,17 +33,19 @@ import { api } from '@/lib/api'
 import { SettingsPageProvider } from '../../components/settings-page-context'
 import { QuotaSettingsSection } from '../quota-settings-section'
 
-function Fixture() {
+function Fixture(props: { quotaPerUnit: number }) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null)
   return (
     <>
       <div ref={setContainer} />
       <SettingsPageProvider actionsContainer={container}>
         <QuotaSettingsSection
+          quotaPerUnit={props.quotaPerUnit}
           defaultValues={{
             QuotaForNewUser: 0,
             QuotaForInviter: 0,
             QuotaForInvitee: 0,
+            InviterFirstTopUpRewardUSD: 2.5,
             TopUpLink: '',
             quota_setting: {
               enable_free_model_pre_consume: true,
@@ -57,12 +59,14 @@ function Fixture() {
   )
 }
 
-async function renderSettings() {
+async function renderSettings(quotaPerUnit = 500000) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
   const router = createRouter({
-    routeTree: createRootRoute({ component: Fixture }),
+    routeTree: createRootRoute({
+      component: () => <Fixture quotaPerUnit={quotaPerUnit} />,
+    }),
     history: createMemoryHistory({ initialEntries: ['/'] }),
   })
   render(
@@ -95,6 +99,75 @@ test('non-zero invitation rewards can be saved without a compliance prompt', asy
       value: 100,
     })
   )
+})
+
+test.each([
+  ['0', 0],
+  ['1', 0.000002],
+  ['500000', 1],
+  ['1875000', 3.75],
+])(
+  'first top-up inviter reward accepts quota %s and preserves the corresponding saved amount',
+  async (value, amountUSD) => {
+    const user = userEvent.setup()
+    await renderSettings()
+    const input = screen.getByRole('spinbutton', {
+      name: 'First top-up inviter reward',
+    })
+    expect(input).toHaveValue(1250000)
+    await user.clear(input)
+    await user.type(input, value)
+    await user.click(screen.getByRole('button', { name: 'Save Changes' }))
+    await waitFor(() =>
+      expect(api.put).toHaveBeenCalledWith('/api/option/', {
+        key: 'InviterFirstTopUpRewardUSD',
+        value: amountUSD,
+      })
+    )
+  }
+)
+
+test.each(['-1', '', '0.5', '9007199254740992'])(
+  'invalid first top-up inviter reward "%s" prevents saving',
+  async (value) => {
+    await renderSettings()
+    const input = screen.getByRole('spinbutton', {
+      name: 'First top-up inviter reward',
+    })
+    fireEvent.change(input, { target: { value } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }))
+    await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'))
+    expect(api.put).not.toHaveBeenCalled()
+  }
+)
+
+test('first top-up reward preserves existing amounts with a configured quota conversion rate', async () => {
+  await renderSettings(1000000)
+  const input = screen.getByRole('spinbutton', {
+    name: 'First top-up inviter reward',
+  })
+  expect(input).toHaveValue(2500000)
+  fireEvent.change(input, { target: { value: '1000000' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }))
+  await waitFor(() =>
+    expect(api.put).toHaveBeenCalledWith('/api/option/', {
+      key: 'InviterFirstTopUpRewardUSD',
+      value: 1,
+    })
+  )
+})
+
+test('first top-up reward shows the same converted balance preview as other quota settings', async () => {
+  await renderSettings()
+  for (const name of [
+    'New User Quota',
+    'Inviter Reward',
+    'First top-up inviter reward',
+  ]) {
+    const input = screen.getByRole('spinbutton', { name })
+    fireEvent.change(input, { target: { value: '500000' } })
+    expect(input).toHaveAccessibleDescription(expect.stringContaining('$1'))
+  }
 })
 
 test.each(['0.5', '1.5', '2.5', '0.0001'])(

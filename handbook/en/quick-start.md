@@ -1,3 +1,8 @@
+---
+title: "AI API Quick Start: Make Your First Model Request"
+description: "Create a TaoDock API key, list available models and make your first AI model request with cURL or PowerShell."
+---
+
 # Make your first API call
 
 The TaoDock console and API are both available at **https://taodock.com**. Follow these steps to create an account and receive your first model response.

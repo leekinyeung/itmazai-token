@@ -6,21 +6,27 @@
     <meta name="google" content="notranslate" />
 
     <!-- Primary Meta Tags -->
-    <title>TaoDock</title>
-    <meta name="title" content="TaoDock" />
+    <title>众妙之门 TaoDock | Unified AI API for Apps and Agents</title>
+    <meta
+      name="title"
+      content="众妙之门 TaoDock | Unified AI API for Apps and Agents"
+    />
     <meta
       name="description"
-      content="Unified AI API gateway and admin dashboard."
+      content="Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides."
     />
 
     <!-- Social cards must be present in the initial HTML for crawlers. -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="TaoDock" />
+    <meta property="og:site_name" content="众妙之门 TaoDock" />
     <meta property="og:url" content="https://taodock.com/" />
-    <meta property="og:title" content="TaoDock" />
+    <meta
+      property="og:title"
+      content="众妙之门 TaoDock | Unified AI API for Apps and Agents"
+    />
     <meta
       property="og:description"
-      content="Unified AI API gateway and admin dashboard."
+      content="Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides."
     />
     <meta property="og:image" content="https://taodock.com/social-card.png" />
     <meta property="og:image:type" content="image/png" />
@@ -29,10 +35,13 @@
     <meta property="og:image:alt" content="TaoDock" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="TaoDock" />
+    <meta
+      name="twitter:title"
+      content="众妙之门 TaoDock | Unified AI API for Apps and Agents"
+    />
     <meta
       name="twitter:description"
-      content="Unified AI API gateway and admin dashboard."
+      content="Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides."
     />
     <meta name="twitter:image" content="https://taodock.com/social-card.png" />
     <meta name="twitter:image:alt" content="TaoDock" />
@@ -43,11 +52,18 @@
          Keep in sync with ThemeProvider and THEME_STORAGE_KEYS.mode. -->
     <script>
       ;(function () {
-        var theme = 'system'
+        var theme = 'dark'
         try {
-          theme = localStorage.getItem('newapi:theme:v1:mode') || 'system'
+          var savedTheme = localStorage.getItem('newapi:theme:v1:mode')
+          if (
+            savedTheme === 'dark' ||
+            savedTheme === 'light' ||
+            savedTheme === 'system'
+          ) {
+            theme = savedTheme
+          }
         } catch (e) {}
-        if (theme !== 'dark' && theme !== 'light') {
+        if (theme === 'system') {
           theme = window.matchMedia('(prefers-color-scheme: dark)').matches
             ? 'dark'
             : 'light'

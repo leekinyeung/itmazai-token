@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowRight, Loader2, Mail } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -34,7 +34,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group'
 import { sendPasswordResetEmail } from '@/features/auth/api'
 import {
   forgotPasswordFormSchema,
@@ -101,7 +105,8 @@ export function ForgotPasswordForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('grid gap-2', className)}
+        className={cn('grid gap-4', className)}
+        noValidate
         {...props}
       >
         <FormField
@@ -109,10 +114,22 @@ export function ForgotPasswordForm({
           name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder='name@example.com' {...field} />
-              </FormControl>
+              <FormLabel>{t('Email')}</FormLabel>
+              <InputGroup>
+                <InputGroupAddon>
+                  <Mail className='size-4' aria-hidden='true' />
+                </InputGroupAddon>
+                <FormControl>
+                  <InputGroupInput
+                    type='email'
+                    autoComplete='email'
+                    autoCapitalize='none'
+                    spellCheck={false}
+                    placeholder='name@example.com'
+                    {...field}
+                  />
+                </FormControl>
+              </InputGroup>
               <FormMessage />
             </FormItem>
           )}
@@ -120,7 +137,7 @@ export function ForgotPasswordForm({
 
         <Button
           type='submit'
-          className='mt-2'
+          className='h-auto whitespace-normal'
           disabled={isLoading || isActive || !turnstileReady}
         >
           {isActive

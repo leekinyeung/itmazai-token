@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
-import { Loader2, LogIn, KeyRound } from 'lucide-react'
+import { Loader2, LogIn, KeyRound, LockKeyhole, UserRound } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -38,6 +38,11 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
 import { login, wechatLoginByCode } from '@/features/auth/api'
 import { LegalConsent } from '@/features/auth/components/legal-consent'
@@ -360,12 +365,20 @@ export function UserAuthForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('Username or Email')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t('Enter your username or email')}
-                      {...field}
-                    />
-                  </FormControl>
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <UserRound className='size-[18px]' aria-hidden='true' />
+                    </InputGroupAddon>
+                    <FormControl>
+                      <InputGroupInput
+                        placeholder={t('Enter your username or email')}
+                        autoComplete='username'
+                        autoCapitalize='none'
+                        spellCheck={false}
+                        {...field}
+                      />
+                    </FormControl>
+                  </InputGroup>
                   <FormMessage />
                 </FormItem>
               )}
@@ -381,6 +394,8 @@ export function UserAuthForm({
                   <FormControl>
                     <PasswordInput
                       placeholder={t('Enter password')}
+                      autoComplete='current-password'
+                      startIcon={<LockKeyhole className='size-[18px]' />}
                       {...field}
                     />
                   </FormControl>

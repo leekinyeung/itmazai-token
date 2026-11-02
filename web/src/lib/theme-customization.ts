@@ -79,7 +79,7 @@ export const THEME_PRESETS = [
   },
 ] as const
 
-export type ThemePreset = (typeof THEME_PRESETS)[number]['value']
+export type ThemePreset = (typeof THEME_PRESETS)[number]['value'] | 'custom'
 export type ThemeRadius = 'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl'
 export type ThemeScale = 'default' | 'sm' | 'lg' | 'xl'
 export type ContentLayout = 'full' | 'centered'
@@ -105,6 +105,7 @@ export type ResolvedThemeFont = 'system' | Exclude<ThemeFont, 'default'>
 
 export type ThemeCustomization = {
   preset: ThemePreset
+  customColor: string
   font: ThemeFont
   radius: ThemeRadius
   scale: ThemeScale
@@ -112,16 +113,38 @@ export type ThemeCustomization = {
 }
 
 export const DEFAULT_THEME_CUSTOMIZATION: ThemeCustomization = {
-  preset: 'default',
-  font: 'default',
-  radius: 'default',
+  preset: 'ocean-breeze',
+  customColor: '#2563eb',
+  font: 'sans',
+  radius: 'sm',
   scale: 'default',
   contentLayout: 'full',
 }
 
-export const THEME_PRESET_VALUES = new Set(
-  THEME_PRESETS.map((p) => p.value)
-) as ReadonlySet<ThemePreset>
+export const THEME_PRESET_VALUES: ReadonlySet<ThemePreset> = new Set([
+  ...THEME_PRESETS.map((p) => p.value),
+  'custom',
+])
+
+export function normalizeThemeColor(value: string): string | null {
+  const hex = value.trim().replace(/^#/, '')
+  if (/^[\da-f]{3}$/i.test(hex)) {
+    return `#${[...hex].map((digit) => digit + digit).join('')}`.toLowerCase()
+  }
+  return /^[\da-f]{6}$/i.test(hex) ? `#${hex.toLowerCase()}` : null
+}
+
+/** Pick readable button text for an opaque, normalized sRGB color. */
+export function themeColorForeground(color: string): '#000000' | '#ffffff' {
+  const linear = [1, 3, 5].map((offset) => {
+    const channel = Number.parseInt(color.slice(offset, offset + 2), 16) / 255
+    return channel <= 0.04045
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4
+  })
+  const luminance = linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722
+  return luminance > 0.179 ? '#000000' : '#ffffff'
+}
 
 export const THEME_FONT_VALUES: ReadonlySet<ThemeFont> = new Set([
   'default',

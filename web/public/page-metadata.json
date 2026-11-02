@@ -1,0 +1,34 @@
+{
+  "origin": "https://taodock.com",
+  "siteName": "众妙之门 TaoDock",
+  "pages": {
+    "/": {
+      "title": "Unified AI API for Apps and Agents",
+      "description": "Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides."
+    },
+    "/pricing": {
+      "title": "AI Model API Pricing",
+      "description": "Explore available AI models, supported API endpoints and current pricing on {{systemName}}."
+    },
+    "/pricing/:modelId": {
+      "title": "{{modelName}} API Pricing and Capabilities",
+      "description": "View API capabilities, supported endpoints and current pricing for {{modelName}} on {{systemName}}."
+    },
+    "/about": {
+      "title": "About the Platform",
+      "description": "Learn about {{systemName}}, a unified API platform for connecting applications and agents to AI models."
+    },
+    "/rankings": {
+      "title": "Usage Rankings",
+      "description": "View the usage rankings and available reporting periods published by {{systemName}}."
+    },
+    "/privacy-policy": {
+      "title": "Privacy Policy",
+      "description": "Read the privacy policy published by {{systemName}}, including how information is handled when you use the platform."
+    },
+    "/user-agreement": {
+      "title": "User Agreement",
+      "description": "Read the user agreement for using {{systemName}} and its AI API services."
+    }
+  }
+}

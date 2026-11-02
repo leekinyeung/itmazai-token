@@ -36,6 +36,7 @@ import type { LogOtherData } from '../types'
 import { DetailRow } from './dialogs/log-detail-layout'
 
 interface ModelBadgeProps {
+  canInspectModels?: boolean
   modelName: string
   actualModel?: string
   responseModel?: LogOtherData['response_model']
@@ -90,7 +91,12 @@ function ModelBadgeContent(props: ModelBadgeProps & { copyable: boolean }) {
   )
 }
 
-export function ModelBadge(props: ModelBadgeProps) {
+export function ModelBadge(input: ModelBadgeProps) {
+  const props = {
+    ...input,
+    actualModel: input.canInspectModels ? input.actualModel : undefined,
+    responseModel: input.canInspectModels ? input.responseModel : undefined,
+  }
   const { t } = useTranslation()
   const mismatch = isResponseModelMismatch(props.responseModel)
   const responseModelLabel =

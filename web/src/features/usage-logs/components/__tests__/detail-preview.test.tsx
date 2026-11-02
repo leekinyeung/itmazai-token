@@ -24,6 +24,7 @@ import {
 } from '@tanstack/react-table'
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { createInstance } from 'i18next'
+import { useMemo } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { afterAll, afterEach, beforeEach, expect, test, vi } from 'vitest'
 
@@ -79,8 +80,14 @@ function DetailPreview(props: {
   isAdmin: boolean
   type?: number
 }) {
+  // A language update must not look like new row data to TanStack Table;
+  // otherwise automatic pagination resets can keep scheduling React updates.
+  const data = useMemo(
+    () => [makeLog(props.other, props.type)],
+    [props.other, props.type]
+  )
   const table = useReactTable({
-    data: [makeLog(props.other, props.type)],
+    data,
     columns: useCommonLogsColumns(props.isAdmin, false),
     getCoreRowModel: getCoreRowModel(),
   })
@@ -99,11 +106,14 @@ const plugin = {
 }
 const previousConfig = useSystemConfigStore.getState().config
 let client: QueryClient
-const i18n = createInstance()
+let i18n: ReturnType<typeof createInstance>
 beforeEach(async () => {
+  i18n = createInstance()
   await i18n.init({
     lng: 'en',
-    resources: { en },
+    // Initialize every language used by this fixture before React subscribes.
+    resources: { en, zh, 'zh-CN': zh },
+    fallbackLng: 'en',
     interpolation: { escapeValue: false },
   })
   useSystemConfigStore
@@ -430,7 +440,9 @@ test('task log prices use localized unit labels from pricing metadata', async ()
     matched_tier: 'images',
   })
   expect(preview).toHaveTextContent('images · images $0.25/image')
-  await act(() => i18n.changeLanguage('zh-CN'))
+  await act(async () => {
+    await i18n.changeLanguage('zh-CN')
+  })
   expect(
     screen.getByRole('button', { name: /images · images/ })
   ).toHaveTextContent('images · images $0.25/张')

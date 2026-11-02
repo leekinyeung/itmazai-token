@@ -99,12 +99,12 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 			case types.RelayFormatOpenAIRealtime:
 				helper.WssError(c, ws, newAPIError.ToOpenAIError(upstreamURLs...))
 			case types.RelayFormatClaude:
-				c.JSON(newAPIError.StatusCode, gin.H{
+				common.WritePublicModelJSON(c, newAPIError.StatusCode, gin.H{
 					"type":  "error",
 					"error": newAPIError.ToClaudeError(upstreamURLs...),
 				})
 			default:
-				c.JSON(newAPIError.StatusCode, gin.H{
+				common.WritePublicModelJSON(c, newAPIError.StatusCode, gin.H{
 					"error": newAPIError.ToOpenAIError(upstreamURLs...),
 				})
 			}
@@ -730,7 +730,7 @@ func presentTaskSubmission(c *gin.Context, outcome *taskSubmissionOutcome) {
 				if valueErr == nil {
 					if body, callErr := pinned.Plugin.Engine.CallPath(c.Request.Context(), "native", []string{pinned.Route.Render}, requestContext.JSValue(), viewValue); callErr == nil {
 						diagnostics.present(outcome.Task, "native_presenter")
-						c.JSON(http.StatusOK, body)
+						common.WritePublicModelJSON(c, http.StatusOK, body)
 						return
 					} else {
 						logger.LogError(c, common.LogText("task plugin native submit presenter failed: %s", callErr.Error()))
@@ -746,7 +746,7 @@ func presentTaskSubmission(c *gin.Context, outcome *taskSubmissionOutcome) {
 	if pinnedValue, exists := c.Get(pluginruntime.ContextKeyPinnedEndpoint); exists {
 		if pinned, ok := pinnedValue.(pluginruntime.PinnedEndpoint); ok && pinned.Protocol == "openai_video" && pinned.Operation.Name == "create" {
 			diagnostics.present(outcome.Task, "openai_video_create")
-			c.JSON(http.StatusOK, outcome.Task.ToOpenAIVideo())
+			common.WritePublicModelJSON(c, http.StatusOK, outcome.Task.ToOpenAIVideo())
 			return
 		}
 	}
@@ -775,10 +775,12 @@ func respondTaskSubmissionError(c *gin.Context, taskErr *taskdto.TaskError) {
 
 // respondTaskError 统一输出 Task 错误响应（含 429 限流提示改写）
 func respondTaskError(c *gin.Context, taskErr *taskdto.TaskError) {
-	if taskErr.StatusCode == http.StatusTooManyRequests {
-		taskErr.Message = i18n.T(c, i18n.MsgRelayGroupUpstreamSaturated)
+	publicError := *taskErr
+	publicError.Message = common.PublicModelMessage(c, publicError.Message)
+	if publicError.StatusCode == http.StatusTooManyRequests {
+		publicError.Message = i18n.T(c, i18n.MsgRelayGroupUpstreamSaturated)
 	}
-	c.JSON(taskErr.StatusCode, taskErr)
+	common.WritePublicModelJSON(c, publicError.StatusCode, &publicError)
 }
 
 // taskSubmissionAPIError adapts a task error for the shared relay error paths.

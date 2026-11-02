@@ -7,6 +7,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -15,6 +16,7 @@ import (
 
 func TestGetOpenAIVideoRouteRendersJimengTask(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	require.NoError(t, i18n.Init())
 
 	previousDB := model.DB
 	previousDatabaseType := common.MainDatabaseType()
@@ -69,15 +71,16 @@ func TestGetOpenAIVideoRouteRendersJimengTask(t *testing.T) {
 	}).Error)
 
 	task := &model.Task{
-		CreatedAt: 1710000000,
-		UpdatedAt: 1710000060,
-		TaskID:    "task_jimeng_public",
-		Platform:  constant.TaskPlatform("jimeng"),
-		UserId:    91,
-		Group:     "default",
-		ChannelId: 17,
-		Status:    model.TaskStatusSuccess,
-		Progress:  "100%",
+		CreatedAt:  1710000000,
+		UpdatedAt:  1710000060,
+		TaskID:     "task_jimeng_public",
+		Properties: model.Properties{OriginModelName: "jimeng_vgfm_t2v_l20", UpstreamModelName: "jimeng-private-model"},
+		Platform:   constant.TaskPlatform("jimeng"),
+		UserId:     91,
+		Group:      "default",
+		ChannelId:  17,
+		Status:     model.TaskStatusSuccess,
+		Progress:   "100%",
 		PrivateData: model.TaskPrivateData{
 			ResultURL: "data:video/mp4;base64,ZGF0YQ==",
 		},
@@ -120,6 +123,18 @@ func TestGetOpenAIVideoRouteRendersJimengTask(t *testing.T) {
 	assert.Equal(t, int64(1710000060), response.CompletedAt)
 	assert.NotContains(t, recorder.Body.String(), "cdn.example")
 	assert.NotContains(t, recorder.Body.String(), "jimeng-private-1")
+
+	t.Run("missing public identity fails closed", func(t *testing.T) {
+		require.NoError(t, database.Model(task).Update("properties", model.Properties{UpstreamModelName: "jimeng-private-model"}).Error)
+		request := httptest.NewRequest(http.MethodGet, "/v1/videos/task_jimeng_public", nil)
+		request.Header.Set("Authorization", "Bearer sk-jimengfetch")
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, request)
+		assert.Equal(t, http.StatusInternalServerError, recorder.Code, recorder.Body.String())
+		assert.Contains(t, recorder.Body.String(), "public_model_unavailable")
+		assert.NotContains(t, recorder.Body.String(), "jimeng-private-model")
+		require.NoError(t, database.Model(task).Update("properties", model.Properties{OriginModelName: "jimeng_vgfm_t2v_l20", UpstreamModelName: "jimeng-private-model"}).Error)
+	})
 
 	for _, testCase := range []struct {
 		name          string

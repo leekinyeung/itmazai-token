@@ -26,8 +26,16 @@ import { NotificationPopover } from '@/components/notification-popover'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Button } from '@/components/ui/button'
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SystemUpdateAction } from '@/features/system-update/system-update-action'
+import { useMediaQuery } from '@/hooks/use-media-query'
 import { useNotifications } from '@/hooks/use-notifications'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
@@ -78,6 +86,7 @@ export function PublicHeader(props: PublicHeaderProps) {
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [authPromptTarget, setAuthPromptTarget] =
     useState<AuthPromptTarget | null>(null)
   const [authPromptSecondsLeft, setAuthPromptSecondsLeft] =
@@ -130,11 +139,8 @@ export function PublicHeader(props: PublicHeaderProps) {
   }, [])
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : ''
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [mobileOpen])
+    if (isDesktop) setMobileOpen(false)
+  }, [isDesktop])
 
   useEffect(() => {
     if (!authPromptTarget) return
@@ -198,20 +204,14 @@ export function PublicHeader(props: PublicHeaderProps) {
   )
 
   return (
-    <>
+    <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
       <header className='pointer-events-none fixed inset-x-0 top-0 z-50'>
-        <div
-          className={cn(
-            'pointer-events-auto mx-auto transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
-            scrolled ? 'max-w-[52rem] px-3 pt-3' : 'max-w-7xl px-4 pt-0 md:px-6'
-          )}
-        >
+        <div className='pointer-events-auto mx-auto max-w-7xl px-4 md:px-6'>
           <nav
             className={cn(
-              'flex items-center justify-between gap-2 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
-              scrolled
-                ? 'bg-background/60 ring-border/50 h-12 rounded-2xl pr-1.5 pl-4 shadow-[0_2px_16px_-6px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.02)] ring-[0.5px] backdrop-blur-2xl dark:shadow-[0_2px_16px_-6px_rgba(0,0,0,0.4)]'
-                : 'h-16 px-2'
+              'flex h-16 items-center justify-between gap-2 px-2 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
+              scrolled &&
+                'bg-background/60 ring-border/50 rounded-2xl shadow-[0_2px_16px_-6px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.02)] ring-[0.5px] backdrop-blur-2xl dark:shadow-[0_2px_16px_-6px_rgba(0,0,0,0.4)]'
             )}
           >
             {/* Logo */}
@@ -316,13 +316,16 @@ export function PublicHeader(props: PublicHeaderProps) {
               {showAuthButtons && !loading && isAuthenticated && (
                 <ProfileDropdown />
               )}
-              <Button
-                type='button'
-                variant='ghost'
-                size='icon'
-                className='size-9'
-                onClick={() => setMobileOpen((v) => !v)}
-                aria-label={t('Toggle navigation menu')}
+              <SheetTrigger
+                render={
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    size='icon'
+                    className='size-11'
+                    aria-label={t('Toggle navigation menu')}
+                  />
+                }
               >
                 <div className='relative size-4'>
                   <span
@@ -344,22 +347,44 @@ export function PublicHeader(props: PublicHeaderProps) {
                     )}
                   />
                 </div>
-              </Button>
+              </SheetTrigger>
             </div>
           </nav>
         </div>
       </header>
 
-      {/* Mobile full-screen overlay */}
-      <div
-        className={cn(
-          'bg-background/98 fixed inset-0 z-40 backdrop-blur-2xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:pointer-events-none lg:hidden',
-          mobileOpen
-            ? 'pointer-events-auto opacity-100'
-            : 'pointer-events-none opacity-0'
-        )}
+      <SheetContent
+        showCloseButton={false}
+        aria-describedby={undefined}
+        aria-labelledby='mobile-navigation-title'
+        className='inset-0 h-dvh w-full max-w-none gap-0 border-0 sm:max-w-none lg:hidden'
       >
-        <div className='flex h-full flex-col justify-between px-8 pt-20 pb-10'>
+        <div className='flex shrink-0 items-center justify-between px-6 py-3'>
+          <SheetTitle className='text-sm font-semibold'>
+            {displaySiteName}
+          </SheetTitle>
+          <div className='flex items-center gap-2'>
+            {showLanguageSwitcher && <LanguageSwitcher className='size-11' />}
+            <SheetClose
+              render={
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='size-11'
+                  aria-label={t('Close menu')}
+                />
+              }
+            >
+              <span aria-hidden='true' className='text-2xl'>
+                ×
+              </span>
+            </SheetClose>
+          </div>
+        </div>
+        <span id='mobile-navigation-title' className='sr-only'>
+          {t('Toggle navigation menu')}
+        </span>
+        <div className='flex min-h-0 flex-1 flex-col justify-between gap-6 overflow-y-auto px-8 pt-4 pb-8'>
           <nav className='flex flex-col gap-1'>
             {links.map((link, i) => {
               const isActive = pathname === link.href
@@ -426,7 +451,7 @@ export function PublicHeader(props: PublicHeaderProps) {
             )}
           </div>
         </div>
-      </div>
+      </SheetContent>
 
       <Dialog
         open={!!authPromptTarget}
@@ -456,6 +481,6 @@ export function PublicHeader(props: PublicHeaderProps) {
           })}
         </div>
       </Dialog>
-    </>
+    </Sheet>
   )
 }

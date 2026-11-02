@@ -1385,6 +1385,19 @@ export const native = {error: function(ctx, error) {
 	assert.NotContains(t, recorder.Body.String(), "upstream.invalid")
 	assert.NotContains(t, recorder.Body.String(), "secret")
 	assert.NotContains(t, recorder.Body.String(), "password")
+
+	// Client-facing validation details keep their meaning while private model
+	// aliases are removed before a native renderer receives the error DTO.
+	recorder = httptest.NewRecorder()
+	c, _ = gin.CreateTestContext(recorder)
+	c.Request = httptest.NewRequest(http.MethodPost, "/vendor/failure", nil)
+	c.Set(jsplugin.ContextKeyPinnedRoute, jsplugin.PinnedRoute{Plugin: plugin})
+	c.Set(jsplugin.ContextKeyRouteRequest, jsplugin.RouteRequestContext{Path: "/vendor/failure"})
+	service.BindTaskPublicModel(c, &model.Task{Properties: model.Properties{OriginModelName: "public-pro", UpstreamModelName: "private-model"}})
+	require.True(t, RespondTaskPluginError(c, &dto.TaskError{Code: "invalid_request", Message: "private-model does not support this option", StatusCode: http.StatusBadRequest}))
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	assert.Contains(t, recorder.Body.String(), "public-pro does not support this option")
+	assert.NotContains(t, recorder.Body.String(), "private-model")
 }
 
 func TestTaskPluginErrorFallbackIsSanitized(t *testing.T) {

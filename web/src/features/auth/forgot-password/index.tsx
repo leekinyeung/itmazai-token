@@ -17,7 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
+import { ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
+import { Separator } from '@/components/ui/separator'
 
 import { AuthLayout } from '../auth-layout'
 import { ForgotPasswordForm } from './components/forgot-password-form'
@@ -25,30 +28,32 @@ import { ForgotPasswordForm } from './components/forgot-password-form'
 export function ForgotPassword() {
   const { t } = useTranslation()
   return (
-    <AuthLayout>
+    <AuthLayout variant='split'>
       <div className='w-full space-y-8'>
-        <div className='space-y-3'>
-          <h2 className='text-center text-2xl font-semibold tracking-tight sm:text-left'>
-            {t('Forgot password')}
-          </h2>
-          <p className='text-muted-foreground text-left text-sm sm:text-base'>
+        <div>
+          <h1 className='auth-heading'>{t('Forgot password')}</h1>
+          <p className='auth-description'>
             {t(
               'Enter your registered email and we will send you a link to reset your password.'
             )}
           </p>
-          <p className='text-muted-foreground text-left text-sm sm:text-base'>
-            {t("Don't have an account?")}{' '}
-            <Link
-              to='/sign-up'
-              className='hover:text-primary font-medium underline underline-offset-4'
-            >
-              {t('Sign up')}
-            </Link>
-            .
-          </p>
         </div>
 
-        <ForgotPasswordForm className='space-y-0' />
+        <ForgotPasswordForm />
+
+        <div className='auth-switch'>
+          <Separator className='min-w-0 flex-1' />
+          <p>
+            <Link
+              to='/sign-in'
+              className='inline-flex items-center gap-2 font-medium hover:underline'
+            >
+              <ArrowLeft className='size-4' aria-hidden='true' />
+              {t('Back to login')}
+            </Link>
+          </p>
+          <Separator className='min-w-0 flex-1' />
+        </div>
       </div>
     </AuthLayout>
   )

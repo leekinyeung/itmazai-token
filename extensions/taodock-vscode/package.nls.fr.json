@@ -1,0 +1,8 @@
+{
+  "extension.description": "Utilisez les modèles TaoDock dans VS Code avec votre clé API : réponses en continu, outils et stockage sécurisé.",
+  "command.manage": "Configurer ou remplacer la clé API",
+  "command.refresh": "Actualiser les modèles",
+  "command.remove": "Supprimer la clé API de cet éditeur",
+  "command.console": "Ouvrir la console des clés API",
+  "command.docs": "Ouvrir la documentation"
+}

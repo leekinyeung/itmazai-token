@@ -34,19 +34,22 @@ const metadata = Object.fromEntries(
     tag.getAttribute('content'),
   ])
 )
+const homepageTitle = '众妙之门 TaoDock | Unified AI API for Apps and Agents'
+const homepageDescription =
+  'Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides.'
 
 describe('website social sharing', () => {
   it('provides Twitter large image and Open Graph metadata before JavaScript runs', () => {
     expect(metadata).toEqual(
       expect.objectContaining({
         'twitter:card': 'summary_large_image',
-        'twitter:title': 'TaoDock',
+        'twitter:title': homepageTitle,
         'twitter:description': metadata.description,
         'twitter:image': 'https://taodock.com/social-card.png',
         'twitter:image:alt': 'TaoDock',
         'og:type': 'website',
-        'og:site_name': 'TaoDock',
-        'og:title': 'TaoDock',
+        'og:site_name': '众妙之门 TaoDock',
+        'og:title': homepageTitle,
         'og:url': 'https://taodock.com/',
         'og:description': metadata.description,
         'og:image': metadata['twitter:image'],
@@ -55,6 +58,40 @@ describe('website social sharing', () => {
       })
     )
     expect(metadata.description).toBeTruthy()
+  })
+
+  it('describes the homepage in the initial HTML before JavaScript runs', () => {
+    expect(head.querySelector('title')?.textContent).toBe(homepageTitle)
+    expect(metadata.title).toBe(homepageTitle)
+    expect(metadata.description).toBe(homepageDescription)
+  })
+
+  it('provides a valid XML sitemap for the homepage and public model pricing page', () => {
+    const sitemap = new DOMParser().parseFromString(
+      readFileSync(resolve(webRoot, 'public/sitemap.xml'), 'utf8'),
+      'application/xml'
+    )
+
+    expect(sitemap.querySelector('parsererror')).toBeNull()
+    expect(sitemap.documentElement.localName).toBe('urlset')
+    expect(sitemap.documentElement.namespaceURI).toBe(
+      'http://www.sitemaps.org/schemas/sitemap/0.9'
+    )
+    expect(
+      Array.from(
+        sitemap.querySelectorAll('url > loc'),
+        (loc) => loc.textContent
+      )
+    ).toEqual(['https://taodock.com/', 'https://taodock.com/pricing'])
+  })
+
+  it('allows search crawlers and advertises the sitemap in robots.txt', () => {
+    const robots = readFileSync(resolve(webRoot, 'public/robots.txt'), 'utf8')
+
+    expect(robots).toMatch(/^User-agent: \*$/m)
+    expect(robots).toMatch(/^Allow: \/$/m)
+    expect(robots).toMatch(/^Sitemap: https:\/\/taodock\.com\/sitemap\.xml$/m)
+    expect(robots).not.toMatch(/^Disallow:\s*\/\s*$/m)
   })
 
   it('references a public landscape PNG with matching dimensions and a file size below 5 MB', () => {

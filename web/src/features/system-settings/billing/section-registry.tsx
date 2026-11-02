@@ -60,10 +60,12 @@ const BILLING_SECTIONS = [
     titleKey: 'Quota Settings',
     build: (settings: BillingSettings) => (
       <QuotaSettingsSection
+        quotaPerUnit={settings.QuotaPerUnit}
         defaultValues={{
           QuotaForNewUser: settings.QuotaForNewUser,
           QuotaForInviter: settings.QuotaForInviter,
           QuotaForInvitee: settings.QuotaForInvitee,
+          InviterFirstTopUpRewardUSD: settings.InviterFirstTopUpRewardUSD,
           TopUpLink: settings.TopUpLink,
           quota_setting: {
             trust_quota_usd: settings['quota_setting.trust_quota_usd'],

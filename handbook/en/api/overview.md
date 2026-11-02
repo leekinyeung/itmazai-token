@@ -1,3 +1,8 @@
+---
+title: "AI API Integration: cURL, Python and JavaScript"
+description: "Use TaoDock API endpoints to list models and send chat requests with cURL, Python or JavaScript, including streaming and error handling."
+---
+
 # API integration
 
 TaoDock's API service is **https://taodock.com**, with OpenAI-compatible Base URL **`https://taodock.com/v1`**. The code below uses TaoDock's actual addresses and reads your own key from the terminal or environment.

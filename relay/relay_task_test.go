@@ -48,6 +48,38 @@ func setupRelayChannelDB(t *testing.T) *gorm.DB {
 	return database
 }
 
+func TestResolveOriginTaskRequiresPersistedPublicModel(t *testing.T) {
+	require.NoError(t, i18n.Init())
+	database := setupRelayChannelDB(t)
+	require.NoError(t, database.AutoMigrate(&model.Task{}))
+	channel := &model.Channel{Name: "origin-privacy", Key: "unused", Status: common.ChannelStatusEnabled}
+	require.NoError(t, database.Create(channel).Error)
+	for _, publicModel := range []string{"public-pro", ""} {
+		t.Run("public="+publicModel, func(t *testing.T) {
+			task := &model.Task{TaskID: "origin-" + publicModel, UserId: 91, ChannelId: channel.Id,
+				Properties: model.Properties{OriginModelName: publicModel, UpstreamModelName: "private-model"},
+				Data:       []byte(`{"model":"private-model"}`)}
+			require.NoError(t, database.Create(task).Error)
+			c, _ := gin.CreateTestContext(httptest.NewRecorder())
+			c.Request = httptest.NewRequest(http.MethodPost, "/v1/video/generations", nil)
+			info := &relaycommon.RelayInfo{UserId: 91, ChannelMeta: &relaycommon.ChannelMeta{ChannelId: channel.Id}, TaskRelayInfo: &relaycommon.TaskRelayInfo{OriginTaskID: task.TaskID}}
+			taskErr := ResolveOriginTask(c, info)
+			if publicModel == "" {
+				require.NotNil(t, taskErr)
+				assert.Equal(t, "public_model_unavailable", taskErr.Code)
+				assert.Equal(t, http.StatusInternalServerError, taskErr.StatusCode)
+				assert.Empty(t, info.OriginModelName)
+				assert.NotContains(t, taskErr.Message, "private-model")
+				return
+			}
+			require.Nil(t, taskErr)
+			assert.Equal(t, publicModel, info.OriginModelName)
+			require.IsType(t, &model.Channel{}, info.LockedChannel)
+			assert.Equal(t, channel.Id, info.LockedChannel.(*model.Channel).Id)
+		})
+	}
+}
+
 func TestApplyChannelPinPreservesOriginTasksAndRetryMode(t *testing.T) {
 	database := setupRelayChannelDB(t)
 	channel := &model.Channel{Name: "origin-channel", Key: "sk-test", Status: common.ChannelStatusEnabled, Type: constant.ChannelTypeDoubaoVideo}
@@ -468,4 +500,25 @@ export function parseTaskResult() { return {status:"SUCCESS"}; }
 			assert.JSONEq(t, `{"status":`+strconv.Itoa(tc.status)+`}`, string(result.TaskData))
 		})
 	}
+}
+
+func TestLegacyTaskFetchProjectsModelMetadataAndPreservesResults(t *testing.T) {
+	db := setupRelayChannelDB(t)
+	require.NoError(t, db.AutoMigrate(&model.Task{}))
+	const original = `{"model":"private-model","output":{"model":"private-model","text":"private-model"},"large":9007199254740993}`
+	task := &model.Task{TaskID: "task_privacy", UserId: 91, Properties: model.Properties{OriginModelName: "public-pro", UpstreamModelName: "private-model"}, Data: []byte(original)}
+	require.NoError(t, db.Create(task).Error)
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/v1/video/generations/task_privacy", nil)
+	c.Params = gin.Params{{Key: "task_id", Value: task.TaskID}}
+	c.Set("id", 91)
+	body, taskErr := videoFetchByIDRespBodyBuilder(c)
+	require.Nil(t, taskErr)
+	assert.NotContains(t, string(body), "upstream_model_name")
+	assert.Contains(t, string(body), `"model":"public-pro"`)
+	assert.Contains(t, string(body), `"output":{"model":"private-model","text":"private-model"}`)
+	assert.Contains(t, string(body), `"large":9007199254740993`)
+	require.NoError(t, db.First(task, task.ID).Error)
+	assert.Equal(t, original, string(task.Data))
+	assert.Equal(t, "private-model", task.Properties.UpstreamModelName)
 }

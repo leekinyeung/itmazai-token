@@ -21,7 +21,7 @@ bun run dev
 | `index.md` | 手册首页 |
 | `quick-start.md` | 新用户首次调用流程 |
 | `guide/console.md` | 控制台使用 |
-| `guide/clients.md` | 客户端通用配置 |
+| `guide/clients.md` | Cherry Studio、WorkBuddy、AionUI、DeepChat、Open WebUI 的导入与配置 |
 | `guide/models.md` | TaoDock 模型、接口与分组选择 |
 | `guide/api-keys.md` | 密钥的创建、限制与停用 |
 | `guide/wallet.md` | 钱包、额度与用量核对 |
@@ -275,6 +275,31 @@ mv -Tf /var/www/taodock-handbook/current.rollback.20261026T061954Z /var/www/taod
 - 验证：`bun run build`、内容与链接检查通过；八个修改页面的线上内容逐字节匹配构建；主站状态正常，Nginx 配置和应用镜像未改动。
 - 回退方式与上一节一致，使用本次备份中的 `previous-target` 原子切换 `current` 链接。
 
+### 2026-10-27 客户端与 Agent 教程上线
+
+- 发布版本：`20261027T025837Z`，本次手册工作区构建。
+- 内容：补充 Cherry Studio、WorkBuddy、AionUI、DeepChat 的导入或手动接入、会话选模、工具验证与排错；保留 Open WebUI，更新中英文首页、导航、侧栏与当前模型 ID。
+- 发布目录：`/var/www/taodock-handbook/releases/20261027T025837Z/site`。
+- 发布包 SHA-256：`9da6d7798a99d65697dd4e2889d979612498cfc277301232bb7f2b81e5088398`，上传后已核对。
+- 备份：`/root/taodock-docs-backups/20261027T025837Z`；`previous-target` 保存上一版 `/var/www/taodock-handbook/releases/20261026T064941Z/site`。
+- 静态文件经备份和校验后原子切换 `current`；旧版静态资源仍保留。Nginx 配置校验通过，主站应用镜像 ID 与发布前一致。
+- 实测：`bun run build`、`git diff --check`、中英文页面和章节锚点对齐、内部链接、占位内容扫描通过；新增教程中的外链均返回 HTTP 200。现有 Python / JavaScript 调用片段以模拟响应验证，Bash/Zsh 语法检查通过。
+- 本地生产预览：WorkBuddy 排版正常，侧栏能定位各工具章节，中英文切换保留 `#workbuddy`，站内搜索 WorkBuddy 能返回新教程。
+- 线上：中英文共 18 页的 HTTPS 内容逐字节匹配本地构建；主站 `/api/status` 成功，文档入口正确。线上自动浏览器导航超时，未计入已通过的检查。
+- 验证边界：未安装或运行这些客户端，未进行付费模型、MCP 或文件工具实测。教程附有用户可执行的验证步骤。
+- 回退：读取本次备份中的 `previous-target`，创建指向该目录的临时符号链接，再以 `mv -Tf` 原子替换 `/var/www/taodock-handbook/current`。
+
+### 2026-10-27 操作截图上线
+
+- 发布版本：`20261027T032959Z`；发布目录：`/var/www/taodock-handbook/releases/20261027T032959Z/site`。
+- 发布包 SHA-256：`d76218ffd44c1988120c86800caae0b31578cf4242f45ae295207f06daf18cc4`，上传后已核对。
+- 中英文客户端教程各增加四张图片、图注、替代文本与字段对照；图片共用，支持在新标签中打开原尺寸。
+- 来源：Cherry Studio 2.1.7、WorkBuddy 5.8.3、DeepChat 1.1.3 的实际配置界面，以及标明来源的 AionUI 官方平台选择图。没有改写截图中的字段或生成模拟界面。
+- 验证：`bun run build`、`git diff --check`、页面和章节对齐、内部路径与锚点、截图静态资源及原尺寸链接检查通过。浏览器实测四张图均加载，图片按列宽缩放且没有横向溢出，WorkBuddy 与 DeepChat 的图片链接能打开原图；未进行手机设备模拟。
+- 线上：中英文 18 页与四个图片文件的内容逐字节匹配构建，JPEG/PNG MIME 类型正确；主站状态正常。未修改 Nginx、证书、应用镜像或数据库。
+- 备份：`/root/taodock-docs-backups/20261027T032959Z`；上一版为 `/var/www/taodock-handbook/releases/20261027T025837Z/site`。回退时读取备份中的 `previous-target` 并原子切换 `current`。
+- 截图未使用真实密钥进行模型调用；WorkBuddy 与 DeepChat 的临时表单未保存。用于截图的 DeepChat 已退出，本地预览已停止。
+
 ## 接入主站
 
 确认线上文档可访问后，使用管理员账号进入主站：
@@ -287,7 +312,33 @@ mv -Tf /var/www/taodock-handbook/current.rollback.20261026T061954Z /var/www/taod
 
 公开手册使用 TaoDock 的实际域名、控制台路径和已核对的模型 ID。维护时同步更新中英文对应文章，不得重新引入占位域名、虚构密钥或未经核对的模型名称。密钥由用户自己输入，不能将测试凭据写入公开页面。
 
+### 客户端操作截图
+
+截图保存在 `public/images/clients/`，中英文客户端文章共用原图，分别维护替代文本、图注和字段对照。每张图提供可在新标签中打开的原尺寸链接，设置宽高及延迟加载。保持真实界面，不能用生成图片替代操作截图。
+
+| 图片 | 来源与范围 |
+| --- | --- |
+| `cherry-provider.jpg` | 2026-10-27 通过电脑操作工具截取本机 Cherry Studio 2.1.7 的 New API 设置；实际域名为 TaoDock，密钥由应用遮罩，未展开密钥或改动服务商配置 |
+| `workbuddy-custom.jpg` | 本机 WorkBuddy 5.8.3 添加模型表单；只填写 TaoDock 公共地址和模型 ID，密钥留空；截图后取消表单，没有保存新模型或调用测试 |
+| `aionui-platform.png` | [AionUI 官方图片](https://github.com/iOfficeAI/AionUi/blob/main/resources/llm_newapi.png)原图，用于定位 Custom 平台；图注明确来源和未填写 TaoDock 的状态，连接值以相邻表格为准 |
+| `deepchat-custom.jpg` | DeepChat 1.1.3 官方发布版的自定义服务商表单；填写 TaoDock 名称、Chat Completions 协议与公共 URL，密钥留空，未保存服务商或发起连接测试 |
+
+DeepChat 发布包来自官方 GitHub Release，仅解压到临时目录用于截图，未复制到 `/Applications`。下载包 SHA-256 与 GitHub 发布资产的摘要一致（`6284eadb9315724f5729b15b9eef21d1cb848909e99750d486e581186e106b03`），`codesign --verify --deep --strict` 通过。AionUI 图片保持原始文件，不修改其中界面或将其描述为本机实测。
+
+截图核对内容包括：字段与正文地址一致、没有可用的真实 API 密钥、没有私聊内容和个人账号信息、文件格式与扩展名一致、原尺寸链接和移动端显示正常。更换客户端版本时重新核对，必要时重拍截图；不要仅改正文而留下相反的图中地址或协议。
+
 2026-10-26 内容核对来源为主站 `/api/status`、`/api/pricing`、`/api/about` 的公开信息及当前前端路由与密钥操作实现。注册要求、模型可用性和价格可能变化，每次修改相关内容时重新核对；客户端配置另外参考 Cherry Studio 和 Open WebUI 的官方说明。未使用真实密钥发起计费生成调用。
+
+2026-10-27 新增 Agent 工具接入教程：分别说明控制台一键导入、应用内手动配置、会话选模和文件工具验证；同步中英文首页、导航、侧栏与模型目录。公开 `/api/status` 仍提供 Cherry Studio、AionUI、DeepChat 预设，没有 WorkBuddy 预设。模型目录中部分旧 ID 已移除，已按当天 `/api/pricing` 更新模型指南。
+
+本次客户端核对依据：
+
+- Cherry Studio 的 [New API 服务商说明](https://cherryai.com.cn/docs/zh-cn/pre-basic/providers/newapi/)、[智能体运行模式与模型](https://cherryai.com.cn/docs/zh-cn/advanced-basic/agent-workspace/create-agent/)和 [API 网关](https://cherryai.com/docs/en/advanced-basic/developer-tools/api-gateway/)。不同运行模式按兼容模型选择器配置，不把普通聊天成功等同于 Agent 成功。
+- WorkBuddy 的[官方模型配置](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Model)及[地址与能力选项说明](https://intl.cloud.tencent.com/zh/document/product/1316/84496)。自定义协议关闭时用 `/v1` 基础地址，开启时用完整 `/v1/chat/completions`；不提供未经核对的 `models.json` 配置。
+- AionUI 的[模型配置 Wiki](https://github.com/iOfficeAI/AionUi/wiki/LLM-Configuration-Chinese)和[入门说明](https://github.com/iOfficeAI/AionUi/wiki/Getting-Started)，并检查官方 `packages/desktop/src/process/utils/deepLink.ts`、`packages/desktop/src/renderer/hooks/system/useDeepLink.ts`。当前应用导入参数的处理可能随版本变化，教程要求核对地址和密钥并提供手动回退，不保证任意版本自动填全。
+- DeepChat 的[官方项目](https://github.com/ThinkInAIXYZ/deepchat)，并检查 `src/shared/providerDeeplink.ts`、`src/renderer/settings/components/AddProviderFlow.vue`、`ModelProviderSettings.vue`、`ModelProviderSettingsDetail.vue`。当前添加界面中 `OpenAI` 对应 `/responses`，`OpenAI Completions` 对应 `/chat/completions`，教程使用后者。
+
+上述为资料、公开入口及代码核对，未安装这些客户端或使用用户密钥发起计费生成、MCP 或本机文件工具调用。实际集成需要用户按教程完成对话及工具检查。
 
 ## 官方参考
 

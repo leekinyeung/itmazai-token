@@ -19,6 +19,33 @@ For commercial licensing, please contact support@quantumnous.com
 // Static translation keys that don't get picked up by the t('...') regex.
 // These cover dynamic labels (e.g. constants, configs) that are passed into t at runtime.
 export const STATIC_I18N_KEYS = [
+  // Public footer navigation labels are translated when rendered.
+  'Products',
+  'Documentation',
+  'About',
+  'Model Square',
+  'Rankings',
+  'Console',
+  'Quick start',
+  'Integration guide',
+  'API documentation',
+  'Developer documentation',
+  'About us',
+  'User Agreement',
+  'Privacy Policy',
+  'First top-up inviter reward must be a valid non-negative USD amount within the wallet limit',
+  "Invited user's first top-up reward {{quota}} (user ID: {{user_id}})",
+  // Public page titles and descriptions are shared with the server HTML renderer.
+  'AI Model API Pricing',
+  'Explore available AI models, supported API endpoints and current pricing on {{systemName}}.',
+  '{{modelName}} API Pricing and Capabilities',
+  'View API capabilities, supported endpoints and current pricing for {{modelName}} on {{systemName}}.',
+  'About the Platform',
+  'Learn about {{systemName}}, a unified API platform for connecting applications and agents to AI models.',
+  'Usage Rankings',
+  'View the usage rankings and available reporting periods published by {{systemName}}.',
+  'Read the privacy policy published by {{systemName}}, including how information is handled when you use the platform.',
+  'Read the user agreement for using {{systemName}} and its AI API services.',
   'Failed to load language resources',
   'Task usage metadata is unavailable. Pricing details cannot be displayed.',
   'This expression cannot be expanded into a price table. View the original expression below.',
@@ -905,4 +932,7 @@ export const STATIC_I18N_KEYS = [
   'Channel priorities changed. Refresh and try again.',
   'Invalid channel priority move',
   'Channel priority is outside the sortable range',
+  // Homepage protocol counts selected by singular/plural catalog size.
+  '{{formattedCount}} compatible model',
+  '{{formattedCount}} compatible models',
 ] as const

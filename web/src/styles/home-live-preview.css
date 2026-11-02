@@ -1,0 +1,281 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+.home-live.home-section {
+  padding-block: 4rem;
+}
+.home-live > .home-eyebrow {
+  margin-bottom: 0;
+}
+.home-live-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 1rem;
+}
+.home-live-grid > * {
+  min-width: 0;
+}
+.home-live-intro > .home-section-description {
+  max-width: 28rem;
+  margin-top: 1rem;
+  font-size: var(--text-base);
+  line-height: 1.625;
+  color: var(--home-muted-foreground);
+}
+.home-price-panel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  margin-top: 2rem;
+}
+.home-panel-label {
+  flex-wrap: wrap;
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--home-muted-foreground);
+  font-size: var(--text-xs);
+}
+.home-panel-label > span {
+  font-size: var(--text-xs);
+  color: var(--home-muted-foreground);
+}
+.home-price-list {
+  margin-top: 10px;
+}
+.home-price-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  align-items: center;
+}
+.home-price-model {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.home-price-model-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.home-price-model-identity {
+  min-width: 0;
+  flex: 1;
+}
+.home-price-model a {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  overflow-wrap: anywhere;
+  line-height: 1.65;
+}
+.home-price-model a svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.home-price-model-identity > span {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--home-muted-foreground);
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.home-price-value {
+  min-width: 0;
+}
+.home-price-value .tabular-nums {
+  color: var(--home-success-text);
+}
+.home-price-loading {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.home-terminal {
+  margin-top: 0;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  overflow: hidden;
+  box-shadow: 0 24px 70px #0003;
+}
+.home-terminal-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 4px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--home-muted-foreground);
+  background: var(--muted);
+  font:
+    10px ui-monospace,
+    monospace;
+  gap: 12px;
+}
+.home-terminal-dots {
+  flex-shrink: 0;
+  display: flex;
+  gap: 6px;
+}
+.home-terminal-dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--destructive);
+}
+.home-terminal-dots i:nth-child(2) {
+  background: var(--warning);
+}
+.home-terminal-dots i:nth-child(3) {
+  background: var(--success);
+}
+.home-terminal-bar button {
+  color: var(--home-muted-foreground);
+  font-size: 11px;
+  gap: 6px;
+  min-width: 80px;
+  height: 44px;
+}
+.home-main .home-curl-code {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  min-width: 0;
+  padding: 0 16px;
+  margin: 0;
+  box-shadow: none;
+}
+.home-curl-code .cm-editor,
+.home-curl-code .cm-scroller,
+.home-curl-code .cm-content {
+  background: transparent !important;
+  font:
+    12px/1.8 ui-monospace,
+    monospace;
+}
+.home-curl-code [role='textbox'] {
+  --code-editor-min-height: 0rem !important;
+  min-height: 0;
+}
+.home-curl-code .cm-content {
+  padding: 16px 0 !important;
+}
+.home-curl-code .cm-line {
+  line-height: 1.8;
+}
+.home-curl-code .cm-scroller {
+  overflow-x: auto;
+}
+.home-curl-code .cm-focused {
+  outline: 0 !important;
+}
+.home-terminal-response {
+  border-top: 1px dashed var(--border);
+  padding: 16px;
+  font-size: var(--text-xs);
+}
+.home-terminal-response > span {
+  color: var(--home-muted-foreground);
+  display: block;
+  font:
+    11px ui-monospace,
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+.home-terminal-response code {
+  color: var(--home-success-text);
+}
+.home-terminal-response p {
+  color: var(--home-muted-foreground);
+  margin-top: 8px;
+  line-height: 1.75;
+}
+
+.home-price-value .truncate,
+.home-price-value .sm\:truncate {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.home-terminal-title {
+  min-width: 0;
+  flex: 1;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.home-curl-code .code-block-scroll {
+  overscroll-behavior-x: contain;
+}
+@media (min-width: 768px) {
+  .home-live.home-section {
+    padding-block: 6rem;
+  }
+}
+@media (min-width: 1024px) {
+  .home-live-grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 40px;
+  }
+}
+
+@media (max-width: 639px) {
+  .home-price-list li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding-block: 16px;
+  }
+  .home-price-panel {
+    padding-inline: 12px;
+  }
+  .home-price-model a {
+    font-size: var(--text-sm);
+    min-height: 44px;
+  }
+  .home-price-model a svg {
+    margin-left: auto;
+  }
+  .home-price-value > span > span:first-child > span {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .home-price-value {
+    font-size: var(--text-xs);
+  }
+  .home-terminal {
+    margin-top: 0;
+  }
+}

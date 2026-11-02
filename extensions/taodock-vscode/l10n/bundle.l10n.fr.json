@@ -1,0 +1,18 @@
+{
+  "Connect TaoDock": "Connecter TaoDock",
+  "Paste an API key from taodock.com/keys. It will be stored in VS Code Secret Storage.": "Collez une clé API de taodock.com/keys. Elle sera conservée dans le stockage sécurisé de VS Code.",
+  "Enter a complete API key without spaces or line breaks.": "Saisissez une clé API complète, sans espace ni saut de ligne.",
+  "This key has no supported chat models. Check its group and model permissions in TaoDock.": "Cette clé ne donne accès à aucun modèle de chat compatible. Vérifiez son groupe et ses autorisations dans TaoDock.",
+  "TaoDock connected. Choose a TaoDock model in the chat model picker.": "TaoDock est connecté. Choisissez un modèle TaoDock dans le sélecteur de chat.",
+  "TaoDock API key removed from this editor. Revoke it in the console to disable it everywhere.": "Clé TaoDock supprimée de cet éditeur. Révoquez-la dans la console pour la désactiver partout.",
+  "TaoDock models refreshed. Open the chat model picker to choose a model.": "Modèles TaoDock actualisés. Ouvrez le sélecteur de chat pour choisir un modèle.",
+  "Provided by TaoDock. Availability and charges follow your account and key permissions.": "Fourni par TaoDock. Disponibilité et frais selon votre compte et les autorisations de votre clé.",
+  "Set your TaoDock API key before sending a message.": "Configurez votre clé API TaoDock avant d’envoyer un message.",
+  "TaoDock could not complete the request. Please try again.": "TaoDock n’a pas pu terminer la requête. Réessayez.",
+  "Your TaoDock API key is invalid, expired or disabled. Set a valid key and try again.": "Votre clé API TaoDock est invalide, expirée ou désactivée. Configurez une clé valide et réessayez.",
+  "TaoDock denied this request. Check your balance, key quota and model access in the console.": "TaoDock a refusé la requête. Vérifiez le solde, le quota de la clé et l’accès au modèle dans la console.",
+  "TaoDock rate limit reached. Please wait before trying again.": "Limite de requêtes TaoDock atteinte. Patientez avant de réessayer.",
+  "TaoDock returned an incomplete or unsupported response. Check model compatibility and request logs.": "TaoDock a renvoyé une réponse incomplète ou incompatible. Vérifiez le modèle et les journaux.",
+  "The TaoDock request timed out. Check request logs before retrying.": "La requête TaoDock a expiré. Consultez les journaux avant de réessayer.",
+  "Could not connect to TaoDock. Check your network and try again.": "Connexion à TaoDock impossible. Vérifiez votre réseau et réessayez."
+}

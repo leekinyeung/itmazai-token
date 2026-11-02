@@ -304,7 +304,7 @@ function generationSource(req) {
   const source = Object.assign(
     {},
     plainObject(req.metadata) || {},
-    req.size === undefined || req.size === null || req.size === "" ? {} : sizeOptions(req.size),
+    req.size === undefined || req.size === null || req.size === "" ? {} : sizeOptions(req.size)
   );
   for (const key of Object.keys(req)) {
     if (req[key] !== undefined && req[key] !== null && req[key] !== "") source[key] = req[key];
@@ -566,7 +566,7 @@ function outputResolution(url) {
     const track = videoTrack(url);
     if (!track) return "";
     return Math.min(track.width, track.height) > 480 ? "720p" : "480p";
-  } catch (_error) {
+  } catch {
     return "";
   }
 }

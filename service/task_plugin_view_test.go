@@ -108,3 +108,29 @@ func TestBuildTaskPluginViewEncodesKeysInMapOrder(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, string(reencoded), string(encoded))
 }
+
+func TestTaskPluginViewProjectsModelEnvelopeOnly(t *testing.T) {
+	task := &model.Task{Properties: model.Properties{OriginModelName: "public-pro", UpstreamModelName: "[private-route]gemini-pro"}, Data: []byte(`{"model":"[private-route]gemini-pro","data":{"model":"[private-route]gemini-pro","content":{"model":"[private-route]gemini-pro"}},"tool_arguments":{"model":"[private-route]gemini-pro"}}`)}
+	view, err := BuildTaskPluginView(task)
+	require.NoError(t, err)
+	data := view.Data.(map[string]any)
+	assert.Equal(t, "public-pro", data["model"])
+	assert.Equal(t, "public-pro", data["data"].(map[string]any)["model"])
+	assert.Equal(t, "[private-route]gemini-pro", data["tool_arguments"].(map[string]any)["model"])
+	assert.Contains(t, string(task.Data), `"model":"[private-route]gemini-pro"`)
+
+	// Older rows can have a provider payload without either persisted identity.
+	// Optional envelope fields are omitted instead of trusting that payload.
+	task.Properties = model.Properties{}
+	view, err = BuildTaskPluginView(task)
+	require.NoError(t, err)
+	data = view.Data.(map[string]any)
+	assert.NotContains(t, data, "model")
+	assert.NotContains(t, data["data"].(map[string]any), "model")
+	assert.Equal(t, "[private-route]gemini-pro", data["tool_arguments"].(map[string]any)["model"])
+
+	task.Data = []byte(`[{"model":"opaque-business-value"}]`)
+	projected, err := taskPublicModelIdentity(task).ProjectResponseModel(task.Data)
+	require.NoError(t, err)
+	assert.Equal(t, string(task.Data), string(projected))
+}

@@ -27,6 +27,8 @@ interface HtmlContentProps {
   content: string
   className?: string
   variant?: HtmlContentVariant
+  prose?: boolean
+  inlineSanitizeOptions?: Config
 }
 
 const isolatedContentSandbox =
@@ -87,7 +89,7 @@ const isolatedSanitizeOptions = {
   FORCE_BODY: true,
 } satisfies Config
 
-function hardenIsolatedHtml(html: string): string {
+function hardenHtmlContent(html: string): string {
   if (typeof document === 'undefined') {
     return html
   }
@@ -120,15 +122,16 @@ function hardenIsolatedHtml(html: string): string {
 
 function sanitizeHtmlContent(
   content: string,
-  variant: HtmlContentVariant
+  variant: HtmlContentVariant,
+  inlineOptions?: Config
 ): string {
   if (variant === 'isolated') {
     const html = DOMPurify.sanitize(content, isolatedSanitizeOptions)
 
-    return hardenIsolatedHtml(html)
+    return hardenHtmlContent(html)
   }
 
-  return DOMPurify.sanitize(content)
+  return hardenHtmlContent(DOMPurify.sanitize(content, inlineOptions))
 }
 
 function syncDarkClass(wrapper: HTMLElement): void {
@@ -186,8 +189,9 @@ function IsolatedHtmlContent(props: {
 export function HtmlContent(props: HtmlContentProps) {
   const variant = props.variant ?? 'inline'
   const html = useMemo(
-    () => sanitizeHtmlContent(props.content, variant),
-    [props.content, variant]
+    () =>
+      sanitizeHtmlContent(props.content, variant, props.inlineSanitizeOptions),
+    [props.content, variant, props.inlineSanitizeOptions]
   )
 
   if (variant === 'isolated') {
@@ -197,7 +201,8 @@ export function HtmlContent(props: HtmlContentProps) {
   return (
     <div
       className={cn(
-        'prose prose-neutral dark:prose-invert max-w-none',
+        props.prose !== false &&
+          'prose prose-neutral dark:prose-invert max-w-none',
         props.className
       )}
       // eslint-disable-next-line react/no-danger -- html is sanitized above

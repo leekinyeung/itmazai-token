@@ -21,7 +21,7 @@ import {
   useReactTable,
   type ColumnFiltersState,
 } from '@tanstack/react-table'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { afterEach, expect, it, vi } from 'vitest'
@@ -29,6 +29,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
+import { DataTableFacetedFilter } from '../faceted-filter'
 import { DataTableToolbar } from '../toolbar'
 
 const rows = [{ name: 'Channel', model: 'model', status: 'enabled' }]
@@ -158,4 +159,52 @@ it.each([
   expect(
     screen.queryByRole('button', { name: /^(Collapse|Expand)$/ })
   ).not.toBeInTheDocument()
+})
+
+function FallbackIcon() {
+  return <svg role='img' aria-label='Fallback icon' />
+}
+
+it('a custom filter icon takes precedence over the fallback icon', async () => {
+  const user = userEvent.setup()
+  render(
+    <DataTableFacetedFilter
+      title='Provider'
+      options={[
+        {
+          label: 'Custom provider',
+          value: 'custom',
+          iconNode: <span>Custom icon</span>,
+          icon: FallbackIcon,
+        },
+      ]}
+    />
+  )
+  await user.click(screen.getByRole('button', { name: 'Provider' }))
+  const option = screen.getByRole('option')
+  expect(within(option).getByText('Custom icon')).toBeVisible()
+  expect(within(option).queryByRole('img')).not.toBeInTheDocument()
+})
+
+it('a falsy icon uses its fallback and a zero count remains visible without extra icon text', async () => {
+  const user = userEvent.setup()
+  render(
+    <DataTableFacetedFilter
+      title='Provider'
+      options={[
+        {
+          label: 'Fallback provider',
+          value: 'fallback',
+          iconNode: 0,
+          icon: FallbackIcon,
+        },
+        { label: 'No icon', value: 'none', iconNode: 0, count: 0 },
+      ]}
+    />
+  )
+  await user.click(screen.getByRole('button', { name: 'Provider' }))
+  expect(screen.getByRole('img', { name: 'Fallback icon' })).toBeVisible()
+  expect(screen.getByRole('option', { name: /^No icon/ })).toHaveTextContent(
+    /^No icon0$/
+  )
 })

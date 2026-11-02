@@ -98,7 +98,11 @@ type RelayInfo struct {
 	UsePrice               bool
 	RelayMode              int
 	OriginModelName        string
-	ResponseModel          *ResponseModel
+	// PublicModelName is the immutable validated identity used only in client projections.
+	PublicModelName     string
+	privateModelNames   []string
+	publicModelLanguage string
+	ResponseModel       *ResponseModel
 
 	// BillingModelName is the pricing identity for this request. It is kept
 	// separate from OriginModelName and UpstreamModelName so virtual pricing
@@ -650,6 +654,8 @@ func genBaseRelayInfo(c *gin.Context, request dto.Request) *RelayInfo {
 		},
 	}
 
+	info.BindPublicModel(c)
+
 	if info.RelayMode == relayconstant.RelayModeUnknown {
 		info.RelayMode = c.GetInt("relay_mode")
 	}
@@ -799,6 +805,8 @@ func (info *RelayInfo) GetFinalRequestRelayFormat() types.RelayFormat {
 
 func GenRelayInfoResponsesCompaction(c *gin.Context, request *dto.OpenAIResponsesCompactionRequest) *RelayInfo {
 	info := genBaseRelayInfo(c, request)
+	info.BindPublicModel(c)
+
 	if info.RelayMode == relayconstant.RelayModeUnknown {
 		info.RelayMode = relayconstant.RelayModeResponsesCompact
 	}
@@ -808,6 +816,8 @@ func GenRelayInfoResponsesCompaction(c *gin.Context, request *dto.OpenAIResponse
 
 func GenRelayInfoAlphaSearch(c *gin.Context, request *dto.AlphaSearchRequest) *RelayInfo {
 	info := genBaseRelayInfo(c, request)
+	info.BindPublicModel(c)
+
 	if info.RelayMode == relayconstant.RelayModeUnknown {
 		info.RelayMode = relayconstant.RelayModeAlphaSearch
 	}

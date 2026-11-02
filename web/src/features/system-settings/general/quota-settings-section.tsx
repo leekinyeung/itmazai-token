@@ -54,6 +54,16 @@ const quotaSchema = z.object({
   QuotaForNewUser: z.coerce.number().min(0),
   QuotaForInviter: z.coerce.number().min(0),
   QuotaForInvitee: z.coerce.number().min(0),
+  QuotaForInviterFirstTopUp: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.coerce
+      .number({ error: () => i18next.t('Please enter a valid number') })
+      .int({ error: () => i18next.t('Please enter a valid number') })
+      .min(0, { error: () => i18next.t('Must be greater than or equal to 0') })
+      .max(Number.MAX_SAFE_INTEGER, {
+        error: () => i18next.t('Please enter a valid number'),
+      })
+  ),
   TopUpLink: z.string(),
   quota_setting: z.object({
     enable_free_model_pre_consume: z.boolean(),
@@ -79,14 +89,21 @@ function formatQuotaInputValue(value: QuotaInputValue): string {
 }
 
 type QuotaSettingsSectionProps = {
-  defaultValues: QuotaFormValues
+  defaultValues: Omit<QuotaFormValues, 'QuotaForInviterFirstTopUp'> & {
+    InviterFirstTopUpRewardUSD: number
+  }
+  quotaPerUnit: number
 }
 
 export function QuotaSettingsSection({
   defaultValues,
+  quotaPerUnit,
 }: QuotaSettingsSectionProps) {
   const { t } = useTranslation()
   const updateOption = useUpdateOption()
+  // The existing API stores this reward in USD. Present all quota settings in
+  // the same units while retaining the value of previously saved rewards.
+  const { InviterFirstTopUpRewardUSD, ...quotaDefaults } = defaultValues
   const handleNumberChange =
     (onChange: (value: QuotaInputValue) => void) =>
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -101,9 +118,21 @@ export function QuotaSettingsSection({
         unknown,
         QuotaFormValues
       >,
-      defaultValues,
+      defaultValues: {
+        ...quotaDefaults,
+        QuotaForInviterFirstTopUp: Math.round(
+          InviterFirstTopUpRewardUSD * quotaPerUnit
+        ),
+      },
       onSubmit: async (_data, changedFields) => {
         for (const [key, value] of Object.entries(changedFields)) {
+          if (key === 'QuotaForInviterFirstTopUp') {
+            await updateOption.mutateAsync({
+              key: 'InviterFirstTopUpRewardUSD',
+              value: Number(value) / quotaPerUnit,
+            })
+            continue
+          }
           await updateOption.mutateAsync({
             key,
             value: value as string | number | boolean,
@@ -230,6 +259,37 @@ export function QuotaSettingsSection({
                   <FormDescription>
                     {t(
                       'Quota given to users who invite others ({{formattedQuota}})',
+                      {
+                        formattedQuota: formatQuotaInputValue(field.value),
+                      }
+                    )}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='QuotaForInviterFirstTopUp'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('First top-up inviter reward')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='number'
+                      min={0}
+                      step={1}
+                      value={field.value ?? ''}
+                      onChange={handleNumberChange(field.onChange)}
+                      name={field.name}
+                      onBlur={field.onBlur}
+                      ref={field.ref}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t(
+                      'Quota credited to the inviter after an invited user’s first successful wallet top-up ({{formattedQuota}}). Set to 0 to disable. Users with previous successful top-ups are excluded. Registration rewards are configured separately.',
                       {
                         formattedQuota: formatQuotaInputValue(field.value),
                       }

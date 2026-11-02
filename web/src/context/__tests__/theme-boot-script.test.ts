@@ -76,20 +76,46 @@ describe('index.html theme boot script', () => {
     expect(document.documentElement).not.toHaveClass('dark')
   })
 
-  it('follows the system dark mode when no preference is saved', () => {
-    mockSystemDarkMode(true)
+  it.each([false, true])(
+    'starts dark without a saved preference when system dark mode is %s',
+    (dark) => {
+      mockSystemDarkMode(dark)
+
+      runBootScript()
+
+      expect(document.documentElement).toHaveClass('dark')
+    }
+  )
+
+  it('uses the dark default when the saved value is invalid', () => {
+    mockSystemDarkMode(false)
+    localStorage.setItem(THEME_STORAGE_KEYS.mode, 'sepia')
 
     runBootScript()
 
     expect(document.documentElement).toHaveClass('dark')
   })
 
-  it('follows the system light mode when the saved value is invalid', () => {
+  it.each([false, true])(
+    'honors an explicit system preference when system dark mode is %s',
+    (dark) => {
+      mockSystemDarkMode(dark)
+      localStorage.setItem(THEME_STORAGE_KEYS.mode, 'system')
+
+      runBootScript()
+
+      expect(document.documentElement).toHaveClass(dark ? 'dark' : 'light')
+    }
+  )
+
+  it('keeps the dark default when storage cannot be read', () => {
     mockSystemDarkMode(false)
-    localStorage.setItem(THEME_STORAGE_KEYS.mode, 'sepia')
+    vi.spyOn(localStorage, 'getItem').mockImplementation(() => {
+      throw new DOMException('Storage unavailable', 'SecurityError')
+    })
 
     runBootScript()
 
-    expect(document.documentElement).toHaveClass('light')
+    expect(document.documentElement).toHaveClass('dark')
   })
 })

@@ -26,6 +26,9 @@ import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, it, vi } from 'vitest'
 
+import { ROLE } from '@/lib/roles'
+import { useAuthStore } from '@/stores/auth-store'
+
 import { usageLogSchema, type UsageLog } from '../../data/schema'
 import { useCommonLogsColumns } from '../columns/common-logs-columns'
 import { UsageLogsMobileList } from '../usage-logs-mobile-card'
@@ -84,6 +87,15 @@ function Fixture(props: {
 }
 
 function renderLogs(props: Parameters<typeof Fixture>[0] = {}) {
+  useAuthStore.setState((state) => ({
+    auth: {
+      ...state.auth,
+      user: {
+        ...state.auth.user,
+        role: props.admin === false ? ROLE.USER : ROLE.ADMIN,
+      } as NonNullable<typeof state.auth.user>,
+    },
+  }))
   return render(
     <QueryClientProvider
       client={
@@ -335,5 +347,35 @@ it('shows loading placeholders without displaying stale log fields', () => {
   )
   expect(
     screen.queryByRole('button', { name: /^Model:/ })
+  ).not.toBeInTheDocument()
+})
+
+it('personal mobile model copies only the public name even with poisoned diagnostics', async () => {
+  const user = userEvent.setup()
+  const copy = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue()
+  renderLogs({
+    admin: false,
+    logs: [
+      {
+        ...log,
+        other: JSON.stringify({
+          is_model_mapped: true,
+          upstream_model_name: '[private-route]gemini-pro',
+          admin_info: {
+            response_model: {
+              requested_model: longName,
+              upstream_model: '[private-route]gemini-pro',
+              returned_model: '[private-route]gemini-pro',
+            },
+          },
+        }),
+      },
+    ],
+  })
+  await user.click(screen.getByRole('button', { name: `Model: ${longName}` }))
+  expect(copy).toHaveBeenCalledWith(longName)
+  expect(document.body.textContent).not.toContain('[private-route]')
+  expect(
+    screen.queryByRole('dialog', { name: 'Model' })
   ).not.toBeInTheDocument()
 })

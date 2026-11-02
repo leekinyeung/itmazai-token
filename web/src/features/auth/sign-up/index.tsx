@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
+import { Separator } from '@/components/ui/separator'
 import { useStatus } from '@/hooks/use-status'
 
 import { AuthLayout } from '../auth-layout'
@@ -30,25 +31,27 @@ export function SignUp() {
   const { status } = useStatus()
 
   return (
-    <AuthLayout>
+    <AuthLayout variant='split'>
       <div className='w-full space-y-8'>
-        <div className='space-y-2'>
-          <h2 className='text-center text-2xl font-semibold tracking-tight sm:text-left'>
-            {t('Create an account')}
-          </h2>
-          <p className='text-muted-foreground text-left text-sm sm:text-base'>
-            {t('Already have an account?')}{' '}
-            <Link
-              to='/sign-in'
-              className='hover:text-primary font-medium underline underline-offset-4'
-            >
-              {t('Sign in')}
-            </Link>
-            .
+        <div>
+          <h1 className='auth-heading'>{t('Create an account')}</h1>
+          <p className='auth-description'>
+            {t('Start here. Connect to more AI possibilities.')}
           </p>
         </div>
 
         <SignUpForm />
+
+        <div className='auth-switch'>
+          <Separator className='min-w-0 flex-1' />
+          <p>
+            {t('Already have an account?')}{' '}
+            <Link to='/sign-in' className='font-medium hover:underline'>
+              {t('Sign in now')}
+            </Link>
+          </p>
+          <Separator className='min-w-0 flex-1' />
+        </div>
 
         <TermsFooter
           variant='sign-up'

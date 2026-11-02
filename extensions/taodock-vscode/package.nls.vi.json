@@ -1,0 +1,8 @@
+{
+  "extension.description": "Dùng mô hình TaoDock trong VS Code với khóa API riêng: phản hồi trực tuyến, gọi công cụ và lưu khóa an toàn.",
+  "command.manage": "Đặt hoặc thay khóa API",
+  "command.refresh": "Làm mới mô hình",
+  "command.remove": "Xóa khóa API khỏi trình soạn thảo này",
+  "command.console": "Mở bảng quản lý khóa API",
+  "command.docs": "Mở tài liệu"
+}

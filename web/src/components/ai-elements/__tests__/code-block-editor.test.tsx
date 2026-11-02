@@ -17,9 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { cleanup, render } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, test } from 'vitest'
 
-import { CodeBlockEditor } from '../code-block'
+import { CodeBlock, CodeBlockEditor } from '../code-block'
 
 afterEach(() => {
   cleanup()
@@ -74,4 +75,32 @@ describe('CodeBlockEditor', () => {
     expect(contentAfter).toBe(contentBefore)
     expect(contentAfter?.textContent).toContain('hi')
   })
+})
+
+test('a read-only shell example distinguishes commands, variables and quoted values', () => {
+  const { getByRole } = render(
+    <CodeBlock
+      code='curl "https://gateway.example.test" --header "Bearer $API_KEY"'
+      language='bash'
+    />
+  )
+  const example = getByRole('textbox', { name: 'bash' })
+  expect(example).toHaveAttribute('aria-readonly', 'true')
+  const colors = [...example.querySelectorAll('.cm-line span')].map(
+    (token) => window.getComputedStyle(token).color
+  )
+  expect(new Set(colors).size).toBeGreaterThanOrEqual(2)
+})
+
+test('a read-only code example is reachable by Tab for keyboard scrolling', async () => {
+  const user = userEvent.setup()
+  const { getByRole } = render(
+    <CodeBlock
+      code='curl https://gateway.example.test/v1/models'
+      language='bash'
+    />
+  )
+  const example = getByRole('textbox', { name: 'bash' })
+  await user.tab()
+  expect(example).toContainElement(document.activeElement as HTMLElement)
 })

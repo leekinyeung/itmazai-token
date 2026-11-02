@@ -50,7 +50,7 @@ func GetTask(c *gin.Context) {
 	if createdAt == 0 {
 		createdAt = task.SubmitTime
 	}
-	failReason := task.FailReason
+	failReason := common.RedactModelNames(task.FailReason, task.Properties.OriginModelName, task.Properties.UpstreamModelName)
 	if task.Status == model.TaskStatusSuccess && taskFailReasonIsLegacyResultURL(task.FailReason) {
 		failReason = ""
 	}
@@ -457,6 +457,14 @@ func tasksToDto(tasks []*model.Task, fillUser bool, viewerRole int) []*dto.TaskD
 			}
 		}
 		item := relay.TaskModel2Dto(task)
+		if viewerRole < common.RoleAdminUser {
+			properties := task.Properties
+			properties.UpstreamModelName = ""
+			item.Properties = properties
+			item.Data = nil
+			item.ResultURL = ""
+			item.FailReason = common.RedactModelNames(task.FailReason, properties.OriginModelName, task.Properties.UpstreamModelName)
+		}
 		item.LegacyVideoAvailable = legacyVideoAvailable(task)
 		item.ResultDiscarded = task.PrivateData.ResultDiscarded
 		if task.Status == model.TaskStatusSuccess {

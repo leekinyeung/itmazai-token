@@ -1,0 +1,14 @@
+**/*
+!dist/extension.js
+!src/*.ts
+!build.mjs
+!tsconfig.json
+!bun.lock
+!scripts/localize.mjs
+!assets/icon.png
+!l10n/*.json
+!package.json
+!package.nls*.json
+!README.md
+!CHANGELOG.md
+!LICENSE

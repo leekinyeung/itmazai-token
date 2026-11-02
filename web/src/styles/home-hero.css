@@ -1,0 +1,307 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+.home-hero {
+  position: relative;
+  isolation: isolate;
+  padding: 2.5rem 24px;
+  text-align: center;
+}
+.home-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      ellipse at 25% 20%,
+      color-mix(in oklch, var(--primary) 14%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse at 75% 40%,
+      color-mix(in oklch, var(--chart-2) 10%, transparent),
+      transparent 55%
+    );
+  pointer-events: none;
+  opacity: 1;
+  mask-image: linear-gradient(#000 65%, transparent);
+}
+.home-hero-copy {
+  max-width: 1320px;
+  margin-inline: auto;
+  container-type: inline-size;
+}
+.home-hero .home-hero-badge {
+  display: inline-flex;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 16px;
+  background: var(--card);
+}
+.home-hero-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--home-success-text);
+  box-shadow: 0 0 10px var(--home-success-text);
+}
+.home-hero h1 {
+  font-size: clamp(2.8rem, 3.8vw, 4rem);
+  line-height: 1.13;
+  margin-top: 1.5rem;
+}
+.home-audience {
+  display: grid;
+  grid-template-areas: 'phrase';
+  color: var(--home-accent-text);
+  margin-top: 0.1em;
+}
+.home-audience-content,
+.home-audience-reserve {
+  grid-area: phrase;
+  min-width: 0;
+}
+.home-audience-reserve {
+  visibility: hidden;
+}
+.home-audience-reserve .home-audience-word {
+  padding-inline-end: 0.12em;
+}
+.home-audience-word {
+  position: relative;
+  display: inline-grid;
+  max-width: 100%;
+  grid-template-areas: 'word';
+  text-align: left;
+  vertical-align: baseline;
+  transition: width 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.home-audience-measure,
+.home-audience-live {
+  grid-area: word;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.home-audience-measure {
+  visibility: hidden;
+  width: max-content;
+  max-width: 100cqw;
+  padding-inline-end: 0.12em;
+}
+.home-audience-caret {
+  display: inline-block;
+  width: 0.045em;
+  height: 0.82em;
+  margin-left: 0.06em;
+  transform: translateY(0.1em);
+  background: currentColor;
+}
+.home-audience-caret[data-holding='true'] {
+  animation: home-audience-caret 1s step-end infinite;
+}
+.home-audience[data-paused='true'] .home-audience-caret {
+  animation-play-state: paused;
+}
+.home-hero-description {
+  max-width: 690px;
+  margin: 1.5rem auto 0;
+  color: var(--home-muted-foreground);
+  font-size: 17px;
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+.home-hero-note {
+  margin-top: 1.25rem;
+  color: var(--home-muted-foreground);
+  font:
+    11px/1.6 ui-monospace,
+    monospace;
+}
+.home-gateway {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 1200px);
+  margin: 2rem auto 0;
+  pointer-events: none;
+  user-select: none;
+}
+.home-gateway-lines,
+.home-gateway-lines-mobile {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  fill: none;
+  font-family: ui-monospace, monospace;
+}
+.home-gateway-lines-mobile {
+  display: none;
+}
+.home-gateway-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.home-gateway-connection {
+  color: var(--primary);
+}
+.home-gateway-connection[data-outgoing='true'] {
+  color: var(--home-success-text);
+}
+.home-gateway-node {
+  color: var(--foreground);
+}
+.home-gateway-node > rect {
+  fill: var(--card);
+  stroke: var(--border);
+}
+.home-gateway-node text {
+  fill: var(--foreground);
+  stroke: none;
+}
+.home-gateway-node-label {
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.home-gateway-hub > g > rect {
+  stroke: var(--border);
+}
+.home-gateway-hub text {
+  fill: var(--foreground);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  stroke: none;
+}
+.home-gateway[data-motion='true'] .home-gateway-halo {
+  animation: home-gateway-pulse 4.2s ease-in-out infinite;
+}
+.home-gateway[data-paused='true'] .home-gateway-halo {
+  animation-play-state: paused;
+}
+.home-gateway-packet {
+  color: var(--home-success-text);
+}
+.home-gateway-packet[data-tone='plain'] {
+  color: var(--foreground);
+}
+.home-gateway-packet[data-tone='warn'] {
+  color: var(--home-warning-text);
+}
+.home-gateway-packet rect {
+  fill: var(--background);
+  stroke: currentColor;
+  stroke-opacity: 0.6;
+}
+.home-gateway-packet[data-tone='plain'] rect {
+  stroke-opacity: 0.18;
+}
+.home-gateway-packet .home-gateway-warning {
+  fill: none;
+  stroke-opacity: 1;
+  stroke-width: 1.3;
+}
+.home-gateway-packet text {
+  fill: currentColor;
+  stroke: none;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@keyframes home-gateway-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes home-audience-caret {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  .home-gateway {
+    max-width: 420px;
+  }
+  .home-gateway-lines {
+    display: none;
+  }
+  .home-gateway-lines-mobile {
+    display: block;
+  }
+}
+
+@media (max-width: 639px) {
+  .home-hero {
+    padding: 3rem 20px 3rem;
+  }
+  .home-hero::before {
+    opacity: 1;
+  }
+  .home-hero h1 {
+    font-size: 2.6rem;
+    margin-top: 1.5rem;
+  }
+  .home-audience {
+    font-size: 0.73em;
+    line-height: 1.5;
+    margin-top: 0.5rem;
+  }
+  .home-hero-description {
+    font-size: var(--text-sm);
+    margin-top: 1rem;
+  }
+  .home-hero-copy .home-actions {
+    margin-inline: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-audience-caret {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .home-hero h1 {
+    margin-top: 1.25rem;
+  }
+  .home-hero-description {
+    margin-top: 1rem;
+  }
+  .home-hero .home-actions {
+    margin-top: 1.5rem;
+  }
+  .home-hero-note {
+    margin-top: 1rem;
+  }
+}

@@ -70,7 +70,7 @@ export function CommonLogMobileCard<TData>(props: {
   const other = parseLogOther(log.other)
   const displayable = isDisplayableLogType(log.type)
   const timing = isTimingLogType(log.type)
-  const model = formatModelName(log)
+  const model = formatModelName(log, isAdminView)
   const config = getLogTypeConfig(log.type)
   const group = log.group || other?.group || ''
   const groupRatio =
@@ -148,6 +148,7 @@ export function CommonLogMobileCard<TData>(props: {
         {fields.model.visible && (
           <div className='min-w-0 flex-[1_1_10rem]'>
             <ModelBadge
+              canInspectModels={isAdminView}
               modelName={model.name}
               actualModel={model.actualModel}
               responseModel={model.responseModel}

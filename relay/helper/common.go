@@ -64,6 +64,9 @@ func ClaudeData(c *gin.Context, resp dto.ClaudeResponse) error {
 	}
 
 	jsonData, err := common.Marshal(resp)
+	if err == nil {
+		jsonData, err = common.ProjectResponseModel(c, jsonData)
+	}
 	if err != nil {
 		common.SysError(common.LogText("error marshalling stream response: %s", err.Error()))
 	} else {
@@ -75,6 +78,12 @@ func ClaudeData(c *gin.Context, resp dto.ClaudeResponse) error {
 }
 
 func ClaudeChunkData(c *gin.Context, resp dto.ClaudeResponse, data string) {
+	projected, err := common.ProjectResponseModel(c, []byte(data))
+	if err != nil {
+		common.SysError(err.Error())
+		return
+	}
+	data = string(projected)
 	if requestContextDone(c) {
 		return
 	}
@@ -85,6 +94,11 @@ func ClaudeChunkData(c *gin.Context, resp dto.ClaudeResponse, data string) {
 }
 
 func ResponseChunkData(c *gin.Context, resp dto.ResponsesStreamResponse, data string) error {
+	projected, err := common.ProjectResponseModel(c, []byte(data))
+	if err != nil {
+		return err
+	}
+	data = string(projected)
 	if requestContextDone(c) {
 		return fmt.Errorf("request context done: %w", c.Request.Context().Err())
 	}
@@ -95,6 +109,11 @@ func ResponseChunkData(c *gin.Context, resp dto.ResponsesStreamResponse, data st
 }
 
 func StringData(c *gin.Context, str string) error {
+	projected, err := common.ProjectResponseModel(c, []byte(str))
+	if err != nil {
+		return err
+	}
+	str = string(projected)
 	if c == nil || c.Writer == nil {
 		return errors.New("context or writer is nil")
 	}
@@ -163,6 +182,7 @@ func WssError(c *gin.Context, ws *websocket.Conn, openaiError types.OpenAIError)
 	if ws == nil {
 		return
 	}
+	openaiError.Message = common.PublicModelMessage(c, openaiError.Message)
 	errorObj := &dto.RealtimeEvent{
 		Type:    "error",
 		EventId: GetLocalRealtimeID(c),

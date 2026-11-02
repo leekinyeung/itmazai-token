@@ -1,0 +1,8 @@
+{
+  "extension.description": "使用自己的 API 金鑰在 VS Code 使用眾妙之門 TaoDock 對話模型，支援串流回覆、工具呼叫與安全金鑰儲存。",
+  "command.manage": "設定或更換 API 金鑰",
+  "command.refresh": "重新整理模型清單",
+  "command.remove": "從目前編輯器移除 API 金鑰",
+  "command.console": "開啟 API 金鑰控制台",
+  "command.docs": "開啟使用文件"
+}

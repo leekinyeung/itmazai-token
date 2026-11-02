@@ -38,6 +38,11 @@ func ShouldCopyUpstreamHeader(c *gin.Context, k string, v []string) bool {
 		}
 		return false
 	}
+	for _, value := range v {
+		if common.PublicModelMessage(c, value) != value {
+			return false
+		}
+	}
 	return true
 }
 
@@ -46,6 +51,20 @@ func IOCopyBytesGracefully(c *gin.Context, src *http.Response, data []byte) {
 		return
 	}
 
+	projected := data
+	var projectionErr error
+	contentType := ""
+	if src != nil {
+		contentType = src.Header.Get("Content-Type")
+	}
+	if contentType == "" || strings.Contains(contentType, "json") || strings.HasPrefix(contentType, "text/event-stream") {
+		projected, projectionErr = common.ProjectResponseModel(c, data)
+	}
+	if projectionErr != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": gin.H{"type": "server_error", "code": "invalid_response_metadata", "message": common.MessageWithRequestId(projectionErr.Error(), c.GetString(common.RequestIdKey))}})
+		return
+	}
+	data = projected
 	body := io.NopCloser(bytes.NewBuffer(data))
 
 	// We shouldn't set the header before we parse the response body, because the parse part may fail.

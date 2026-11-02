@@ -48,6 +48,9 @@ func (info *RelayInfo) ObserveResponseModel(model string) {
 		}
 	}
 	observation := info.ResponseModel
+	if len(info.privateModelNames) > 0 || info.ChannelMeta != nil && info.IsModelMapped {
+		info.RememberPrivateModel(model)
+	}
 	if observation.Mismatch() {
 		return
 	}

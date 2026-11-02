@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 export const THEME_STORAGE_KEYS = {
   mode: 'newapi:theme:v1:mode',
   preset: 'newapi:theme:v1:preset',
+  customColor: 'newapi:theme:v1:custom-color',
   font: 'newapi:theme:v1:font',
   radius: 'newapi:theme:v1:radius',
   scale: 'newapi:theme:v1:scale',
@@ -27,7 +28,7 @@ export const THEME_STORAGE_KEYS = {
 
 export function readThemePreference<T extends string>(
   key: string,
-  allowed: ReadonlySet<T>,
+  allowed: ReadonlySet<T> | ((value: string) => T | null),
   fallback: T
 ): T {
   if (typeof window === 'undefined') return fallback
@@ -36,7 +37,9 @@ export function readThemePreference<T extends string>(
     // Legacy cookies are shared across ports, so importing them would restore
     // preferences that may belong to another local instance.
     const value = window.localStorage.getItem(key)
-    return value && allowed.has(value as T) ? (value as T) : fallback
+    if (!value) return fallback
+    if (typeof allowed === 'function') return allowed(value) ?? fallback
+    return allowed.has(value as T) ? (value as T) : fallback
   } catch {
     return fallback
   }

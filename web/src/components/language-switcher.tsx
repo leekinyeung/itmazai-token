@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Languages, Check } from 'lucide-react'
+import { Check, ChevronDown } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -37,10 +37,18 @@ import { handleServerError } from '@/lib/handle-server-error'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher(
+  props: {
+    showLabel?: boolean
+    className?: string
+  } = {}
+) {
   const { i18n, t } = useTranslation()
   const user = useAuthStore((s) => s.auth.user)
   const currentLanguage = normalizeInterfaceLanguage(i18n.language)
+  const currentLanguageOption = INTERFACE_LANGUAGE_OPTIONS.find(
+    (lang) => lang.code === currentLanguage
+  )
   const [changing, setChanging] = useState(false)
   const handleChangeLanguage = useCallback(
     async (code: string) => {
@@ -67,18 +75,57 @@ export function LanguageSwitcher() {
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger
         disabled={changing}
-        render={<Button variant='ghost' size='icon' className='h-9 w-9' />}
+        render={
+          <Button
+            variant='ghost'
+            size={props.showLabel ? 'default' : 'icon'}
+            className={cn(
+              'h-9',
+              props.showLabel ? 'gap-2 px-2' : 'w-9',
+              props.className
+            )}
+          />
+        }
       >
-        <Languages className='size-[1.2rem]' />
+        <img
+          src={currentLanguageOption?.flag}
+          alt=''
+          aria-hidden='true'
+          width={24}
+          height={16}
+          className='h-4 w-6 rounded-xs object-cover'
+        />
+        {props.showLabel && (
+          <>
+            <span
+              aria-hidden='true'
+              className='hidden max-w-28 truncate text-sm sm:inline'
+            >
+              {currentLanguageOption?.label}
+            </span>
+            <ChevronDown
+              aria-hidden='true'
+              className='hidden size-3.5 sm:block'
+            />
+          </>
+        )}
         <span className='sr-only'>{t('Change language')}</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end'>
+      <DropdownMenuContent align='end' className='min-w-40'>
         {INTERFACE_LANGUAGE_OPTIONS.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             disabled={changing}
             onClick={() => handleChangeLanguage(lang.code)}
           >
+            <img
+              src={lang.flag}
+              alt=''
+              aria-hidden='true'
+              width={24}
+              height={16}
+              className='h-4 w-6 shrink-0 rounded-xs object-cover'
+            />
             {lang.label}
             <Check
               size={14}

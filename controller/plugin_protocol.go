@@ -13,6 +13,7 @@ import (
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
+	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/model"
 	pluginruntime "github.com/QuantumNous/new-api/pkg/jsplugin"
@@ -967,6 +968,11 @@ func retrieveTaskPluginResponse(c *gin.Context, deps pluginProtocolBridgeDeps) {
 	}
 	if !task.ResultRetrievable() {
 		writeTaskPluginResponseNotFound(c, responseID, "result_discarded")
+		return
+	}
+
+	if task.Properties.OriginModelName == "" {
+		respondPluginProtocolError(c, http.StatusInternalServerError, "public_model_unavailable", i18n.T(c, i18n.MsgRelayPublicModelUnavailable))
 		return
 	}
 

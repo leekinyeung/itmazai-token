@@ -263,7 +263,7 @@ it.each(
   'groups $model under $category and displays its provider icon',
   async ({ model, category, label }) => {
     expect(getModelCategory(model)).toBe(category)
-    render(<ModelBadge modelName={model} />)
+    render(<ModelBadge canInspectModels modelName={model} />)
     expect(screen.getByText(model.trim())).toBeVisible()
     const icon = screen.getByLabelText(label)
     expect(icon).toBeVisible()
@@ -283,7 +283,9 @@ it.each([
   't2v-02',
 ])('keeps unknown model %s in Other with the dot fallback', (model) => {
   expect(getModelCategory(model)).toBe('Other')
-  const { container } = render(<ModelBadge modelName={model} />)
+  const { container } = render(
+    <ModelBadge canInspectModels modelName={model} />
+  )
   expect(container.querySelector('svg, img')).toBeNull()
   expect(container.querySelector('[aria-hidden="true"]')).not.toBeNull()
 })
@@ -306,7 +308,12 @@ it('preserves model names and input order when grouping models', () => {
 
 it('shows the OpenAI icon in the mobile model button', () => {
   render(
-    <ModelBadge modelName='codex-auto-review' wrapText onInspect={vi.fn()} />
+    <ModelBadge
+      canInspectModels
+      modelName='codex-auto-review'
+      wrapText
+      onInspect={vi.fn()}
+    />
   )
   expect(
     screen.getByRole('button', { name: 'Model: codex-auto-review' })
@@ -323,6 +330,7 @@ it('opens the mismatch evidence with the keyboard and shows all three models', a
     'unexpected-provider-model-with-a-long-dated-version-2026-09-17'
   render(
     <ModelBadge
+      canInspectModels
       modelName='requested-model'
       responseModel={{
         requested_model: 'requested-model',
@@ -356,6 +364,7 @@ it.each([false, true])(
     const copy = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue()
     render(
       <ModelBadge
+        canInspectModels
         modelName='requested-model'
         responseModel={
           observed
@@ -380,6 +389,7 @@ it('keeps mapped model details available when the response matches the upstream 
   const user = userEvent.setup()
   render(
     <ModelBadge
+      canInspectModels
       modelName='requested-model'
       responseModel={{
         requested_model: 'requested-model',
@@ -408,6 +418,7 @@ it.each([
     const user = userEvent.setup()
     render(
       <ModelBadge
+        canInspectModels
         modelName='requested-model'
         responseModel={{
           requested_model: 'requested-model',
@@ -430,3 +441,19 @@ it.each([
     ).not.toBeInTheDocument()
   }
 )
+
+it('does not expose poisoned model diagnostics without management view access', () => {
+  render(
+    <ModelBadge
+      modelName='public-pro'
+      actualModel='[private-route]gemini-pro'
+      responseModel={{
+        requested_model: 'public-pro',
+        upstream_model: '[private-route]gemini-pro',
+        returned_model: '[private-route]gemini-pro',
+      }}
+    />
+  )
+  expect(document.body.textContent).not.toContain('[private-route]')
+  expect(document.body.innerHTML).not.toContain('Response model:')
+})

@@ -10,6 +10,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/relay/channel/claude"
 	"github.com/QuantumNous/new-api/relay/channel/gemini"
 	"github.com/QuantumNous/new-api/relay/channel/openai"
@@ -21,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/gjson"
 )
 
 func TestResponseModelComparisonAndLog(t *testing.T) {
@@ -63,19 +65,21 @@ func TestResponseModelComparisonAndLog(t *testing.T) {
 			}
 			other := service.GenerateTextOtherInfo(c, info, 1, 1, 1, 0, 0, 0, 1)
 			var stored struct {
-				ResponseModel *relaycommon.ResponseModel `json:"response_model"`
+				AdminInfo struct {
+					ResponseModel *relaycommon.ResponseModel `json:"response_model"`
+				} `json:"admin_info"`
 			}
 			require.NoError(t, common.UnmarshalJsonStr(other.JSONString(), &stored))
 			if tc.returned == "" {
-				assert.Nil(t, stored.ResponseModel)
+				assert.Nil(t, stored.AdminInfo.ResponseModel)
 				return
 			}
-			require.NotNil(t, stored.ResponseModel)
+			require.NotNil(t, stored.AdminInfo.ResponseModel)
 			assert.Equal(t, &relaycommon.ResponseModel{
 				RequestedModel: "requested", UpstreamModel: "mapped", ReturnedModel: tc.returned,
-			}, stored.ResponseModel)
+			}, stored.AdminInfo.ResponseModel)
 			assert.NotContains(t, other.JSONString(), "mismatch")
-			assert.Equal(t, tc.mismatch, stored.ResponseModel.Mismatch())
+			assert.Equal(t, tc.mismatch, stored.AdminInfo.ResponseModel.Mismatch())
 			assert.Equal(t, "mapped", info.UpstreamModelName)
 		})
 	}
@@ -108,7 +112,7 @@ func TestResponseModelLogOmitsUnchangedModel(t *testing.T) {
 			require.NotNil(t, info.ResponseModel)
 			assert.Equal(t, float64(1), other.Snapshot()["model_ratio"])
 			if tc.record {
-				assert.Equal(t, *info.ResponseModel, other.Snapshot()["response_model"])
+				assert.Equal(t, *info.ResponseModel, other.Snapshot()["admin_info"].(map[string]any)["response_model"])
 			} else {
 				assert.NotContains(t, other.Snapshot(), "response_model")
 			}
@@ -216,7 +220,8 @@ func TestResponseModelHandlersCaptureBeforeConversion(t *testing.T) {
 		{"gemini to responses stream", geminiStream, types.RelayFormatOpenAIResponses, true, gemini.GeminiResponsesStreamHandler},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
+			recorder := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(recorder)
 			c.Request = httptest.NewRequest(http.MethodPost, "/v1/responses", nil)
 			info := &relaycommon.RelayInfo{
 				OriginModelName: "requested", RelayFormat: tc.format, RelayMode: relayconstant.RelayModeChatCompletions,
@@ -224,15 +229,33 @@ func TestResponseModelHandlersCaptureBeforeConversion(t *testing.T) {
 				ChannelMeta:         &relaycommon.ChannelMeta{UpstreamModelName: "mapped"},
 				ThinkingContentInfo: relaycommon.ThinkingContentInfo{IsFirstThinkingContent: true},
 			}
+			info.BindPublicModel(c)
+			info.RememberPrivateModel(info.UpstreamModelName)
 			usage, apiErr := tc.handler(c, info, &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(tc.body))})
 			require.Nil(t, apiErr)
 			require.NotNil(t, usage)
 			assert.Equal(t, 5, usage.TotalTokens)
+			output := recorder.Body.String()
+			for line := range strings.SplitSeq(output, "\n") {
+				payload := strings.TrimPrefix(line, "data: ")
+				for _, path := range []string{"model", "response.model", "message.model"} {
+					if name := gjson.Get(payload, path); name.Exists() {
+						assert.Equal(t, "requested", name.Str, output)
+					}
+				}
+				if tc.format == types.RelayFormatGemini {
+					assert.False(t, gjson.Get(payload, "modelVersion").Exists(), output)
+				}
+			}
+			if strings.Contains(tc.body, "hello") {
+				assert.Contains(t, output, "hello")
+			}
+
 			require.NotNil(t, info.ResponseModel)
 			assert.Equal(t, &relaycommon.ResponseModel{RequestedModel: "requested", UpstreamModel: "mapped", ReturnedModel: "returned"}, info.ResponseModel)
 			assert.True(t, info.ResponseModel.Mismatch())
 			other := service.GenerateTextOtherInfo(c, info, 1, 1, 1, 0, 0, 0, 1)
-			assert.Equal(t, *info.ResponseModel, other.Snapshot()["response_model"])
+			assert.Equal(t, *info.ResponseModel, other.Snapshot()["admin_info"].(map[string]any)["response_model"])
 		})
 	}
 }
@@ -262,4 +285,121 @@ func TestResponseModelDoesNotRecordSynthesizedModel(t *testing.T) {
 	})
 	require.Nil(t, apiErr)
 	assert.Nil(t, info.ResponseModel)
+}
+
+func TestPublicModelProjectionPreservesBusinessPayloads(t *testing.T) {
+	require.NoError(t, i18n.Init())
+	const private = "[private-route]gemini-pro"
+	for _, tc := range []struct {
+		name   string
+		format types.RelayFormat
+		body   string
+		path   string
+	}{
+		{"chat", types.RelayFormatOpenAI, `{"type":"chat.completion.chunk","model":"[private-route]gemini-pro","model":"duplicate-private","choices":[{"message":{"content":"[private-route]gemini-pro","reasoning_content":"[private-route]gemini-pro","tool_calls":[{"function":{"arguments":"{\"model\":\"[private-route]gemini-pro\"}"}}]}}],"business":{"model":"[private-route]gemini-pro"},"large":9007199254740993}`, "model"},
+		{"responses event", types.RelayFormatOpenAIResponses, `{"type":"response.completed","response":{"model":"[private-route]gemini-pro","output":[{"text":"[private-route]gemini-pro"}]},"business":{"model":"[private-route]gemini-pro"},"large":9007199254740993}`, "response.model"},
+		{"claude start", types.RelayFormatClaude, `{"type":"message_start","message":{"model":"[private-route]gemini-pro","content":[]},"business":{"model":"[private-route]gemini-pro"},"large":9007199254740993}`, "message.model"},
+		{"realtime session", types.RelayFormatOpenAIRealtime, `{"type":"session.created","session":{"model":"[private-route]gemini-pro","instructions":"[private-route]gemini-pro"},"business":{"model":"[private-route]gemini-pro"},"large":9007199254740993}`, "session.model"},
+		{"gemini version", types.RelayFormatGemini, `{"modelVersion":"[private-route]gemini-pro","candidates":[{"content":{"parts":[{"text":"[private-route]gemini-pro"}]}}],"business":{"model":"[private-route]gemini-pro"},"large":9007199254740993}`, ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			info := &relaycommon.RelayInfo{OriginModelName: "public-pro", RelayFormat: tc.format, ChannelMeta: &relaycommon.ChannelMeta{UpstreamModelName: private, IsModelMapped: true}}
+			info.BindPublicModel(nil)
+			info.RememberPrivateModel(private)
+			projected, err := info.ProjectResponseModel([]byte(tc.body))
+			require.NoError(t, err)
+			if tc.path != "" {
+				assert.Equal(t, "public-pro", gjson.GetBytes(projected, tc.path).Str)
+			}
+			assert.False(t, gjson.GetBytes(projected, "modelVersion").Exists())
+			assert.Equal(t, private, gjson.GetBytes(projected, "business.model").Str)
+			assert.Contains(t, string(projected), `"large":9007199254740993`)
+			assert.Contains(t, string(projected), private)
+			assert.Equal(t, private, info.UpstreamModelName)
+			info.IsModelMapped = false
+			unmapped := &relaycommon.RelayInfo{OriginModelName: "public-pro", RelayFormat: tc.format, ChannelMeta: &relaycommon.ChannelMeta{UpstreamModelName: "public-pro"}}
+			unmapped.BindPublicModel(nil)
+			unchanged, err := unmapped.ProjectResponseModel([]byte(tc.body))
+			require.NoError(t, err)
+			assert.Equal(t, tc.body, string(unchanged), "unmapped protocol remains compatible")
+			_, err = info.ProjectResponseModel([]byte(`{"model":"[private-route]gemini-pro"`))
+			assert.Error(t, err, "malformed metadata must fail closed")
+		})
+	}
+}
+
+type publicModelFrameRecorder struct {
+	*httptest.ResponseRecorder
+	frames chan string
+}
+
+func (r *publicModelFrameRecorder) Flush() {
+	r.ResponseRecorder.Flush()
+	r.frames <- r.Body.String()
+}
+
+func TestPublicModelSSEFlushesBeforeUpstreamFinishes(t *testing.T) {
+	previousTimeout := constant.StreamingTimeout
+	constant.StreamingTimeout = 30
+	t.Cleanup(func() { constant.StreamingTimeout = previousTimeout })
+	reader, writer := io.Pipe()
+	t.Cleanup(func() { _ = reader.Close(); _ = writer.Close() })
+	recorder := &publicModelFrameRecorder{ResponseRecorder: httptest.NewRecorder(), frames: make(chan string, 8)}
+	c, _ := gin.CreateTestContext(recorder)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/responses", nil)
+	info := &relaycommon.RelayInfo{OriginModelName: "public-pro", RelayFormat: types.RelayFormatOpenAIResponses, IsStream: true, DisablePing: true, ChannelMeta: &relaycommon.ChannelMeta{UpstreamModelName: "private-model", IsModelMapped: true}}
+	info.BindPublicModel(c)
+	done := make(chan *dto.Usage, 1)
+	go func() {
+		usage, err := openai.OaiResponsesStreamHandler(c, info, &http.Response{StatusCode: 200, Header: make(http.Header), Body: reader})
+		if err != nil {
+			done <- nil
+			return
+		}
+		done <- usage
+	}()
+	_, err := io.WriteString(writer, "data: "+`{"type":"response.created","response":{"id":"resp_1","model":"private-model","status":"in_progress"}}`+"\n\n")
+	require.NoError(t, err)
+	select {
+	case frame := <-recorder.frames:
+		assert.Contains(t, frame, `"model":"public-pro"`)
+		assert.NotContains(t, frame, `"model":"private-model"`)
+	case <-time.After(3 * time.Second):
+		t.Fatal("first projected event was buffered until EOF")
+	}
+	_, err = io.WriteString(writer, "data: "+`{"type":"response.completed","response":{"id":"resp_1","model":"private-model","status":"completed","usage":{"input_tokens":2,"output_tokens":3,"total_tokens":5}}}`+"\n\n")
+	require.NoError(t, err)
+	require.NoError(t, writer.Close())
+	select {
+	case usage := <-done:
+		require.NotNil(t, usage)
+		assert.Equal(t, 5, usage.TotalTokens)
+	case <-time.After(3 * time.Second):
+		t.Fatal("stream did not finish")
+	}
+}
+
+func TestPublicModelErrorAndHeadersKeepDiagnostics(t *testing.T) {
+	const body = `{"error":{"type":"rate_limit_error","code":"rate_limit_exceeded","message":"model private-model exceeded its limit","details":[{"model":"private-model"}]},"request_id":"req-public"}`
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", nil)
+	info := &relaycommon.RelayInfo{OriginModelName: "public-pro", RelayFormat: types.RelayFormatOpenAI, ChannelMeta: &relaycommon.ChannelMeta{UpstreamModelName: "private-model", IsModelMapped: true}}
+	info.BindPublicModel(c)
+	service.IOCopyBytesGracefully(c, &http.Response{StatusCode: 429, Header: http.Header{"Content-Type": []string{"application/json"}, "X-Served-Model": []string{"private-model"}, "X-RateLimit-Remaining": []string{"0"}}}, []byte(body))
+	assert.Equal(t, 429, recorder.Code)
+	assert.Empty(t, recorder.Header().Get("X-Served-Model"))
+	assert.Equal(t, "0", recorder.Header().Get("X-RateLimit-Remaining"))
+	assert.NotContains(t, recorder.Body.String(), "private-model")
+	assert.Equal(t, "rate_limit_exceeded", gjson.Get(recorder.Body.String(), "error.code").Str)
+	assert.Equal(t, "req-public", gjson.Get(recorder.Body.String(), "request_id").Str)
+	projected, err := info.ProjectResponseModel([]byte(`{"model":"private-model","error":null}`))
+	require.NoError(t, err)
+	assert.Equal(t, "null", gjson.GetBytes(projected, "error").Raw)
+	binaryRecorder := httptest.NewRecorder()
+	binaryContext, _ := gin.CreateTestContext(binaryRecorder)
+	info.BindPublicModel(binaryContext)
+	media := []byte("\x00\xffprivate-model\x00")
+	service.IOCopyBytesGracefully(binaryContext, &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": []string{"audio/mpeg"}}}, media)
+	assert.Equal(t, media, binaryRecorder.Body.Bytes())
 }

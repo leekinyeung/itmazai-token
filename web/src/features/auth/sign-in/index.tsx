@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link, useSearch } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
+import { Separator } from '@/components/ui/separator'
 import { useStatus } from '@/hooks/use-status'
 
 import { AuthLayout } from '../auth-layout'
@@ -31,28 +32,30 @@ export function SignIn() {
   const { status } = useStatus()
 
   return (
-    <AuthLayout>
+    <AuthLayout variant='split'>
       <div className='w-full space-y-8'>
-        <div className='space-y-2'>
-          <h2 className='text-center text-2xl font-semibold tracking-tight sm:text-left'>
-            {t('Sign in')}
-          </h2>
-          {!status?.self_use_mode_enabled &&
-            status?.register_enabled !== false && (
-              <p className='text-muted-foreground text-left text-sm sm:text-base'>
-                {t("Don't have an account?")}{' '}
-                <Link
-                  to='/sign-up'
-                  className='hover:text-primary font-medium underline underline-offset-4'
-                >
-                  {t('Sign up')}
-                </Link>
-                .
-              </p>
-            )}
+        <div>
+          <h1 className='auth-heading'>{t('Welcome back')}</h1>
+          <p className='auth-description'>
+            {t('Sign in to continue your AI journey.')}
+          </p>
         </div>
 
         <UserAuthForm redirectTo={redirect} />
+
+        {!status?.self_use_mode_enabled &&
+          status?.register_enabled !== false && (
+            <div className='auth-switch'>
+              <Separator className='min-w-0 flex-1' />
+              <p>
+                {t("Don't have an account?")}{' '}
+                <Link to='/sign-up' className='font-medium hover:underline'>
+                  {t('Sign up now')}
+                </Link>
+              </p>
+              <Separator className='min-w-0 flex-1' />
+            </div>
+          )}
 
         <TermsFooter
           variant='sign-in'

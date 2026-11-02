@@ -21,6 +21,8 @@ func OpenaiRealtimeHandler(c *gin.Context, info *relaycommon.RelayInfo) (*types.
 		return types.NewError(fmt.Errorf("invalid websocket connection"), types.ErrorCodeBadResponse), nil
 	}
 
+	info.BindPublicModel(c)
+	info.RememberPrivateModel(info.UpstreamModelName)
 	info.IsStream = true
 	clientConn := info.ClientWs
 	targetConn := info.TargetWs
@@ -187,7 +189,12 @@ func OpenaiRealtimeHandler(c *gin.Context, info *relaycommon.RelayInfo) (*types.
 					localUsage.OutputTokenDetails.AudioTokens += audioToken
 				}
 
-				err = helper.WssString(c, clientConn, string(message))
+				projected, projectionErr := info.ProjectResponseModel(message)
+				if projectionErr != nil {
+					errChan <- projectionErr
+					return
+				}
+				err = helper.WssString(c, clientConn, string(projected))
 				if err != nil {
 					errChan <- fmt.Errorf("error writing to client: %v", err)
 					return

@@ -113,9 +113,54 @@ afterEach(() => {
 })
 
 describe('theme preference persistence', () => {
+  it('starts with the selected dark Ocean Breeze appearance on a fresh visit', () => {
+    render(<ThemeFixture />)
+
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('dark')
+    expect(document.documentElement).toHaveClass('dark')
+    expect(document.body).toHaveAttribute('data-theme-preset', 'ocean-breeze')
+    expect(document.body).toHaveAttribute('data-theme-font', 'sans')
+    expect(document.body).toHaveAttribute('data-theme-radius', 'sm')
+    expect(document.body).not.toHaveAttribute('data-theme-scale')
+    expect(document.body).toHaveAttribute('data-theme-content-layout', 'full')
+    expect(localStorage.length).toBe(0)
+  })
+
+  it('preserves saved light mode and explicit base palette, Auto font and Auto radius', () => {
+    const preferences = {
+      'newapi:theme:v1:mode': 'light',
+      'newapi:theme:v1:preset': 'default',
+      'newapi:theme:v1:font': 'default',
+      'newapi:theme:v1:radius': 'default',
+    }
+    for (const [key, value] of Object.entries(preferences)) {
+      localStorage.setItem(key, value)
+    }
+
+    render(<ThemeFixture />)
+
+    expect(document.documentElement).toHaveClass('light')
+    expect(document.body).not.toHaveAttribute('data-theme-preset')
+    expect(document.body).toHaveAttribute('data-theme-font', 'system')
+    expect(document.body).not.toHaveAttribute('data-theme-radius')
+    for (const [key, value] of Object.entries(preferences)) {
+      expect(localStorage.getItem(key)).toBe(value)
+    }
+  })
+
+  it('preserves a saved system preference instead of forcing the new dark default', () => {
+    localStorage.setItem('newapi:theme:v1:mode', 'system')
+
+    render(<ThemeFixture />)
+
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
+    expect(document.documentElement).toHaveClass('light')
+    expect(localStorage.getItem('newapi:theme:v1:mode')).toBe('system')
+  })
+
   it('starts with defaults when only shared legacy theme cookies exist', () => {
-    document.cookie = 'theme_preset=ocean-breeze; path=/'
-    document.cookie = 'vite-ui-theme=dark; path=/'
+    document.cookie = 'theme_preset=sunset-glow; path=/'
+    document.cookie = 'vite-ui-theme=light; path=/'
     document.cookie = 'theme_font=serif; path=/'
     document.cookie = 'theme_radius=xl; path=/'
     document.cookie = 'theme_scale=lg; path=/'
@@ -123,11 +168,11 @@ describe('theme preference persistence', () => {
 
     render(<ThemeFixture />)
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
-    expect(document.documentElement).toHaveClass('light')
-    expect(document.body).not.toHaveAttribute('data-theme-preset')
-    expect(document.body).toHaveAttribute('data-theme-font', 'system')
-    expect(document.body).not.toHaveAttribute('data-theme-radius')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('dark')
+    expect(document.documentElement).toHaveClass('dark')
+    expect(document.body).toHaveAttribute('data-theme-preset', 'ocean-breeze')
+    expect(document.body).toHaveAttribute('data-theme-font', 'sans')
+    expect(document.body).toHaveAttribute('data-theme-radius', 'sm')
     expect(document.body).not.toHaveAttribute('data-theme-scale')
     expect(document.body).toHaveAttribute('data-theme-content-layout', 'full')
   })
@@ -156,12 +201,12 @@ describe('theme preference persistence', () => {
     expect(document.cookie).toBe('')
   })
 
-  it('keeps a reset after remounting even when the legacy ocean cookie remains', async () => {
+  it('keeps a reset after remounting even when a conflicting legacy cookie remains', async () => {
     for (const [key, value] of Object.entries(savedPreferences)) {
       localStorage.setItem(key, value)
     }
     localStorage.setItem('unrelated-preference', 'keep')
-    document.cookie = 'theme_preset=ocean-breeze; path=/'
+    document.cookie = 'theme_preset=sunset-glow; path=/'
     const user = userEvent.setup()
     const first = render(<ThemeFixture />)
 
@@ -169,18 +214,18 @@ describe('theme preference persistence', () => {
     first.unmount()
     render(<ThemeFixture />)
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
-    expect(document.documentElement).toHaveClass('light')
-    expect(document.body).not.toHaveAttribute('data-theme-preset')
-    expect(document.body).toHaveAttribute('data-theme-font', 'system')
-    expect(document.body).not.toHaveAttribute('data-theme-radius')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('dark')
+    expect(document.documentElement).toHaveClass('dark')
+    expect(document.body).toHaveAttribute('data-theme-preset', 'ocean-breeze')
+    expect(document.body).toHaveAttribute('data-theme-font', 'sans')
+    expect(document.body).toHaveAttribute('data-theme-radius', 'sm')
     expect(document.body).not.toHaveAttribute('data-theme-scale')
     expect(document.body).toHaveAttribute('data-theme-content-layout', 'full')
     for (const key of Object.keys(savedPreferences)) {
       expect(localStorage.getItem(key)).toBeNull()
     }
     expect(localStorage.getItem('unrelated-preference')).toBe('keep')
-    expect(document.cookie).toContain('theme_preset=ocean-breeze')
+    expect(document.cookie).toContain('theme_preset=sunset-glow')
   })
 
   it.each(['', 'unknown'])(
@@ -192,10 +237,10 @@ describe('theme preference persistence', () => {
 
       render(<ThemeFixture />)
 
-      expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
-      expect(document.body).not.toHaveAttribute('data-theme-preset')
-      expect(document.body).toHaveAttribute('data-theme-font', 'system')
-      expect(document.body).not.toHaveAttribute('data-theme-radius')
+      expect(screen.getByLabelText('Theme mode')).toHaveTextContent('dark')
+      expect(document.body).toHaveAttribute('data-theme-preset', 'ocean-breeze')
+      expect(document.body).toHaveAttribute('data-theme-font', 'sans')
+      expect(document.body).toHaveAttribute('data-theme-radius', 'sm')
       expect(document.body).not.toHaveAttribute('data-theme-scale')
       expect(document.body).toHaveAttribute('data-theme-content-layout', 'full')
     }
@@ -208,8 +253,8 @@ describe('theme preference persistence', () => {
 
     render(<ThemeFixture />)
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
-    expect(document.body).not.toHaveAttribute('data-theme-preset')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('dark')
+    expect(document.body).toHaveAttribute('data-theme-preset', 'ocean-breeze')
   })
 
   it('still applies and resets preferences when storage writes fail', async () => {
@@ -229,8 +274,8 @@ describe('theme preference persistence', () => {
 
     await user.click(screen.getByRole('button', { name: 'Reset' }))
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
-    expect(document.body).not.toHaveAttribute('data-theme-preset')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('dark')
+    expect(document.body).toHaveAttribute('data-theme-preset', 'ocean-breeze')
   })
 
   it('preserves saved theme preferences during frontend cache initialization', () => {
@@ -262,7 +307,7 @@ describe('theme font selection', () => {
     render(<ThemeFixture />)
 
     expect(document.body).toHaveAttribute('data-theme-font', 'sans')
-    expect(localStorage.getItem('newapi:theme:v1:font')).toBe('sans')
+    expect(localStorage.getItem('newapi:theme:v1:font')).toBeNull()
 
     await user.click(screen.getByRole('button', { name: 'Anthropic preset' }))
 
@@ -277,7 +322,7 @@ describe('theme font selection', () => {
     await user.click(screen.getByRole('button', { name: 'Auto font' }))
 
     expect(document.body).toHaveAttribute('data-theme-font', 'system')
-    expect(localStorage.getItem('newapi:theme:v1:font')).toBeNull()
+    expect(localStorage.getItem('newapi:theme:v1:font')).toBe('default')
 
     first.unmount()
     render(<ThemeFixture />)
@@ -289,6 +334,8 @@ describe('theme font selection', () => {
     const user = userEvent.setup()
     render(<ThemeFixture />)
 
+    await user.click(screen.getByRole('button', { name: 'Auto font' }))
+
     await user.click(screen.getByRole('button', { name: 'Anthropic preset' }))
 
     expect(document.body).toHaveAttribute('data-theme-font', 'serif')
@@ -296,6 +343,6 @@ describe('theme font selection', () => {
     await user.click(screen.getByRole('button', { name: 'Default preset' }))
 
     expect(document.body).toHaveAttribute('data-theme-font', 'system')
-    expect(localStorage.getItem('newapi:theme:v1:font')).toBeNull()
+    expect(localStorage.getItem('newapi:theme:v1:font')).toBe('default')
   })
 })

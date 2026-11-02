@@ -32,6 +32,7 @@ import { IconSidebarSidebar } from '@/assets/custom/icon-sidebar-sidebar'
 import { IconThemeDark } from '@/assets/custom/icon-theme-dark'
 import { IconThemeLight } from '@/assets/custom/icon-theme-light'
 import { IconThemeSystem } from '@/assets/custom/icon-theme-system'
+import { CustomThemeColor } from '@/components/custom-theme-color'
 import {
   sideDrawerContentClassName,
   sideDrawerFooterClassName,
@@ -247,6 +248,13 @@ function ThemeConfig() {
 function PresetConfig() {
   const { t } = useTranslation()
   const { defaults, customization, setPreset } = useThemeCustomization()
+  const presets = [
+    ...THEME_PRESETS,
+    {
+      value: 'custom',
+      swatches: [customization.customColor, customization.customColor],
+    },
+  ]
   return (
     <div>
       <SectionTitle
@@ -260,12 +268,16 @@ function PresetConfig() {
         className='grid w-full grid-cols-4 gap-3'
         aria-label={t('Select color preset')}
       >
-        {THEME_PRESETS.map((preset) => (
+        {presets.map((preset) => (
           <Item
             key={preset.value}
             value={preset.value}
             className='group flex flex-col items-stretch outline-none'
-            aria-label={t(`preset.${preset.value}`)}
+            aria-label={
+              preset.value === 'custom'
+                ? t('Custom')
+                : t(`preset.${preset.value}`)
+            }
           >
             <div
               className={cn(
@@ -294,11 +306,14 @@ function PresetConfig() {
               />
             </div>
             <div className='mt-1.5 truncate text-center text-xs'>
-              {t(`preset.${preset.value}`)}
+              {preset.value === 'custom'
+                ? t('Custom')
+                : t(`preset.${preset.value}`)}
             </div>
           </Item>
         ))}
       </Radio>
+      {customization.preset === 'custom' && <CustomThemeColor />}
     </div>
   )
 }

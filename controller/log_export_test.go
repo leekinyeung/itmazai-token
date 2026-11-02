@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/middleware"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/service"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
@@ -56,7 +57,7 @@ func seedExportLogs(t *testing.T, mainDB *gorm.DB, logDB *gorm.DB, now int64) {
 	t.Helper()
 	require.NoError(t, mainDB.Create(&model.Channel{Id: 9, Name: "primary"}).Error)
 	logs := []model.Log{
-		{UserId: 1, Username: "alice", CreatedAt: now - 3600, Type: model.LogTypeConsume, ModelName: "gpt-a", ChannelId: 9, Quota: 10, RequestId: "a-1", Other: `{"admin_info":{"use_channel":["9"]}}`},
+		{UserId: 1, Username: "alice", CreatedAt: now - 3600, Type: model.LogTypeConsume, ModelName: "gpt-a", ChannelId: 9, Quota: 10, RequestId: "a-1", Other: `{"model_price":0.004,"upstream_model_name":"[private-route]gemini-pro","is_model_mapped":true,"response_model":{"requested_model":"gpt-a","upstream_model":"[private-route]gemini-pro","returned_model":"[private-route]gemini-pro"},"admin_info":{"use_channel":["9"]}}`},
 		{UserId: 2, Username: "bob", CreatedAt: now - 1800, Type: model.LogTypeConsume, ModelName: "gpt-b", ChannelId: 9, Quota: 20, RequestId: "b-1"},
 		{UserId: 1, Username: "alice", CreatedAt: now - 60, Type: model.LogTypeError, ModelName: "gpt-a", RequestId: "a-2"},
 		{UserId: 1, Username: "alice", CreatedAt: now - 400*24*3600, Type: model.LogTypeConsume, ModelName: "gpt-a", RequestId: "a-old"},
@@ -139,12 +140,15 @@ func TestLogExportDatabaseMatrix(t *testing.T) {
 			assert.Equal(t, float64(1), own[0]["id"], "user exports carry list positions, not row ids")
 			assert.Empty(t, own[1]["channel_name"])
 			assert.NotContains(t, own[1]["other"], "admin_info")
+			assert.NotContains(t, own[1]["other"], "[private-route]")
+			assert.NotContains(t, own[1]["other"], "upstream_model_name")
 
 			all := callLogHandler(t, ExportAllLogs, 3, common.RoleAdminUser, query+"&model_name=gpt-%25")
 			require.Len(t, all, 4)
 			assert.Equal(t, []any{"a-2", "b-1", "a-1"}, exportedRequestIds(all))
 			assert.Equal(t, "primary", all[2]["channel_name"])
 			assert.Contains(t, all[2]["other"], "admin_info")
+			assert.Contains(t, all[2]["other"], "[private-route]gemini-pro")
 			assert.Equal(t, true, all[3]["success"])
 		})
 	}
@@ -243,4 +247,83 @@ func TestAcquireLogExportLock(t *testing.T) {
 			releaseAgain()
 		})
 	}
+}
+
+func TestLogModelVisibilityUsesAuthenticatedRouteScope(t *testing.T) {
+	// Initialize the production dialect constants before the real API-key middleware.
+	previousDB, previousSQLite, previousMaster := model.DB, common.SQLitePath, common.IsMasterNode
+	t.Setenv("SQL_DSN", "")
+	common.SQLitePath, common.IsMasterNode = t.TempDir()+"/visibility.db", false
+	require.NoError(t, model.InitDB())
+	bootstrap := model.DB
+	bootstrapSQL, err := bootstrap.DB()
+	require.NoError(t, err)
+	model.DB, common.SQLitePath, common.IsMasterNode = previousDB, previousSQLite, previousMaster
+	t.Cleanup(func() { require.NoError(t, bootstrapSQL.Close()) })
+	admin, _ := setupAccessTokenAudit(t)
+	db := model.DB
+	useLogExportDatabases(t, db, db, common.DatabaseTypeSQLite, common.DatabaseTypeSQLite)
+	require.NoError(t, db.AutoMigrate(&model.Channel{}, &model.Token{}))
+	previousSecret := common.SessionSecret
+	common.SessionSecret = "log-model-visibility-regression-secret"
+	t.Cleanup(func() { common.SessionSecret = previousSecret })
+	setting := operation_setting.GetLogSetting()
+	previousExport := setting.UserExportEnabled
+	setting.UserExportEnabled = true
+	t.Cleanup(func() { setting.UserExportEnabled = previousExport })
+	user := &model.User{Username: "log-reader", Role: common.RoleCommonUser, Status: common.UserStatusEnabled, Group: "default", AuthVersion: 1, AffCode: "log-reader"}
+	root := &model.User{Username: "log-root", Role: common.RoleRootUser, Status: common.UserStatusEnabled, Group: "default", AuthVersion: 1, AffCode: "log-root"}
+	require.NoError(t, db.Create(user).Error)
+	require.NoError(t, db.Create(root).Error)
+	_, adminJWT := createAccessTokenTestSession(t, admin.Id, "log-admin-session")
+	_, userJWT := createAccessTokenTestSession(t, user.Id, "log-user-session")
+	_, rootJWT := createAccessTokenTestSession(t, root.Id, "log-root-session")
+	token := &model.Token{UserId: admin.Id, Key: "modelvisibilityadminkey123456789", Status: common.TokenStatusEnabled, ExpiredTime: -1, RemainQuota: 1000}
+	require.NoError(t, db.Create(token).Error)
+	const storedOther = `{"model_price":0.004,"upstream_model_name":"[private-route]gemini-pro","is_model_mapped":true,"response_model":{"requested_model":"public-pro","upstream_model":"[private-route]gemini-pro","returned_model":"[private-route]gemini-pro"},"details":{"model":"[private-route]gemini-pro"},"root_info":{"node_name":"private-node"}}`
+	for _, owner := range []*model.User{user, admin, root} {
+		require.NoError(t, db.Create(&model.Log{UserId: owner.Id, Username: owner.Username, CreatedAt: time.Now().Unix(), Type: model.LogTypeConsume, ModelName: "public-pro", TokenId: token.Id, Quota: 17, PromptTokens: 2, CompletionTokens: 3, RequestId: fmt.Sprintf("visibility-%d", owner.Id), Other: storedOther}).Error)
+	}
+	engine := gin.New()
+	engine.Use(middleware.DisableCache())
+	engine.GET("/api/log/", middleware.AdminAuth(), GetAllLogs)
+	engine.GET("/api/log/self", middleware.UserAuth(), GetUserLogs)
+	engine.GET("/api/log/token", middleware.TokenAuthReadOnly(), GetLogByKey)
+	engine.GET("/api/log/export", middleware.AdminAuth(), ExportAllLogs)
+	engine.GET("/api/log/self/export", middleware.UserAuth(), ExportUserLogs)
+	for _, tc := range []struct {
+		name, path, bearer string
+		status             int
+		private            bool
+	}{
+		{"user", "/api/log/self?role=100&admin=true&user_id=1", userJWT, 200, false},
+		{"admin personal", "/api/log/self", adminJWT, 200, false},
+		{"root personal", "/api/log/self", rootJWT, 200, false},
+		{"admin key", "/api/log/token?role=100&admin=true", "sk-" + token.Key, 200, false},
+		{"user export", "/api/log/self/export", userJWT, 200, false},
+		{"admin personal export", "/api/log/self/export", adminJWT, 200, false},
+		{"admin management", "/api/log/", adminJWT, 200, true},
+		{"root management", "/api/log/", rootJWT, 200, true},
+		{"management export", "/api/log/export", adminJWT, 200, true},
+		{"forged admin", "/api/log/?role=100&admin=true", userJWT, 403, false},
+		{"key cannot manage", "/api/log/", "sk-" + token.Key, 401, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			response := auditRequest(engine, http.MethodGet, tc.path, tc.bearer)
+			require.Equal(t, tc.status, response.Code, response.Body.String())
+			assert.Contains(t, response.Header().Get("Cache-Control"), "no-store")
+			if tc.private {
+				assert.Contains(t, response.Body.String(), "[private-route]gemini-pro")
+			} else {
+				assert.NotContains(t, response.Body.String(), "[private-route]")
+				assert.NotContains(t, response.Body.String(), "upstream_model_name")
+				assert.NotContains(t, response.Body.String(), "is_model_mapped")
+			}
+		})
+	}
+	var persisted model.Log
+	require.NoError(t, db.Where("user_id = ?", user.Id).First(&persisted).Error)
+	assert.Equal(t, storedOther, persisted.Other)
+	assert.Equal(t, 17, persisted.Quota)
+	assert.Equal(t, 2, persisted.PromptTokens)
 }

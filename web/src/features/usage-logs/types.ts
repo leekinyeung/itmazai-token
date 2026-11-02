@@ -116,6 +116,10 @@ export interface ToolSurchargeItem {
 
 export interface LogOtherData {
   admin_info?: {
+    is_model_mapped?: boolean
+    upstream_model_name?: string
+    response_model?: LogOtherData['response_model']
+    po?: string[]
     request_policy?: PolicyEvent[]
     is_multi_key?: boolean
     multi_key_index?: number

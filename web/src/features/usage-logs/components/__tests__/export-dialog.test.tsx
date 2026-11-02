@@ -175,7 +175,12 @@ it('downloads the streamed logs of the current filters as CSV', async () => {
       token_name: 'prod',
       model_name: 'gpt-4o',
       quota: 0,
-      other: '',
+      other: JSON.stringify({
+        upstream_model_name: '[private-route]gemini-pro',
+        is_model_mapped: true,
+        response_model: { returned_model: '[private-route]gemini-pro' },
+        admin_info: { po: ['set model = [private-route]gemini-pro'] },
+      }),
       request_id: 'req-2',
     },
     {
@@ -217,6 +222,9 @@ it('downloads the streamed logs of the current filters as CSV', async () => {
   expect(rows).toHaveLength(3)
   expect(rows[1]).toContain('"req-2"')
   expect(rows[2]).toContain('"req-1"')
+  expect(rows[1]).toContain('"gpt-4o"')
+  expect(rows.join('\n')).not.toContain('[private-route]')
+  expect(rows.join('\n')).not.toContain('upstream_model')
   expect(success).toHaveBeenCalledWith('Exported 2 logs')
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
 })

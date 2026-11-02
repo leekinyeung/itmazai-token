@@ -32,6 +32,23 @@ For commercial licensing, please contact support@quantumnous.com
  *   blocks so an explicit user choice overrides the preset's default radius.
  */
 
+/* ── Custom ───────────────────────────────────────────────────────────── */
+[data-theme-preset='custom'] {
+  --primary: var(--custom-primary);
+  --primary-foreground: var(--custom-primary-foreground);
+  --secondary: color-mix(in oklch, var(--primary) 16%, var(--background));
+  --secondary-foreground: var(--foreground);
+  --ring: var(--primary);
+  --chart-1: var(--primary);
+  --chart-2: color-mix(in oklch, var(--primary) 70%, #14b8a6);
+  --chart-3: color-mix(in oklch, var(--primary) 65%, #8b5cf6);
+  --chart-4: color-mix(in oklch, var(--primary) 55%, #f59e0b);
+  --chart-5: color-mix(in oklch, var(--primary) 40%, var(--foreground));
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-ring: var(--ring);
+}
+
 /* ── Underground ──────────────────────────────────────────────────────── */
 [data-theme-preset='underground'] {
   --primary: oklch(0.5315 0.0694 156.19);
@@ -428,8 +445,8 @@ For commercial licensing, please contact support@quantumnous.com
  *     cards/borders rather than tinting them with the clay accent).
  *   - `simple-large`: keeps intentionally neutral, high-contrast surfaces. */
 [data-theme-preset]:not([data-theme-preset='default']):not(
-  [data-theme-preset='anthropic']
-):not([data-theme-preset='simple-large']) {
+    [data-theme-preset='anthropic']
+  ):not([data-theme-preset='simple-large']) {
   --card: color-mix(in oklch, var(--primary) 3%, var(--background));
   --popover: color-mix(in oklch, var(--primary) 5%, var(--background));
   --muted: color-mix(in oklch, var(--primary) 7%, var(--background));

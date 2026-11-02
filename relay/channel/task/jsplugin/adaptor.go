@@ -1401,6 +1401,7 @@ func (a *TaskAdaptor) buildSubmit(c *gin.Context, info *relaycommon.RelayInfo) (
 		info.OriginModelName = descriptor.Model
 	}
 	if descriptor.RewriteModel != "" {
+		info.RememberPrivateModel(descriptor.RewriteModel)
 		info.UpstreamModelName = descriptor.RewriteModel
 	}
 	a.submit = &descriptor

@@ -1208,8 +1208,8 @@ export function buildContentRequest(ctx) {
     const images = imageContent(artifactData(ctx)).filter(function (part) {
       return part.image;
     });
-    const index = images.findIndex(function (_, index) {
-      return ctx.artifactKey === "image-" + (index + 1);
+    const index = images.findIndex(function (_, imageIndex) {
+      return ctx.artifactKey === "image-" + (imageIndex + 1);
     });
     url = index >= 0 ? images[index].image : "";
   }
@@ -1400,7 +1400,7 @@ export const protocols = {
           if (req[key] === undefined) continue;
           try {
             req[key] = JSON.parse(req[key]);
-          } catch (e) {
+          } catch {
             throw new Error(key + " must be a JSON object string");
           }
         }
@@ -1491,7 +1491,7 @@ export const protocols = {
           let parsed;
           try {
             parsed = JSON.parse(req.metadata);
-          } catch (e) {
+          } catch {
             throw new Error("metadata must be a JSON object string");
           }
           if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("metadata must be a JSON object string");

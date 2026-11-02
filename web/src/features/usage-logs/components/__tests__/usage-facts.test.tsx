@@ -64,7 +64,11 @@ function makeLog(other: LogOtherData): UsageLog {
   }
 }
 
-function renderDetails(other: LogOtherData, promptTokens = 0): QueryClient {
+function renderDetails(
+  other: LogOtherData,
+  promptTokens = 0,
+  isAdmin = false
+): QueryClient {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
@@ -80,7 +84,7 @@ function renderDetails(other: LogOtherData, promptTokens = 0): QueryClient {
     <QueryClientProvider client={queryClient}>
       <DetailsDialog
         log={{ ...makeLog(other), prompt_tokens: promptTokens }}
-        isAdmin={false}
+        isAdmin={isAdmin}
         isRoot={false}
         open
         onOpenChange={() => undefined}
@@ -95,13 +99,17 @@ function rowValue(label: string): string | null {
 }
 
 test('shows the recorded request and response models in log details', () => {
-  const queryClient = renderDetails({
-    response_model: {
-      requested_model: 'requested-model',
-      upstream_model: 'mapped-model',
-      returned_model: 'unexpected-model',
+  const queryClient = renderDetails(
+    {
+      response_model: {
+        requested_model: 'requested-model',
+        upstream_model: 'mapped-model',
+        returned_model: 'unexpected-model',
+      },
     },
-  })
+    0,
+    true
+  )
   expect(screen.getByText('Response model: unexpected-model')).toBeVisible()
   expect(rowValue('Request Model')).toBe('requested-model')
   expect(rowValue('Upstream Model')).toBe('mapped-model')
@@ -274,4 +282,24 @@ describe('usage facts billing details', () => {
     expect(screen.queryByText('seconds')).toBeNull()
     expect(screen.getByText('Total Cost')).toBeInTheDocument()
   })
+})
+
+test('personal details ignore both legacy and management model diagnostics', () => {
+  const client = renderDetails({
+    is_model_mapped: true,
+    upstream_model_name: '[private-route]gemini-pro',
+    response_model: {
+      requested_model: 'public-pro',
+      upstream_model: '[private-route]gemini-pro',
+      returned_model: '[private-route]gemini-pro',
+    },
+    admin_info: {
+      upstream_model_name: '[private-route]gemini-pro',
+      po: ['set model = [private-route]gemini-pro'],
+    },
+  })
+  expect(document.body.textContent).not.toContain('[private-route]')
+  expect(screen.queryByText('Model Mapping')).not.toBeInTheDocument()
+  expect(screen.queryByText('Response Model')).not.toBeInTheDocument()
+  client.clear()
 })

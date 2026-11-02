@@ -1,10 +1,27 @@
 import { defineConfig } from 'vitepress'
 
+const docsOrigin = 'https://docs.taodock.com'
+
 export default defineConfig({
   lang: 'zh-CN',
-  title: 'TaoDock 使用手册',
-  description: 'TaoDock 专属使用指南：账号与密钥、模型选择、客户端配置、API 调用、钱包与用量排查。',
+  title: '众妙之门 TaoDock',
+  description: '众妙之门 TaoDock 使用手册：AI API 接入、客户端配置、模型选择、密钥管理、钱包与用量排查。',
   srcExclude: ['README.md'],
+  sitemap: {
+    hostname: docsOrigin,
+  },
+  transformHead({ pageData }) {
+    if (pageData.relativePath === '404.md') return []
+    const path = pageData.relativePath
+      .replace(/(^|\/)index\.md$/, '$1')
+      .replace(/\.md$/, '.html')
+    const chinesePath = path.replace(/^en\//, '')
+    return [
+      ['link', { rel: 'canonical', href: new URL(path, `${docsOrigin}/`).href }],
+      ['link', { rel: 'alternate', hreflang: 'zh-CN', href: new URL(chinesePath, `${docsOrigin}/`).href }],
+      ['link', { rel: 'alternate', hreflang: 'en', href: new URL(`en/${chinesePath}`, `${docsOrigin}/`).href }],
+    ]
+  },
   locales: {
     root: {
       label: '简体中文',
@@ -13,11 +30,12 @@ export default defineConfig({
     en: {
       label: 'English',
       lang: 'en',
-      title: 'TaoDock User Guide',
+      title: 'TaoDock',
       description: 'Connect to TaoDock: account setup, API keys, models, clients, API requests, wallet, and troubleshooting.',
       themeConfig: {
         nav: [
           { text: 'Quick start', link: '/en/quick-start' },
+          { text: 'Clients & Agents', link: '/en/guide/clients' },
           { text: 'API integration', link: '/en/api/overview' },
           { text: 'FAQ', link: '/en/faq' },
           { text: 'Open TaoDock', link: 'https://taodock.com' },
@@ -36,7 +54,18 @@ export default defineConfig({
               { text: 'Using the console', link: '/en/guide/console' },
               { text: 'Choose a model', link: '/en/guide/models' },
               { text: 'Manage API keys', link: '/en/guide/api-keys' },
-              { text: 'Connect an AI client', link: '/en/guide/clients' },
+              {
+                text: 'Clients & Agents',
+                link: '/en/guide/clients',
+                collapsed: true,
+                items: [
+                  { text: 'Cherry Studio', link: '/en/guide/cherry-studio' },
+                  { text: 'WorkBuddy', link: '/en/guide/workbuddy' },
+                  { text: 'AionUI', link: '/en/guide/clients#aionui' },
+                  { text: 'DeepChat', link: '/en/guide/clients#deepchat' },
+                  { text: 'Open WebUI', link: '/en/guide/open-webui' },
+                ],
+              },
               { text: 'Wallet and usage', link: '/en/guide/wallet' },
               { text: 'API integration', link: '/en/api/overview' },
               { text: 'FAQ', link: '/en/faq' },
@@ -67,9 +96,10 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: '快速开始', link: '/quick-start' },
+      { text: '客户端与 Agent', link: '/guide/clients' },
       { text: 'API 接入', link: '/api/overview' },
       { text: '常见问题', link: '/faq' },
-      { text: '进入 TaoDock', link: 'https://taodock.com' },
+      { text: '进入众妙之门', link: 'https://taodock.com' },
     ],
     sidebar: [
       {
@@ -85,7 +115,18 @@ export default defineConfig({
           { text: '控制台使用', link: '/guide/console' },
           { text: '选择模型和接口', link: '/guide/models' },
           { text: 'API 密钥管理', link: '/guide/api-keys' },
-          { text: '连接 AI 客户端', link: '/guide/clients' },
+          {
+            text: '客户端与 Agent',
+            link: '/guide/clients',
+            collapsed: true,
+            items: [
+              { text: 'Cherry Studio', link: '/guide/cherry-studio' },
+              { text: 'WorkBuddy', link: '/guide/workbuddy' },
+              { text: 'AionUI', link: '/guide/clients#aionui' },
+              { text: 'DeepChat', link: '/guide/clients#deepchat' },
+              { text: 'Open WebUI', link: '/guide/open-webui' },
+            ],
+          },
           { text: '钱包与用量', link: '/guide/wallet' },
           { text: 'API 接入说明', link: '/api/overview' },
           { text: '常见问题', link: '/faq' },
@@ -143,7 +184,7 @@ export default defineConfig({
       linkText: '返回首页',
     },
     footer: {
-      message: 'TaoDock · 控制台与 API：taodock.com · 使用手册：docs.taodock.com',
+      message: '众妙之门 TaoDock · 控制台与 API：taodock.com · 使用手册：docs.taodock.com',
     },
   },
 })

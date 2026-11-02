@@ -1,3 +1,8 @@
+---
+title: "Wallet, Quota and API Usage"
+description: "Check TaoDock wallet and key quotas, find funding options and review API usage and charges in request logs."
+---
+
 # Wallet and usage
 
 Open [TaoDock Wallet](https://taodock.com/wallet) to check your balance and the funding options available to your account. TaoDock currently displays quota and related amounts in **USD**.

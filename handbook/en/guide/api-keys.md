@@ -1,3 +1,8 @@
+---
+title: "Creating and Managing API Keys"
+description: "Create and name TaoDock API keys, configure expiration and access restrictions, connect clients and deactivate keys when needed."
+---
+
 # API key management
 
 [API Keys](https://taodock.com/keys) authorize applications to access TaoDock. Your password signs you into the console; your API key connects clients and programs. They are not interchangeable.

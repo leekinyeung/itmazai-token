@@ -1196,6 +1196,9 @@ func renderTaskPluginQuery(
 			abortTaskPluginRouteError(c, http.StatusNotFound)
 			return
 		}
+		if !multiple {
+			service.BindTaskPublicModel(c, task)
+		}
 		view, viewErr := service.BuildTaskPluginView(task)
 		if viewErr != nil {
 			abortTaskPluginRouteError(c, http.StatusInternalServerError)
@@ -1237,7 +1240,7 @@ func renderTaskPluginQuery(
 		time.Since(renderStarted).Milliseconds(),
 	)
 	c.Abort()
-	c.JSON(http.StatusOK, result)
+	common.WritePublicModelJSON(c, http.StatusOK, result)
 }
 
 // RespondTaskPluginError gives a pinned plugin a sanitized error DTO and writes
@@ -1251,7 +1254,7 @@ func RespondTaskPluginError(c *gin.Context, taskErr *dto.TaskError) bool {
 	if !exists || !ok || pinned.Plugin == nil {
 		return false
 	}
-	sanitized := sanitizedTaskPluginError(taskErr.StatusCode, taskErr.Message)
+	sanitized := sanitizedTaskPluginError(taskErr.StatusCode, common.PublicModelMessage(c, taskErr.Message))
 	requestID := c.GetString(common.RequestIdKey)
 	hasRenderer, err := pinned.Plugin.Engine.HasCallablePath(c.Request.Context(), "native", "error")
 	requestValue, exists := c.Get(pluginruntime.ContextKeyRouteRequest)
@@ -1307,6 +1310,7 @@ func abortTaskPluginRouteError(c *gin.Context, status int) {
 }
 
 func abortTaskPluginRouteErrorDetail(c *gin.Context, status int, detail string) {
+	detail = common.PublicModelMessage(c, detail)
 	taskErr := sanitizedTaskPluginError(status, detail)
 	c.Abort()
 	if RespondTaskPluginError(c, &dto.TaskError{Code: taskErr.Code, Message: detail, StatusCode: taskErr.HTTPStatus}) {

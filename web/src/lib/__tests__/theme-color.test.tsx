@@ -25,6 +25,8 @@ import { resolveThemeColor, useThemeColor } from '../theme-color'
 // cascade: the dark class lives on <html> and the preset attribute on <body>,
 // as in theme.css and theme-presets.css.
 function cascadedForeground(): string {
+  const customColor = document.body.getAttribute('data-theme-custom-color')
+  if (customColor) return customColor
   if (document.body.getAttribute('data-theme-preset') === 'rose-garden') {
     return 'rgb(80, 20, 40)'
   }
@@ -45,6 +47,7 @@ describe('useThemeColor', () => {
   afterEach(() => {
     document.documentElement.classList.remove('dark')
     document.body.removeAttribute('data-theme-preset')
+    document.body.removeAttribute('data-theme-custom-color')
     vi.restoreAllMocks()
   })
 
@@ -72,6 +75,18 @@ describe('useThemeColor', () => {
     })
 
     expect(result.current).toBe('rgb(80, 20, 40)')
+  })
+
+  test('re-resolves when a custom color changes without switching presets', async () => {
+    document.body.setAttribute('data-theme-preset', 'custom')
+    document.body.setAttribute('data-theme-custom-color', '#2563eb')
+    const { result } = renderHook(() => useThemeColor('--chart-1'))
+
+    await act(async () => {
+      document.body.setAttribute('data-theme-custom-color', '#9333ea')
+    })
+
+    expect(result.current).toBe('#9333ea')
   })
 })
 

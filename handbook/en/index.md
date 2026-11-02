@@ -1,4 +1,7 @@
 ---
+title: "TaoDock Documentation | Unified AI API Guides"
+description: "Learn how to connect apps and clients to TaoDock AI APIs, choose models, manage API keys, check usage and troubleshoot integrations."
+titleTemplate: false
 layout: home
 
 hero:
@@ -10,15 +13,24 @@ hero:
       text: Make your first API call
       link: /en/quick-start
     - theme: alt
-      text: Connect an AI client
+      text: Connect clients and Agents
       link: /en/guide/clients
     - theme: alt
       text: Open the console
       link: https://taodock.com/dashboard/overview
 
 features:
-  - title: Connect clients
-    details: Configure Cherry Studio and Open WebUI, or use the console's client import actions.
+  - title: Cherry Studio setup
+    details: Set the New API root URL, import keys, enable models and verify requests.
+    link: /en/guide/cherry-studio
+  - title: WorkBuddy custom models
+    details: Configure the API URL and model ID, then select and verify your model.
+    link: /en/guide/workbuddy
+  - title: Open WebUI setup
+    details: Add an OpenAI-compatible connection, load models and troubleshoot errors.
+    link: /en/guide/open-webui
+  - title: Clients and Agents
+    details: Connect Cherry Studio, WorkBuddy, AionUI, DeepChat, and Open WebUI with import steps, model selection, and tool checks.
     link: /en/guide/clients
   - title: Choose a model
     details: Find TaoDock chat and image models, and understand model IDs, protocols, and groups.

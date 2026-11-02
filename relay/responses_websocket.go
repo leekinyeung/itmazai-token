@@ -79,10 +79,11 @@ type responsesWSControl struct {
 // Only the request worker reads or changes billing state. Socket readers pass
 // bounded messages to it; cancellation never performs an independent refund.
 type responsesWSCallState struct {
-	inbox    chan responsesWSMessage
-	controls chan responsesWSControl
-	done     chan struct{}
-	terminal *responsesWSMessage
+	inbox      chan responsesWSMessage
+	controls   chan responsesWSControl
+	done       chan struct{}
+	terminal   *responsesWSMessage
+	projection common.ModelIdentityProjection
 	// A nonzero closeCode ends the connection after this request.
 	closeCode   int
 	closeReason string
@@ -198,6 +199,15 @@ func (s *responsesWSSession) runRequest(state *responsesWSCallState, message []b
 				outgoing = &responsesWSMessage{kind: websocket.TextMessage, body: body}
 			}
 		}
+		if outgoing != nil && state.projection != nil {
+			projected, err := state.projection.ProjectResponseModel(outgoing.body)
+			if err != nil {
+				state.closeCode = websocket.CloseInternalServerErr
+				outgoing = nil
+			} else {
+				outgoing.body = projected
+			}
+		}
 		s.clientWriteMu.Lock()
 		s.stateMu.Lock()
 		if outgoing != nil {
@@ -226,6 +236,9 @@ func (s *responsesWSSession) runRequest(state *responsesWSCallState, message []b
 		c.Request.Body = io.NopCloser(bytes.NewReader(create.Body))
 		c.Request.ContentLength = int64(len(create.Body))
 		callErr := s.runCall(c, state, create)
+		if value, exists := c.Get(common.ModelIdentityProjectionKey); exists {
+			state.projection, _ = value.(common.ModelIdentityProjection)
+		}
 		upstreamURLs = common.UpstreamAddresses(c)
 		return callErr
 	})
@@ -400,7 +413,7 @@ func (s *responsesWSSession) runCall(c *gin.Context, state *responsesWSCallState
 				info.StreamStatus.RecordError("invalid upstream websocket event")
 			} else {
 				if event.Type != "error" && event.StreamID != "" && event.StreamID != create.StreamID {
-					if err := s.writeClient(incoming.kind, incoming.body); err != nil {
+					if err := s.writePublicClient(info, incoming.kind, incoming.body); err != nil {
 						s.shutdown(websocket.CloseInternalServerErr, "")
 					}
 					continue
@@ -418,7 +431,7 @@ func (s *responsesWSSession) runCall(c *gin.Context, state *responsesWSCallState
 					}
 					terminal, ambiguous, controlError := responsesWSErrorEndsRequest(rejection, create.StreamID, responseID, sentControl)
 					if !terminal {
-						if err := s.writeClient(incoming.kind, incoming.body); err != nil {
+						if err := s.writePublicClient(info, incoming.kind, incoming.body); err != nil {
 							s.shutdown(websocket.CloseInternalServerErr, "")
 						}
 						// Only a control error in this stream resolves its pending control.
@@ -478,7 +491,7 @@ func (s *responsesWSSession) runCall(c *gin.Context, state *responsesWSCallState
 				ConsumeResponsesQuota(c, info, accumulator.Finish())
 				return nil
 			}
-			if err := s.writeClient(incoming.kind, incoming.body); err != nil {
+			if err := s.writePublicClient(info, incoming.kind, incoming.body); err != nil {
 				s.shutdown(websocket.CloseInternalServerErr, "")
 			}
 			if accepted && pendingControl != nil {
@@ -712,6 +725,14 @@ func (s *responsesWSSession) writeTarget(kind int, message []byte) error {
 		return err
 	}
 	return target.WriteMessage(kind, message)
+}
+
+func (s *responsesWSSession) writePublicClient(info *relaycommon.RelayInfo, kind int, message []byte) error {
+	projected, err := info.ProjectResponseModel(message)
+	if err != nil {
+		return err
+	}
+	return s.writeClient(kind, projected)
 }
 
 func (s *responsesWSSession) writeClient(kind int, message []byte) error {

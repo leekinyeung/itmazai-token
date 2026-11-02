@@ -1,9 +1,13 @@
 package service
 
 import (
+	"encoding/json"
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
+	relaycommon "github.com/QuantumNous/new-api/relay/common"
+	"github.com/QuantumNous/new-api/relaykit/types"
+	"github.com/gin-gonic/gin"
 )
 
 // BuildTaskPluginView converts a persisted task into the deliberately narrow
@@ -18,13 +22,17 @@ func BuildTaskPluginView(task *model.Task) (dto.TaskView, error) {
 		Platform:   string(task.Platform),
 		Status:     string(task.Status),
 		Progress:   task.Progress,
-		FailReason: task.FailReason,
+		FailReason: common.RedactModelNames(task.FailReason, task.Properties.OriginModelName, task.Properties.UpstreamModelName),
 		CreatedAt:  createdAt,
 		UpdatedAt:  task.UpdatedAt,
 		FinishedAt: task.FinishTime,
 	}
 	if len(task.Data) > 0 {
-		if err := common.Unmarshal(task.Data, &view.Data); err != nil {
+		projected, err := ProjectTaskModelData(task)
+		if err != nil {
+			return dto.TaskView{}, err
+		}
+		if err := common.Unmarshal(projected, &view.Data); err != nil {
 			return dto.TaskView{}, err
 		}
 		view.Data = replacePrivateTaskID(view.Data, task.PrivateData.UpstreamTaskID, task.TaskID)
@@ -57,5 +65,35 @@ func replacePrivateTaskID(value any, privateTaskID, publicTaskID string) any {
 		return replaced
 	default:
 		return value
+	}
+}
+
+// ProjectTaskModelData projects the provider envelope without normalizing opaque
+// business JSON through float64. Arrays have no protocol model envelope.
+func ProjectTaskModelData(task *model.Task) (json.RawMessage, error) {
+	if len(task.Data) == 0 {
+		return nil, nil
+	}
+	if common.GetJsonType(task.Data) != "object" {
+		return task.Data, nil
+	}
+	return taskPublicModelIdentity(task).ProjectResponseModel(task.Data)
+}
+
+// BindTaskPublicModel rebuilds only the display projection from persisted
+// identities. It never supplies an upstream fallback for a missing public name.
+func BindTaskPublicModel(c *gin.Context, task *model.Task) {
+	taskPublicModelIdentity(task).BindPublicModel(c)
+}
+
+func taskPublicModelIdentity(task *model.Task) *relaycommon.RelayInfo {
+	return &relaycommon.RelayInfo{
+		OriginModelName: task.Properties.OriginModelName,
+		PublicModelName: task.Properties.OriginModelName,
+		RelayFormat:     types.RelayFormatTask,
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: task.Properties.UpstreamModelName,
+			IsModelMapped:     task.Properties.OriginModelName == "" || task.Properties.UpstreamModelName != task.Properties.OriginModelName,
+		},
 	}
 }

@@ -451,12 +451,12 @@ func GeminiChatHandler(c *gin.Context, info *relaycommon.RelayInfo, resp *http.R
 
 		switch info.RelayFormat {
 		case types.RelayFormatClaude:
-			c.JSON(newAPIError.StatusCode, gin.H{
+			common.WritePublicModelJSON(c, newAPIError.StatusCode, gin.H{
 				"type":  "error",
 				"error": newAPIError.ToClaudeError(common.UpstreamAddresses(c)...),
 			})
 		default:
-			c.JSON(newAPIError.StatusCode, gin.H{
+			common.WritePublicModelJSON(c, newAPIError.StatusCode, gin.H{
 				"error": newAPIError.ToOpenAIError(common.UpstreamAddresses(c)...),
 			})
 		}
@@ -576,7 +576,7 @@ func GeminiImageHandler(c *gin.Context, info *relaycommon.RelayInfo, resp *http.
 
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.WriteHeader(resp.StatusCode)
-	_, _ = c.Writer.Write(jsonResponse)
+	_, _ = common.WritePublicModelBytes(c, jsonResponse)
 
 	// https://github.com/google-gemini/cookbook/blob/719a27d752aac33f39de18a8d3cb42a70874917e/quickstarts/Counting_Tokens.ipynb
 	// each image has fixed 258 tokens

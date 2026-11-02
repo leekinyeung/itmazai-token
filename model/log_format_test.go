@@ -242,3 +242,36 @@ func TestLogFormattingPreservesLargeIntegerLexemes(t *testing.T) {
 		assert.Equal(t, unprivileged, adminLogs[0].Other)
 	})
 }
+
+func TestUserLogModelMetadataProjection(t *testing.T) {
+	const privateModel = "[private-route]gemini-pro"
+	const original = `{"model_price":0.004,"public_id":9007199254740993,"upstream_model_name":"[private-route]gemini-pro","is_model_mapped":true,"response_model":{"requested_model":"public-pro","upstream_model":"[private-route]gemini-pro","returned_model":"[private-route]gemini-pro"},"po":["set model = [private-route]gemini-pro"],"details":{"upstream_model_name":"[private-route]gemini-pro"},"admin_info":{"use_channel":[9]}}`
+	wrapped, err := common.Marshal(original)
+	require.NoError(t, err)
+	for _, value := range []string{original, string(wrapped), "", "null", `{"upstream_model_name":"[private-route]gemini-pro"`, `[]`} {
+		t.Run(value, func(t *testing.T) {
+			stored := &Log{ModelName: "public-pro", Other: value, Quota: 17, PromptTokens: 2, CompletionTokens: 3}
+			logs := []*Log{stored}
+			formatUserLogs(logs, 0)
+			assert.NotContains(t, logs[0].Other, privateModel)
+			assert.NotContains(t, logs[0].Other, "upstream_model")
+			assert.NotContains(t, logs[0].Other, "is_model_mapped")
+			assert.NotContains(t, logs[0].Other, "response_model")
+			assert.NotContains(t, logs[0].Other, `"po"`)
+			assert.Equal(t, value, stored.Other, "projection must detach the returned record")
+			assert.Equal(t, 17, logs[0].Quota)
+			assert.Equal(t, "public-pro", logs[0].ModelName)
+			if value == original || value == string(wrapped) {
+				assert.Contains(t, logs[0].Other, `"public_id":9007199254740993`)
+				assert.Contains(t, logs[0].Other, `"model_price":0.004`)
+			}
+		})
+	}
+	admin := []*Log{{Other: original}}
+	FormatAdminLogs(admin)
+	assert.Contains(t, admin[0].Other, privateModel)
+	var projected map[string]any
+	require.NoError(t, common.UnmarshalJsonStr(admin[0].Other, &projected))
+	assert.NotContains(t, projected, "upstream_model_name")
+	assert.Contains(t, projected["admin_info"], "upstream_model_name")
+}

@@ -1,0 +1,135 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+import { ArrowRight01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Link } from '@tanstack/react-router'
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { Button } from '@/components/ui/button'
+import { toIntlLocale } from '@/i18n/languages'
+import { formatNumber } from '@/lib/format'
+
+import { HomeAudience } from './home-audience'
+import { HomeGateway } from './home-gateway'
+
+import '@/styles/home-hero.css'
+
+interface HomeHeroProps {
+  brand: string
+  logo: string
+  docsUrl: string
+  modelCount?: number
+  paused: boolean
+}
+
+export function HomeHero(props: HomeHeroProps) {
+  const { t, i18n } = useTranslation()
+  const locale = toIntlLocale(i18n.resolvedLanguage || i18n.language)
+  const audience = useMemo(() => {
+    const words = [t('developers'), t('teams'), t('your next idea')]
+    // Split the translated template so each language keeps its own word order.
+    const parts = t('Built for {{audience}}', { audience: '\uFFFC' }).split(
+      '\uFFFC'
+    )
+    if (parts.length !== 2) {
+      return {
+        words: words.map((word) =>
+          t('Built for {{audience}}', { audience: word })
+        ),
+        prefix: '',
+        suffix: '',
+      }
+    }
+    return { words, prefix: parts[0], suffix: parts[1] }
+  }, [t])
+
+  return (
+    <section className='home-hero' aria-labelledby='home-title'>
+      <div className='home-hero-copy'>
+        <p className='home-eyebrow home-hero-badge'>
+          {t('MODELS · API · POSSIBILITIES')}
+        </p>
+        <h1 id='home-title'>
+          {t('One gateway, endless AI possibilities.')}
+          <HomeAudience
+            key={locale}
+            words={audience.words}
+            prefix={audience.prefix}
+            suffix={audience.suffix}
+            paused={props.paused}
+          />
+        </h1>
+        <p className='home-hero-description'>
+          {t(
+            'Connect leading models through {{brand}}. One familiar API, from your first prototype to your next release.',
+            { brand: props.brand }
+          )}
+        </p>
+        <div className='home-actions'>
+          <Button
+            className='home-primary-action'
+            render={<Link to='/pricing' />}
+          >
+            {t('Explore models')}
+            <HugeiconsIcon
+              icon={ArrowRight01Icon}
+              size={16}
+              aria-hidden='true'
+            />
+          </Button>
+          <Button
+            variant='outline'
+            className='home-secondary-action'
+            render={
+              /^https?:\/\//.test(props.docsUrl) ? (
+                <a
+                  href={props.docsUrl}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                />
+              ) : (
+                <Link to={props.docsUrl} />
+              )
+            }
+          >
+            {t('Integration guide')}
+            <HugeiconsIcon
+              icon={ArrowRight01Icon}
+              size={16}
+              aria-hidden='true'
+            />
+          </Button>
+        </div>
+        <p className='home-hero-note'>
+          {!props.modelCount
+            ? t('Many models. One connection.')
+            : t('{{formattedCount}} models, ready to explore.', {
+                formattedCount: formatNumber(props.modelCount, locale),
+              })}
+        </p>
+      </div>
+      <HomeGateway
+        logo={props.logo}
+        brand={props.brand}
+        paused={props.paused}
+      />
+    </section>
+  )
+}

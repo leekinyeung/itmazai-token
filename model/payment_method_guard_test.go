@@ -1,12 +1,21 @@
 package model
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 func insertUserForPaymentGuardTest(t *testing.T, id int, quota int) *User {
@@ -352,4 +361,259 @@ func TestRechargeEpayEnforcesFinalWalletQuotaLimit(t *testing.T) {
 			assert.Equal(t, tc.wantStatus, getTopUpStatusForPaymentGuardTest(t, order.TradeNo))
 		})
 	}
+}
+
+func setFirstTopUpRewardForTest(t *testing.T, value string) {
+	t.Helper()
+	common.OptionMapRWMutex.Lock()
+	if common.OptionMap == nil {
+		common.OptionMap = make(map[string]string)
+	}
+	previous, exists := common.OptionMap[InviterFirstTopUpRewardUSDOptionKey]
+	common.OptionMap[InviterFirstTopUpRewardUSDOptionKey] = value
+	common.OptionMapRWMutex.Unlock()
+	t.Cleanup(func() {
+		common.OptionMapRWMutex.Lock()
+		defer common.OptionMapRWMutex.Unlock()
+		if exists {
+			common.OptionMap[InviterFirstTopUpRewardUSDOptionKey] = previous
+		} else {
+			delete(common.OptionMap, InviterFirstTopUpRewardUSDOptionKey)
+		}
+	})
+}
+
+func createFirstTopUpRewardUsers(t *testing.T) {
+	t.Helper()
+	require.NoError(t, DB.Create(&[]User{
+		{Id: 101, Username: "referral_inviter", AffCode: "referral_inviter", Quota: 7, Status: common.UserStatusEnabled},
+		{Id: 102, Username: "referral_invitee", AffCode: "referral_invitee", InviterId: 101, Quota: 3, Status: common.UserStatusEnabled},
+	}).Error)
+}
+
+func TestFirstTopUpInviterRewardDatabaseMatrix(t *testing.T) {
+	for _, dialect := range []string{"sqlite", "mysql", "postgres"} {
+		t.Run(dialect, func(t *testing.T) {
+			var driver gorm.Dialector
+			switch dialect {
+			case "sqlite":
+				driver = sqlite.Open(filepath.Join(t.TempDir(), "referral.db") + "?_pragma=busy_timeout(30000)&_pragma=journal_mode(WAL)&_txlock=immediate")
+			case "mysql":
+				dsn := os.Getenv("TEST_MYSQL_DSN")
+				if dsn == "" {
+					t.Skip("TEST_MYSQL_DSN is not configured")
+				}
+				driver = mysql.Open(dsn)
+			case "postgres":
+				dsn := os.Getenv("TEST_POSTGRES_DSN")
+				if dsn == "" {
+					t.Skip("TEST_POSTGRES_DSN is not configured")
+				}
+				driver = postgres.Open(dsn)
+			}
+			db, err := gorm.Open(driver, &gorm.Config{NamingStrategy: schema.NamingStrategy{TablePrefix: "referral_test_"}})
+			require.NoError(t, err)
+			sqlDB, err := db.DB()
+			require.NoError(t, err)
+			sqlDB.SetMaxOpenConns(8)
+			previousDB, previousType, previousQuotaUnit := DB, common.MainDatabaseType(), common.QuotaPerUnit
+			DB = db
+			common.SetMainDatabaseType(common.DatabaseType(dialect))
+			common.QuotaPerUnit = 500000
+			t.Cleanup(func() {
+				assert.NoError(t, db.Migrator().DropTable(&FirstTopUpReward{}, &TopUp{}, &User{}, &Option{}))
+				DB = previousDB
+				common.SetMainDatabaseType(previousType)
+				common.QuotaPerUnit = previousQuotaUnit
+				assert.NoError(t, sqlDB.Close())
+			})
+			versionSQL := "SELECT version()"
+			if dialect == "sqlite" {
+				versionSQL = "SELECT sqlite_version()"
+			}
+			var version string
+			require.NoError(t, db.Raw(versionSQL).Scan(&version).Error)
+			t.Logf("database version: %s", version)
+			setFirstTopUpRewardForTest(t, "2.5")
+
+			for _, upgrade := range []bool{false, true} {
+				t.Run(fmt.Sprintf("migration/upgrade=%v", upgrade), func(t *testing.T) {
+					require.NoError(t, db.Migrator().DropTable(&FirstTopUpReward{}, &TopUp{}, &User{}, &Option{}))
+					// User and TopUp are unchanged by this feature: this represents
+					// the existing schema before the new rewards table is introduced.
+					require.NoError(t, db.AutoMigrate(&User{}, &TopUp{}, &Option{}))
+					if upgrade {
+						createFirstTopUpRewardUsers(t)
+						createEpayTestOrder(t, 102, "legacy-success", PaymentProviderEpay, common.TopUpStatusSuccess)
+					}
+					for range 2 {
+						require.NoError(t, db.AutoMigrate(&FirstTopUpReward{}))
+					}
+					if upgrade {
+						assert.Equal(t, 3, getUserQuotaForPaymentGuardTest(t, 102))
+						assert.Equal(t, common.TopUpStatusSuccess, getTopUpStatusForPaymentGuardTest(t, "legacy-success"))
+						assert.Error(t, db.Create(&TopUp{TradeNo: "legacy-success"}).Error, "order numbers remain unique")
+						createEpayTestOrder(t, 102, "after-upgrade", PaymentProviderEpay, common.TopUpStatusPending)
+						_, err := RechargeEpay("after-upgrade", "alipay", "")
+						require.NoError(t, err)
+						assert.Equal(t, 7, getUserQuotaForPaymentGuardTest(t, 101), "existing users cannot claim on a later top-up")
+						assert.Error(t, db.Create(&FirstTopUpReward{UserId: 102}).Error, "claims remain unique per invitee")
+					}
+				})
+			}
+
+			providers := []struct {
+				name     string
+				provider string
+				complete func(string) error
+			}{
+				{"epay", PaymentProviderEpay, func(tradeNo string) error { _, err := RechargeEpay(tradeNo, "alipay", ""); return err }},
+				{"stripe", PaymentProviderStripe, func(tradeNo string) error { return Recharge(tradeNo, "customer", "") }},
+				{"creem", PaymentProviderCreem, func(tradeNo string) error { return RechargeCreem(tradeNo, "customer@example.com", "", "") }},
+				{"waffo", PaymentProviderWaffo, func(tradeNo string) error { return RechargeWaffo(tradeNo, "") }},
+				{"waffo pancake", PaymentProviderWaffoPancake, RechargeWaffoPancake},
+				{"manual completion", PaymentProviderEpay, func(tradeNo string) error { return ManualCompleteTopUp(tradeNo, "") }},
+			}
+			for _, provider := range providers {
+				t.Run(provider.name+"/credits once", func(t *testing.T) {
+					for _, table := range []any{&FirstTopUpReward{}, &TopUp{}, &User{}} {
+						require.NoError(t, db.Unscoped().Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(table).Error)
+					}
+					createFirstTopUpRewardUsers(t)
+					order := createEpayTestOrder(t, 102, "first-payment", provider.provider, common.TopUpStatusPending)
+					require.NoError(t, provider.complete(order.TradeNo))
+					assert.Equal(t, 1_250_007, getUserQuotaForPaymentGuardTest(t, 101))
+					var reward FirstTopUpReward
+					require.NoError(t, db.First(&reward, "user_id = ?", 102).Error)
+					assert.Equal(t, FirstTopUpReward{UserId: 102, TopUpId: order.Id, InviterId: 101, Quota: 1_250_000}, reward)
+					var inviter User
+					require.NoError(t, db.First(&inviter, 101).Error)
+					assert.Zero(t, inviter.AffQuota, "reward is immediately spendable without a transfer")
+					quotaAfterFirst := getUserQuotaForPaymentGuardTest(t, 102)
+					assert.Greater(t, quotaAfterFirst, 3)
+					_ = provider.complete(order.TradeNo) // Some providers reject an already-completed order.
+					assert.Equal(t, quotaAfterFirst, getUserQuotaForPaymentGuardTest(t, 102))
+					createEpayTestOrder(t, 102, "second-payment", provider.provider, common.TopUpStatusPending)
+					require.NoError(t, provider.complete("second-payment"))
+					assert.Greater(t, getUserQuotaForPaymentGuardTest(t, 102), quotaAfterFirst)
+					assert.Equal(t, 1_250_007, getUserQuotaForPaymentGuardTest(t, 101))
+				})
+			}
+
+			for _, scenario := range []string{"disabled", "no inviter", "self invitation", "deleted inviter", "failed earlier order", "subscription earlier order", "wallet limit"} {
+				t.Run(scenario, func(t *testing.T) {
+					for _, table := range []any{&FirstTopUpReward{}, &TopUp{}, &User{}} {
+						require.NoError(t, db.Unscoped().Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(table).Error)
+					}
+					createFirstTopUpRewardUsers(t)
+					wantInviterQuota := 7
+					switch scenario {
+					case "disabled":
+						setFirstTopUpRewardForTest(t, "0")
+					case "no inviter":
+						require.NoError(t, db.Model(&User{}).Where("id = ?", 102).Update("inviter_id", 0).Error)
+					case "self invitation":
+						require.NoError(t, db.Model(&User{}).Where("id = ?", 102).Update("inviter_id", 102).Error)
+					case "deleted inviter":
+						require.NoError(t, db.Delete(&User{}, 101).Error)
+					case "failed earlier order":
+						createEpayTestOrder(t, 102, "earlier", PaymentProviderEpay, common.TopUpStatusFailed)
+						wantInviterQuota += 1_250_000
+					case "subscription earlier order":
+						require.NoError(t, db.Create(&TopUp{UserId: 102, TradeNo: "subscription", Amount: 0, Status: common.TopUpStatusSuccess}).Error)
+						wantInviterQuota += 1_250_000
+					case "wallet limit":
+						require.NoError(t, db.Model(&User{}).Where("id = ?", 101).Update("quota", common.MaxWalletQuota).Error)
+					}
+					createEpayTestOrder(t, 102, "first-payment", PaymentProviderEpay, common.TopUpStatusPending)
+					_, err := RechargeEpay("first-payment", "alipay", "")
+					if scenario == "wallet limit" {
+						require.ErrorIs(t, err, ErrTopUpQuotaLimitExceeded)
+						assert.Equal(t, common.TopUpStatusPending, getTopUpStatusForPaymentGuardTest(t, "first-payment"))
+						assert.Equal(t, 3, getUserQuotaForPaymentGuardTest(t, 102))
+						var count int64
+						require.NoError(t, db.Model(&FirstTopUpReward{}).Count(&count).Error)
+						assert.Zero(t, count)
+						// A retry after capacity is available must deliver both credits.
+						require.NoError(t, db.Model(&User{}).Where("id = ?", 101).Update("quota", 7).Error)
+						_, err = RechargeEpay("first-payment", "alipay", "")
+						require.NoError(t, err)
+						wantInviterQuota += 1_250_000
+					} else {
+						require.NoError(t, err)
+					}
+					assert.Equal(t, 1_000_003, getUserQuotaForPaymentGuardTest(t, 102))
+					if scenario != "deleted inviter" {
+						assert.Equal(t, wantInviterQuota, getUserQuotaForPaymentGuardTest(t, 101))
+					}
+					if scenario == "disabled" {
+						setFirstTopUpRewardForTest(t, "2.5")
+						createEpayTestOrder(t, 102, "later-payment", PaymentProviderEpay, common.TopUpStatusPending)
+						_, err := RechargeEpay("later-payment", "alipay", "")
+						require.NoError(t, err)
+						assert.Equal(t, 7, getUserQuotaForPaymentGuardTest(t, 101))
+					}
+				})
+			}
+
+			t.Run("concurrent different orders and duplicate callbacks", func(t *testing.T) {
+				for _, table := range []any{&FirstTopUpReward{}, &TopUp{}, &User{}} {
+					require.NoError(t, db.Unscoped().Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(table).Error)
+				}
+				createFirstTopUpRewardUsers(t)
+				for _, tradeNo := range []string{"concurrent-a", "concurrent-b"} {
+					createEpayTestOrder(t, 102, tradeNo, PaymentProviderEpay, common.TopUpStatusPending)
+				}
+				start := make(chan struct{})
+				errors := make(chan error, 4)
+				var group sync.WaitGroup
+				for _, tradeNo := range []string{"concurrent-a", "concurrent-b", "concurrent-a", "concurrent-b"} {
+					group.Go(func() {
+						<-start
+						_, err := RechargeEpay(tradeNo, "alipay", "")
+						errors <- err
+					})
+				}
+				close(start)
+				group.Wait()
+				close(errors)
+				for err := range errors {
+					require.NoError(t, err)
+				}
+				assert.Equal(t, 2_000_003, getUserQuotaForPaymentGuardTest(t, 102))
+				assert.Equal(t, 1_250_007, getUserQuotaForPaymentGuardTest(t, 101))
+			})
+		})
+	}
+}
+
+func TestFirstTopUpInviterRewardConfigurationAndCache(t *testing.T) {
+	truncateTables(t)
+	require.NoError(t, DB.AutoMigrate(&Option{}))
+	setFirstTopUpRewardForTest(t, "0")
+	for _, value := range []string{"-1", "NaN", "Inf", "invalid", "1e100", "0.00000001"} {
+		require.Error(t, UpdateOption(InviterFirstTopUpRewardUSDOptionKey, value), value)
+	}
+	require.NoError(t, UpdateOption(InviterFirstTopUpRewardUSDOptionKey, "2.5"))
+	var option Option
+	require.NoError(t, DB.First(&option, "key = ?", InviterFirstTopUpRewardUSDOptionKey).Error)
+	assert.Equal(t, "2.5", option.Value)
+	t.Cleanup(func() { DB.Delete(&Option{}, "key = ?", InviterFirstTopUpRewardUSDOptionKey) })
+
+	createFirstTopUpRewardUsers(t)
+	useUserCacheMiniRedis(t)
+	var inviter User
+	require.NoError(t, DB.First(&inviter, 101).Error)
+	require.NoError(t, populateUserCache(inviter))
+	createEpayTestOrder(t, 102, "first-payment-cache", PaymentProviderEpay, common.TopUpStatusPending)
+	_, err := RechargeEpay("first-payment-cache", "alipay", "")
+	require.NoError(t, err)
+	cached, err := cacheGetUserBase(101)
+	require.NoError(t, err)
+	assert.Equal(t, 1_250_007, cached.Quota)
+	_, err = RechargeEpay("first-payment-cache", "alipay", "")
+	require.NoError(t, err)
+	cached, err = cacheGetUserBase(101)
+	require.NoError(t, err)
+	assert.Equal(t, 1_250_007, cached.Quota)
 }

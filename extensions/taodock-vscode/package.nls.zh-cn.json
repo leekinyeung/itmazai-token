@@ -1,0 +1,8 @@
+{
+  "extension.description": "用自己的 API 密钥在 VS Code 使用众妙之门 TaoDock 对话模型，支持流式回复、工具调用和安全密钥存储。",
+  "command.manage": "设置或更换 API 密钥",
+  "command.refresh": "刷新模型列表",
+  "command.remove": "从当前编辑器移除 API 密钥",
+  "command.console": "打开 API 密钥控制台",
+  "command.docs": "打开使用文档"
+}

@@ -21,7 +21,12 @@ For commercial licensing, please contact support@quantumnous.com
 
 import { javascript } from '@codemirror/lang-javascript'
 import { markdown } from '@codemirror/lang-markdown'
-import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import {
+  HighlightStyle,
+  StreamLanguage,
+  syntaxHighlighting,
+} from '@codemirror/language'
+import { shell } from '@codemirror/legacy-modes/mode/shell'
 import { EditorState, type Extension } from '@codemirror/state'
 import {
   EditorView,
@@ -189,23 +194,43 @@ const codeMirrorTheme = EditorView.theme({
 
 const codeMirrorHighlightStyle = syntaxHighlighting(
   HighlightStyle.define([
-    { tag: highlightTags.heading, color: '#e06c75', fontWeight: '600' },
-    { tag: [highlightTags.strong, highlightTags.emphasis], color: '#d19a66' },
-    { tag: [highlightTags.link, highlightTags.url], color: '#61afef' },
+    {
+      tag: highlightTags.heading,
+      color: 'var(--code-token-heading, #e06c75)',
+      fontWeight: '600',
+    },
+    {
+      tag: [highlightTags.strong, highlightTags.emphasis],
+      color: 'var(--code-token-emphasis, #d19a66)',
+    },
+    {
+      tag: [highlightTags.link, highlightTags.url],
+      color: 'var(--code-token-link, #61afef)',
+    },
     {
       tag: [highlightTags.monospace, highlightTags.contentSeparator],
-      color: '#98c379',
+      color: 'var(--code-token-monospace, #98c379)',
     },
     {
       tag: [highlightTags.keyword, highlightTags.processingInstruction],
-      color: '#c678dd',
+      color: 'var(--code-token-keyword, #c678dd)',
     },
     {
       tag: [highlightTags.atom, highlightTags.bool, highlightTags.number],
-      color: '#d19a66',
+      color: 'var(--code-token-number, #d19a66)',
     },
-    { tag: [highlightTags.string, highlightTags.inserted], color: '#98c379' },
-    { tag: [highlightTags.deleted, highlightTags.invalid], color: '#e06c75' },
+    {
+      tag: [highlightTags.string, highlightTags.inserted],
+      color: 'var(--code-token-string, #98c379)',
+    },
+    {
+      tag: highlightTags.variableName,
+      color: 'var(--code-token-variable, #c7a2ff)',
+    },
+    {
+      tag: [highlightTags.deleted, highlightTags.invalid],
+      color: 'var(--code-token-invalid, #e06c75)',
+    },
     {
       tag: [highlightTags.meta, highlightTags.comment],
       color: 'var(--muted-foreground)',
@@ -239,6 +264,8 @@ function getCodeMirrorLanguageExtension(language: BundledLanguage | string) {
   if (requestedLanguage === 'typescript' || requestedLanguage === 'tsx') {
     return javascript({ jsx: requestedLanguage === 'tsx', typescript: true })
   }
+
+  if (requestedLanguage === 'bash') return StreamLanguage.define(shell)
 
   return []
 }
@@ -301,6 +328,10 @@ function getCodeMirrorExtensions(options: {
       },
     }),
   ]
+
+  if (options.readOnly) {
+    extensions.push(EditorView.contentAttributes.of({ tabindex: '0' }))
+  }
 
   if (options.placeholder) {
     extensions.push(placeholderExtension(options.placeholder))

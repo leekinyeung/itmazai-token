@@ -1,3 +1,8 @@
+---
+title: "AI API FAQ and Connection Troubleshooting"
+description: "Troubleshoot TaoDock email verification, API addresses, key permissions, model access, quota, rate limits and client connections."
+---
+
 # FAQ
 
 ## In what order should I troubleshoot? {#troubleshoot}

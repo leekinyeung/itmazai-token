@@ -490,7 +490,7 @@ protocols.openai_video = {
         let parsed;
         try {
           parsed = JSON.parse(req.metadata);
-        } catch (e) {
+        } catch {
           throw new Error("metadata must be a JSON object string");
         }
         if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("metadata must be a JSON object string");
