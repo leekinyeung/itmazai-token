@@ -94,6 +94,28 @@ describe('website social sharing', () => {
     expect(robots).not.toMatch(/^Disallow:\s*\/\s*$/m)
   })
 
+  it('declares account, authentication and console routes as noindex pages', () => {
+    const manifest = JSON.parse(
+      readFileSync(resolve(webRoot, 'public/page-metadata.json'), 'utf8')
+    ) as { noIndexRoutes: string[] }
+
+    expect(manifest.noIndexRoutes).toEqual(
+      expect.arrayContaining([
+        '/sign-in',
+        '/sign-up',
+        '/forgot-password',
+        '/oauth/:provider',
+        '/dashboard/:section',
+        '/keys',
+        '/profile',
+        '/system-settings',
+        '/console/*legacy',
+      ])
+    )
+    expect(manifest.noIndexRoutes).not.toContain('/')
+    expect(manifest.noIndexRoutes).not.toContain('/pricing')
+  })
+
   it('references a public landscape PNG with matching dimensions and a file size below 5 MB', () => {
     const imageUrl = new URL(metadata['og:image'] || '')
     expect(imageUrl.origin).toBe('https://taodock.com')

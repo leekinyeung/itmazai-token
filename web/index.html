@@ -47,6 +47,87 @@
     <meta name="twitter:image:alt" content="TaoDock" />
 
     <meta name="theme-color" content="#fff" />
+    <style>
+      .server-fallback {
+        box-sizing: border-box;
+        width: min(72rem, 100%);
+        margin: 0 auto;
+        padding: 5rem 1.5rem 3rem;
+        color: #172033;
+        font:
+          400 1rem/1.65 system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+      }
+      .server-fallback section {
+        margin: 0 0 3rem;
+      }
+      .server-fallback__hero {
+        max-width: 52rem;
+      }
+      .server-fallback h1 {
+        margin: 0.25rem 0 1rem;
+        font-size: clamp(2.25rem, 6vw, 4.75rem);
+        line-height: 1.05;
+        letter-spacing: -0.045em;
+      }
+      .server-fallback h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1.35rem;
+        line-height: 1.3;
+      }
+      .server-fallback__eyebrow {
+        color: #e11d48;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .server-fallback__lead {
+        font-size: 1.2rem;
+      }
+      .server-fallback nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1.25rem;
+        margin-top: 1.5rem;
+      }
+      .server-fallback a {
+        color: #be123c;
+        font-weight: 650;
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+      .server-fallback__price-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+        gap: 1rem;
+        margin-top: 1.25rem;
+      }
+      .server-fallback__price {
+        border: 1px solid #d8dee9;
+        border-radius: 0.9rem;
+        padding: 1rem;
+      }
+      .server-fallback__price p {
+        margin-bottom: 0;
+      }
+      .server-fallback--error {
+        max-width: 44rem;
+        padding-top: 8rem;
+      }
+      html.dark .server-fallback {
+        color: #e5e7eb;
+      }
+      html.dark .server-fallback__price {
+        border-color: #374151;
+      }
+      html.dark .server-fallback a,
+      html.dark .server-fallback__eyebrow {
+        color: #fb7185;
+      }
+    </style>
     <!-- Resolve the theme before first paint so the page never flashes light
          and one-shot detectors (e.g. Dark Reader) see the real theme.
          Keep in sync with ThemeProvider and THEME_STORAGE_KEYS.mode. -->

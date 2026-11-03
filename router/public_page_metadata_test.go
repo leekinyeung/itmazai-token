@@ -1,6 +1,7 @@
 package router
 
 import (
+	"bytes"
 	"html"
 	"net/http"
 	"net/http/httptest"
@@ -8,9 +9,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/QuantumNous/new-api/controller"
+	"github.com/QuantumNous/new-api/model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	xhtml "golang.org/x/net/html"
 )
 
 func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
@@ -23,7 +27,11 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()
 	engine.NoRoute(func(c *gin.Context) {
-		page := renderer.render(c.Request.URL.EscapedPath())
+		var fallback *xhtml.Node
+		if normalizePagePath(c.Request.URL.EscapedPath()) == "/" {
+			fallback = homePageFallback()
+		}
+		page := renderer.render(c.Request.URL.EscapedPath(), fallback)
 		if page == nil {
 			page = index
 		}
@@ -56,6 +64,11 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 			if strings.HasPrefix(tc.path, "/pricing") {
 				assert.NotContains(t, body, `name="description" content="Connect apps and agents`)
 			}
+			if tc.path == "/" {
+				assert.Contains(t, body, `<h1>One unified AI API for apps and agents</h1>`)
+				assert.Contains(t, body, `href="/pricing"`)
+				assert.Contains(t, body, `href="https://docs.taodock.com/quick-start.html"`)
+			}
 		})
 	}
 
@@ -79,6 +92,65 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 func TestPublicPageMetadataLegacyFrontendFallback(t *testing.T) {
 	for _, manifest := range []string{"", "{", `{"origin":"javascript:alert(1)","siteName":"Custom"}`} {
 		renderer := newPublicPageMetadataRenderer([]byte("legacy frontend"), []byte(manifest))
-		assert.Nil(t, renderer.render("/pricing"))
+		assert.Nil(t, renderer.render("/pricing", nil))
 	}
+}
+
+func TestPublicPageRouteClassification(t *testing.T) {
+	index, err := os.ReadFile("../web/index.html")
+	require.NoError(t, err)
+	manifest, err := os.ReadFile("../web/public/page-metadata.json")
+	require.NoError(t, err)
+	renderer := newPublicPageMetadataRenderer(index, manifest)
+	require.NotNil(t, renderer)
+
+	for _, path := range []string{
+		"/sign-in", "/register", "/forgot-password", "/oauth/github", "/dashboard/overview",
+		"/keys", "/system-settings/security/rate-limit", "/console/chat/123", "/login",
+	} {
+		assert.True(t, renderer.isNoIndexRoute(path), path)
+	}
+	for _, path := range []string{"/", "/pricing", "/about", "/not-a-route", "/dashboard/overview/extra"} {
+		assert.False(t, renderer.isNoIndexRoute(path), path)
+	}
+
+	page := renderPageHTML(index, "Account and console | TaoDock", "Account page", "TaoDock", "", true, nil)
+	assert.Contains(t, string(page), `name="robots" content="noindex, nofollow"`)
+	assert.NotContains(t, string(page), `rel="canonical"`)
+	assert.NotContains(t, string(page), `property="og:url"`)
+
+	notFound := renderPageHTML(index, "Page not found | TaoDock", "Missing", "TaoDock", "", true, notFoundFallback())
+	assert.Contains(t, string(notFound), `<h1>Page not found</h1>`)
+	assert.Contains(t, string(notFound), `href="/"`)
+}
+
+func TestPublicPricingFallbackUsesPublicBillingData(t *testing.T) {
+	data := controller.PublicPricingData{
+		GroupRatio: map[string]float64{"public": 0.8},
+		Pricing: []model.Pricing{
+			{
+				ModelName: "token-model", EnableGroup: []string{"public"}, BillingMode: "tiered_expr",
+				BillingExpr: `tier("standard", p * 2 + c * 10 + cr * 0.2)`, OwnerBy: "internal-channel",
+			},
+			{
+				ModelName: "image-model", EnableGroup: []string{"public"}, BillingMode: "tiered_expr",
+				BillingExpr: `tier("image", fixed(0.12))`,
+			},
+		},
+	}
+
+	var output bytes.Buffer
+	require.NoError(t, xhtml.Render(&output, pricingPageFallback(data)))
+	body := output.String()
+	assert.Contains(t, body, `<h1>AI model API pricing</h1>`)
+	assert.Contains(t, body, "$1.6 input / $8 output / $0.16 cache read per 1M tokens")
+	assert.Contains(t, body, "$0.096 per request")
+	assert.Contains(t, body, `href="/pricing/token-model"`)
+	assert.NotContains(t, body, "internal-channel")
+	assert.NotContains(t, body, `tier(&#34;standard&#34;`)
+
+	output.Reset()
+	require.NoError(t, xhtml.Render(&output, pricingPageFallback(controller.PublicPricingData{})))
+	assert.Contains(t, output.String(), "public pricing catalog is temporarily unavailable")
+	assert.Contains(t, output.String(), "No missing price is treated as free")
 }

@@ -889,7 +889,15 @@ func performPluginRequest(handler http.Handler, method, path string) *httptest.R
 func TestWebFallbackDoesNotCacheMissingAPIOrAssets(t *testing.T) {
 	outer := gin.New()
 	SetWebRouter(outer, WebAssets{IndexPage: []byte("dashboard")}, func(c *gin.Context) { c.Next() })
-	for _, path := range []string{"/api/user/token/status", "/api/audit/self?p=1", "/v1/missing", "/assets/missing.js"} {
+	for _, path := range []string{
+		"/api/user/token/status",
+		"/api/audit/self?p=1",
+		"/v1/missing",
+		"/assets/missing.js",
+		"/missing.css",
+		"/static/missing",
+		"/dashboard/billing/missing",
+	} {
 		t.Run(path, func(t *testing.T) {
 			response := performPluginRequest(outer, http.MethodGet, path)
 			assert.Equal(t, http.StatusNotFound, response.Code)
@@ -898,10 +906,16 @@ func TestWebFallbackDoesNotCacheMissingAPIOrAssets(t *testing.T) {
 			assert.NotContains(t, response.Header().Get("Cache-Control"), "604800")
 		})
 	}
-	page := performPluginRequest(outer, http.MethodGet, "/security")
-	assert.Equal(t, http.StatusOK, page.Code)
-	assert.Equal(t, "dashboard", page.Body.String())
-	assert.Equal(t, "no-cache", page.Header().Get("Cache-Control"))
+	page := performPluginRequest(outer, http.MethodGet, "/not-a-route")
+	assert.Equal(t, http.StatusNotFound, page.Code)
+	assert.Contains(t, page.Body.String(), "Page not found")
+	assert.Equal(t, "no-store", page.Header().Get("Cache-Control"))
+	assert.Equal(t, "noindex, nofollow", page.Header().Get("X-Robots-Tag"))
+
+	htmlPage := performPluginRequest(outer, http.MethodGet, "/not-a-route.html")
+	assert.Equal(t, http.StatusNotFound, htmlPage.Code)
+	assert.Equal(t, "text/html; charset=utf-8", htmlPage.Header().Get("Content-Type"))
+	assert.Contains(t, htmlPage.Body.String(), "Page not found")
 }
 
 func TestSecurityRoutesDisableCachingBeforeAuthentication(t *testing.T) {

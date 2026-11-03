@@ -3,6 +3,7 @@ package router
 import (
 	"embed"
 	"net/http"
+	pathpkg "path"
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
@@ -10,6 +11,7 @@ import (
 	"github.com/QuantumNous/new-api/middleware"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/net/html"
 )
 
 // WebAssets holds the embedded dashboard frontend assets.
@@ -40,16 +42,89 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 		middleware.Cache(),
 		middleware.ServeFrontendFiles(frontendFS),
 		func(c *gin.Context) {
-			if strings.HasPrefix(c.Request.RequestURI, "/v1") || strings.HasPrefix(c.Request.RequestURI, "/api") || strings.HasPrefix(c.Request.RequestURI, "/assets") {
+			requestPath := c.Request.URL.Path
+			if (c.Request.Method != http.MethodGet && c.Request.Method != http.MethodHead) || isAPIOrAssetPath(requestPath) {
 				controller.RelayNotFound(c)
 				return
 			}
-			c.Header("Cache-Control", "no-cache")
-			page := assets.IndexPage
-			if rendered := pageMetadata.render(c.Request.URL.EscapedPath()); rendered != nil {
-				page = rendered
+
+			escapedPath := c.Request.URL.EscapedPath()
+			path := normalizePagePath(escapedPath)
+			publicPage := false
+			if pageMetadata != nil {
+				_, _, _, publicPage = pageMetadata.publicPage(escapedPath)
 			}
-			c.Data(http.StatusOK, "text/html; charset=utf-8", page)
+			pricingRestricted := publicPage && isPricingPagePath(path) && !middleware.HeaderNavModuleIsPublic("pricing")
+			rankingsRestricted := publicPage && path == "/rankings" && !middleware.HeaderNavModuleIsPublic("rankings")
+			if pricingRestricted {
+				publicPage = false
+			}
+			if rankingsRestricted {
+				publicPage = false
+			}
+
+			if publicPage {
+				var fallback *html.Node
+				switch path {
+				case "/":
+					fallback = homePageFallback()
+				case "/pricing":
+					fallback = pricingPageFallback(controller.GetAnonymousPricingData())
+				}
+				c.Header("Cache-Control", "no-cache")
+				c.Data(http.StatusOK, "text/html; charset=utf-8", pageMetadata.render(escapedPath, fallback))
+				return
+			}
+
+			validNoIndexRoute := pageMetadata != nil && pageMetadata.isNoIndexRoute(escapedPath)
+			if pricingRestricted {
+				validNoIndexRoute = true
+			}
+			if rankingsRestricted {
+				validNoIndexRoute = true
+			}
+			if validNoIndexRoute {
+				c.Header("Cache-Control", "private, no-store")
+				c.Header("X-Robots-Tag", "noindex, nofollow")
+				siteName := "TaoDock"
+				if pageMetadata != nil {
+					siteName = pageMetadata.SiteName
+				}
+				page := renderPageHTML(assets.IndexPage, "Account and console | "+siteName, "Sign in to use the TaoDock account and console features.", siteName, "", true, nil)
+				c.Data(http.StatusOK, "text/html; charset=utf-8", page)
+				return
+			}
+
+			c.Header("Cache-Control", "no-store")
+			c.Header("X-Robots-Tag", "noindex, nofollow")
+			siteName := "TaoDock"
+			if pageMetadata != nil {
+				siteName = pageMetadata.SiteName
+			}
+			page := renderPageHTML(assets.IndexPage, "Page not found | "+siteName, "The requested TaoDock page does not exist.", siteName, "", true, notFoundFallback())
+			c.Data(http.StatusNotFound, "text/html; charset=utf-8", page)
 		},
 	)
+}
+
+func isPricingPagePath(path string) bool {
+	return path == "/pricing" || strings.HasPrefix(path, "/pricing/")
+}
+
+func isAPIOrAssetPath(requestPath string) bool {
+	for _, prefix := range []string{"/api", "/v1", "/v1beta", "/pg", "/mj", "/assets", "/static", "/dashboard/billing"} {
+		if requestPath == prefix || strings.HasPrefix(requestPath, prefix+"/") {
+			return true
+		}
+	}
+	parts := strings.Split(strings.Trim(requestPath, "/"), "/")
+	if len(parts) > 1 && parts[1] == "mj" {
+		return true
+	}
+	switch strings.ToLower(pathpkg.Ext(requestPath)) {
+	case ".avif", ".css", ".gif", ".ico", ".jpeg", ".jpg", ".js", ".json", ".map", ".mjs", ".mp3", ".mp4", ".ogg", ".otf", ".pdf", ".png", ".svg", ".txt", ".wasm", ".webmanifest", ".webm", ".webp", ".woff", ".woff2", ".xml":
+		return true
+	default:
+		return false
+	}
 }

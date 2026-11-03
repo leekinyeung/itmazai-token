@@ -11,6 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type PublicPricingData struct {
+	Pricing      []model.Pricing
+	GroupRatio   map[string]float64
+	UsableGroups map[string]string
+}
+
 func filterPricingByUsableGroups(pricing []model.Pricing, usableGroup map[string]string) []model.Pricing {
 	if len(pricing) == 0 {
 		return pricing
@@ -35,41 +41,57 @@ func filterPricingByUsableGroups(pricing []model.Pricing, usableGroup map[string
 	return filtered
 }
 
-func GetPricing(c *gin.Context) {
-	pricing := model.GetPricing()
-	userId, exists := c.Get("id")
-	usableGroup := map[string]string{}
-	groupRatio := map[string]float64{}
+func pricingDataForGroup(group string) PublicPricingData {
+	groupRatio := make(map[string]float64)
 	maps.Copy(groupRatio, ratio_setting.GetGroupRatioCopy())
+	if group != "" {
+		for candidate := range groupRatio {
+			if ratio, ok := ratio_setting.GetGroupGroupRatio(group, candidate); ok {
+				groupRatio[candidate] = ratio
+			}
+		}
+	}
+
+	usableGroups := service.GetUserUsableGroups(group)
+	pricing := filterPricingByUsableGroups(model.GetPricing(), usableGroups)
+	for candidate := range groupRatio {
+		if _, ok := usableGroups[candidate]; !ok {
+			delete(groupRatio, candidate)
+		}
+	}
+
+	return PublicPricingData{
+		Pricing:      pricing,
+		GroupRatio:   groupRatio,
+		UsableGroups: usableGroups,
+	}
+}
+
+// GetAnonymousPricingData returns the same public catalog and group ratios as
+// GET /api/pricing for a signed-out visitor. It deliberately has no user or
+// request context so server-rendered public HTML cannot enter a shared cache
+// with account-specific pricing.
+func GetAnonymousPricingData() PublicPricingData {
+	return pricingDataForGroup("")
+}
+
+func GetPricing(c *gin.Context) {
+	userId, exists := c.Get("id")
 	var group string
 	if exists {
 		user, err := model.GetUserCache(userId.(int))
 		if err == nil {
 			group = user.Group
-			for g := range groupRatio {
-				ratio, ok := ratio_setting.GetGroupGroupRatio(group, g)
-				if ok {
-					groupRatio[g] = ratio
-				}
-			}
 		}
 	}
-
-	usableGroup = service.GetUserUsableGroups(group)
-	pricing = filterPricingByUsableGroups(pricing, usableGroup)
-	// check groupRatio contains usableGroup
-	for group := range ratio_setting.GetGroupRatioCopy() {
-		if _, ok := usableGroup[group]; !ok {
-			delete(groupRatio, group)
-		}
-	}
+	pricingData := pricingDataForGroup(group)
 
 	c.JSON(200, gin.H{
 		"success":            true,
-		"data":               pricing,
+		"data":               pricingData.Pricing,
 		"vendors":            model.GetVendors(),
-		"group_ratio":        groupRatio,
-		"usable_group":       usableGroup,
+		"group_ratio":        pricingData.GroupRatio,
+		"usable_group":       pricingData.UsableGroups,
 		"supported_endpoint": model.GetSupportedEndpointMap(),
 		"auto_groups":        service.GetUserAutoGroup(group),
 		"pricing_version":    "a42d372ccf0b5dd13ecf71203521f9d2",

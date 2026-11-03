@@ -16,11 +16,11 @@ type publicPageMetadata struct {
 }
 
 type publicPageMetadataRenderer struct {
-	Origin   string                        `json:"origin"`
-	SiteName string                        `json:"siteName"`
-	Pages    map[string]publicPageMetadata `json:"pages"`
-	index    []byte
-	static   map[string][]byte
+	Origin        string                        `json:"origin"`
+	SiteName      string                        `json:"siteName"`
+	NoIndexRoutes []string                      `json:"noIndexRoutes"`
+	Pages         map[string]publicPageMetadata `json:"pages"`
+	index         []byte
 }
 
 func newPublicPageMetadataRenderer(index, manifest []byte) *publicPageMetadataRenderer {
@@ -34,56 +34,98 @@ func newPublicPageMetadataRenderer(index, manifest []byte) *publicPageMetadataRe
 	}
 	renderer.Origin = strings.TrimRight(renderer.Origin, "/")
 	renderer.index = index
-	renderer.static = make(map[string][]byte)
-	for path, page := range renderer.Pages {
-		if strings.Contains(path, ":") {
-			continue
-		}
+	return &renderer
+}
+
+func normalizePagePath(escapedPath string) string {
+	path := strings.TrimRight(escapedPath, "/")
+	if path == "" {
+		return "/"
+	}
+	return path
+}
+
+func (renderer *publicPageMetadataRenderer) publicPage(escapedPath string) (string, string, string, bool) {
+	if renderer == nil {
+		return "", "", "", false
+	}
+	path := normalizePagePath(escapedPath)
+	if page, ok := renderer.Pages[path]; ok && !strings.Contains(path, ":") {
 		title := page.Title + " | " + renderer.SiteName
 		if path == "/" {
 			title = renderer.SiteName + " | " + page.Title
 		}
 		description := strings.ReplaceAll(page.Description, "{{systemName}}", renderer.SiteName)
-		renderer.static[path] = renderPublicPageHTML(index, title, description, renderer.SiteName, renderer.Origin+path)
+		return title, description, renderer.Origin + path, true
 	}
-	return &renderer
-}
 
-func (renderer *publicPageMetadataRenderer) render(escapedPath string) []byte {
-	if renderer == nil {
-		return nil
-	}
-	path := strings.TrimRight(escapedPath, "/")
-	if path == "" {
-		path = "/"
-	}
-	if page, ok := renderer.static[path]; ok {
-		return page
-	}
 	encodedName, ok := strings.CutPrefix(path, "/pricing/")
 	if !ok || encodedName == "" || strings.Contains(encodedName, "/") {
-		return nil
+		return "", "", "", false
 	}
 	modelName, err := url.PathUnescape(encodedName)
 	if err != nil || strings.TrimSpace(modelName) == "" || utf8.RuneCountInString(modelName) > 200 {
-		return nil
+		return "", "", "", false
 	}
 	page, ok := renderer.Pages["/pricing/:modelId"]
 	if !ok {
-		return nil
+		return "", "", "", false
 	}
 	values := strings.NewReplacer("{{systemName}}", renderer.SiteName, "{{modelName}}", modelName)
 	title := values.Replace(page.Title) + " | " + renderer.SiteName
-	return renderPublicPageHTML(renderer.index, title, values.Replace(page.Description), renderer.SiteName, renderer.Origin+path)
+	return title, values.Replace(page.Description), renderer.Origin + path, true
+}
+
+func (renderer *publicPageMetadataRenderer) render(escapedPath string, fallback *html.Node) []byte {
+	title, description, canonical, ok := renderer.publicPage(escapedPath)
+	if !ok {
+		return nil
+	}
+	return renderPageHTML(renderer.index, title, description, renderer.SiteName, canonical, false, fallback)
+}
+
+func (renderer *publicPageMetadataRenderer) isNoIndexRoute(escapedPath string) bool {
+	if renderer == nil {
+		return false
+	}
+	path := normalizePagePath(escapedPath)
+	for _, pattern := range renderer.NoIndexRoutes {
+		if routePatternMatches(pattern, path) {
+			return true
+		}
+	}
+	return false
+}
+
+func routePatternMatches(pattern, path string) bool {
+	patternParts := strings.Split(strings.Trim(pattern, "/"), "/")
+	pathParts := strings.Split(strings.Trim(path, "/"), "/")
+	if pattern == "/" || path == "/" {
+		return pattern == path
+	}
+	for index, patternPart := range patternParts {
+		if strings.HasPrefix(patternPart, "*") {
+			return index < len(pathParts)
+		}
+		if index >= len(pathParts) || (patternPart != pathParts[index] && !strings.HasPrefix(patternPart, ":")) {
+			return false
+		}
+	}
+	return len(patternParts) == len(pathParts)
 }
 
 // Render through the HTML parser so model IDs and branding cannot become markup.
 func renderPublicPageHTML(index []byte, title, description, siteName, canonical string) []byte {
+	return renderPageHTML(index, title, description, siteName, canonical, false, nil)
+}
+
+func renderPageHTML(index []byte, title, description, siteName, canonical string, noIndex bool, fallback *html.Node) []byte {
 	document, err := html.Parse(bytes.NewReader(index))
 	if err != nil {
 		return nil
 	}
 	var head *html.Node
+	var root *html.Node
 	for node := document.FirstChild; node != nil; node = node.NextSibling {
 		if node.Type != html.ElementNode || node.Data != "html" {
 			continue
@@ -91,7 +133,18 @@ func renderPublicPageHTML(index []byte, title, description, siteName, canonical 
 		for child := node.FirstChild; child != nil; child = child.NextSibling {
 			if child.Type == html.ElementNode && child.Data == "head" {
 				head = child
-				break
+			}
+			if child.Type == html.ElementNode && child.Data == "body" {
+				for bodyChild := child.FirstChild; bodyChild != nil; bodyChild = bodyChild.NextSibling {
+					if bodyChild.Type != html.ElementNode {
+						continue
+					}
+					for _, attribute := range bodyChild.Attr {
+						if attribute.Key == "id" && attribute.Val == "root" {
+							root = bodyChild
+						}
+					}
+				}
 			}
 		}
 	}
@@ -104,9 +157,11 @@ func renderPublicPageHTML(index []byte, title, description, siteName, canonical 
 		{"property", "og:title", title},
 		{"property", "og:description", description},
 		{"property", "og:site_name", siteName},
-		{"property", "og:url", canonical},
 		{"name", "twitter:title", title},
 		{"name", "twitter:description", description},
+	}
+	if canonical != "" {
+		fields = append(fields, struct{ kind, key, value string }{"property", "og:url", canonical})
 	}
 	seen := make(map[string]bool)
 	hasTitle := false
@@ -127,6 +182,16 @@ func renderPublicPageHTML(index []byte, title, description, siteName, canonical 
 			head.RemoveChild(node)
 		}
 		if node.Type == html.ElementNode && node.Data == "meta" {
+			if attributes["name"] == "robots" {
+				head.RemoveChild(node)
+				node = next
+				continue
+			}
+			if attributes["property"] == "og:url" && canonical == "" {
+				head.RemoveChild(node)
+				node = next
+				continue
+			}
 			for _, field := range fields {
 				if attributes[field.kind] != field.key {
 					continue
@@ -158,9 +223,19 @@ func renderPublicPageHTML(index []byte, title, description, siteName, canonical 
 			}})
 		}
 	}
-	head.AppendChild(&html.Node{Type: html.ElementNode, Data: "link", Attr: []html.Attribute{
-		{Key: "rel", Val: "canonical"}, {Key: "href", Val: canonical},
-	}})
+	if canonical != "" {
+		head.AppendChild(&html.Node{Type: html.ElementNode, Data: "link", Attr: []html.Attribute{
+			{Key: "rel", Val: "canonical"}, {Key: "href", Val: canonical},
+		}})
+	}
+	if noIndex {
+		head.AppendChild(&html.Node{Type: html.ElementNode, Data: "meta", Attr: []html.Attribute{
+			{Key: "name", Val: "robots"}, {Key: "content", Val: "noindex, nofollow"},
+		}})
+	}
+	if root != nil && fallback != nil {
+		root.AppendChild(fallback)
+	}
 	var output bytes.Buffer
 	if html.Render(&output, document) != nil {
 		return nil

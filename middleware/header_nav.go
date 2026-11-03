@@ -101,6 +101,14 @@ func parseHeaderNavBool(value any, fallback bool) bool {
 	}
 }
 
+// HeaderNavModuleIsPublic reports whether a signed-out visitor may access the
+// module. Server-rendered pages use the same decision as the API middleware so
+// private pricing is never copied into public HTML.
+func HeaderNavModuleIsPublic(module string) bool {
+	access := getHeaderNavAccess(module)
+	return access.Enabled && !access.RequireAuth
+}
+
 func HeaderNavModuleAuth(module string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		access := getHeaderNavAccess(module)

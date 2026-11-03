@@ -109,6 +109,9 @@ export function App() {
   )
 }
 
+rootElement
+  .querySelector<HTMLElement>(':scope > [data-server-fallback]')
+  ?.remove()
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
