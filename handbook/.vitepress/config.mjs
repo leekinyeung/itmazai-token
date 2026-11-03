@@ -16,8 +16,10 @@ export default defineConfig({
       .replace(/(^|\/)index\.md$/, '$1')
       .replace(/\.md$/, '.html')
     const chinesePath = path.replace(/^en\//, '')
+    const canonical = new URL(path, `${docsOrigin}/`).href
     return [
-      ['link', { rel: 'canonical', href: new URL(path, `${docsOrigin}/`).href }],
+      ['link', { rel: 'canonical', href: canonical }],
+      ['meta', { property: 'og:url', content: canonical }],
       ['link', { rel: 'alternate', hreflang: 'zh-CN', href: new URL(chinesePath, `${docsOrigin}/`).href }],
       ['link', { rel: 'alternate', hreflang: 'en', href: new URL(`en/${chinesePath}`, `${docsOrigin}/`).href }],
     ]
@@ -38,7 +40,6 @@ export default defineConfig({
           { text: 'Clients & Agents', link: '/en/guide/clients' },
           { text: 'API integration', link: '/en/api/overview' },
           { text: 'FAQ', link: '/en/faq' },
-          { text: 'Open TaoDock', link: 'https://taodock.com' },
         ],
         sidebar: [
           {
@@ -99,7 +100,6 @@ export default defineConfig({
       { text: '客户端与 Agent', link: '/guide/clients' },
       { text: 'API 接入', link: '/api/overview' },
       { text: '常见问题', link: '/faq' },
-      { text: '进入众妙之门', link: 'https://taodock.com' },
     ],
     sidebar: [
       {

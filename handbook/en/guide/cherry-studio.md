@@ -1,13 +1,18 @@
 ---
-title: "Cherry Studio API Setup and Import Guide"
+title: "Cherry Studio Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - TaoDock"
+titleTemplate: false
 description: "Connect Cherry Studio to TaoDock using key import or New API settings, enable models, check Agent compatibility and troubleshoot requests."
 ---
 
 # Cherry Studio API Setup and Import Guide
 
+## Step 1: Preparation {#prepare}
+
 Before you start, prepare your [TaoDock API key](https://taodock.com/keys), sufficient account quota and an exact model ID from the [model catalog](https://taodock.com/pricing). See the [quick start](../quick-start.md) if this is your first integration.
 
 Install the desktop application from the [Cherry Studio website](https://cherryai.com/).
+
+<IntegrationConversionCallout />
 
 ## Import from TaoDock
 
@@ -56,3 +61,5 @@ For Agent workflows, also follow the [file tool verification](./clients.md#agent
 | Chat works but tools fail | Verify the protocol, model capability and the application's tool permissions |
 
 Return to [all client integration guides](./clients.md) or see the [FAQ](../faq.md) for more help.
+
+<IntegrationConversionCallout />

@@ -38,6 +38,7 @@ export function GatewayDiagram(props: {
   brand: string
   svgRef: Ref<SVGSVGElement>
   height?: number
+  fallbackMarkers?: boolean
 }) {
   const { t } = useTranslation()
   const layout = props.layout
@@ -140,12 +141,20 @@ export function GatewayDiagram(props: {
         },
       ]
   const tiles = [
-    { key: 'models', x: 0, y: -GATEWAY_TILE_OFFSET, label: t('Models'), dx: 0 },
+    {
+      key: 'models',
+      x: 0,
+      y: -GATEWAY_TILE_OFFSET,
+      label: t('Models'),
+      labelKey: 'Models',
+      dx: 0,
+    },
     {
       key: 'routing',
       x: -GATEWAY_TILE_OFFSET,
       y: 0,
       label: t('Routing'),
+      labelKey: 'Routing',
       dx: -8,
     },
     {
@@ -153,9 +162,17 @@ export function GatewayDiagram(props: {
       x: GATEWAY_TILE_OFFSET,
       y: 0,
       label: t('Unified API'),
+      labelKey: 'Unified API',
       dx: 8,
     },
-    { key: 'logs', x: 0, y: GATEWAY_TILE_OFFSET, label: t('Logs'), dx: 0 },
+    {
+      key: 'logs',
+      x: 0,
+      y: GATEWAY_TILE_OFFSET,
+      label: t('Logs'),
+      labelKey: 'Logs',
+      dx: 0,
+    },
   ]
   return (
     <svg
@@ -168,7 +185,9 @@ export function GatewayDiagram(props: {
       focusable='false'
       style={props.mobile ? undefined : { height: props.height }}
     >
-      <title>{props.brand}</title>
+      <title data-fallback-brand={props.fallbackMarkers || undefined}>
+        {props.brand}
+      </title>
       <defs>
         <linearGradient
           id={`${props.namespace}-tile`}
@@ -317,6 +336,9 @@ export function GatewayDiagram(props: {
               textAnchor='middle'
               textLength={[...tile.label].length * 6.8 > 80 ? 80 : undefined}
               lengthAdjust='spacingAndGlyphs'
+              data-fallback-i18n={
+                props.fallbackMarkers ? tile.labelKey : undefined
+              }
             >
               {tile.label}
             </text>
@@ -342,6 +364,7 @@ export function GatewayDiagram(props: {
           width={40}
           height={40}
           aria-label={props.brand}
+          data-server-logo={props.fallbackMarkers || undefined}
         />
       </g>
     </svg>

@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
+import { Link, useParams, useSearch } from '@tanstack/react-router'
 import {
   ArrowLeft,
   CalendarClock,
@@ -1592,7 +1592,6 @@ export function ModelDetails() {
   const { t } = useTranslation()
   const { modelId } = useParams({ from: '/pricing/$modelId/' })
   const search = useSearch({ from: '/pricing/$modelId/' })
-  const navigate = useNavigate()
 
   const {
     models,
@@ -1612,10 +1611,6 @@ export function ModelDetails() {
     if (!models || !modelId) return null
     return models.find((m) => m.model_name === modelId) || null
   }, [models, modelId])
-
-  const handleBack = () => {
-    navigate({ to: '/pricing', search })
-  }
 
   if (isLoading) {
     return (
@@ -1652,7 +1647,11 @@ export function ModelDetails() {
           <p className='text-muted-foreground mb-4 text-sm'>
             {t("The model you're looking for doesn't exist.")}
           </p>
-          <Button onClick={handleBack} variant='outline' size='sm'>
+          <Button
+            variant='outline'
+            size='sm'
+            render={<Link to='/pricing' search={search} />}
+          >
             {t('Back to Models')}
           </Button>
         </div>
@@ -1666,7 +1665,7 @@ export function ModelDetails() {
         <Button
           variant='ghost'
           size='sm'
-          onClick={handleBack}
+          render={<Link to='/pricing' search={search} />}
           className='text-muted-foreground hover:text-foreground mb-4 h-auto gap-1 px-0 py-1 text-xs'
         >
           <ArrowLeft className='size-3.5' />

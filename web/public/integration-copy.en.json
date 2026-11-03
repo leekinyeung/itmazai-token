@@ -1,0 +1,30 @@
+{
+  "eyebrow": "Compatible clients",
+  "title": "Connect TaoDock to the tools you already use",
+  "description": "Use one OpenAI-compatible API address and API key across supported desktop clients, agent workspaces, web interfaces and SDKs.",
+  "clients": {
+    "cherry-studio": "Use TaoDock models in a desktop client built for multi-provider AI conversations.",
+    "workbuddy": "Connect an agent workspace to TaoDock with a custom OpenAI-compatible model.",
+    "open-webui": "Bring TaoDock models into a self-hosted web interface for chat and team use.",
+    "aionui": "Import TaoDock into a desktop AI workspace for agents, files and automated tasks.",
+    "deepchat": "Configure TaoDock as an OpenAI-compatible provider in a cross-platform desktop client.",
+    "openai-sdk": "Use the official OpenAI SDK with the TaoDock API address, API key and model name."
+  },
+  "stepsTitle": "Connect in three steps",
+  "steps": [
+    {
+      "title": "Create an API key",
+      "description": "Give your application a dedicated key in the key manager."
+    },
+    {
+      "title": "Connect your tools",
+      "description": "Configure the API address and key in your client or SDK."
+    },
+    {
+      "title": "Follow your usage",
+      "description": "View requests and consumption in the usage logs."
+    }
+  ],
+  "pricingLink": "Browse all models and pricing",
+  "docsLink": "Integration guide"
+}

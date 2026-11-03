@@ -62,7 +62,11 @@ Open the dedicated [WorkBuddy Custom Model Setup Guide](./workbuddy.md) for conf
 
 ## Import and configure AionUI {#aionui}
 
+### Step 1: Preparation {#aionui-prepare}
+
 Install AionUI from its [official releases](https://github.com/iOfficeAI/AionUi/releases).
+
+<IntegrationConversionCallout />
 
 ### Import from TaoDock
 
@@ -95,9 +99,15 @@ Install AionUI from its [official releases](https://github.com/iOfficeAI/AionUi/
 
 These steps configure AionUI's Built-in Agent. Other CLI Agents launched through AionUI have their own model and authentication settings; importing this provider does not configure all of them. See [AionUI model configuration](https://github.com/iOfficeAI/AionUi/wiki/LLM-Configuration) and [Getting Started](https://github.com/iOfficeAI/AionUi/wiki/Getting-Started).
 
+<IntegrationConversionCallout />
+
 ## Import and configure DeepChat {#deepchat}
 
+### Step 1: Preparation {#deepchat-prepare}
+
 Install DeepChat from its [official releases](https://github.com/ThinkInAIXYZ/deepchat/releases).
+
+<IntegrationConversionCallout />
 
 ### Import from TaoDock
 
@@ -123,6 +133,8 @@ Install DeepChat from its [official releases](https://github.com/ThinkInAIXYZ/de
 **Follow Figure 4:** ① Open Providers (服务商设置) on the left; ② click Add Custom Provider (添加自定义服务商) in the middle; ③ enter `TaoDock` and select **OpenAI Completions**; ④ enter `https://taodock.com/v1` and check the complete endpoint preview below; ⑤ enter your API key, then click Connect and Load Models (连接并加载模型). Save Without Testing (保存但不测试) can save first; fetch and enable models afterward. Saving alone does not verify the connection.
 
 This configuration uses `/v1/chat/completions`. In some versions, the type labeled only **OpenAI** uses Responses; confirm that **OpenAI Completions** is selected. DeepChat supports custom compatible providers. Review import previews and any overwrite prompt. See the [official DeepChat project](https://github.com/ThinkInAIXYZ/deepchat) for its current interface and releases.
+
+<IntegrationConversionCallout />
 
 ## Configure Open WebUI {#open-webui}
 Open the dedicated [Open WebUI OpenAI-Compatible API Setup](./open-webui.md) for configuration steps, verification and troubleshooting.

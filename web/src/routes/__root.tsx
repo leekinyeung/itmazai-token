@@ -24,7 +24,7 @@ import {
   useNavigate,
   useRouterState,
 } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 
 import { DevelopmentTools } from '@/components/development-tools'
 import { NavigationProgress } from '@/components/navigation-progress'
@@ -42,6 +42,7 @@ import {
   clearAuthentication,
 } from '@/lib/auth-session'
 import { subscribeAuthSessionEvents } from '@/lib/auth-session-sync'
+import { revealClientApp } from '@/lib/client-handoff'
 import { resolveLegacyRoute } from '@/lib/legacy-route'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -55,6 +56,12 @@ function RootComponent() {
   // Load system configuration (logo, system name, etc.) from backend
   const { systemName } = useSystemConfig({ autoLoad: true })
   usePageMetadata(systemName, pathname)
+
+  useLayoutEffect(() => {
+    if (pathname !== '/') {
+      revealClientApp()
+    }
+  }, [pathname])
 
   useEffect(() => {
     const aff = new URLSearchParams(window.location.search).get('aff')?.trim()

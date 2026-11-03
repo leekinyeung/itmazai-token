@@ -9,13 +9,26 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/controller"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	xhtml "golang.org/x/net/html"
 )
+
+func testHomePageAssets(t *testing.T) *homePageAssets {
+	t.Helper()
+	assets := newHomePageAssets(
+		[]byte(`<div data-server-fallback="home" data-server-home-variant="default"><header><img src="/logo.png" data-server-logo="true"><span data-fallback-brand="true">TaoDock</span><a href="/" data-server-nav="home">Home</a><a href="/pricing" data-server-nav="pricing">Pricing</a><a href="__DOCS__" data-server-nav="docs" data-server-docs="true">Docs</a></header><main class="home-main"><h1><span data-fallback-i18n="One gateway, endless AI possibilities.">One gateway, endless AI possibilities.</span></h1><p data-fallback-brand-value="true" data-fallback-i18n="Connect leading models through {{brand}}.">Connect leading models through TaoDock.</p><nav><a href="https://docs.taodock.com/en/guide/cherry-studio.html">Cherry Studio setup guide</a><a href="https://docs.taodock.com/en/guide/open-webui.html">Open WebUI configuration guide</a><a href="https://docs.taodock.com/en/guide/workbuddy.html">WorkBuddy setup guide</a></nav><svg><image href="/logo.png" data-server-logo="true"></image></svg></main></div>`),
+		[]byte(`<div data-server-fallback="home" data-server-home-variant="custom"><img src="/logo.png" data-server-logo="true"><p data-fallback-brand="true">TaoDock</p><p data-fallback-i18n="Loading...">Loading...</p></div>`),
+		[]byte(`{"en":{"One gateway, endless AI possibilities.":"One gateway, endless AI possibilities.","Connect leading models through {{brand}}.":"Connect leading models through {{brand}}.","Loading...":"Loading...","TaoDock":"TaoDock"},"zh":{"One gateway, endless AI possibilities.":"一个网关，无限 AI 可能。","Connect leading models through {{brand}}.":"通过 {{brand}} 连接模型。","Loading...":"加载中...","TaoDock":"众妙之门"}}`),
+	)
+	require.NotNil(t, assets)
+	return assets
+}
 
 func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 	index, err := os.ReadFile("../web/index.html")
@@ -24,23 +37,39 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 	require.NoError(t, err)
 	renderer := newPublicPageMetadataRenderer(index, manifest)
 	require.NotNil(t, renderer)
+	catalog, err := os.ReadFile("../web/public/integration-catalog.json")
+	require.NoError(t, err)
+	copy, err := os.ReadFile("../web/public/integration-copy.en.json")
+	require.NoError(t, err)
+	integrations := newIntegrationPageContent(catalog, copy)
+	require.NotNil(t, integrations)
+	homeAssets := testHomePageAssets(t)
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()
 	engine.NoRoute(func(c *gin.Context) {
 		var fallback *xhtml.Node
-		if normalizePagePath(c.Request.URL.EscapedPath()) == "/" {
-			fallback = homePageFallback()
+		switch normalizePagePath(c.Request.URL.EscapedPath()) {
+		case "/":
+			fallback = homePageFallback(homeAssets)
+		case "/integrations":
+			fallback = integrationPageFallback(integrations)
 		}
 		page := renderer.render(c.Request.URL.EscapedPath(), fallback)
 		if page == nil {
 			page = index
 		}
+		c.Header("Cache-Control", "no-cache")
 		c.Data(http.StatusOK, "text/html; charset=utf-8", page)
 	})
 	for _, tc := range []struct{ path, title, canonical string }{
-		{"/", "众妙之门 TaoDock | Unified AI API for Apps and Agents", "https://taodock.com/"},
+		{"/", "TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation", "https://taodock.com/"},
+		{"/?utm_source=launch", "TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation", "https://taodock.com/"},
 		{"/pricing?search=claude", "AI Model API Pricing | 众妙之门 TaoDock", "https://taodock.com/pricing"},
 		{"/pricing/", "AI Model API Pricing | 众妙之门 TaoDock", "https://taodock.com/pricing"},
+		{"/pricing/?utm_source=launch", "AI Model API Pricing | 众妙之门 TaoDock", "https://taodock.com/pricing"},
+		{"/integrations", "AI Client and SDK Integrations | 众妙之门 TaoDock", "https://taodock.com/integrations"},
+		{"/integrations/", "AI Client and SDK Integrations | 众妙之门 TaoDock", "https://taodock.com/integrations"},
+		{"/integrations/?utm_source=launch", "AI Client and SDK Integrations | 众妙之门 TaoDock", "https://taodock.com/integrations"},
 		{"/about", "About the Platform | 众妙之门 TaoDock", "https://taodock.com/about"},
 		{"/rankings", "Usage Rankings | 众妙之门 TaoDock", "https://taodock.com/rankings"},
 		{"/privacy-policy", "Privacy Policy | 众妙之门 TaoDock", "https://taodock.com/privacy-policy"},
@@ -57,6 +86,11 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 			assert.Contains(t, body, `name="twitter:title" content="`+tc.title+`"`)
 			assert.Contains(t, body, `rel="canonical" href="`+tc.canonical+`"`)
 			assert.Equal(t, 1, strings.Count(body, `rel="canonical"`))
+			assert.Contains(t, body, `property="og:url" content="`+tc.canonical+`"`)
+			assert.Equal(t, 1, strings.Count(body, `property="og:url"`))
+			assert.Equal(t, "no-cache", response.Header().Get("Cache-Control"))
+			assert.Empty(t, response.Header().Get("X-Robots-Tag"))
+			assert.NotContains(t, body, `name="robots" content="noindex`)
 			assert.Contains(t, body, `id="root"`)
 			assert.Contains(t, body, "localStorage.getItem")
 			assert.NotContains(t, body, "{{systemName}}")
@@ -65,9 +99,30 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 				assert.NotContains(t, body, `name="description" content="Connect apps and agents`)
 			}
 			if tc.path == "/" {
-				assert.Contains(t, body, `<h1>One unified AI API for apps and agents</h1>`)
+				assert.Contains(t, body, `data-server-home-variant="default"`)
+				assert.Contains(t, body, `One gateway, endless AI possibilities.`)
+				assert.Contains(t, body, `data-home-fallback-copy="true"`)
 				assert.Contains(t, body, `href="/pricing"`)
-				assert.Contains(t, body, `href="https://docs.taodock.com/quick-start.html"`)
+				assert.Contains(t, body, `data-server-docs="true"`)
+				assert.Contains(t, body, `href="https://docs.taodock.com/en/guide/cherry-studio.html"`)
+				assert.Contains(t, body, `href="https://docs.taodock.com/en/guide/open-webui.html"`)
+				assert.Contains(t, body, `href="https://docs.taodock.com/en/guide/workbuddy.html"`)
+			}
+			if normalizePagePath(tc.path) == "/integrations" {
+				seoDescription := "Connect Cherry Studio, WorkBuddy, Open WebUI, AionUI, DeepChat and OpenAI SDK applications to 众妙之门 TaoDock through one OpenAI-compatible API."
+				assert.Contains(t, body, `name="description" content="`+seoDescription+`"`)
+				assert.Contains(t, body, `property="og:description" content="`+seoDescription+`"`)
+				assert.Contains(t, body, `name="twitter:description" content="`+seoDescription+`"`)
+				assert.NotContains(t, body, `name="keywords"`)
+				assert.Contains(t, body, `<h1>`+integrations.Copy.Title+`</h1>`)
+				assert.Contains(t, body, integrations.Copy.Description)
+				assert.Contains(t, body, `data-server-fallback="integrations"`)
+				assert.Contains(t, body, `href="/pricing"`)
+				for _, item := range integrations.Catalog {
+					assert.Contains(t, body, `<h2>`+item.Name+`</h2>`)
+					assert.Contains(t, body, integrations.Copy.Clients[item.ID])
+					assert.Contains(t, body, `href="https://docs.taodock.com/en`+item.DocPath+`"`)
+				}
 			}
 		})
 	}
@@ -87,6 +142,68 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 			assert.Equal(t, index, response.Body.Bytes())
 		})
 	}
+}
+
+func TestHomePageFallbackInjectsConfigurationSafely(t *testing.T) {
+	assets := testHomePageAssets(t)
+	settings := operation_setting.GetGeneralSetting()
+	originalDocsLink := settings.DocsLink
+
+	common.OptionMapRWMutex.Lock()
+	optionMapWasNil := common.OptionMap == nil
+	if optionMapWasNil {
+		common.OptionMap = make(map[string]string)
+	}
+	originalSystemName := common.SystemName
+	originalLogo := common.Logo
+	originalHomePageContent := common.OptionMap["HomePageContent"]
+	originalHeaderNavModules := common.OptionMap["HeaderNavModules"]
+	common.SystemName = `<Brand & Co>`
+	common.Logo = `/custom-logo.png?mode=dark&size=2`
+	common.OptionMap["HomePageContent"] = ""
+	common.OptionMap["HeaderNavModules"] = `{"home":true,"pricing":false,"docs":true}`
+	common.OptionMapRWMutex.Unlock()
+	settings.DocsLink = `https://docs.example.test/start?from=home&lang=zh`
+
+	t.Cleanup(func() {
+		settings.DocsLink = originalDocsLink
+		common.OptionMapRWMutex.Lock()
+		common.SystemName = originalSystemName
+		common.Logo = originalLogo
+		common.OptionMap["HomePageContent"] = originalHomePageContent
+		common.OptionMap["HeaderNavModules"] = originalHeaderNavModules
+		if optionMapWasNil {
+			common.OptionMap = nil
+		}
+		common.OptionMapRWMutex.Unlock()
+	})
+
+	var output bytes.Buffer
+	require.NoError(t, xhtml.Render(&output, homePageFallback(assets)))
+	body := output.String()
+	assert.Contains(t, body, `data-server-brand="&lt;Brand &amp; Co&gt;"`)
+	assert.Contains(t, body, `&lt;Brand &amp; Co&gt;`)
+	assert.NotContains(t, body, `<Brand & Co>`)
+	assert.Contains(t, body, `src="/custom-logo.png?mode=dark&amp;size=2"`)
+	assert.Contains(t, body, `href="https://docs.example.test/start?from=home&amp;lang=zh"`)
+	assert.NotContains(t, body, `href="/pricing"`)
+	assert.Contains(t, body, `href="https://docs.taodock.com/en/guide/cherry-studio.html"`)
+	assert.Contains(t, body, `href="https://docs.taodock.com/en/guide/open-webui.html"`)
+	assert.Contains(t, body, `href="https://docs.taodock.com/en/guide/workbuddy.html"`)
+	assert.Contains(t, body, `data-home-fallback-copy="true"`)
+
+	common.OptionMapRWMutex.Lock()
+	common.OptionMap["HomePageContent"] = "# Custom home"
+	common.OptionMapRWMutex.Unlock()
+	output.Reset()
+	require.NoError(t, xhtml.Render(&output, homePageFallback(assets)))
+	assert.Contains(t, output.String(), `data-server-home-variant="custom"`)
+	assert.NotContains(t, output.String(), `<main class="home-main"`)
+
+	output.Reset()
+	require.NoError(t, xhtml.Render(&output, homePageFallback(nil)))
+	assert.Contains(t, output.String(), `data-server-home-variant="custom"`)
+	assert.Contains(t, output.String(), `&lt;Brand &amp; Co&gt;`)
 }
 
 func TestPublicPageMetadataLegacyFrontendFallback(t *testing.T) {
@@ -110,7 +227,7 @@ func TestPublicPageRouteClassification(t *testing.T) {
 	} {
 		assert.True(t, renderer.isNoIndexRoute(path), path)
 	}
-	for _, path := range []string{"/", "/pricing", "/about", "/not-a-route", "/dashboard/overview/extra"} {
+	for _, path := range []string{"/", "/pricing", "/integrations", "/about", "/not-a-route", "/dashboard/overview/extra"} {
 		assert.False(t, renderer.isNoIndexRoute(path), path)
 	}
 
@@ -122,6 +239,28 @@ func TestPublicPageRouteClassification(t *testing.T) {
 	notFound := renderPageHTML(index, "Page not found | TaoDock", "Missing", "TaoDock", "", true, notFoundFallback())
 	assert.Contains(t, string(notFound), `<h1>Page not found</h1>`)
 	assert.Contains(t, string(notFound), `href="/"`)
+}
+
+func TestIntegrationPageContentRejectsIncompleteAssets(t *testing.T) {
+	validCopy, err := os.ReadFile("../web/public/integration-copy.en.json")
+	require.NoError(t, err)
+	validCatalog, err := os.ReadFile("../web/public/integration-catalog.json")
+	require.NoError(t, err)
+	require.NotNil(t, newIntegrationPageContent(validCatalog, validCopy))
+
+	for _, tc := range []struct {
+		name    string
+		catalog string
+		copy    string
+	}{
+		{name: "invalid catalog", catalog: `{`, copy: string(validCopy)},
+		{name: "missing description", catalog: string(validCatalog), copy: `{"title":"Integrations"}`},
+		{name: "unsafe docs path", catalog: `[{"id":"client","name":"Client","icon":"client","docPath":"//example.com"}]`, copy: `{"eyebrow":"Clients","title":"Integrations","description":"Description","clients":{"client":"Client description"},"stepsTitle":"Steps","steps":[{"title":"One","description":"Do it"}],"pricingLink":"Pricing","docsLink":"Guide"}`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Nil(t, newIntegrationPageContent([]byte(tc.catalog), []byte(tc.copy)))
+		})
+	}
 }
 
 func TestPublicPricingFallbackUsesPublicBillingData(t *testing.T) {

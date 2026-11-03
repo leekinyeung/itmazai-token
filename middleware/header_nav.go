@@ -109,6 +109,13 @@ func HeaderNavModuleIsPublic(module string) bool {
 	return access.Enabled && !access.RequireAuth
 }
 
+// HeaderNavModuleIsEnabled reports whether the module should be present in
+// public navigation. Authentication requirements affect click behavior, not
+// whether the navigation item is visible.
+func HeaderNavModuleIsEnabled(module string) bool {
+	return getHeaderNavAccess(module).Enabled
+}
+
 func HeaderNavModuleAuth(module string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		access := getHeaderNavAccess(module)

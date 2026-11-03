@@ -449,10 +449,48 @@ test('a catalog error provides the model-square fallback without invented prices
   expect(
     screen.queryByRole('list', { name: 'Current model prices' })
   ).not.toBeInTheDocument()
+  const pricingLinks = screen.getAllByRole('button', {
+    name: 'Browse all models and pricing',
+  })
+  expect(pricingLinks.length).toBeGreaterThan(0)
+  for (const link of pricingLinks) {
+    expect(link.tagName).toBe('A')
+    expect(link).toHaveAttribute('href', '/pricing')
+  }
+  const integrations = screen.getByRole('button', {
+    name: 'Explore integrations',
+  })
+  expect(integrations.tagName).toBe('A')
+  expect(integrations).toHaveAttribute('href', '/integrations')
+})
+
+test('featured integration guides are native localized documentation anchors', async () => {
+  await renderLanding()
+  for (const [name, path] of [
+    ['Cherry Studio setup guide', 'guide/cherry-studio.html'],
+    ['Open WebUI configuration guide', 'guide/open-webui.html'],
+    ['WorkBuddy setup guide', 'guide/workbuddy.html'],
+  ]) {
+    const link = screen.getByRole('button', { name })
+    expect(link.tagName).toBe('A')
+    expect(link).toHaveAttribute('href', `https://docs.taodock.com/en/${path}`)
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  }
+
+  i18next.addResourceBundle('zhCN', 'translation', zh.translation, true, true)
+  await act(async () => {
+    await i18next.changeLanguage('zhCN')
+  })
   expect(
-    screen.getAllByRole('button', { name: 'Browse all models and pricing' })
-      .length
-  ).toBeGreaterThan(0)
+    screen.getByRole('button', { name: 'Cherry Studio 接入教程' })
+  ).toHaveAttribute('href', 'https://docs.taodock.com/guide/cherry-studio.html')
+  expect(
+    screen.getByRole('button', { name: 'Open WebUI 配置指南' })
+  ).toHaveAttribute('href', 'https://docs.taodock.com/guide/open-webui.html')
+  expect(
+    screen.getByRole('button', { name: 'WorkBuddy 接入教程' })
+  ).toHaveAttribute('href', 'https://docs.taodock.com/guide/workbuddy.html')
 })
 
 test.each([

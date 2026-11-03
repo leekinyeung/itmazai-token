@@ -6,15 +6,18 @@
     <meta name="google" content="notranslate" />
 
     <!-- Primary Meta Tags -->
-    <title>众妙之门 TaoDock | Unified AI API for Apps and Agents</title>
+    <title>
+      TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation
+    </title>
     <meta
       name="title"
-      content="众妙之门 TaoDock | Unified AI API for Apps and Agents"
+      content="TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation"
     />
     <meta
       name="description"
       content="Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides."
     />
+    <link rel="canonical" href="https://taodock.com/" />
 
     <!-- Social cards must be present in the initial HTML for crawlers. -->
     <meta property="og:type" content="website" />
@@ -22,7 +25,7 @@
     <meta property="og:url" content="https://taodock.com/" />
     <meta
       property="og:title"
-      content="众妙之门 TaoDock | Unified AI API for Apps and Agents"
+      content="TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation"
     />
     <meta
       property="og:description"
@@ -37,7 +40,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="众妙之门 TaoDock | Unified AI API for Apps and Agents"
+      content="TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation"
     />
     <meta
       name="twitter:description"
@@ -105,7 +108,18 @@
         gap: 1rem;
         margin-top: 1.25rem;
       }
+      .server-fallback__card-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+        gap: 1rem;
+        margin-top: 1.25rem;
+      }
       .server-fallback__price {
+        border: 1px solid #d8dee9;
+        border-radius: 0.9rem;
+        padding: 1rem;
+      }
+      .server-fallback__card {
         border: 1px solid #d8dee9;
         border-radius: 0.9rem;
         padding: 1rem;
@@ -123,9 +137,52 @@
       html.dark .server-fallback__price {
         border-color: #374151;
       }
+      html.dark .server-fallback__card {
+        border-color: #374151;
+      }
       html.dark .server-fallback a,
       html.dark .server-fallback__eyebrow {
         color: #fb7185;
+      }
+      #root[data-client-pending] > [data-client-root] {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      #root[data-client-pending] > [data-server-fallback] {
+        position: relative;
+        z-index: 1;
+      }
+      .server-home-frame {
+        font-family:
+          'Public Sans Variable', 'Public Sans', ui-sans-serif, system-ui,
+          sans-serif;
+      }
+      .server-home-menu,
+      .server-home-menu::before,
+      .server-home-menu::after {
+        display: block;
+        width: 1rem;
+        height: 1.5px;
+        border-radius: 999px;
+        background: currentColor;
+      }
+      .server-home-menu {
+        position: relative;
+      }
+      .server-home-menu::before,
+      .server-home-menu::after {
+        content: '';
+        position: absolute;
+        left: 0;
+      }
+      .server-home-menu::before {
+        top: -4px;
+      }
+      .server-home-menu::after {
+        top: 4px;
       }
     </style>
     <!-- Resolve the theme before first paint so the page never flashes light
@@ -158,5 +215,102 @@
 
   <body>
     <div id="root" translate="no" class="notranslate"></div>
+    <script>
+      ;(function () {
+        var root = document.getElementById('root')
+        if (!root) return
+        var fallback = root.querySelector('[data-server-fallback="home"]')
+        var copyNode = root.querySelector('[data-home-fallback-copy]')
+        if (!fallback || !copyNode) return
+
+        var resources
+        try {
+          resources = JSON.parse(copyNode.textContent || '{}')
+        } catch (e) {
+          return
+        }
+
+        var saved = ''
+        try {
+          saved = localStorage.getItem('i18nextLng') || ''
+        } catch (e) {}
+        var candidates = [saved].concat(
+          Array.prototype.slice.call(navigator.languages || []),
+          [navigator.language || 'en']
+        )
+        var language = 'en'
+        for (var index = 0; index < candidates.length; index += 1) {
+          var value = String(candidates[index] || '')
+            .replace(/_/g, '-')
+            .toLowerCase()
+          if (!value) continue
+          if (
+            value === 'zhtw' ||
+            value === 'zh-tw' ||
+            value === 'zh-hk' ||
+            value === 'zh-mo' ||
+            value.indexOf('zh-hant') === 0
+          ) {
+            language = 'zh-TW'
+          } else if (
+            value === 'zhcn' ||
+            value === 'zh' ||
+            value === 'zh-cn' ||
+            value.indexOf('zh-hans') === 0
+          ) {
+            language = 'zh'
+          } else if (/^(en|fr|ja|ru|vi)(-|$)/.test(value)) {
+            language = value.split('-')[0]
+          } else {
+            continue
+          }
+          if (resources[language]) break
+          language = 'en'
+        }
+
+        var copy = resources[language] || resources.en || {}
+        var rawBrand = fallback.getAttribute('data-server-brand') || 'TaoDock'
+        var brandKey = rawBrand.trim().toLowerCase()
+        var brand =
+          brandKey === 'taodock' ||
+          brandKey === '众妙之门' ||
+          brandKey === '眾妙之門'
+            ? copy.TaoDock || rawBrand
+            : rawBrand
+        var translate = function (key, element) {
+          var result = copy[key] || (resources.en && resources.en[key]) || key
+          if (element && element.hasAttribute('data-fallback-brand-value')) {
+            result = result.replace(/\{\{brand\}\}/g, brand)
+          }
+          if (element && element.hasAttribute('data-fallback-audience')) {
+            var audienceKey = element.getAttribute('data-fallback-audience')
+            var audience = copy[audienceKey] || audienceKey
+            result = result.replace(/\{\{audience\}\}/g, audience)
+          }
+          return result
+        }
+
+        fallback
+          .querySelectorAll('[data-fallback-brand]')
+          .forEach(function (el) {
+            el.textContent = brand
+          })
+        fallback
+          .querySelectorAll('[data-fallback-i18n]')
+          .forEach(function (el) {
+            el.textContent = translate(
+              el.getAttribute('data-fallback-i18n'),
+              el
+            )
+          })
+        fallback
+          .querySelectorAll('[data-fallback-i18n-aria-label]')
+          .forEach(function (el) {
+            var key = el.getAttribute('data-fallback-i18n-aria-label')
+            el.setAttribute('aria-label', translate(key, el))
+          })
+        document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
+      })()
+    </script>
   </body>
 </html>

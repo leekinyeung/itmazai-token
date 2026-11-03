@@ -1,16 +1,22 @@
 package router
 
 import (
+	"bytes"
 	"fmt"
 	"math"
+	"net/url"
 	"slices"
 	"strconv"
 	"strings"
 
+	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/controller"
+	"github.com/QuantumNous/new-api/middleware"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 func element(name string, attributes map[string]string, children ...*html.Node) *html.Node {
@@ -32,40 +38,269 @@ func link(href, label string) *html.Node {
 	return element("a", map[string]string{"href": href}, text(label))
 }
 
-func homePageFallback() *html.Node {
-	return element("main", map[string]string{
-		"class":                "server-fallback",
-		"data-server-fallback": "home",
+type homePageAssets struct {
+	defaultTemplate []byte
+	customTemplate  []byte
+	copy            []byte
+}
+
+func newHomePageAssets(defaultTemplate, customTemplate, copyJSON []byte) *homePageAssets {
+	if parseHomePageTemplate(defaultTemplate) == nil || parseHomePageTemplate(customTemplate) == nil {
+		return nil
+	}
+	var translations map[string]map[string]string
+	if common.Unmarshal(copyJSON, &translations) != nil || len(translations) == 0 || len(translations["en"]) == 0 {
+		return nil
+	}
+	return &homePageAssets{
+		defaultTemplate: bytes.Clone(defaultTemplate),
+		customTemplate:  bytes.Clone(customTemplate),
+		copy:            bytes.Clone(copyJSON),
+	}
+}
+
+func parseHomePageTemplate(template []byte) *html.Node {
+	context := &html.Node{Type: html.ElementNode, DataAtom: atom.Div, Data: "div"}
+	nodes, err := html.ParseFragment(bytes.NewReader(template), context)
+	if err != nil {
+		return nil
+	}
+	for _, node := range nodes {
+		if node.Type == html.ElementNode && attribute(node, "data-server-fallback") == "home" {
+			return node
+		}
+	}
+	return nil
+}
+
+func attribute(node *html.Node, key string) string {
+	for _, item := range node.Attr {
+		if item.Key == key {
+			return item.Val
+		}
+	}
+	return ""
+}
+
+func setAttribute(node *html.Node, key, value string) {
+	for index := range node.Attr {
+		if node.Attr[index].Key == key {
+			node.Attr[index].Val = value
+			return
+		}
+	}
+	node.Attr = append(node.Attr, html.Attribute{Key: key, Val: value})
+}
+
+func replaceNodeText(node *html.Node, value string) {
+	for child := node.FirstChild; child != nil; {
+		next := child.NextSibling
+		node.RemoveChild(child)
+		child = next
+	}
+	node.AppendChild(text(value))
+}
+
+func homePageConfiguration() (systemName, logo, docsLink string, custom bool) {
+	common.OptionMapRWMutex.RLock()
+	systemName = strings.TrimSpace(common.SystemName)
+	logo = strings.TrimSpace(common.Logo)
+	custom = strings.TrimSpace(common.OptionMap["HomePageContent"]) != ""
+	common.OptionMapRWMutex.RUnlock()
+	if systemName == "" {
+		systemName = "TaoDock"
+	}
+	if logo == "" {
+		logo = "/logo.png"
+	}
+	docsLink = strings.TrimSpace(operation_setting.GetGeneralSetting().DocsLink)
+	parsedDocsLink, err := url.Parse(docsLink)
+	if err != nil || docsLink == "" || (parsedDocsLink.Scheme != "" && parsedDocsLink.Scheme != "http" && parsedDocsLink.Scheme != "https") {
+		docsLink = "https://docs.taodock.com"
+	}
+	return systemName, logo, docsLink, custom
+}
+
+func brandLoadingFallback(systemName, logo string, custom bool) *html.Node {
+	variant := "loading"
+	if custom {
+		variant = "custom"
+	}
+	return element("div", map[string]string{
+		"class":                    "server-home-frame bg-background text-foreground relative flex min-h-svh flex-col overflow-x-clip",
+		"data-server-fallback":     "home",
+		"data-server-home-variant": variant,
+		"data-server-brand":        systemName,
+	},
+		element("header", map[string]string{"class": "server-home-minimal-header"},
+			element("a", map[string]string{"href": "/"},
+				element("img", map[string]string{"src": logo, "alt": "", "width": "28", "height": "28"}),
+				element("span", nil, text(systemName)),
+			),
+		),
+		element("main", map[string]string{
+			"class":     "server-home-loading flex min-h-svh flex-1 flex-col items-center justify-center gap-4 px-6 pt-16 text-center",
+			"aria-busy": "true",
+		},
+			element("img", map[string]string{"src": logo, "alt": "", "width": "56", "height": "56"}),
+			element("p", map[string]string{"class": "text-lg font-semibold"}, text(systemName)),
+			element("p", map[string]string{"class": "text-muted-foreground text-sm"}, text("Loading...")),
+		),
+	)
+}
+
+func homePageFallback(assets *homePageAssets) *html.Node {
+	systemName, logo, docsLink, custom := homePageConfiguration()
+	if assets == nil {
+		return brandLoadingFallback(systemName, logo, custom)
+	}
+	template := assets.defaultTemplate
+	if custom {
+		template = assets.customTemplate
+	}
+	root := parseHomePageTemplate(template)
+	if root == nil {
+		return brandLoadingFallback(systemName, logo, custom)
+	}
+	setAttribute(root, "data-server-brand", systemName)
+
+	var update func(*html.Node)
+	update = func(node *html.Node) {
+		for child := node.FirstChild; child != nil; {
+			next := child.NextSibling
+			if module := attribute(child, "data-server-nav"); module != "" && !middleware.HeaderNavModuleIsEnabled(module) {
+				node.RemoveChild(child)
+				child = next
+				continue
+			}
+			if attribute(child, "data-fallback-brand") != "" {
+				replaceNodeText(child, systemName)
+			}
+			if attribute(child, "data-server-logo") != "" {
+				if child.DataAtom == atom.Img {
+					setAttribute(child, "src", logo)
+				} else {
+					setAttribute(child, "href", logo)
+				}
+				setAttribute(child, "aria-label", systemName)
+			}
+			if attribute(child, "data-server-docs") != "" {
+				setAttribute(child, "href", docsLink)
+			}
+			update(child)
+			child = next
+		}
+	}
+	update(root)
+	root.AppendChild(element("script", map[string]string{
+		"type":                    "application/json",
+		"data-home-fallback-copy": "true",
+	}, text(string(assets.copy))))
+	return root
+}
+
+type integrationCatalogItem struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Icon    string `json:"icon"`
+	DocPath string `json:"docPath"`
+}
+
+type integrationPageStep struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+type integrationPageCopy struct {
+	Eyebrow     string                `json:"eyebrow"`
+	Title       string                `json:"title"`
+	Description string                `json:"description"`
+	Clients     map[string]string     `json:"clients"`
+	StepsTitle  string                `json:"stepsTitle"`
+	Steps       []integrationPageStep `json:"steps"`
+	PricingLink string                `json:"pricingLink"`
+	DocsLink    string                `json:"docsLink"`
+}
+
+type integrationPageContent struct {
+	Catalog []integrationCatalogItem
+	Copy    integrationPageCopy
+}
+
+func newIntegrationPageContent(catalogJSON, copyJSON []byte) *integrationPageContent {
+	var catalog []integrationCatalogItem
+	var copy integrationPageCopy
+	if common.Unmarshal(catalogJSON, &catalog) != nil || common.Unmarshal(copyJSON, &copy) != nil || len(catalog) == 0 {
+		return nil
+	}
+	if copy.Eyebrow == "" || copy.Title == "" || copy.Description == "" || copy.StepsTitle == "" ||
+		copy.PricingLink == "" || copy.DocsLink == "" || len(copy.Steps) == 0 {
+		return nil
+	}
+	seen := make(map[string]bool, len(catalog))
+	for _, item := range catalog {
+		docURL, err := url.Parse(item.DocPath)
+		if item.ID == "" || item.Name == "" || item.Icon == "" || item.DocPath == "" || seen[item.ID] ||
+			err != nil || docURL.Scheme != "" || docURL.Host != "" || docURL.RawQuery != "" ||
+			!strings.HasPrefix(docURL.Path, "/") || strings.HasPrefix(docURL.Path, "//") ||
+			!strings.HasSuffix(docURL.Path, ".html") || strings.Contains(docURL.Path, "..") ||
+			strings.ContainsAny(item.DocPath, " \t\r\n") || copy.Clients[item.ID] == "" {
+			return nil
+		}
+		seen[item.ID] = true
+	}
+	for _, step := range copy.Steps {
+		if step.Title == "" || step.Description == "" {
+			return nil
+		}
+	}
+	return &integrationPageContent{Catalog: catalog, Copy: copy}
+}
+
+func integrationPageFallback(content *integrationPageContent) *html.Node {
+	if content == nil {
+		return nil
+	}
+	main := element("main", map[string]string{
+		"class":                "server-fallback server-fallback--integrations",
+		"data-server-fallback": "integrations",
 	},
 		element("section", map[string]string{"class": "server-fallback__hero"},
-			element("p", map[string]string{"class": "server-fallback__eyebrow"}, text("众妙之门 · TaoDock")),
-			element("h1", nil, text("One unified AI API for apps and agents")),
-			element("p", map[string]string{"class": "server-fallback__lead"}, text("TaoDock connects developers, teams and AI agents to text, image, audio and video models through one compatible API gateway.")),
-			element("p", nil, text("Use OpenAI-compatible and provider-specific endpoints, issue API keys, route requests across available providers, inspect usage logs and manage billing from one console.")),
-			element("nav", map[string]string{"aria-label": "Get started"},
-				link("/pricing", "View public model pricing"),
-				link("https://docs.taodock.com/quick-start.html", "Read the quick start"),
-				link("/sign-in?redirect=%2Fkeys", "Sign in and create an API key"),
-			),
-		),
-		element("section", nil,
-			element("h2", nil, text("Built for practical AI integration")),
-			element("ul", nil,
-				element("li", nil, text("Developers integrating chat, reasoning, embeddings and multimodal generation.")),
-				element("li", nil, text("Teams that need provider routing, access controls, usage records and predictable settlement.")),
-				element("li", nil, text("AI clients and agents that need a stable API endpoint across multiple model families.")),
-			),
-		),
-		element("section", nil,
-			element("h2", nil, text("Choose a model, follow a guide, then connect")),
-			element("p", nil, text("Compare the anonymous public catalog before signing in. Prices may differ by model, usage type, context tier, time or account group; the pricing page states the applicable terms.")),
-			element("p", nil,
-				link("https://docs.taodock.com/guide/clients.html", "Browse supported client tutorials"),
-				text(" · "),
-				link("https://docs.taodock.com/api/overview.html", "Read the API overview"),
+			element("p", map[string]string{"class": "server-fallback__eyebrow"}, text(content.Copy.Eyebrow)),
+			element("h1", nil, text(content.Copy.Title)),
+			element("p", map[string]string{"class": "server-fallback__lead"}, text(content.Copy.Description)),
+			element("nav", map[string]string{"aria-label": content.Copy.Eyebrow},
+				link("/pricing", content.Copy.PricingLink),
+				link("https://docs.taodock.com/en/guide/clients.html", content.Copy.DocsLink),
 			),
 		),
 	)
+
+	cards := element("div", map[string]string{"class": "server-fallback__card-list"})
+	for _, item := range content.Catalog {
+		cards.AppendChild(element("article", map[string]string{"class": "server-fallback__card"},
+			element("h2", nil, text(item.Name)),
+			element("p", nil, text(content.Copy.Clients[item.ID])),
+			element("p", nil, link("https://docs.taodock.com/en"+item.DocPath, content.Copy.DocsLink+": "+item.Name)),
+		))
+	}
+	main.AppendChild(element("section", nil,
+		element("h2", nil, text(content.Copy.Eyebrow)),
+		cards,
+	))
+
+	steps := element("ol", nil)
+	for _, step := range content.Copy.Steps {
+		steps.AppendChild(element("li", nil,
+			element("h3", nil, text(step.Title)),
+			element("p", nil, text(step.Description)),
+		))
+	}
+	main.AppendChild(element("section", nil,
+		element("h2", nil, text(content.Copy.StepsTitle)),
+		steps,
+	))
+	return main
 }
 
 func pricingPageFallback(data controller.PublicPricingData) *html.Node {

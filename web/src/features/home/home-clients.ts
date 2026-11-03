@@ -16,20 +16,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import CherryStudioIcon from '@lobehub/icons/es/CherryStudio/components/Color'
-import OpenWebUIIcon from '@lobehub/icons/es/OpenWebUI/components/Mono'
-import { Code2 } from 'lucide-react'
+import { INTEGRATION_CATALOG } from '@/features/integrations/catalog'
+import {
+  getIntegrationIcon,
+  getIntegrationInitials,
+  type IntegrationIconComponent,
+} from '@/features/integrations/integration-icons'
 
 // Only clients covered by this deployment's integration documentation.
-export const HOME_CLIENTS = [
-  { name: 'Cherry Studio', icon: CherryStudioIcon, initials: '' },
-  { name: 'WorkBuddy', initials: 'W' },
-  { name: 'Open WebUI', icon: OpenWebUIIcon, initials: '' },
-  { name: 'AionUi', initials: 'A' },
-  { name: 'DeepChat', initials: 'D' },
-  { name: 'OpenAI SDK', icon: Code2, initials: '' },
-] as const
+export const HOME_CLIENTS = INTEGRATION_CATALOG
 
-export const HOME_GATEWAY_CLIENTS = HOME_CLIENTS.filter(
-  (client) => client.name !== 'WorkBuddy'
-)
+type HomeGatewayClient =
+  | { name: string; icon: IntegrationIconComponent }
+  | { name: string; initials: string }
+
+export const HOME_GATEWAY_CLIENTS: HomeGatewayClient[] = HOME_CLIENTS.filter(
+  (client) => client.id !== 'workbuddy'
+).map((client) => {
+  const icon = getIntegrationIcon(client.icon)
+  if (icon) return { name: client.name, icon }
+  return { name: client.name, initials: getIntegrationInitials(client.icon) }
+})

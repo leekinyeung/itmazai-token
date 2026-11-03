@@ -1,13 +1,18 @@
 ---
-title: "Cherry Studio API 配置与模型接入教程"
+title: "Cherry Studio 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - 众妙之门 TaoDock"
+titleTemplate: false
 description: "使用 Cherry Studio 连接众妙之门 TaoDock，了解一键导入、New API 根地址、模型启用、智能体配置与常见错误排查。"
 ---
 
 # Cherry Studio 接入众妙之门：导入与 API 配置
 
+## 第一步：准备工作 {#prepare}
+
 开始前，请准备[众妙之门 TaoDock API 密钥](https://taodock.com/keys)、足够的账户额度，并从[模型广场](https://taodock.com/pricing)复制完整模型 ID。首次使用可先完成[快速开始](../quick-start.md)。
 
 从 [Cherry Studio 官网](https://cherryai.com.cn/)下载安装桌面版。
+
+<IntegrationConversionCallout />
 
 ## 一键导入
 
@@ -56,3 +61,5 @@ description: "使用 Cherry Studio 连接众妙之门 TaoDock，了解一键导�
 | 对话正常但工具失败 | 协议、模型能力及应用的工具权限 |
 
 返回[客户端与 Agent 接入指南](./clients.md)，或查看[常见问题](../faq.md)继续排查。
+
+<IntegrationConversionCallout />

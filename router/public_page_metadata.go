@@ -53,7 +53,7 @@ func (renderer *publicPageMetadataRenderer) publicPage(escapedPath string) (stri
 	if page, ok := renderer.Pages[path]; ok && !strings.Contains(path, ":") {
 		title := page.Title + " | " + renderer.SiteName
 		if path == "/" {
-			title = renderer.SiteName + " | " + page.Title
+			title = page.Title
 		}
 		description := strings.ReplaceAll(page.Description, "{{systemName}}", renderer.SiteName)
 		return title, description, renderer.Origin + path, true

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -7,6 +8,12 @@ import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss'
 import { tanstackRouter } from '@tanstack/router-plugin/rspack'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const homeCriticalStyles = [
+  './src/styles/home.css',
+  './src/styles/home-hero.css',
+]
+  .map((file) => readFileSync(path.resolve(__dirname, file), 'utf8'))
+  .join('\n')
 
 export default defineConfig(({ envMode }) => {
   const env = loadEnv({ mode: envMode, prefixes: ['VITE_'] })
@@ -67,6 +74,15 @@ export default defineConfig(({ envMode }) => {
     html: {
       template: './index.html',
       favicon: './public/favicon.ico',
+      tags: [
+        {
+          tag: 'style',
+          attrs: { 'data-home-critical': true },
+          children: homeCriticalStyles,
+          head: true,
+          append: false,
+        },
+      ],
     },
     server: {
       host: '0.0.0.0',

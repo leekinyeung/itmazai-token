@@ -27,6 +27,20 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 	if manifest, err := assets.BuildFS.ReadFile("web/dist/page-metadata.json"); err == nil {
 		pageMetadata = newPublicPageMetadataRenderer(assets.IndexPage, manifest)
 	}
+	var homeAssets *homePageAssets
+	if fallback, err := assets.BuildFS.ReadFile("web/dist/home-fallback.html"); err == nil {
+		if customFallback, customErr := assets.BuildFS.ReadFile("web/dist/home-custom-fallback.html"); customErr == nil {
+			if copy, copyErr := assets.BuildFS.ReadFile("web/dist/home-fallback-copy.json"); copyErr == nil {
+				homeAssets = newHomePageAssets(fallback, customFallback, copy)
+			}
+		}
+	}
+	var integrations *integrationPageContent
+	if catalog, err := assets.BuildFS.ReadFile("web/dist/integration-catalog.json"); err == nil {
+		if copy, copyErr := assets.BuildFS.ReadFile("web/dist/integration-copy.en.json"); copyErr == nil {
+			integrations = newIntegrationPageContent(catalog, copy)
+		}
+	}
 
 	router.NoRoute(
 		pluginDispatcher,
@@ -54,6 +68,9 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 			if pageMetadata != nil {
 				_, _, _, publicPage = pageMetadata.publicPage(escapedPath)
 			}
+			if path == "/integrations" && integrations == nil {
+				publicPage = false
+			}
 			pricingRestricted := publicPage && isPricingPagePath(path) && !middleware.HeaderNavModuleIsPublic("pricing")
 			rankingsRestricted := publicPage && path == "/rankings" && !middleware.HeaderNavModuleIsPublic("rankings")
 			if pricingRestricted {
@@ -67,9 +84,11 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 				var fallback *html.Node
 				switch path {
 				case "/":
-					fallback = homePageFallback()
+					fallback = homePageFallback(homeAssets)
 				case "/pricing":
 					fallback = pricingPageFallback(controller.GetAnonymousPricingData())
+				case "/integrations":
+					fallback = integrationPageFallback(integrations)
 				}
 				c.Header("Cache-Control", "no-cache")
 				c.Data(http.StatusOK, "text/html; charset=utf-8", pageMetadata.render(escapedPath, fallback))
