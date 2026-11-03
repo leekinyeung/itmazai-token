@@ -140,7 +140,13 @@ export function GatewayDiagram(props: {
         },
       ]
   const tiles = [
-    { key: 'models', x: 0, y: -GATEWAY_TILE_OFFSET, label: t('Models'), dx: 0 },
+    {
+      key: 'models',
+      x: 0,
+      y: -GATEWAY_TILE_OFFSET,
+      label: t('Models'),
+      dx: 0,
+    },
     {
       key: 'routing',
       x: -GATEWAY_TILE_OFFSET,
@@ -155,7 +161,13 @@ export function GatewayDiagram(props: {
       label: t('Unified API'),
       dx: 8,
     },
-    { key: 'logs', x: 0, y: GATEWAY_TILE_OFFSET, label: t('Logs'), dx: 0 },
+    {
+      key: 'logs',
+      x: 0,
+      y: GATEWAY_TILE_OFFSET,
+      label: t('Logs'),
+      dx: 0,
+    },
   ]
   return (
     <svg

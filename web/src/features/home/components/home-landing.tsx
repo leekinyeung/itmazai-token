@@ -28,13 +28,13 @@ import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { toIntlLocale } from '@/i18n/languages'
 
+import '@/styles/home.css'
+
 import { HomeCapabilities } from './home-capabilities'
 import { HomeEcosystem } from './home-ecosystem'
 import { HomeHero } from './home-hero'
 import { HomeLivePreview } from './home-live-preview'
 import { HomeSetup } from './home-setup'
-
-import '@/styles/home.css'
 
 function HomeActions(props: { isAuthenticated: boolean }) {
   const { t } = useTranslation()

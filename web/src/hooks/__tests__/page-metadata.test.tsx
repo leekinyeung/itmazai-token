@@ -47,7 +47,8 @@ const resources: Record<string, { translation: Record<string, string> }> =
       ),
     ])
   )
-const titleKey = 'Unified AI API for Apps and Agents'
+const homepageTitle =
+  'TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation'
 const descriptionKey =
   'Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides.'
 let instance: i18n
@@ -92,10 +93,10 @@ describe('page metadata', () => {
       { initialProps: { systemName: 'TaoDock' }, wrapper: MetadataProvider }
     )
 
-    expect(document.title).toBe(`TaoDock | ${titleKey}`)
+    expect(document.title).toBe(homepageTitle)
     rerender({ systemName: 'Custom AI' })
 
-    expect(document.title).toBe(`Custom AI | ${titleKey}`)
+    expect(document.title).toBe(homepageTitle)
     for (const selector of [
       'meta[name="title"]',
       'meta[property="og:title"]',
@@ -126,13 +127,21 @@ describe('page metadata', () => {
       })
 
       const translation = resources[language].translation
-      expect(translation[titleKey]).toBeTruthy()
       expect(translation[descriptionKey]).toBeTruthy()
       if (file !== 'en') {
-        expect(translation[titleKey]).not.toBe(titleKey)
         expect(translation[descriptionKey]).not.toBe(descriptionKey)
       }
-      expect(document.title).toBe(`${brandName} | ${translation[titleKey]}`)
+      expect(document.title).toBe(homepageTitle)
+      for (const selector of [
+        'meta[name="title"]',
+        'meta[property="og:title"]',
+        'meta[name="twitter:title"]',
+      ]) {
+        expect(document.querySelector(selector)).toHaveAttribute(
+          'content',
+          homepageTitle
+        )
+      }
       expect(
         document.querySelector('meta[property="og:site_name"]')
       ).toHaveAttribute('content', brandName)
@@ -157,9 +166,9 @@ describe('page metadata', () => {
       { initialProps: { systemName: 'Taodock' }, wrapper: MetadataProvider }
     )
 
-    expect(document.title).toBe('众妙之门 | 面向应用与智能体的统一 AI API')
+    expect(document.title).toBe(homepageTitle)
     rerender({ systemName: 'Custom AI' })
-    expect(document.title).toBe('Custom AI | 面向应用与智能体的统一 AI API')
+    expect(document.title).toBe(homepageTitle)
   })
 
   it('updates public page metadata on navigation and removes canonical links on private pages', () => {
@@ -173,6 +182,10 @@ describe('page metadata', () => {
       'href',
       'https://taodock.com/'
     )
+    expect(document.querySelector('meta[property="og:url"]')).toHaveAttribute(
+      'content',
+      'https://taodock.com/'
+    )
     rerender({ pathname: '/pricing' })
     expect(document.querySelector('link[rel="canonical"]')).toHaveAttribute(
       'href',
@@ -183,21 +196,34 @@ describe('page metadata', () => {
       'content',
       'Explore available AI models, supported API endpoints and current pricing on TaoDock.'
     )
+    rerender({ pathname: '/integrations' })
+    expect(document.querySelector('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://taodock.com/integrations'
+    )
+    expect(document.title).toBe('AI Client and SDK Integrations | TaoDock')
+    expect(document.querySelector('meta[name="description"]')).toHaveAttribute(
+      'content',
+      'Connect Cherry Studio, WorkBuddy, Open WebUI, AionUI, DeepChat and OpenAI SDK applications to TaoDock through one OpenAI-compatible API.'
+    )
     rerender({ pathname: '/keys' })
     expect(document.querySelector('link[rel="canonical"]')).toBeNull()
+    expect(document.querySelector('meta[property="og:url"]')).toBeNull()
     expect(document.title).toBe('TaoDock')
     rerender({ pathname: '/' })
     expect(document.querySelectorAll('link[rel="canonical"]')).toHaveLength(1)
-    expect(document.title).toBe(`TaoDock | ${titleKey}`)
+    expect(document.title).toBe(homepageTitle)
     unmount()
     expect(document.querySelector('link[rel="canonical"]')).toBeNull()
   })
 
   it('reuses the server canonical and removes query filters from the public URL', () => {
-    const canonical = document.createElement('link')
-    canonical.rel = 'canonical'
+    const canonical = document.querySelector<HTMLLinkElement>(
+      'link[rel="canonical"]'
+    )
+    expect(canonical).not.toBeNull()
+    if (!canonical) return
     canonical.href = 'https://taodock.com/pricing'
-    document.head.appendChild(canonical)
     renderHook(() => usePageMetadata('TaoDock', '/pricing/'), {
       wrapper: MetadataProvider,
     })

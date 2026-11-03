@@ -31,10 +31,9 @@ export function usePageMetadata(systemName: string, pathname: string): void {
   const values = { systemName: displayName, modelName: page?.modelName }
   let title = displayName
   if (page) {
-    const pageTitle = t(page.title, values)
     title = page.isHome
-      ? `${displayName} | ${pageTitle}`
-      : `${pageTitle} | ${displayName}`
+      ? page.title
+      : `${t(page.title, values)} | ${displayName}`
   }
   let description = t(
     'Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides.'
@@ -52,7 +51,6 @@ export function usePageMetadata(systemName: string, pathname: string): void {
       ['meta[property="og:title"]', title],
       ['meta[property="og:description"]', description],
       ['meta[property="og:site_name"]', displayName],
-      ['meta[property="og:url"]', canonicalUrl || 'https://taodock.com/'],
       ['meta[name="twitter:title"]', title],
       ['meta[name="twitter:description"]', description],
     ]) {
@@ -61,14 +59,25 @@ export function usePageMetadata(systemName: string, pathname: string): void {
     let canonical = document.querySelector<HTMLLinkElement>(
       'link[rel="canonical"]'
     )
+    let openGraphUrl = document.querySelector<HTMLMetaElement>(
+      'meta[property="og:url"]'
+    )
     if (!canonicalUrl) {
       canonical?.remove()
+      openGraphUrl?.remove()
       return
     }
     canonical ??= document.createElement('link')
     canonical.rel = 'canonical'
     canonical.href = canonicalUrl
     if (!canonical.isConnected) document.head.appendChild(canonical)
-    return () => canonical.remove()
+    openGraphUrl ??= document.createElement('meta')
+    openGraphUrl.setAttribute('property', 'og:url')
+    openGraphUrl.setAttribute('content', canonicalUrl)
+    if (!openGraphUrl.isConnected) document.head.appendChild(openGraphUrl)
+    return () => {
+      canonical.remove()
+      openGraphUrl.remove()
+    }
   }, [canonicalUrl, description, displayName, language, title])
 }

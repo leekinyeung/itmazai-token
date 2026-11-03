@@ -61,7 +61,7 @@
   ],
   "pages": {
     "/": {
-      "title": "Unified AI API for Apps and Agents",
+      "title": "TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation",
       "description": "Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides."
     },
     "/pricing": {
@@ -71,6 +71,10 @@
     "/pricing/:modelId": {
       "title": "{{modelName}} API Pricing and Capabilities",
       "description": "View API capabilities, supported endpoints and current pricing for {{modelName}} on {{systemName}}."
+    },
+    "/integrations": {
+      "title": "AI Client and SDK Integrations",
+      "description": "Connect Cherry Studio, WorkBuddy, Open WebUI, AionUI, DeepChat and OpenAI SDK applications to {{systemName}} through one OpenAI-compatible API."
     },
     "/about": {
       "title": "About the Platform",

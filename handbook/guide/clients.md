@@ -62,7 +62,11 @@ description: "选择适合的众妙之门 TaoDock 接入方式，查看 Cherry S
 
 ## AionUI 导入与配置 {#aionui}
 
+### 第一步：准备工作 {#aionui-prepare}
+
 从 [AionUI 官方发布页](https://github.com/iOfficeAI/AionUi/releases)安装应用。
+
+<IntegrationConversionCallout />
 
 ### 一键导入
 
@@ -95,9 +99,15 @@ description: "选择适合的众妙之门 TaoDock 接入方式，查看 Cherry S
 
 此教程配置 AionUI 的内置 Agent。通过 AionUI 启动的其他 CLI Agent 有各自的模型与认证配置，不会仅因导入此服务商就全部完成配置。见 [AionUI 模型配置](https://github.com/iOfficeAI/AionUi/wiki/LLM-Configuration-Chinese)和[快速入门](https://github.com/iOfficeAI/AionUi/wiki/Getting-Started)。
 
+<IntegrationConversionCallout />
+
 ## DeepChat 导入与配置 {#deepchat}
 
+### 第一步：准备工作 {#deepchat-prepare}
+
 从 [DeepChat 官方发布页](https://github.com/ThinkInAIXYZ/deepchat/releases)安装应用。
+
+<IntegrationConversionCallout />
 
 ### 一键导入
 
@@ -123,6 +133,8 @@ description: "选择适合的众妙之门 TaoDock 接入方式，查看 Cherry S
 **对照图 4：** ① 进入左侧「服务商设置」；② 点击中间的「添加自定义服务商」；③ 右侧名称填 `众妙之门 TaoDock`，API 类型选 **OpenAI Completions**；④ API 地址填 `https://taodock.com/v1`，核对下方自动显示的完整路径；⑤ 粘贴自己的 API 密钥，再点击「连接并加载模型」。也可先「保存但不测试」，之后再获取和启用模型；保存配置本身不代表连接已验证。
 
 这套配置使用 `/v1/chat/completions`。部分版本中，单独标为「OpenAI」的类型使用 Responses 接口，选择时请确认是 **OpenAI Completions**。DeepChat 支持自定义兼容服务商，导入仍需确认预览及是否覆盖已有配置。界面和版本说明见 [DeepChat 官方项目](https://github.com/ThinkInAIXYZ/deepchat)。
+
+<IntegrationConversionCallout />
 
 ## Open WebUI 配置 {#open-webui}
 请打开独立的[Open WebUI 接入众妙之门 API 配置教程](./open-webui.md)，查看配置步骤、成功验证和错误排查。

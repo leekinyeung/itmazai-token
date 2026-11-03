@@ -1,13 +1,18 @@
 ---
-title: "Open WebUI OpenAI-Compatible API Setup"
+title: "Open WebUI Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - TaoDock"
+titleTemplate: false
 description: "Configure a TaoDock OpenAI-compatible connection in Open WebUI, set the API URL and key, load models and troubleshoot connectivity."
 ---
 
 # Open WebUI OpenAI-Compatible API Setup
 
+## Step 1: Preparation {#prepare}
+
 Before you start, prepare your [TaoDock API key](https://taodock.com/keys), sufficient account quota and an exact model ID from the [model catalog](https://taodock.com/pricing). See the [quick start](../quick-start.md) if this is your first integration.
 
 You need permission to manage connections in Open WebUI.
+
+<IntegrationConversionCallout />
 
 1. Open **Settings → Admin → Connections**.
 2. Add an OpenAI connection with URL **`https://taodock.com/v1`**.
@@ -34,3 +39,5 @@ For Agent workflows, also follow the [file tool verification](./clients.md#agent
 | Chat works but tools fail | Verify the protocol, model capability and the application's tool permissions |
 
 Return to [all client integration guides](./clients.md) or see the [FAQ](../faq.md) for more help.
+
+<IntegrationConversionCallout />

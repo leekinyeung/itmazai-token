@@ -1,0 +1,38 @@
+[
+  {
+    "id": "cherry-studio",
+    "name": "Cherry Studio",
+    "icon": "cherry-studio",
+    "docPath": "/guide/cherry-studio.html"
+  },
+  {
+    "id": "workbuddy",
+    "name": "WorkBuddy",
+    "icon": "workbuddy",
+    "docPath": "/guide/workbuddy.html"
+  },
+  {
+    "id": "open-webui",
+    "name": "Open WebUI",
+    "icon": "open-webui",
+    "docPath": "/guide/open-webui.html"
+  },
+  {
+    "id": "aionui",
+    "name": "AionUI",
+    "icon": "aionui",
+    "docPath": "/guide/clients.html#aionui"
+  },
+  {
+    "id": "deepchat",
+    "name": "DeepChat",
+    "icon": "deepchat",
+    "docPath": "/guide/clients.html#deepchat"
+  },
+  {
+    "id": "openai-sdk",
+    "name": "OpenAI SDK",
+    "icon": "openai-sdk",
+    "docPath": "/api/overview.html"
+  }
+]

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vitepress dev . --host 127.0.0.1",
     "build": "vitepress build .",
-    "preview": "vitepress preview . --host 127.0.0.1"
+    "preview": "vitepress preview . --host 127.0.0.1",
+    "verify:conversion": "node scripts/verify-conversion-links.mjs"
   },
   "devDependencies": {
     "vitepress": "1.6.4"

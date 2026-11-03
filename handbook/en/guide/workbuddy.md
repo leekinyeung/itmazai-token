@@ -1,13 +1,18 @@
 ---
-title: "WorkBuddy Custom Model Setup Guide"
+title: "WorkBuddy Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - TaoDock"
+titleTemplate: false
 description: "Add a TaoDock custom model to WorkBuddy desktop, configure the API URL and protocol, select the model and verify a chat request."
 ---
 
 # WorkBuddy Custom Model Setup Guide
 
+## Step 1: Preparation {#prepare}
+
 Before you start, prepare your [TaoDock API key](https://taodock.com/keys), sufficient account quota and an exact model ID from the [model catalog](https://taodock.com/pricing). See the [quick start](../quick-start.md) if this is your first integration.
 
 Install the desktop application from the [WorkBuddy website](https://www.workbuddy.cn/) and sign in. Configure a TaoDock model inside WorkBuddy as follows.
+
+<IntegrationConversionCallout />
 
 ## Add the TaoDock model
 
@@ -57,3 +62,5 @@ For Agent workflows, also follow the [file tool verification](./clients.md#agent
 | Chat works but tools fail | Verify the protocol, model capability and the application's tool permissions |
 
 Return to [all client integration guides](./clients.md) or see the [FAQ](../faq.md) for more help.
+
+<IntegrationConversionCallout />

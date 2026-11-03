@@ -55,6 +55,12 @@ export function HomeLivePreview(props: {
               'Live models and prices from our model square. Add your API key to the example and connect with a familiar SDK.'
             )}
           </p>
+          <HomeRequestPreview
+            apiBaseUrl={props.apiBaseUrl}
+            modelName={exampleModel?.model_name}
+          />
+        </div>
+        <div className='home-live-prices'>
           <HomeModelPrices pricing={props.pricing} />
           <p className='home-fine-print'>
             {t(
@@ -62,10 +68,6 @@ export function HomeLivePreview(props: {
             )}
           </p>
         </div>
-        <HomeRequestPreview
-          apiBaseUrl={props.apiBaseUrl}
-          modelName={exampleModel?.model_name}
-        />
       </div>
     </section>
   )

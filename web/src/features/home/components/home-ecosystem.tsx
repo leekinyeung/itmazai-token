@@ -21,6 +21,8 @@ import { ArrowRight, Pause, Play } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { FeaturedIntegrationGuides } from '@/features/integrations/featured-integration-guides'
+import { IntegrationMark } from '@/features/integrations/integration-mark'
 
 import { HOME_CLIENTS } from '../home-clients'
 import { HOME_PROVIDERS } from '../model-providers'
@@ -86,13 +88,10 @@ export function HomeEcosystem(props: {
             >
               {HOME_CLIENTS.map((client) => (
                 <span key={client.name}>
-                  {'icon' in client ? (
-                    <client.icon size={26} aria-hidden='true' />
-                  ) : (
-                    <span className='home-client-symbol' aria-hidden='true'>
-                      {client.initials}
-                    </span>
-                  )}
+                  <IntegrationMark
+                    icon={client.icon}
+                    className='home-client-symbol'
+                  />
                   {client.name}
                 </span>
               ))}
@@ -100,14 +99,28 @@ export function HomeEcosystem(props: {
           ))}
         </div>
       </div>
-      <Button
-        variant='link'
-        className='home-text-link'
-        render={<Link to='/pricing' />}
-      >
-        {t('Browse all models and pricing')}
-        <ArrowRight size={15} aria-hidden='true' />
-      </Button>
+      <FeaturedIntegrationGuides
+        id='home-integration-guides'
+        headingLevel='h3'
+      />
+      <div className='mt-4 flex flex-wrap gap-x-5 gap-y-2'>
+        <Button
+          variant='link'
+          className='home-text-link'
+          render={<Link to='/integrations' />}
+        >
+          {t('Explore integrations')}
+          <ArrowRight size={15} aria-hidden='true' />
+        </Button>
+        <Button
+          variant='link'
+          className='home-text-link'
+          render={<Link to='/pricing' />}
+        >
+          {t('Browse all models and pricing')}
+          <ArrowRight size={15} aria-hidden='true' />
+        </Button>
+      </div>
     </section>
   )
 }

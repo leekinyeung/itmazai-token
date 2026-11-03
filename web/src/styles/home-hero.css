@@ -49,6 +49,7 @@ For commercial licensing, please contact support@quantumnous.com
 }
 .home-hero .home-hero-badge {
   display: inline-flex;
+  align-items: center;
   gap: 10px;
   border: 1px solid var(--border);
   border-radius: 999px;

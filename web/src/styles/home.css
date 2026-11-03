@@ -268,6 +268,26 @@ For commercial licensing, please contact support@quantumnous.com
   font-size: 19px;
   color: var(--home-muted-foreground);
 }
+.home-integration-guides {
+  width: min(100%, 52rem);
+  margin: 2rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+.home-integration-guides-title {
+  color: var(--foreground);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.home-integration-guides ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 1.25rem;
+  margin-top: 0.5rem;
+}
 .home-ecosystem > .home-text-link {
   margin-top: 1rem;
 }
@@ -588,6 +608,14 @@ For commercial licensing, please contact support@quantumnous.com
   }
   .home-marquee-reverse .home-logo-row > span {
     font-size: var(--text-base);
+  }
+  .home-integration-guides ul {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .home-integration-guides li {
+    display: flex;
+    justify-content: center;
   }
   .home-protocol-panel {
     margin-top: 0;

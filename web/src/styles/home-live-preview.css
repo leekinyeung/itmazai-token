@@ -32,6 +32,9 @@ For commercial licensing, please contact support@quantumnous.com
 .home-live-grid > * {
   min-width: 0;
 }
+.home-live-intro > .home-terminal {
+  margin-top: 2rem;
+}
 .home-live-intro > .home-section-description {
   max-width: 28rem;
   margin-top: 1rem;
@@ -46,7 +49,7 @@ For commercial licensing, please contact support@quantumnous.com
   background: var(--card);
   border-radius: var(--radius-xl);
   padding: 16px;
-  margin-top: 2rem;
+  margin-top: 0;
 }
 .home-panel-label {
   flex-wrap: wrap;

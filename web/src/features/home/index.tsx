@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ErrorState } from '@/components/error-state'
@@ -24,6 +24,7 @@ import { PublicLayout } from '@/components/layout/components/public-layout'
 import { LoadingState } from '@/components/loading-state'
 import { RichContent } from '@/components/rich-content'
 import { useTheme } from '@/context/theme-provider'
+import { revealClientApp } from '@/lib/client-handoff'
 import { isLikelyHtml } from '@/lib/content-format'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -36,6 +37,16 @@ export function Home() {
   const { resolvedTheme } = useTheme()
   const isAuthenticated = useAuthStore((state) => !!state.auth.user)
   const { content, status, isUrl, retry } = useHomePageContent()
+
+  useLayoutEffect(() => {
+    if (
+      status === 'default' ||
+      status === 'error' ||
+      (status === 'custom' && !isUrl)
+    ) {
+      revealClientApp()
+    }
+  }, [isUrl, status])
 
   const syncIframePreferences = useCallback(() => {
     try {
@@ -95,7 +106,10 @@ export function Home() {
             className='h-screen w-full border-none'
             title={t('Custom Home Page')}
             sandbox='allow-forms allow-popups allow-popups-to-escape-sandbox allow-scripts allow-top-navigation-by-user-activation'
-            onLoad={syncIframePreferences}
+            onLoad={() => {
+              syncIframePreferences()
+              revealClientApp()
+            }}
           />
         </PublicLayout>
       )

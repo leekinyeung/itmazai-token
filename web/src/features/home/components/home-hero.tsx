@@ -24,12 +24,12 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { toIntlLocale } from '@/i18n/languages'
-import { formatNumber } from '@/lib/format'
+
+import '@/styles/home-hero.css'
 
 import { HomeAudience } from './home-audience'
 import { HomeGateway } from './home-gateway'
-
-import '@/styles/home-hero.css'
+import { HomeHeroFrame } from './home-hero-frame'
 
 interface HomeHeroProps {
   brand: string
@@ -60,76 +60,52 @@ export function HomeHero(props: HomeHeroProps) {
     return { words, prefix: parts[0], suffix: parts[1] }
   }, [t])
 
+  const primaryAction = (
+    <Button className='home-primary-action' render={<Link to='/pricing' />}>
+      {t('Explore models')}
+      <HugeiconsIcon icon={ArrowRight01Icon} size={16} aria-hidden='true' />
+    </Button>
+  )
+  const secondaryAction = (
+    <Button
+      variant='outline'
+      className='home-secondary-action'
+      render={
+        /^https?:\/\//.test(props.docsUrl) ? (
+          <a href={props.docsUrl} target='_blank' rel='noopener noreferrer' />
+        ) : (
+          <Link to={props.docsUrl} />
+        )
+      }
+    >
+      {t('Integration guide')}
+      <HugeiconsIcon icon={ArrowRight01Icon} size={16} aria-hidden='true' />
+    </Button>
+  )
+
   return (
-    <section className='home-hero' aria-labelledby='home-title'>
-      <div className='home-hero-copy'>
-        <p className='home-eyebrow home-hero-badge'>
-          {t('MODELS · API · POSSIBILITIES')}
-        </p>
-        <h1 id='home-title'>
-          {t('One gateway, endless AI possibilities.')}
-          <HomeAudience
-            key={locale}
-            words={audience.words}
-            prefix={audience.prefix}
-            suffix={audience.suffix}
-            paused={props.paused}
-          />
-        </h1>
-        <p className='home-hero-description'>
-          {t(
-            'Connect leading models through {{brand}}. One familiar API, from your first prototype to your next release.',
-            { brand: props.brand }
-          )}
-        </p>
-        <div className='home-actions'>
-          <Button
-            className='home-primary-action'
-            render={<Link to='/pricing' />}
-          >
-            {t('Explore models')}
-            <HugeiconsIcon
-              icon={ArrowRight01Icon}
-              size={16}
-              aria-hidden='true'
-            />
-          </Button>
-          <Button
-            variant='outline'
-            className='home-secondary-action'
-            render={
-              /^https?:\/\//.test(props.docsUrl) ? (
-                <a
-                  href={props.docsUrl}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                />
-              ) : (
-                <Link to={props.docsUrl} />
-              )
-            }
-          >
-            {t('Integration guide')}
-            <HugeiconsIcon
-              icon={ArrowRight01Icon}
-              size={16}
-              aria-hidden='true'
-            />
-          </Button>
-        </div>
-        <p className='home-hero-note'>
-          {!props.modelCount
-            ? t('Many models. One connection.')
-            : t('{{formattedCount}} models, ready to explore.', {
-                formattedCount: formatNumber(props.modelCount, locale),
-              })}
-        </p>
-      </div>
-      <HomeGateway
-        logo={props.logo}
-        brand={props.brand}
-        paused={props.paused}
-      />
-    </section>
+    <HomeHeroFrame
+      brand={props.brand}
+      locale={locale}
+      modelCount={props.modelCount}
+      audience={
+        <HomeAudience
+          key={locale}
+          words={audience.words}
+          prefix={audience.prefix}
+          suffix={audience.suffix}
+          paused={props.paused}
+        />
+      }
+      primaryAction={primaryAction}
+      secondaryAction={secondaryAction}
+      gateway={
+        <HomeGateway
+          logo={props.logo}
+          brand={props.brand}
+          paused={props.paused}
+        />
+      }
+    />
   )
 }

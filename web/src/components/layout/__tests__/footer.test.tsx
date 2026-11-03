@@ -119,6 +119,7 @@ test('a non-demo site exposes product, documentation and about destinations', as
     ['Model Square', '/pricing'],
     ['Rankings', '/rankings'],
     ['Console', '/dashboard'],
+    ['Integrations', '/integrations'],
     ['About us', '/about'],
   ]) {
     expect(footer.getByRole('link', { name })).toHaveAttribute('href', href)
@@ -132,25 +133,28 @@ test('a non-demo site exposes product, documentation and about destinations', as
       ),
     ])
   )
-  for (const path of [
-    'quick-start.html',
-    'guide/clients.html',
-    'api/overview.html',
-  ]) {
+  for (const path of ['quick-start.html', 'api/overview.html']) {
     const link = footer
       .getAllByRole('link')
       .find((item) => item.getAttribute('href')?.endsWith(`/en/${path}`))
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   }
-  expect(
-    footer.getByText(`© ${new Date().getFullYear()} TaoDock.`, {
-      exact: false,
-    })
-  ).toBeVisible()
+  for (const [name, path] of [
+    ['Cherry Studio setup guide', 'guide/cherry-studio.html'],
+    ['Open WebUI configuration guide', 'guide/open-webui.html'],
+    ['WorkBuddy setup guide', 'guide/workbuddy.html'],
+  ]) {
+    const link = footer.getByRole('link', { name })
+    expect(link).toHaveAttribute('href', `https://docs.taodock.com/en/${path}`)
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  }
+  expect(footer.queryByText(/©/)).toBeNull()
+  expect(footer.queryByRole('link', { name: 'New API' })).toBeNull()
 })
 
-test('disabled modules remove their links and empty navigation groups', async () => {
+test('disabled modules retain the independent integration guide group', async () => {
   const footer = within(
     await renderFooter({
       status: {
@@ -169,8 +173,12 @@ test('disabled modules remove their links and empty navigation groups', async ()
   expect(footer.queryByRole('link', { name: 'About us' })).toBeNull()
   expect(footer.queryByRole('heading', { name: 'About' })).toBeNull()
   expect(
-    footer.queryByRole('navigation', { name: 'Footer navigation' })
-  ).toBeNull()
+    footer.getByRole('heading', { name: 'Integration guides' })
+  ).toBeVisible()
+  expect(
+    footer.getByRole('navigation', { name: 'Footer navigation' })
+  ).toBeVisible()
+  expect(footer.getAllByRole('link')).toHaveLength(4)
 })
 
 test('a custom documentation address replaces the handbook links without guessing paths', async () => {
@@ -188,6 +196,12 @@ test('a custom documentation address replaces the handbook links without guessin
   )
   expect(link).toHaveAttribute('target', '_blank')
   expect(footer.queryByRole('link', { name: 'Quick start' })).toBeNull()
+  expect(
+    footer.getByRole('link', { name: 'Cherry Studio setup guide' })
+  ).toHaveAttribute(
+    'href',
+    'https://docs.taodock.com/en/guide/cherry-studio.html'
+  )
 })
 
 test('all seven interface languages update brand, navigation and handbook language together', async () => {
@@ -201,10 +215,17 @@ test('all seven interface languages update brand, navigation and handbook langua
     const docs = links.filter((item) =>
       item.getAttribute('href')?.startsWith('https://docs.taodock.com/')
     )
-    expect(docs).toHaveLength(3)
+    expect(docs).toHaveLength(5)
     expect(docs[0]).toHaveAttribute(
       'href',
       `https://docs.taodock.com/${chinese ? '' : 'en/'}quick-start.html`
+    )
+    expect(docs.map((item) => item.getAttribute('href'))).toEqual(
+      expect.arrayContaining([
+        `https://docs.taodock.com/${chinese ? '' : 'en/'}guide/cherry-studio.html`,
+        `https://docs.taodock.com/${chinese ? '' : 'en/'}guide/open-webui.html`,
+        `https://docs.taodock.com/${chinese ? '' : 'en/'}guide/workbuddy.html`,
+      ])
     )
     expect(
       footer.getByRole('link', {
@@ -214,7 +235,7 @@ test('all seven interface languages update brand, navigation and handbook langua
     const headings = footer
       .getAllByRole('heading')
       .map((item) => item.textContent)
-    expect(headings).toHaveLength(3)
+    expect(headings).toHaveLength(4)
     if (language.code !== 'en') expect(headings).not.toContain('Products')
   }
 })
@@ -287,6 +308,24 @@ test.each(['https://docs.taodock.com/', 'javascript:alert(1)', 'not a URL'])(
   }
 )
 
+test('hiding automatic copyright preserves configured agreement and privacy links', async () => {
+  const footer = within(
+    await renderFooter({
+      status: { user_agreement_enabled: true, privacy_policy_enabled: true },
+    })
+  )
+  expect(footer.getByRole('link', { name: 'User Agreement' })).toHaveAttribute(
+    'href',
+    '/user-agreement'
+  )
+  expect(footer.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute(
+    'href',
+    '/privacy-policy'
+  )
+  expect(footer.queryByText(/©/)).toBeNull()
+  expect(footer.queryByRole('link', { name: 'New API' })).toBeNull()
+})
+
 test('an unavailable status retains default navigation and hides unconfigured legal links', async () => {
   const footer = within(await renderFooter({ status: null }))
   expect(footer.getByRole('link', { name: 'Model Square' })).toBeVisible()
@@ -331,12 +370,12 @@ test.each([
   }
 )
 
-test('footer layout supports two mobile columns, three tablet columns and accessible link targets', async () => {
+test('footer layout supports two mobile columns, four wide columns and accessible link targets', async () => {
   const footer = await renderFooter()
   const navigation = within(footer).getByRole('navigation', {
     name: 'Footer navigation',
   })
-  expect(navigation).toHaveClass('grid-cols-2', 'sm:grid-cols-3')
+  expect(navigation).toHaveClass('grid-cols-2', 'lg:grid-cols-4')
   for (const link of within(footer).getAllByRole('link')) {
     expect(link).toHaveClass('min-h-11', 'focus-visible:ring-2')
   }

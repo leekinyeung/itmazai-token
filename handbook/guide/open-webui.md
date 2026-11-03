@@ -1,13 +1,18 @@
 ---
-title: "Open WebUI OpenAI 兼容 API 配置教程"
+title: "Open WebUI 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - 众妙之门 TaoDock"
+titleTemplate: false
 description: "在 Open WebUI 管理面板配置众妙之门 TaoDock OpenAI 兼容连接，填写 API 地址与密钥、获取模型并排查常见连接问题。"
 ---
 
 # Open WebUI 接入众妙之门 API 配置教程
 
+## 第一步：准备工作 {#prepare}
+
 开始前，请准备[众妙之门 TaoDock API 密钥](https://taodock.com/keys)、足够的账户额度，并从[模型广场](https://taodock.com/pricing)复制完整模型 ID。首次使用可先完成[快速开始](../quick-start.md)。
 
 需要有 Open WebUI 的连接管理权限。
+
+<IntegrationConversionCallout />
 
 1. 打开 Open WebUI 的「Settings → Admin → Connections」。
 2. 在 OpenAI 连接列表中添加连接，URL 填写 **`https://taodock.com/v1`**。
@@ -34,3 +39,5 @@ description: "在 Open WebUI 管理面板配置众妙之门 TaoDock OpenAI 兼�
 | 对话正常但工具失败 | 协议、模型能力及应用的工具权限 |
 
 返回[客户端与 Agent 接入指南](./clients.md)，或查看[常见问题](../faq.md)继续排查。
+
+<IntegrationConversionCallout />

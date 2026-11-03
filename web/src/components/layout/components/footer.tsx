@@ -89,10 +89,16 @@ function ProjectAttribution(props: { currentYear: number }) {
 
 export function Footer(props: FooterProps) {
   const { t } = useTranslation()
+  const { status } = useStatus()
   const { systemName, logo: systemLogo, footerHtml } = useSystemConfig()
   const displayLogo = systemLogo || props.logo || '/logo.png'
   const displayName = systemName || props.name || DEFAULT_SYSTEM_NAME
   const currentYear = new Date().getFullYear()
+  const hasFooterDetails = Boolean(
+    props.copyright ||
+    status?.user_agreement_enabled ||
+    status?.privacy_policy_enabled
+  )
   const footerClassName = cn(
     'border-border bg-background text-foreground relative shrink-0 border-t',
     props.className
@@ -166,18 +172,18 @@ export function Footer(props: FooterProps) {
           </div>
           <FooterNavigation columns={props.columns} />
         </div>
-        <div className='border-border text-muted-foreground flex flex-col items-start justify-between gap-x-8 gap-y-2 border-t py-6 text-xs leading-5 lg:flex-row'>
-          <div className='flex min-w-0 flex-col items-start gap-x-4 gap-y-1 sm:flex-row sm:flex-wrap sm:items-center'>
-            <p className='py-3 wrap-anywhere'>
-              &copy; {currentYear} {displayName}.{' '}
-              {props.copyright ?? t('footer.defaultCopyright')}
-            </p>
+        {hasFooterDetails ? (
+          <div className='border-border text-muted-foreground flex min-w-0 flex-col items-start gap-x-4 gap-y-1 border-t py-6 text-xs leading-5 sm:flex-row sm:flex-wrap sm:items-center'>
+            {props.copyright ? (
+              <p className='py-3 wrap-anywhere'>
+                &copy; {currentYear} {displayName}. {props.copyright}
+              </p>
+            ) : null}
             <div className='flex flex-wrap items-center gap-x-3'>
               <LegalLinks />
             </div>
           </div>
-          <ProjectAttribution currentYear={currentYear} />
-        </div>
+        ) : null}
       </div>
     </footer>
   )

@@ -1,13 +1,18 @@
 ---
-title: "WorkBuddy 自定义模型 API 配置教程"
+title: "WorkBuddy 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - 众妙之门 TaoDock"
+titleTemplate: false
 description: "在 WorkBuddy 桌面版添加众妙之门 TaoDock 自定义模型，正确填写 API 地址、协议与模型 ID，并验证会话中的模型选择。"
 ---
 
 # WorkBuddy 自定义模型接入众妙之门教程
 
+## 第一步：准备工作 {#prepare}
+
 开始前，请准备[众妙之门 TaoDock API 密钥](https://taodock.com/keys)、足够的账户额度，并从[模型广场](https://taodock.com/pricing)复制完整模型 ID。首次使用可先完成[快速开始](../quick-start.md)。
 
 从 [WorkBuddy 官网](https://www.workbuddy.cn/)安装桌面版并完成登录。以下是在 WorkBuddy 内使用众妙之门 TaoDock 模型的配置。
+
+<IntegrationConversionCallout />
 
 ## 添加众妙之门 TaoDock 模型
 
@@ -57,3 +62,5 @@ description: "在 WorkBuddy 桌面版添加众妙之门 TaoDock 自定义模型�
 | 对话正常但工具失败 | 协议、模型能力及应用的工具权限 |
 
 返回[客户端与 Agent 接入指南](./clients.md)，或查看[常见问题](../faq.md)继续排查。
+
+<IntegrationConversionCallout />

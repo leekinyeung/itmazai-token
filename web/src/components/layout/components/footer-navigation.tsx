@@ -19,6 +19,8 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
+import { getIntegrationDocUrl } from '@/features/integrations/catalog'
+import { FEATURED_INTEGRATION_GUIDES } from '@/features/integrations/featured-guides'
 import { useStatus } from '@/hooks/use-status'
 import { normalizeInterfaceLanguage } from '@/i18n/languages'
 import { parseHeaderNavModulesFromStatus } from '@/lib/nav-modules'
@@ -84,15 +86,22 @@ export function FooterNavigation(props: { columns?: FooterColumn[] }) {
     } else {
       documentation.push(
         { text: 'Quick start', href: `${docsBase}quick-start.html` },
-        { text: 'Integration guide', href: `${docsBase}guide/clients.html` },
+        { text: 'Integrations', href: '/integrations' },
         { text: 'API documentation', href: `${docsBase}api/overview.html` }
       )
     }
   }
 
+  const integrationGuides: FooterColumn['links'] =
+    FEATURED_INTEGRATION_GUIDES.map((guide) => ({
+      text: guide.labelKey,
+      href: getIntegrationDocUrl(guide.docPath, language),
+    }))
+
   const defaultColumns: FooterColumn[] = [
     { title: 'Products', links: products },
     { title: 'Documentation', links: documentation },
+    { title: 'Integration guides', links: integrationGuides },
     { title: 'About', links: about },
   ]
   const columns = (props.columns ?? defaultColumns).filter(
@@ -106,9 +115,10 @@ export function FooterNavigation(props: { columns?: FooterColumn[] }) {
       className={cn(
         'grid min-w-0 grid-cols-2 gap-x-12 gap-y-8 lg:basis-0',
         columns.length === 1 && 'grid-cols-1',
-        columns.length >= 3 && 'sm:grid-cols-3'
+        columns.length === 3 && 'lg:grid-cols-3',
+        columns.length >= 4 && 'lg:grid-cols-4'
       )}
-      style={{ flexGrow: Math.min(columns.length, 3) }}
+      style={{ flexGrow: Math.min(columns.length, 4) }}
     >
       {columns.map((column) => (
         <div key={column.title} className='min-w-0'>

@@ -22,6 +22,7 @@ import { StrictMode, Suspense, use } from 'react'
 import ReactDOM from 'react-dom/client'
 
 import { installBuildMetadata } from '@/lib/build-metadata'
+import { prepareClientRoot } from '@/lib/client-handoff'
 import { applyFaviconToDom } from '@/lib/dom-utils'
 import '@/lib/dayjs'
 import { createAppQueryClient } from '@/lib/query-client'
@@ -109,28 +110,24 @@ export function App() {
   )
 }
 
-rootElement
-  .querySelector<HTMLElement>(':scope > [data-server-fallback]')
-  ?.remove()
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement)
-  root.render(
-    <StrictMode>
-      <Suspense
-        fallback={
-          <main
-            aria-busy='true'
-            aria-label={i18n.t('Loading...', { lng: 'en' })}
-            className='mx-auto flex min-h-svh max-w-6xl flex-col gap-8 px-6 py-24'
-          >
-            <Skeleton className='h-10 w-40' />
-            <Skeleton className='h-40 w-full max-w-xl' />
-            <Skeleton className='h-12 w-64' />
-          </main>
-        }
-      >
-        <App />
-      </Suspense>
-    </StrictMode>
-  )
-}
+const clientRootElement = prepareClientRoot(rootElement)
+const root = ReactDOM.createRoot(clientRootElement)
+root.render(
+  <StrictMode>
+    <Suspense
+      fallback={
+        <main
+          aria-busy='true'
+          aria-label={i18n.t('Loading...', { lng: 'en' })}
+          className='mx-auto flex min-h-svh max-w-6xl flex-col gap-8 px-6 py-24'
+        >
+          <Skeleton className='h-10 w-40' />
+          <Skeleton className='h-40 w-full max-w-xl' />
+          <Skeleton className='h-12 w-64' />
+        </main>
+      }
+    >
+      <App />
+    </Suspense>
+  </StrictMode>
+)
