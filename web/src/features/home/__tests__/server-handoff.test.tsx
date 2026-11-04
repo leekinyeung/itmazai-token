@@ -187,6 +187,7 @@ test('the custom-content shell preserves an administrator-defined brand', async 
 })
 
 test('the server frame remains until the hidden client root is ready', () => {
+  vi.useFakeTimers({ toFake: ['setTimeout'] })
   document.body.innerHTML =
     '<div id="root"><main data-server-fallback="home">Server frame</main></div>'
   const root = document.querySelector<HTMLElement>('#root')
@@ -205,9 +206,20 @@ test('the server frame remains until the hidden client root is ready', () => {
   expect(clientRoot).toHaveAttribute('aria-hidden', 'true')
 
   act(() => frame?.(0))
-  expect(root?.querySelector('[data-server-fallback]')).not.toBeInTheDocument()
+  // The frame is revealed immediately but kept in the DOM while it fades, so
+  // the handoff never shows a blank slot between the two trees.
+  const serverFallback = root?.querySelector<HTMLElement>(
+    '[data-server-fallback]'
+  )
+  expect(serverFallback).toBeInTheDocument()
+  expect(serverFallback).toHaveAttribute('data-server-fading', 'true')
+  expect(serverFallback).toHaveAttribute('aria-hidden', 'true')
   expect(root).not.toHaveAttribute('data-client-pending')
   expect(clientRoot).not.toHaveAttribute('aria-hidden')
+
+  act(() => vi.advanceTimersByTime(200))
+  expect(root?.querySelector('[data-server-fallback]')).not.toBeInTheDocument()
+  vi.useRealTimers()
 })
 
 test('a custom iframe keeps the server shell until its load event', () => {
