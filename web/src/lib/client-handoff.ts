@@ -48,9 +48,18 @@ export function revealClientApp(): void {
 
   revealScheduled = true
   window.requestAnimationFrame(() => {
-    root.querySelector<HTMLElement>(':scope > [data-server-fallback]')?.remove()
+    const serverFallback = root.querySelector<HTMLElement>(
+      ':scope > [data-server-fallback]'
+    )
     clientRoot.removeAttribute('aria-hidden')
     delete root.dataset.clientPending
+    if (serverFallback) {
+      // Fade the pre-render out over the live app instead of removing it in the
+      // same frame, so the handoff does not read as a flash of a second page.
+      serverFallback.dataset.serverFading = 'true'
+      serverFallback.setAttribute('aria-hidden', 'true')
+      window.setTimeout(() => serverFallback.remove(), 200)
+    }
     revealScheduled = false
   })
 }

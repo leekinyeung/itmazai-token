@@ -40,12 +40,31 @@
 
     <meta name="theme-color" content="#fff" />
     <style>
+      html {
+        --sf-bg: oklch(1 0 0);
+        --sf-fg: oklch(0.16 0 0);
+        --sf-muted: oklch(0.5 0 0);
+        --sf-border: oklch(0 0 0 / 0.1);
+        --sf-surface: oklch(0.965 0 0);
+        --sf-accent: oklch(0.55 0.15 252);
+      }
+      html.dark {
+        --sf-bg: oklch(0.215 0 0);
+        --sf-fg: oklch(0.97 0 0);
+        --sf-muted: oklch(0.72 0 0);
+        --sf-border: oklch(1 0 0 / 0.14);
+        --sf-surface: oklch(1 0 0 / 0.06);
+        --sf-accent: oklch(0.78 0.12 250);
+      }
+      html:has(#root[data-client-pending]) {
+        background: var(--sf-bg);
+      }
       .server-fallback {
         box-sizing: border-box;
         width: min(72rem, 100%);
         margin: 0 auto;
-        padding: 5rem 1.5rem 3rem;
-        color: #172033;
+        padding: 2.5rem 1.5rem 4rem;
+        color: var(--sf-fg);
         font:
           400 1rem/1.65 system-ui,
           -apple-system,
@@ -56,28 +75,43 @@
       .server-fallback section {
         margin: 0 0 3rem;
       }
+      .server-fallback section.server-fallback__vendor {
+        margin: 3rem 0 0;
+      }
       .server-fallback__hero {
-        max-width: 52rem;
+        max-width: 46rem;
       }
       .server-fallback h1 {
-        margin: 0.25rem 0 1rem;
-        font-size: clamp(2.25rem, 6vw, 4.75rem);
-        line-height: 1.05;
-        letter-spacing: -0.045em;
+        margin: 0.35rem 0 0.75rem;
+        font-size: clamp(2rem, 4.5vw, 2.9rem);
+        font-weight: 650;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
       }
       .server-fallback h2 {
-        margin: 0 0 0.5rem;
-        font-size: 1.35rem;
+        margin: 0 0 0.75rem;
+        font-size: 1.05rem;
+        font-weight: 600;
         line-height: 1.3;
       }
       .server-fallback__eyebrow {
-        color: #e11d48;
-        font-weight: 700;
-        letter-spacing: 0.08em;
+        margin: 0;
+        color: var(--sf-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
       }
       .server-fallback__lead {
-        font-size: 1.2rem;
+        margin: 0 0 0.6rem;
+        color: var(--sf-muted);
+        font-size: 1.05rem;
+      }
+      .server-fallback__note {
+        margin: 0;
+        color: var(--sf-muted);
+        font-size: 0.82rem;
+        line-height: 1.6;
       }
       .server-fallback nav {
         display: flex;
@@ -86,16 +120,73 @@
         margin-top: 1.5rem;
       }
       .server-fallback a {
-        color: #be123c;
-        font-weight: 650;
+        color: var(--sf-accent);
+        text-decoration: none;
+      }
+      .server-fallback a:hover {
         text-decoration: underline;
         text-underline-offset: 0.2em;
       }
+      .server-fallback__topbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem 1rem;
+        margin-bottom: 3.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--sf-border);
+        font-size: 0.9rem;
+      }
+      .server-fallback__topbar nav {
+        margin-top: 0;
+        gap: 1.25rem;
+      }
+      .server-fallback__brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--sf-fg);
+        font-weight: 600;
+      }
+      .server-fallback__brand img {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+      }
+      .server-fallback__chips {
+        margin-top: 2.5rem;
+        gap: 0.5rem;
+      }
+      .server-fallback__chips a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: var(--sf-surface);
+        color: var(--sf-fg);
+        font-size: 0.85rem;
+      }
+      .server-fallback__chip-count {
+        color: var(--sf-muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .server-fallback__vendor h2 {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+      }
+      .server-fallback__count {
+        color: var(--sf-muted);
+        font-size: 0.78rem;
+        font-weight: 400;
+      }
       .server-fallback__price-list {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-        gap: 1rem;
-        margin-top: 1.25rem;
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+        gap: 0.75rem;
+        margin-top: 1rem;
       }
       .server-fallback__card-list {
         display: grid;
@@ -104,14 +195,64 @@
         margin-top: 1.25rem;
       }
       .server-fallback__price {
-        border: 1px solid #d8dee9;
+        border: 1px solid var(--sf-border);
+        border-radius: 0.85rem;
+        padding: 0.9rem 1rem 1rem;
+      }
+      .server-fallback__card {
+        border: 1px solid var(--sf-border);
         border-radius: 0.9rem;
         padding: 1rem;
       }
-      .server-fallback__card {
-        border: 1px solid #d8dee9;
-        border-radius: 0.9rem;
-        padding: 1rem;
+      .server-fallback__price h3 {
+        margin: 0 0 0.6rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+      .server-fallback__price h3 a {
+        color: var(--sf-fg);
+      }
+      .server-fallback__price h3 a:hover {
+        color: var(--sf-accent);
+      }
+      .server-fallback__cells {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+        gap: 0.35rem;
+        margin: 0 0 0.55rem;
+      }
+      .server-fallback__cells > div {
+        padding: 0.35rem 0.5rem;
+        border-radius: 0.5rem;
+        background: var(--sf-surface);
+      }
+      .server-fallback__cells dt {
+        margin: 0;
+        color: var(--sf-muted);
+        font-size: 0.68rem;
+        line-height: 1.3;
+      }
+      .server-fallback__cells dd {
+        margin: 0;
+        font-size: 0.82rem;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+      .server-fallback__meta {
+        margin: 0;
+        color: var(--sf-muted);
+        font-size: 0.78rem;
+      }
+      .server-fallback__desc {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        margin: 0.4rem 0 0;
+        color: var(--sf-muted);
+        font-size: 0.78rem;
       }
       .server-fallback__price p {
         margin-bottom: 0;
@@ -119,19 +260,6 @@
       .server-fallback--error {
         max-width: 44rem;
         padding-top: 8rem;
-      }
-      html.dark .server-fallback {
-        color: #e5e7eb;
-      }
-      html.dark .server-fallback__price {
-        border-color: #374151;
-      }
-      html.dark .server-fallback__card {
-        border-color: #374151;
-      }
-      html.dark .server-fallback a,
-      html.dark .server-fallback__eyebrow {
-        color: #fb7185;
       }
       #root[data-client-pending] > [data-client-root] {
         position: absolute;
@@ -143,6 +271,19 @@
       #root[data-client-pending] > [data-server-fallback] {
         position: relative;
         z-index: 1;
+      }
+      #root > [data-server-fallback][data-server-fading] {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 150ms ease-out;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #root > [data-server-fallback][data-server-fading] {
+          transition: none;
+        }
       }
       .server-home-frame {
         font-family:

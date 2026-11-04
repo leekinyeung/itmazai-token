@@ -363,15 +363,69 @@ func integrationPageFallback(content *integrationPageContent) *html.Node {
 }
 
 func modelsPageFallback(data controller.PublicPricingData) *html.Node {
+	systemName, logo, docsLink, _, _ := homePageConfiguration()
+	models := slices.Clone(data.Pricing)
+	slices.SortFunc(models, func(left, right model.Pricing) int {
+		if order := strings.Compare(strings.ToLower(left.ModelName), strings.ToLower(right.ModelName)); order != 0 {
+			return order
+		}
+		return strings.Compare(left.ModelName, right.ModelName)
+	})
+
+	vendorNames := make(map[int]string, len(data.Vendors))
+	for _, vendor := range data.Vendors {
+		if name := strings.TrimSpace(vendor.Name); name != "" {
+			vendorNames[vendor.ID] = name
+		}
+	}
+
+	type vendorGroup struct {
+		name   string
+		anchor string
+		models []model.Pricing
+	}
+	groups := make([]*vendorGroup, 0, 8)
+	groupByName := make(map[string]*vendorGroup, 8)
+	for _, item := range models {
+		name := vendorNames[item.VendorID]
+		if name == "" {
+			name = "Other models"
+		}
+		group, ok := groupByName[name]
+		if !ok {
+			group = &vendorGroup{name: name, anchor: "vendor-" + urlAnchor(name)}
+			groupByName[name] = group
+			groups = append(groups, group)
+		}
+		group.models = append(group.models, item)
+	}
+	slices.SortFunc(groups, func(left, right *vendorGroup) int {
+		if len(left.models) != len(right.models) {
+			return len(right.models) - len(left.models)
+		}
+		return strings.Compare(left.name, right.name)
+	})
+
 	main := element("main", map[string]string{
 		"class":                "server-fallback server-fallback--pricing",
 		"data-server-fallback": "models",
 	},
+		element("header", map[string]string{"class": "server-fallback__topbar"},
+			element("a", map[string]string{"class": "server-fallback__brand", "href": "/"},
+				element("img", map[string]string{"src": logo, "alt": "", "width": "24", "height": "24"}),
+				element("span", nil, text(systemName)),
+			),
+			element("nav", map[string]string{"aria-label": "Site"},
+				link("/models", "Models"),
+				link(docsLink, "Docs"),
+				link("/sign-in?redirect=%2Fmodels", "Sign in"),
+			),
+		),
 		element("section", map[string]string{"class": "server-fallback__hero"},
-			element("p", map[string]string{"class": "server-fallback__eyebrow"}, text("TaoDock public catalog")),
+			element("p", map[string]string{"class": "server-fallback__eyebrow"}, text("Public catalog")),
 			element("h1", nil, text("AI Models & API Pricing")),
-			element("p", map[string]string{"class": "server-fallback__lead"}, text("The prices below come from the current catalog available to a signed-out visitor. Amounts are in USD and include the public display-group multiplier used by the anonymous catalog for each model.")),
-			element("p", nil, text("Token prices are per 1 million tokens. Per-request, image and task prices use their stated unit. This response reads the current public catalog when requested, and the prices remain valid only while that configuration is active. Context tiers, request parameters, time windows, cache writes and account groups can change the final charge; the interactive catalog and the settlement record are authoritative for a request.")),
+			element("p", map[string]string{"class": "server-fallback__lead"}, text("List prices in USD per 1M tokens for signed-out visitors, including the public display-group multiplier for each model.")),
+			element("p", map[string]string{"class": "server-fallback__note"}, text("Context tiers, request parameters, time windows and account groups can change the final charge. The interactive catalog and the settlement record are authoritative for a request.")),
 			element("nav", map[string]string{"aria-label": "Pricing resources"},
 				link("https://docs.taodock.com/quick-start.html", "Quick start"),
 				link("https://docs.taodock.com/guide/wallet.html", "Wallet and billing guide"),
@@ -380,38 +434,76 @@ func modelsPageFallback(data controller.PublicPricingData) *html.Node {
 		),
 	)
 
-	models := slices.Clone(data.Pricing)
-	slices.SortFunc(models, func(left, right model.Pricing) int {
-		if order := strings.Compare(strings.ToLower(left.ModelName), strings.ToLower(right.ModelName)); order != 0 {
-			return order
-		}
-		return strings.Compare(left.ModelName, right.ModelName)
-	})
-	list := element("div", map[string]string{"class": "server-fallback__price-list"})
-	for _, item := range models {
-		children := []*html.Node{
-			element("h2", nil, link("/models/"+escapePathSegment(item.ModelName), item.ModelName)),
-		}
-		if description := strings.TrimSpace(item.Description); description != "" {
-			children = append(children, element("p", nil, text(description)))
-		}
-		if facts := publicModelFacts(item, data.Vendors); len(facts) > 0 {
-			children = append(children, element("p", nil, text(strings.Join(facts, " · "))))
-		}
-		children = append(children, element("p", nil, text(publicPriceSummary(item, data.GroupRatio))))
-		list.AppendChild(element("article", map[string]string{"class": "server-fallback__price"}, children...))
+	if len(models) == 0 {
+		main.AppendChild(element("section", nil,
+			element("h2", nil, text("Public model prices")),
+			element("p", map[string]string{"role": "status"}, text("The public pricing catalog is temporarily unavailable. No missing price is treated as free; reload the interactive pricing page before sending a paid request.")),
+		))
+		return main
 	}
 
-	sectionChildren := []*html.Node{element("h2", nil, text("Public model prices"))}
-	if len(models) == 0 {
-		sectionChildren = append(sectionChildren,
-			element("p", map[string]string{"role": "status"}, text("The public pricing catalog is temporarily unavailable. No missing price is treated as free; reload the interactive pricing page before sending a paid request.")),
-		)
-	} else {
-		sectionChildren = append(sectionChildren, list)
+	chips := element("nav", map[string]string{"class": "server-fallback__chips", "aria-label": "Jump to a model provider"})
+	for _, group := range groups {
+		chips.AppendChild(element("a", map[string]string{"href": "#" + group.anchor},
+			text(group.name),
+			element("span", map[string]string{"class": "server-fallback__chip-count"}, text(strconv.Itoa(len(group.models)))),
+		))
 	}
-	main.AppendChild(element("section", nil, sectionChildren...))
+	main.AppendChild(chips)
+
+	for _, group := range groups {
+		cards := element("div", map[string]string{"class": "server-fallback__price-list"})
+		for _, item := range group.models {
+			cards.AppendChild(publicModelCard(item, data.GroupRatio))
+		}
+		count := strconv.Itoa(len(group.models)) + " models"
+		if len(group.models) == 1 {
+			count = "1 model"
+		}
+		main.AppendChild(element("section", map[string]string{"class": "server-fallback__vendor", "id": group.anchor},
+			element("h2", nil,
+				text(group.name),
+				element("span", map[string]string{"class": "server-fallback__count"}, text(count)),
+			),
+			cards,
+		))
+	}
 	return main
+}
+
+// publicModelCard renders one catalog entry: a model link, its itemized unit
+// prices and the endpoints it accepts. Callers group cards under a provider
+// heading, so the vendor name is not repeated inside the card.
+func publicModelCard(item model.Pricing, groupRatios map[string]float64) *html.Node {
+	cells, summary := publicPriceBreakdown(item, groupRatios)
+	children := []*html.Node{
+		element("h3", nil, link("/models/"+escapePathSegment(item.ModelName), item.ModelName)),
+	}
+	if len(cells) > 0 {
+		grid := element("dl", map[string]string{"class": "server-fallback__cells"})
+		for _, cell := range cells {
+			grid.AppendChild(element("div", nil,
+				element("dt", nil, text(priceCellTitle(cell.Label))),
+				element("dd", nil, text(cell.Value)),
+			))
+		}
+		children = append(children, grid)
+	} else {
+		children = append(children, element("p", map[string]string{"class": "server-fallback__meta"}, text(summary)))
+	}
+	if len(item.SupportedEndpointTypes) > 0 {
+		endpoints := make([]string, 0, len(item.SupportedEndpointTypes))
+		for _, endpoint := range item.SupportedEndpointTypes {
+			endpoints = append(endpoints, string(endpoint))
+		}
+		children = append(children, element("p", map[string]string{"class": "server-fallback__meta"},
+			text(strings.Join(endpoints, " · ")),
+		))
+	}
+	if description := strings.TrimSpace(item.Description); description != "" {
+		children = append(children, element("p", map[string]string{"class": "server-fallback__desc"}, text(description)))
+	}
+	return element("article", map[string]string{"class": "server-fallback__price"}, children...)
 }
 
 func publicModelPageFallback(data controller.PublicPricingData, item model.Pricing) *html.Node {
@@ -496,7 +588,15 @@ func escapePathSegment(value string) string {
 	return builder.String()
 }
 
-func publicPriceSummary(item model.Pricing, groupRatios map[string]float64) string {
+type modelPriceCell struct {
+	Label string
+	Value string
+}
+
+// publicPriceBreakdown itemizes the public unit prices of a model and, in the
+// same pass, builds the plain-text sentence used by meta descriptions. Cells are
+// empty for task-billed models, where only the sentence is meaningful.
+func publicPriceBreakdown(item model.Pricing, groupRatios map[string]float64) ([]modelPriceCell, string) {
 	groupRatio := publicModelGroupRatio(item, groupRatios)
 	if item.BillingMode == "tiered_expr" && item.BillingExpr != "" {
 		if len(item.BillingUsageSchema) > 0 {
@@ -509,22 +609,83 @@ func publicPriceSummary(item model.Pricing, groupRatios map[string]float64) stri
 			slices.Sort(units)
 			units = slices.Compact(units)
 			if len(units) > 0 {
-				return "Task usage pricing by " + strings.Join(units, ", ") + "; open the model details for its current usage tiers and conditions."
+				return nil, "Task usage pricing by " + strings.Join(units, ", ") + "; open the model details for its current usage tiers and conditions."
 			}
-			return "Task usage pricing; open the model details for its current usage tiers and conditions."
+			return nil, "Task usage pricing; open the model details for its current usage tiers and conditions."
 		}
-		if summary, ok := tieredPriceSummary(item.BillingExpr, groupRatio); ok {
-			return summary
+		if cells, summary, ok := tieredPriceCells(item.BillingExpr, groupRatio); ok {
+			return cells, summary
 		}
-		return "Dynamic model pricing; open the model details for current tiers, request rules and units."
+		return nil, "Dynamic model pricing; open the model details for current tiers, request rules and units."
 	}
 
 	if item.QuotaType == 1 {
-		return formatUSD(item.ModelPrice*groupRatio) + " per request."
+		price := formatUSD(item.ModelPrice * groupRatio)
+		return []modelPriceCell{{Label: "request", Value: price}}, price + " per request."
 	}
-	input := item.ModelRatio * 2 * groupRatio
-	output := input * item.CompletionRatio
-	return formatUSD(input) + " input / " + formatUSD(output) + " output per 1M tokens."
+	input := formatUSD(item.ModelRatio * 2 * groupRatio)
+	output := formatUSD(item.ModelRatio * 2 * groupRatio * item.CompletionRatio)
+	return []modelPriceCell{
+		{Label: "input", Value: input},
+		{Label: "output", Value: output},
+	}, input + " input / " + output + " output per 1M tokens."
+}
+
+func publicPriceSummary(item model.Pricing, groupRatios map[string]float64) string {
+	_, summary := publicPriceBreakdown(item, groupRatios)
+	return summary
+}
+
+// priceCellTitle expands a price label into the wording used on catalog cards.
+func priceCellTitle(label string) string {
+	switch label {
+	case "input":
+		return "Input / 1M"
+	case "output":
+		return "Output / 1M"
+	case "cache read":
+		return "Cache read"
+	case "cache write":
+		return "Cache write"
+	case "cache write (1h)":
+		return "Cache write 1h"
+	case "cache write (12h)":
+		return "Cache write 12h"
+	case "image input":
+		return "Image input"
+	case "cached image input":
+		return "Cached image"
+	case "image output":
+		return "Image output"
+	case "audio input":
+		return "Audio input"
+	case "audio output":
+		return "Audio output"
+	case "request":
+		return "Per request"
+	}
+	return label
+}
+
+// urlAnchor turns a display name into a stable in-page anchor.
+func urlAnchor(value string) string {
+	var builder strings.Builder
+	pendingSeparator := false
+	for _, character := range strings.ToLower(value) {
+		if (character >= 'a' && character <= 'z') || (character >= '0' && character <= '9') {
+			if pendingSeparator && builder.Len() > 0 {
+				builder.WriteByte('-')
+			}
+			pendingSeparator = false
+			builder.WriteRune(character)
+			continue
+		}
+		pendingSeparator = true
+	}
+	if builder.Len() == 0 {
+		return "models"
+	}
+	return builder.String()
 }
 
 func publicModelGroupRatio(item model.Pricing, groupRatios map[string]float64) float64 {
@@ -541,13 +702,15 @@ func publicModelGroupRatio(item model.Pricing, groupRatios map[string]float64) f
 	return best
 }
 
-func tieredPriceSummary(expression string, groupRatio float64) (string, bool) {
+func tieredPriceCells(expression string, groupRatio float64) ([]modelPriceCell, string, bool) {
 	base, trace, err := billingexpr.RunExpr(expression, billingexpr.TokenParams{})
 	if err != nil || math.IsNaN(base) || math.IsInf(base, 0) || base < 0 {
-		return "", false
+		return nil, "", false
 	}
 	if trace.BillingUnit == billingexpr.BillingUnitRequest {
-		return formatUSD(base/1_000_000*groupRatio) + " per request; request and time conditions may apply.", true
+		price := formatUSD(base / 1_000_000 * groupRatio)
+		return []modelPriceCell{{Label: "request", Value: price}},
+			price + " per request; request and time conditions may apply.", true
 	}
 
 	type priceProbe struct {
@@ -567,7 +730,7 @@ func tieredPriceSummary(expression string, groupRatio float64) (string, bool) {
 		{label: "audio input", params: billingexpr.TokenParams{AI: 1, Len: 1}},
 		{label: "audio output", params: billingexpr.TokenParams{AO: 1}},
 	}
-	prices := make([]string, 0, len(probes))
+	cells := make([]modelPriceCell, 0, len(probes))
 	for _, probe := range probes {
 		one, oneTrace, err := billingexpr.RunExpr(expression, probe.params)
 		if err != nil || oneTrace.BillingUnit != billingexpr.BillingUnitToken {
@@ -595,12 +758,16 @@ func tieredPriceSummary(expression string, groupRatio float64) (string, bool) {
 		if unitPrice == 0 && one == base && two == base {
 			continue
 		}
-		prices = append(prices, formatUSD(unitPrice*groupRatio)+" "+probe.label)
+		cells = append(cells, modelPriceCell{Label: probe.label, Value: formatUSD(unitPrice * groupRatio)})
 	}
-	if len(prices) == 0 {
-		return "", false
+	if len(cells) == 0 {
+		return nil, "", false
 	}
-	return strings.Join(prices, " / ") + " per 1M tokens; context, request or time tiers may apply.", true
+	parts := make([]string, 0, len(cells))
+	for _, cell := range cells {
+		parts = append(parts, cell.Value+" "+cell.Label)
+	}
+	return cells, strings.Join(parts, " / ") + " per 1M tokens; context, request or time tiers may apply.", true
 }
 
 func formatUSD(value float64) string {
