@@ -9,4 +9,24 @@ docs
 .gocache
 /web/node_modules
 /web/dist
+/tools/model-evaluation-worker/node_modules
+/tools/model-evaluation-worker/dist
+/output
 !THIRD-PARTY-LICENSES.md
+
+# 与运行时无关的目录：仓库里合计 250MB+，打进上下文只会拖慢每次构建。
+/extensions
+/handbook
+/electron
+/assets
+/logs
+/bin
+/e2e
+/deploy
+/.local-tests
+/.workbuddy
+
+# 本地开发数据库，绝不能进镜像。
+one-api.db
+one-api.db-shm
+one-api.db-wal

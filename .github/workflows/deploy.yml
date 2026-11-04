@@ -1,0 +1,281 @@
+name: Deploy production
+
+# main 合入 → 质量门禁 → 构建镜像（不可变 sha tag）→ 容器冒烟 → SSH 发布 → 提升 latest
+# 发布失败时服务器端脚本会自动回滚到上一个成功版本，本流水线随后报红。
+#
+# 手工重发历史版本：Actions → Deploy production → Run workflow，填 image_tag。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: '已存在的镜像 tag（留空＝从当前提交重新构建），例如 sha-1a2b3c4d5e6f'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+# 同一时间只允许一个生产发布；不取消进行中的发布，避免半成品状态。
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  # 默认推到 GitHub Container Registry，用 Actions 内置 token 登录，不需要任何 registry 密钥。
+  # 想换仓库时设 repository variable IMAGE_NAME 即可（例如 Docker Hub）。
+  IMAGE_NAME: ${{ vars.IMAGE_NAME || format('ghcr.io/{0}/itmazai-token', github.repository_owner) }}
+  REGISTRY: ${{ vars.REGISTRY || 'ghcr.io' }}
+  PLATFORM: linux/amd64
+
+jobs:
+  quality-gate:
+    name: Quality gate
+    if: inputs.image_tag == ''
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: Build & push image
+    needs: [quality-gate]
+    if: ${{ !cancelled() && inputs.image_tag == '' && needs.quality-gate.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      version: ${{ steps.meta.outputs.version }}
+      digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Resolve image tag and version
+        id: meta
+        run: |
+          SHORT_SHA=$(git rev-parse --short=12 HEAD)
+          echo "tag=sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          # 仓库里的 VERSION 是空文件，这里用 git 描述补上，二进制与前端才会显示真实版本。
+          if VERSION=$(git describe --tags --match 'v[0-9]*' --abbrev=0 2>/dev/null); then
+            echo "version=${VERSION}+${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=dev-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Write VERSION file
+        run: echo "${{ steps.meta.outputs.version }}" > VERSION
+
+      - name: Preflight registry target
+        run: |
+          [ -n "${{ env.IMAGE_NAME }}" ] || { echo "::error::镜像名称为空，请检查 vars.IMAGE_NAME"; exit 1; }
+          echo "镜像将推送到 ${{ env.IMAGE_NAME }}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4 # v4.3.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (labels)
+        id: labels
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.IMAGE_NAME }}
+
+      - name: Build & push
+        id: build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }}
+          labels: |
+            ${{ steps.labels.outputs.labels }}
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: mode=max
+          sbom: true
+
+      - name: Summary
+        run: |
+          {
+            echo "### 镜像已推送"
+            echo '```'
+            echo "${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }}"
+            echo "version: ${{ steps.meta.outputs.version }}"
+            echo "digest:  ${{ steps.build.outputs.digest }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  smoke:
+    name: Smoke test image
+    needs: [build]
+    if: ${{ needs.build.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TAG: ${{ needs.build.outputs.tag }}
+
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4 # v4.3.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run container on SQLite
+        run: |
+          docker pull "$IMAGE_NAME:$TAG"
+          # 冒烟用 SQLite，不依赖任何外部数据库，验证二进制、迁移与内嵌前端都能起来。
+          docker run -d --name smoke-new-api \
+            -p 3111:3000 \
+            -e SQLITE_PATH=/data/one-api.db \
+            -e ERROR_LOG_ENABLED=true \
+            "$IMAGE_NAME:$TAG"
+
+      - name: Wait for /api/status
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS --max-time 3 http://127.0.0.1:3111/api/status | grep -q '"success" *: *true'; then
+              echo "第 $i 次探测通过"
+              break
+            fi
+            [ "$i" -eq 40 ] && { echo "::error::容器 120 秒内未就绪"; exit 1; }
+            sleep 3
+          done
+
+      - name: Verify embedded frontend
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3111/)
+          size=$(curl -sL http://127.0.0.1:3111/ | wc -c)
+          echo "index: HTTP $code, ${size} bytes"
+          # 未完成初始化时首页可能 302 到 /setup，这里只要求不是 4xx/5xx 且有内容。
+          [ "$code" -lt 400 ] || { echo "::error::首页返回 $code"; exit 1; }
+          [ "$size" -gt 200 ] || { echo "::error::首页内容异常，前端资源可能未内嵌"; exit 1; }
+
+      - name: Dump container logs
+        if: failure() || cancelled()
+        run: docker logs --tail 150 smoke-new-api || true
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f smoke-new-api || true
+
+  deploy:
+    name: Deploy to production
+    needs: [build, smoke]
+    if: ${{ !cancelled() && (inputs.image_tag != '' || (needs.build.result == 'success' && needs.smoke.result == 'success')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+    env:
+      # tag 优先取本次构建产物，手工重发时取输入
+      TAG: ${{ needs.build.outputs.tag || inputs.image_tag }}
+      SSH_HOST: ${{ vars.SSH_HOST || secrets.SSH_HOST }}
+      SSH_USER: ${{ vars.SSH_USER || secrets.SSH_USER }}
+      SSH_PORT: ${{ vars.SSH_PORT || '22' }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/itmazai' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Preflight deploy settings
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          missing=0
+          for name in TAG SSH_HOST SSH_USER DEPLOY_PATH; do
+            if [ -z "${!name}" ]; then echo "::error::缺少 ${name}（vars 或 secrets）"; missing=1; fi
+          done
+          [ -n "$SSH_PRIVATE_KEY" ] || { echo "::error::缺少 secret SSH_PRIVATE_KEY"; missing=1; }
+          echo "将部署 $IMAGE_NAME:$TAG 到 $SSH_USER@$SSH_HOST:$DEPLOY_PATH"
+          exit "$missing"
+
+      - name: Prepare SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            # 未提供固定主机指纹时退化为首次信任（TOFU），建议补 SSH_KNOWN_HOSTS。
+            ssh-keyscan -T 10 -p "$SSH_PORT" -H "$SSH_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" 'echo ssh ok'
+
+      - name: Sync deploy files
+        run: |
+          SSH_OPTS="-i $HOME/.ssh/deploy_key -p $SSH_PORT -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH/.deploy' '$DEPLOY_PATH/backups' '$DEPLOY_PATH/.state'"
+          scp -P "$SSH_PORT" -i "$HOME/.ssh/deploy_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            deploy/docker-compose.app.yml \
+            deploy/docker-compose.infra.yml \
+            deploy/deploy-remote.sh \
+            deploy/.env.example \
+            "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/.deploy/"
+
+      - name: Deploy over SSH
+        run: |
+          SSH_OPTS="-i $HOME/.ssh/deploy_key -p $SSH_PORT -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" \
+            "cd '$DEPLOY_PATH' && IMAGE_NAME='$IMAGE_NAME' IMAGE_TAG='$TAG' bash .deploy/deploy-remote.sh"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### 发布结果：${{ job.status }}"
+            echo '```'
+            echo "image:  $IMAGE_NAME:$TAG"
+            echo "sha:    ${{ github.sha }}"
+            echo "actor:  ${{ github.actor }}"
+            echo "target: $SSH_USER@$SSH_HOST:$DEPLOY_PATH"
+            echo '```'
+            echo "失败时服务器已自动回滚到上一个成功版本，可用 Rollback production 手动指定版本。"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  promote:
+    name: Promote latest
+    needs: [deploy, build]
+    if: ${{ needs.deploy.result == 'success' && needs.build.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4 # v4.3.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 只有部署成功才移动 latest，保证 latest 永远等于线上实际运行的版本。
+      - name: Tag deployed image as latest
+        run: |
+          docker buildx imagetools create \
+            -t "$IMAGE_NAME:latest" \
+            "$IMAGE_NAME:${{ needs.build.outputs.tag }}"
+          docker buildx imagetools inspect "$IMAGE_NAME:latest" >> "$GITHUB_STEP_SUMMARY"

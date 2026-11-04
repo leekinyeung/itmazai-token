@@ -1,0 +1,88 @@
+name: Rollback production
+
+# 一键回滚：不重新构建，直接把线上容器切回指定 tag（留空＝上一个成功版本）。
+# 与 Deploy production 共用 concurrency 组，不会与发布并发执行。
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '目标镜像 tag（留空＝服务器记录的上一版本），例如 sha-1a2b3c4d5e6f'
+        required: false
+        type: string
+      reason:
+        description: '回滚原因（写入部署记录）'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: ${{ vars.IMAGE_NAME || format('ghcr.io/{0}/itmazai-token', github.repository_owner) }}
+
+jobs:
+  rollback:
+    name: Rollback to ${{ inputs.tag || 'previous' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+    env:
+      TAG: ${{ inputs.tag }}
+      SSH_HOST: ${{ vars.SSH_HOST || secrets.SSH_HOST }}
+      SSH_USER: ${{ vars.SSH_USER || secrets.SSH_USER }}
+      SSH_PORT: ${{ vars.SSH_PORT || '22' }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/itmazai' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Prepare SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -T 10 -p "$SSH_PORT" -H "$SSH_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" 'echo ssh ok'
+
+      - name: Sync deploy files
+        run: |
+          SSH_OPTS="-i $HOME/.ssh/deploy_key -p $SSH_PORT -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH/.deploy' '$DEPLOY_PATH/.state'"
+          scp -P "$SSH_PORT" -i "$HOME/.ssh/deploy_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            deploy/docker-compose.app.yml \
+            deploy/deploy-remote.sh \
+            "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/.deploy/"
+
+      - name: Roll back over SSH
+        run: |
+          SSH_OPTS="-i $HOME/.ssh/deploy_key -p $SSH_PORT -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" \
+            "cd '$DEPLOY_PATH' && IMAGE_NAME='$IMAGE_NAME' IMAGE_TAG='$TAG' bash .deploy/deploy-remote.sh"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### 回滚：${{ job.status }}"
+            echo '```'
+            echo "target: ${TAG:-上一个成功版本}"
+            echo "reason: ${{ inputs.reason }}"
+            echo "actor:  ${{ github.actor }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

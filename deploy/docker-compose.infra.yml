@@ -1,0 +1,73 @@
+# 基础设施栈：Postgres + Redis。只在服务器初始化时启动一次，之后的日常部署不会重启它们。
+# 卷名固定（itmazai_pg_data / itmazai_redis_data），不受目录改名影响。
+#
+# 首次启动：
+#   cd /opt/itmazai && docker compose -f .deploy/docker-compose.infra.yml up -d
+name: itmazai-infra
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: itmazai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - itmazai_pg_data:/var/lib/postgresql/data
+    networks:
+      - itmazai-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    container_name: itmazai-redis
+    restart: unless-stopped
+    environment:
+      # 健康检查在容器内执行，需要这个变量；不传进去会导致 --requirepass 校验时认证失败。
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - ${REDIS_MAXMEMORY:-256mb}
+      - --maxmemory-policy
+      - allkeys-lru
+    volumes:
+      - itmazai_redis_data:/data
+    networks:
+      - itmazai-net
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD} --no-auth-warning ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+volumes:
+  itmazai_pg_data:
+    name: itmazai_pg_data
+  itmazai_redis_data:
+    name: itmazai_redis_data
+
+networks:
+  itmazai-net:
+    name: itmazai-net

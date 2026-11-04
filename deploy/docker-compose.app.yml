@@ -1,0 +1,53 @@
+# 生产应用栈：只包含 new-api 本体，一次部署只替换这一个容器。
+# 数据库与 Redis 由 docker-compose.infra.yml 独立管理，部署流程不会触碰它们的卷。
+#
+# 这个文件由 CI 每次部署自动同步到服务器 <DEPLOY_PATH>/.deploy/ 下，不要在服务器上手工改。
+name: itmazai-app
+
+services:
+  new-api:
+    image: ${IMAGE_NAME:?IMAGE_NAME is required}:${IMAGE_TAG:?IMAGE_TAG is required}
+    container_name: itmazai-new-api
+    restart: unless-stopped
+    command: ["--log-dir", "/app/logs", "--port", "3000"]
+    # 应用配置（SQL_DSN、REDIS_CONN_STRING、SESSION_SECRET 等）全部放在 .env 里，不进仓库。
+    # 由 deploy-remote.sh 以绝对路径注入，手工执行时默认取上级目录的 .env。
+    env_file:
+      - ${APP_ENV_FILE:-../.env}
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      NODE_NAME: ${NODE_NAME:-itmazai-prod-1}
+    # 只监听回环地址，由宿主机上的 Nginx/Caddy 负责 TLS 与对外暴露。
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:3000/api/status | grep -q '\"success\" *: *true'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    # 等正在代理的流式请求结束再退出，避免部署时打断用户对话。
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: ${APP_MEMORY_LIMIT:-2g}
+
+# APP_NETWORK 默认 itmazai-net（由 infra 栈创建）；接管已有栈时在 .env 里
+# 指向已有网络（如 new-api_new-api-network），应用即可直连既有的 postgres/redis。
+networks:
+  default:
+    name: ${APP_NETWORK:-itmazai-net}
+    external: true
