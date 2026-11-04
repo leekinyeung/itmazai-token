@@ -68,7 +68,7 @@ Settings → Secrets and variables → Actions。
 | `SSH_HOST` | `1.2.3.4` | 服务器地址（也可放同名的 Secret） |
 | `SSH_USER` | `deploy` | 部署账号（也可放 Secret） |
 | `SSH_PORT` | `22` | SSH 端口 |
-| `DEPLOY_PATH` | `/opt/itmazai` | 服务器部署目录 |
+| `DEPLOY_PATH` | `/root/new-api` | 服务器部署目录（本仓库当前接管的是旧栈目录） |
 | `IMAGE_NAME` | `ghcr.io/leekinyeung/itmazai-token` | 可选，默认 `ghcr.io/<owner>/itmazai-token` |
 | `REGISTRY` | `ghcr.io` | 可选，换仓库时才需要 |
 | `PRODUCTION_URL` | `https://your-domain` | 可选，显示在部署记录里 |
@@ -138,9 +138,24 @@ ssh root@<host> 'cd /opt/itmazai && docker compose \
 
 > 镜像包设为 Private 时，需在服务器上执行一次 `docker login ghcr.io -u <owner> --password-stdin`（凭证存到 `~/.docker/config.json`），否则发布时 `docker compose pull` 会 401。省事的做法是把包设为 **Public**——镜像里没有密钥，配置都在服务器 `.env`。
 
-### 3.3 首次部署：从旧栈迁移数据
+### 3.3 接管已有栈（2026-11-04 已执行，当前生产即此形态）
 
-⚠️ **这是整条流程里唯一有数据风险的一步。** 旧的 `docker-compose.yml` 用目录名做项目名，数据卷实际叫 `<旧目录名>_pg_data`；新栈用的是固定卷名 `itmazai_pg_data`。两者不是同一个卷，**直接部署会得到一个空数据库**。
+生产服务器原本在 `/root/new-api` 用手工方式部署（手工 build 镜像 + 手工打 rollback tag）。切换到 CI/CD 时**没有迁移数据、没有新建 PG/Redis**，而是让新部署体系直接接管：
+
+- `DEPLOY_PATH=/root/new-api`，应用容器从旧栈的 `new-api` 改为 `itmazai-new-api`，端口仍是 `127.0.0.1:3000`，宿主机 Nginx 无需改动。
+- **复用旧栈的 postgres:15 / redis**（卷 `new-api_pg_data` / `new-api_redis_data` 原样保留），不运行 `docker-compose.infra.yml`。
+- `.env` 由运行中容器的环境变量直接提取生成（值不离开服务器），另加：
+  - `APP_NETWORK=new-api_new-api-network`：应用加入旧栈网络，DSN/Redis 主机名仍是 `postgres` / `redis`
+  - `PG_CONTAINER=postgres`、`POSTGRES_USER=root`、`POSTGRES_DB=new-api`：让发布前自动备份指向旧 PG
+  - `APP_MEMORY_LIMIT=512m`：1GB 内存的机器上收紧上限
+- 旧镜像以 `ghcr.io/<owner>/itmazai-token:pre-takeover` 保留为兜底回滚点，`.state/current_tag` 初始值设为 `pre-takeover`。
+- 旧容器 `new-api` 已停止但保留（`docker start new-api` 可秒级人工兜底，稳定后可删）。
+
+> 教训：本机 Apple Silicon 构建的镜像是 `linux/arm64`，服务器是 `linux/amd64`，容器会以 `exec format error` 崩溃——部署脚本的自动回滚在这次事故里真实生效（10 秒内切回旧版）。**生产镜像一律由 CI 构建**，不要从开发机直接推。
+
+### 3.4 全新部署（未用过，供参考）
+
+⚠️ **全新部署才有数据风险的一步。** 旧的 `docker-compose.yml` 用目录名做项目名，数据卷实际叫 `<旧目录名>_pg_data`；全新栈用的是固定卷名 `itmazai_pg_data`。两者不是同一个卷，**直接部署会得到一个空数据库**。（当前生产走了 §3.3 接管路线，本节未执行。）
 
 推荐做法（迁移数据，停机约几分钟）：
 
@@ -173,10 +188,10 @@ ssh root@<host> 'docker stop new-api && docker rename new-api new-api-old'
 | 重发历史版本 | Actions → **Deploy production** → Run workflow，填 `image_tag`（如 `sha-1a2b3c4d5e6f`） |
 | 回滚到上一版 | Actions → **Rollback production** → `tag` 留空 → 填原因 |
 | 回滚到指定版 | 同上，`tag` 填具体 sha |
-| 查看线上版本 | 服务器 `cat /opt/itmazai/.state/current_tag` |
+| 查看线上版本 | 服务器 `cat /root/new-api/.state/current_tag` |
 | 查看容器状态 | `docker ps --filter name=itmazai-` / `docker logs -f itmazai-new-api` |
-| 手工干预发布 | `cd /opt/itmazai && IMAGE_NAME=... IMAGE_TAG=sha-xxx bash .deploy/deploy-remote.sh` |
-| 停掉应用栈 | `cd /opt/itmazai && IMAGE_NAME=ghcr.io/<owner>/itmazai-token IMAGE_TAG=$(cat .state/current_tag) docker compose --project-directory . -f .deploy/docker-compose.app.yml down`（compose 文件对镜像 tag 做了非空校验，不带变量会报 interpolating 错误） |
+| 手工干预发布 | `cd /root/new-api && IMAGE_NAME=ghcr.io/<owner>/itmazai-token IMAGE_TAG=sha-xxx bash .deploy/deploy-remote.sh`（`IMAGE_TAG` 留空 = 回上一版） |
+| 停掉应用栈 | `cd /root/new-api && IMAGE_NAME=ghcr.io/<owner>/itmazai-token IMAGE_TAG=$(cat .state/current_tag) docker compose --project-directory . -f .deploy/docker-compose.app.yml down`（compose 文件对镜像 tag 做了非空校验，不带变量会报 interpolating 错误） |
 | 本地预演部署 | 在任意目录放一份 `.deploy/` + `.env`，本地打好镜像后：`SKIP_PULL=1 IMAGE_NAME=... IMAGE_TAG=... bash .deploy/deploy-remote.sh`；`SKIP_PULL=1` 表示只用本地镜像，不访问仓库 |
 
 `sha-<12>` 是唯一可追溯的发布单元：`git log` 里的 commit 与镜像 tag 一一对应，`docker inspect` 里也能看到 `org.opencontainers.image.revision`。
@@ -199,12 +214,12 @@ ssh root@<host> 'docker stop new-api && docker rename new-api new-api-old'
 
 - 应用启动时会执行 GORM 自动迁移，**回滚镜像不会回滚 schema**。
 - 因此约定：迁移只做向后兼容的变更（加表、加列、加索引）；删列/改类型走两步发布（先发兼容版本，再发清理版本）。
-- 每次发布前的备份在 `/opt/itmazai/backups/pre-<tag>-<时间>.sql.gz`，默认保留 7 份（`BACKUP_KEEP` 可调）。备份在**同一块磁盘**上，只防误操作不防磁盘故障，建议加一条异地同步：
+- 每次发布前的备份在 `/root/new-api/backups/pre-<tag>-<时间>.sql.gz`，默认保留 7 份（`BACKUP_KEEP` 可调）。备份在**同一块磁盘**上，只防误操作不防磁盘故障，建议加一条异地同步：
   ```bash
   # /etc/cron.daily/itmazai-backup-offsite
-  rclone sync /opt/itmazai/backups remote:itmazai-backups
+  rclone sync /root/new-api/backups remote:itmazai-backups
   ```
-- 手工恢复：`gunzip -c backups/pre-xxx.sql.gz | docker exec -i -e PGPASSWORD=... itmazai-postgres psql -U itmazai -d new-api`（先停应用）。
+- 手工恢复：`gunzip -c backups/pre-xxx.sql.gz | docker exec -i -e PGPASSWORD=... \<PG_CONTAINER> psql -U <POSTGRES_USER> -d new-api`（先停应用；当前生产为 `postgres` 容器、`root` 用户）。
 
 ## 7. 安全与成本
 
@@ -212,7 +227,7 @@ ssh root@<host> 'docker stop new-api && docker rename new-api new-api-old'
 
 - 镜像开启 `provenance: mode=max` 与 `sbom: true`，可追溯构建来源与依赖清单。
 - 应用端口只绑定 `127.0.0.1:3000`，对外由宿主机 Nginx/Caddy 终结 TLS。
-- 容器 `no-new-privileges`、日志按 50MB×5 轮转、内存上限 2g（`APP_MEMORY_LIMIT`）。
+- 容器 `no-new-privileges`、日志按 50MB×5 轮转、内存上限 `APP_MEMORY_LIMIT`（1GB 服务器上设 512m，默认 2g）。
 - 生产 `.env` 权限 600，密钥只存在 GitHub Secrets 与服务器本地。
 - 生产必须 `SESSION_COOKIE_SECURE=true` 且 `SESSION_COOKIE_TRUSTED_URL` 填精确 HTTPS Origin。
 
