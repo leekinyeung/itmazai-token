@@ -139,7 +139,7 @@ export function useSidebarData(): SidebarData {
           },
           {
             title: t('Models'),
-            url: '/models/metadata',
+            url: '/admin/models/metadata',
             icon: Box,
           },
           {

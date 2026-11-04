@@ -13,6 +13,10 @@ import (
 type publicPageMetadata struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	Language    string `json:"language"`
+	OGType      string `json:"ogType"`
+	PublishedAt string `json:"publishedAt"`
+	UpdatedAt   string `json:"updatedAt"`
 }
 
 type publicPageMetadataRenderer struct {
@@ -59,29 +63,45 @@ func (renderer *publicPageMetadataRenderer) publicPage(escapedPath string) (stri
 		return title, description, renderer.Origin + path, true
 	}
 
-	encodedName, ok := strings.CutPrefix(path, "/pricing/")
-	if !ok || encodedName == "" || strings.Contains(encodedName, "/") {
+	modelName, ok := publicModelNameFromPath(path)
+	if !ok {
 		return "", "", "", false
 	}
-	modelName, err := url.PathUnescape(encodedName)
-	if err != nil || strings.TrimSpace(modelName) == "" || utf8.RuneCountInString(modelName) > 200 {
-		return "", "", "", false
-	}
-	page, ok := renderer.Pages["/pricing/:modelId"]
+	page, ok := renderer.Pages["/models/:modelId"]
 	if !ok {
 		return "", "", "", false
 	}
 	values := strings.NewReplacer("{{systemName}}", renderer.SiteName, "{{modelName}}", modelName)
 	title := values.Replace(page.Title) + " | " + renderer.SiteName
-	return title, values.Replace(page.Description), renderer.Origin + path, true
+	canonical := renderer.Origin + "/models/" + escapePathSegment(modelName)
+	return title, values.Replace(page.Description), canonical, true
 }
 
-func (renderer *publicPageMetadataRenderer) render(escapedPath string, fallback *html.Node) []byte {
+func publicModelNameFromPath(path string) (string, bool) {
+	encodedName, ok := strings.CutPrefix(normalizePagePath(path), "/models/")
+	if !ok || encodedName == "" || strings.Contains(encodedName, "/") {
+		return "", false
+	}
+	modelName, err := url.PathUnescape(encodedName)
+	if err != nil || strings.TrimSpace(modelName) == "" || utf8.RuneCountInString(modelName) > 200 {
+		return "", false
+	}
+	return modelName, true
+}
+
+func (renderer *publicPageMetadataRenderer) render(escapedPath string, fallback *html.Node, structuredData ...string) []byte {
 	title, description, canonical, ok := renderer.publicPage(escapedPath)
 	if !ok {
 		return nil
 	}
-	return renderPageHTML(renderer.index, title, description, renderer.SiteName, canonical, false, fallback)
+	page := renderer.Pages[normalizePagePath(escapedPath)]
+	return renderPageHTMLWithOptions(renderer.index, title, description, renderer.SiteName, canonical, false, fallback, publicPageRenderOptions{
+		Language:       page.Language,
+		OGType:         page.OGType,
+		PublishedAt:    page.PublishedAt,
+		UpdatedAt:      page.UpdatedAt,
+		StructuredData: structuredData,
+	})
 }
 
 func (renderer *publicPageMetadataRenderer) isNoIndexRoute(escapedPath string) bool {
@@ -120,6 +140,18 @@ func renderPublicPageHTML(index []byte, title, description, siteName, canonical 
 }
 
 func renderPageHTML(index []byte, title, description, siteName, canonical string, noIndex bool, fallback *html.Node) []byte {
+	return renderPageHTMLWithOptions(index, title, description, siteName, canonical, noIndex, fallback, publicPageRenderOptions{})
+}
+
+type publicPageRenderOptions struct {
+	Language       string
+	OGType         string
+	PublishedAt    string
+	UpdatedAt      string
+	StructuredData []string
+}
+
+func renderPageHTMLWithOptions(index []byte, title, description, siteName, canonical string, noIndex bool, fallback *html.Node, options publicPageRenderOptions) []byte {
 	document, err := html.Parse(bytes.NewReader(index))
 	if err != nil {
 		return nil
@@ -129,6 +161,9 @@ func renderPageHTML(index []byte, title, description, siteName, canonical string
 	for node := document.FirstChild; node != nil; node = node.NextSibling {
 		if node.Type != html.ElementNode || node.Data != "html" {
 			continue
+		}
+		if options.Language != "" {
+			setAttribute(node, "lang", options.Language)
 		}
 		for child := node.FirstChild; child != nil; child = child.NextSibling {
 			if child.Type == html.ElementNode && child.Data == "head" {
@@ -162,6 +197,15 @@ func renderPageHTML(index []byte, title, description, siteName, canonical string
 	}
 	if canonical != "" {
 		fields = append(fields, struct{ kind, key, value string }{"property", "og:url", canonical})
+	}
+	if options.OGType != "" {
+		fields = append(fields, struct{ kind, key, value string }{"property", "og:type", options.OGType})
+	}
+	if options.PublishedAt != "" {
+		fields = append(fields, struct{ kind, key, value string }{"property", "article:published_time", options.PublishedAt})
+	}
+	if options.UpdatedAt != "" {
+		fields = append(fields, struct{ kind, key, value string }{"property", "article:modified_time", options.UpdatedAt})
 	}
 	seen := make(map[string]bool)
 	hasTitle := false
@@ -232,6 +276,11 @@ func renderPageHTML(index []byte, title, description, siteName, canonical string
 		head.AppendChild(&html.Node{Type: html.ElementNode, Data: "meta", Attr: []html.Attribute{
 			{Key: "name", Val: "robots"}, {Key: "content", Val: "noindex, nofollow"},
 		}})
+	}
+	for _, value := range options.StructuredData {
+		if validStructuredData(value) {
+			head.AppendChild(renderStructuredData(value))
+		}
 	}
 	if root != nil && fallback != nil {
 		root.AppendChild(fallback)

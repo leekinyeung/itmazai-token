@@ -115,7 +115,7 @@ describe('model cards', () => {
     })
     render(
       <QueryClientProvider client={queryClient}>
-        <ModelCardGrid models={[pricingModel()]} onModelClick={vi.fn()} />
+        <ModelCardGrid models={[pricingModel()]} />
       </QueryClientProvider>
     )
     await screen.findByText('100.00%')
@@ -181,18 +181,15 @@ describe('model cards', () => {
 
   it('copies the complete long model name without opening details', async () => {
     const user = userEvent.setup()
-    const onClick = vi.fn()
     const name = 'provider/model-with-a-long-name-and-a-version-suffix-20260906'
-    render(
-      <ModelCard model={pricingModel({ model_name: name })} onClick={onClick} />
-    )
+    render(<ModelCard model={pricingModel({ model_name: name })} />)
     expect(screen.getByRole('heading', { name })).toHaveAttribute('title', name)
     await user.click(screen.getByRole('button', { name: 'Copy model name' }))
     expect(await navigator.clipboard.readText()).toBe(name)
-    expect(onClick).not.toHaveBeenCalled()
-    await user.click(screen.getByRole('button', { name: 'Details' }))
-    expect(onClick).toHaveBeenCalledOnce()
-    expect(onClick).toHaveBeenCalledWith(name)
+    expect(screen.getByRole('link', { name: 'Details' })).toHaveAttribute(
+      'href',
+      '/models/provider%2Fmodel-with-a-long-name-and-a-version-suffix-20260906'
+    )
   })
 
   it('shows missing values without placeholder bars when metrics are unavailable', () => {
@@ -210,7 +207,10 @@ describe('model cards', () => {
     expect(statusStrip).toHaveTextContent('—')
     expect(statusStrip.querySelectorAll('[aria-hidden]')).toHaveLength(0)
     expect(screen.getByText('No description available.')).toBeVisible()
-    expect(screen.getByRole('button', { name: 'Details' })).toBeEnabled()
+    expect(screen.getByRole('link', { name: 'Details' })).toHaveAttribute(
+      'href',
+      '/models/example-model'
+    )
   })
 
   it('uses fixed spacing between available status samples', () => {
@@ -267,7 +267,6 @@ describe('model cards', () => {
             pricingModel({ model_name: 'active-model' }),
             pricingModel({ id: 2, model_name: 'idle-model' }),
           ]}
-          onModelClick={vi.fn()}
         />
       </QueryClientProvider>
     )
@@ -314,7 +313,6 @@ describe('model cards', () => {
           supported_endpoint_types: endpoints,
           tags: tags.join(','),
         })}
-        onClick={vi.fn()}
       />
     )
 
@@ -378,12 +376,7 @@ describe('model cards', () => {
   })
 
   it('omits metadata fields when the model has no groups, endpoints or tags', () => {
-    render(
-      <ModelCard
-        model={pricingModel({ enable_groups: [] })}
-        onClick={vi.fn()}
-      />
-    )
+    render(<ModelCard model={pricingModel({ enable_groups: [] })} />)
     expect(screen.queryByText('Groups')).not.toBeInTheDocument()
     expect(screen.queryByText('Endpoints')).not.toBeInTheDocument()
     expect(
@@ -672,10 +665,9 @@ describe('model cards', () => {
     const request = vi
       .spyOn(api, 'get')
       .mockRejectedValue(new Error('metrics unavailable'))
-    const onModelClick = vi.fn()
     render(
       <QueryClientProvider client={queryClient}>
-        <ModelCardGrid models={[pricingModel()]} onModelClick={onModelClick} />
+        <ModelCardGrid models={[pricingModel()]} />
       </QueryClientProvider>
     )
     await waitFor(() =>
@@ -698,9 +690,10 @@ describe('model cards', () => {
         screen.getByLabelText('Performance metrics for the last 24 hours')
       ).getAllByText(/^—/)
     ).toHaveLength(4)
-    const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: 'Details' }))
-    expect(onModelClick).toHaveBeenCalledWith('example-model')
+    expect(screen.getByRole('link', { name: 'Details' })).toHaveAttribute(
+      'href',
+      '/models/example-model'
+    )
   })
 
   it('paginates the model cards and disables navigation at both boundaries', async () => {
@@ -713,7 +706,7 @@ describe('model cards', () => {
     const user = userEvent.setup()
     render(
       <QueryClientProvider client={queryClient}>
-        <ModelCardGrid models={models} onModelClick={vi.fn()} />
+        <ModelCardGrid models={models} />
       </QueryClientProvider>
     )
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeDisabled()
@@ -751,7 +744,7 @@ describe('model cards', () => {
     )
     render(
       <QueryClientProvider client={queryClient}>
-        <ModelCardGrid models={[pricingModel()]} onModelClick={vi.fn()} />
+        <ModelCardGrid models={[pricingModel()]} />
       </QueryClientProvider>
     )
     const grid = screen

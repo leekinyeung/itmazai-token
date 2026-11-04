@@ -17,23 +17,35 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { createFileRoute } from '@tanstack/react-router'
-import z from 'zod'
 
 import { ApiKeys } from '@/features/keys'
 import { API_KEY_STATUS_OPTIONS } from '@/features/keys/constants'
+import {
+  optionalSearchNumber,
+  searchNumber,
+  searchString,
+  searchStringArray,
+} from '@/lib/route-search'
 
-const apiKeySearchSchema = z.object({
-  page: z.number().optional().catch(1),
-  pageSize: z.number().optional().catch(undefined),
-  status: z
-    .array(z.enum(API_KEY_STATUS_OPTIONS.map((s) => s.value as `${number}`)))
-    .optional()
-    .catch([]),
-  filter: z.string().optional().catch(''),
-  token: z.string().optional().catch(''),
-})
+const API_KEY_STATUS_VALUES = new Set(
+  API_KEY_STATUS_OPTIONS.map((status) => status.value as `${number}`)
+)
 
 export const Route = createFileRoute('/_authenticated/keys/')({
-  validateSearch: apiKeySearchSchema,
+  validateSearch: (
+    search
+  ): {
+    page?: number
+    pageSize?: number
+    status?: `${number}`[]
+    filter?: string
+    token?: string
+  } => ({
+    page: searchNumber(search.page, 1),
+    pageSize: optionalSearchNumber(search.pageSize),
+    status: searchStringArray(search.status, API_KEY_STATUS_VALUES),
+    filter: searchString(search.filter),
+    token: searchString(search.token),
+  }),
   component: ApiKeys,
 })

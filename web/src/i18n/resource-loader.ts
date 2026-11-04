@@ -18,10 +18,10 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import type { InterfaceLanguageCode } from './languages'
 
-type LazyLanguageCode = Exclude<InterfaceLanguageCode, 'en'>
 type Translation = Record<string, string>
 
 const loaders = {
+  en: () => import(/* webpackChunkName: "locale-en" */ './locales/en.json'),
   zhCN: () => import(/* webpackChunkName: "locale-zh" */ './locales/zh.json'),
   zhTW: () =>
     import(/* webpackChunkName: "locale-zh-TW" */ './locales/zh-TW.json'),
@@ -30,15 +30,15 @@ const loaders = {
   ja: () => import(/* webpackChunkName: "locale-ja" */ './locales/ja.json'),
   vi: () => import(/* webpackChunkName: "locale-vi" */ './locales/vi.json'),
 } satisfies Record<
-  LazyLanguageCode,
+  InterfaceLanguageCode,
   () => Promise<{ default: { translation: Translation } }>
 >
 
-const requests = new Map<LazyLanguageCode, Promise<Translation>>()
+const requests = new Map<InterfaceLanguageCode, Promise<Translation>>()
 
 /** Share successful resources and in-flight imports; failed attempts remain retryable. */
 export function loadLanguageResource(
-  language: LazyLanguageCode
+  language: InterfaceLanguageCode
 ): Promise<Translation> {
   const existing = requests.get(language)
   if (existing) return existing

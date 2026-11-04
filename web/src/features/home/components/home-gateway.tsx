@@ -116,27 +116,30 @@ export function HomeGateway(props: {
       data-motion={!reducedMotion}
       data-paused={props.paused ?? false}
     >
-      <GatewayDiagram
-        namespace={`${id}-desktop`}
-        layout={desktop}
-        mobile={false}
-        animated={!reducedMotion && !isMobile}
-        reduced={reducedMotion}
-        logo={props.logo}
-        brand={props.brand}
-        svgRef={desktopRef}
-        height={dimensions.height}
-      />
-      <GatewayDiagram
-        namespace={`${id}-mobile`}
-        layout={MOBILE_LAYOUT}
-        mobile
-        animated={!reducedMotion && isMobile}
-        reduced={reducedMotion}
-        logo={props.logo}
-        brand={props.brand}
-        svgRef={mobileRef}
-      />
+      {isMobile ? (
+        <GatewayDiagram
+          namespace={`${id}-mobile`}
+          layout={MOBILE_LAYOUT}
+          mobile
+          animated={!reducedMotion}
+          reduced={reducedMotion}
+          logo={props.logo}
+          brand={props.brand}
+          svgRef={mobileRef}
+        />
+      ) : (
+        <GatewayDiagram
+          namespace={`${id}-desktop`}
+          layout={desktop}
+          mobile={false}
+          animated={!reducedMotion}
+          reduced={reducedMotion}
+          logo={props.logo}
+          brand={props.brand}
+          svgRef={desktopRef}
+          height={dimensions.height}
+        />
+      )}
     </div>
   )
 }

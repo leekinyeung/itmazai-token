@@ -11,8 +11,11 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/controller"
+	"github.com/QuantumNous/new-api/middleware"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
+	"github.com/QuantumNous/new-api/setting/system_setting"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -37,12 +40,13 @@ func link(href, label string) *html.Node {
 }
 
 type homePageAssets struct {
-	template []byte
-	copy     []byte
+	defaultTemplate []byte
+	customTemplate  []byte
+	copy            []byte
 }
 
-func newHomePageAssets(template, copyJSON []byte) *homePageAssets {
-	if parseHomePageTemplate(template) == nil {
+func newHomePageAssets(defaultTemplate, customTemplate, copyJSON []byte) *homePageAssets {
+	if parseHomePageTemplate(defaultTemplate) == nil || parseHomePageTemplate(customTemplate) == nil {
 		return nil
 	}
 	var translations map[string]map[string]string
@@ -50,8 +54,9 @@ func newHomePageAssets(template, copyJSON []byte) *homePageAssets {
 		return nil
 	}
 	return &homePageAssets{
-		template: bytes.Clone(template),
-		copy:     bytes.Clone(copyJSON),
+		defaultTemplate: bytes.Clone(defaultTemplate),
+		customTemplate:  bytes.Clone(customTemplate),
+		copy:            bytes.Clone(copyJSON),
 	}
 }
 
@@ -97,10 +102,37 @@ func replaceNodeText(node *html.Node, value string) {
 	node.AppendChild(text(value))
 }
 
-func homePageBranding() (systemName, logo string) {
+func safeHomeDocsLink(value string) string {
+	value = strings.TrimSpace(value)
+	parsed, err := url.Parse(value)
+	if err != nil || value == "" || parsed.User != nil {
+		return "https://docs.taodock.com"
+	}
+	if parsed.Scheme == "" && strings.HasPrefix(value, "/") && !strings.HasPrefix(value, "//") {
+		return value
+	}
+	if (parsed.Scheme == "http" || parsed.Scheme == "https") && parsed.Host != "" {
+		return value
+	}
+	return "https://docs.taodock.com"
+}
+
+func homeAPIBaseURL(value string) string {
+	value = strings.TrimSpace(value)
+	parsed, err := url.Parse(value)
+	if err != nil || parsed.User != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" || parsed.RawQuery != "" || parsed.Fragment != "" {
+		return "/v1"
+	}
+	base := strings.TrimRight(value, "/")
+	base = strings.TrimSuffix(base, "/v1")
+	return base + "/v1"
+}
+
+func homePageConfiguration() (systemName, logo, docsLink, apiBaseURL string, custom bool) {
 	common.OptionMapRWMutex.RLock()
 	systemName = strings.TrimSpace(common.SystemName)
 	logo = strings.TrimSpace(common.Logo)
+	custom = strings.TrimSpace(common.OptionMap["HomePageContent"]) != ""
 	common.OptionMapRWMutex.RUnlock()
 	if systemName == "" {
 		systemName = "TaoDock"
@@ -108,28 +140,47 @@ func homePageBranding() (systemName, logo string) {
 	if logo == "" {
 		logo = "/logo.png"
 	}
-	return systemName, logo
+	docsLink = safeHomeDocsLink(operation_setting.GetGeneralSetting().DocsLink)
+	apiBaseURL = homeAPIBaseURL(system_setting.ServerAddress)
+	return systemName, logo, docsLink, apiBaseURL, custom
 }
 
-func brandLoadingFallback(systemName, logo string) *html.Node {
+func brandLoadingFallback(systemName, logo string, custom bool) *html.Node {
+	variant := "loading"
+	if custom {
+		variant = "custom"
+	}
 	return element("div", map[string]string{
 		"class":                    "server-home-frame",
 		"data-server-fallback":     "home",
-		"data-server-home-variant": "loading",
+		"data-server-home-variant": variant,
 		"data-server-brand":        systemName,
 	},
 		element("main", map[string]string{
 			"class":     "server-home-loading",
 			"aria-busy": "true",
 		},
-			element("img", map[string]string{
-				"src":              logo,
-				"alt":              "",
-				"width":            "56",
-				"height":           "56",
-				"class":            "server-home-logo",
-				"data-server-logo": "true",
-			}),
+			element("div", map[string]string{"class": "server-home-mark"},
+				element("div", map[string]string{
+					"class":                  "server-home-bloom",
+					"aria-hidden":            "true",
+					"data-server-home-bloom": "true",
+				},
+					element("span", map[string]string{"class": "server-home-orbit server-home-orbit--blue"}),
+					element("span", map[string]string{"class": "server-home-orbit server-home-orbit--violet"}),
+					element("span", map[string]string{"class": "server-home-orbit server-home-orbit--pink"}),
+				),
+				element("div", map[string]string{"class": "server-home-logo-shell"},
+					element("img", map[string]string{
+						"src":              logo,
+						"alt":              "",
+						"width":            "72",
+						"height":           "72",
+						"class":            "server-home-logo",
+						"data-server-logo": "true",
+					}),
+				),
+			),
 			element("p", map[string]string{
 				"class":               "server-home-brand",
 				"data-fallback-brand": "true",
@@ -145,13 +196,17 @@ func brandLoadingFallback(systemName, logo string) *html.Node {
 }
 
 func homePageFallback(assets *homePageAssets) *html.Node {
-	systemName, logo := homePageBranding()
+	systemName, logo, docsLink, apiBaseURL, custom := homePageConfiguration()
 	if assets == nil {
-		return brandLoadingFallback(systemName, logo)
+		return brandLoadingFallback(systemName, logo, custom)
 	}
-	root := parseHomePageTemplate(assets.template)
+	template := assets.defaultTemplate
+	if custom {
+		template = assets.customTemplate
+	}
+	root := parseHomePageTemplate(template)
 	if root == nil {
-		return brandLoadingFallback(systemName, logo)
+		return brandLoadingFallback(systemName, logo, custom)
 	}
 	setAttribute(root, "data-server-brand", systemName)
 
@@ -159,11 +214,33 @@ func homePageFallback(assets *homePageAssets) *html.Node {
 	update = func(node *html.Node) {
 		for child := node.FirstChild; child != nil; {
 			next := child.NextSibling
+			if module := attribute(child, "data-server-nav"); module != "" && !middleware.HeaderNavModuleIsEnabled(module) {
+				node.RemoveChild(child)
+				child = next
+				continue
+			}
 			if attribute(child, "data-fallback-brand") != "" {
 				replaceNodeText(child, systemName)
 			}
+			if attribute(child, "data-fallback-brand-value") != "" {
+				value := strings.ReplaceAll(attribute(child, "data-fallback-i18n"), "{{brand}}", systemName)
+				replaceNodeText(child, value)
+			}
 			if attribute(child, "data-server-logo") != "" {
-				setAttribute(child, "src", logo)
+				if child.DataAtom == atom.Img {
+					setAttribute(child, "src", logo)
+				} else {
+					setAttribute(child, "href", logo)
+				}
+			}
+			if attribute(child, "data-server-docs") != "" {
+				setAttribute(child, "href", docsLink)
+			}
+			if attribute(child, "data-server-api-base") != "" {
+				replaceNodeText(child, apiBaseURL)
+			}
+			if attribute(child, "data-server-api-models-url") != "" {
+				replaceNodeText(child, strings.TrimRight(apiBaseURL, "/")+"/models")
 			}
 			update(child)
 			child = next
@@ -248,7 +325,7 @@ func integrationPageFallback(content *integrationPageContent) *html.Node {
 			element("h1", nil, text(content.Copy.Title)),
 			element("p", map[string]string{"class": "server-fallback__lead"}, text(content.Copy.Description)),
 			element("nav", map[string]string{"aria-label": content.Copy.Eyebrow},
-				link("/pricing", content.Copy.PricingLink),
+				link("/models", content.Copy.PricingLink),
 				link("https://docs.taodock.com/en/guide/clients.html", content.Copy.DocsLink),
 			),
 		),
@@ -259,7 +336,11 @@ func integrationPageFallback(content *integrationPageContent) *html.Node {
 		cards.AppendChild(element("article", map[string]string{"class": "server-fallback__card"},
 			element("h2", nil, text(item.Name)),
 			element("p", nil, text(content.Copy.Clients[item.ID])),
-			element("p", nil, link("https://docs.taodock.com/en"+item.DocPath, content.Copy.DocsLink+": "+item.Name)),
+			element("p", nil,
+				link("/integrations/"+item.ID, "Integration guide: "+item.Name),
+				text(" · "),
+				link("https://docs.taodock.com/en"+item.DocPath, content.Copy.DocsLink),
+			),
 		))
 	}
 	main.AppendChild(element("section", nil,
@@ -281,34 +362,44 @@ func integrationPageFallback(content *integrationPageContent) *html.Node {
 	return main
 }
 
-func pricingPageFallback(data controller.PublicPricingData) *html.Node {
+func modelsPageFallback(data controller.PublicPricingData) *html.Node {
 	main := element("main", map[string]string{
 		"class":                "server-fallback server-fallback--pricing",
-		"data-server-fallback": "pricing",
+		"data-server-fallback": "models",
 	},
 		element("section", map[string]string{"class": "server-fallback__hero"},
 			element("p", map[string]string{"class": "server-fallback__eyebrow"}, text("TaoDock public catalog")),
-			element("h1", nil, text("AI model API pricing")),
+			element("h1", nil, text("AI Models & API Pricing")),
 			element("p", map[string]string{"class": "server-fallback__lead"}, text("The prices below come from the current catalog available to a signed-out visitor. Amounts are in USD and include the public display-group multiplier used by the anonymous catalog for each model.")),
 			element("p", nil, text("Token prices are per 1 million tokens. Per-request, image and task prices use their stated unit. This response reads the current public catalog when requested, and the prices remain valid only while that configuration is active. Context tiers, request parameters, time windows, cache writes and account groups can change the final charge; the interactive catalog and the settlement record are authoritative for a request.")),
 			element("nav", map[string]string{"aria-label": "Pricing resources"},
 				link("https://docs.taodock.com/quick-start.html", "Quick start"),
 				link("https://docs.taodock.com/guide/wallet.html", "Wallet and billing guide"),
-				link("/sign-in?redirect=%2Fpricing", "Sign in for account-specific options"),
+				link("/sign-in?redirect=%2Fmodels", "Sign in for account-specific options"),
 			),
 		),
 	)
 
 	models := slices.Clone(data.Pricing)
 	slices.SortFunc(models, func(left, right model.Pricing) int {
-		return strings.Compare(strings.ToLower(left.ModelName), strings.ToLower(right.ModelName))
+		if order := strings.Compare(strings.ToLower(left.ModelName), strings.ToLower(right.ModelName)); order != 0 {
+			return order
+		}
+		return strings.Compare(left.ModelName, right.ModelName)
 	})
 	list := element("div", map[string]string{"class": "server-fallback__price-list"})
 	for _, item := range models {
-		list.AppendChild(element("article", map[string]string{"class": "server-fallback__price"},
-			element("h2", nil, link("/pricing/"+escapePathSegment(item.ModelName), item.ModelName)),
-			element("p", nil, text(publicPriceSummary(item, data.GroupRatio))),
-		))
+		children := []*html.Node{
+			element("h2", nil, link("/models/"+escapePathSegment(item.ModelName), item.ModelName)),
+		}
+		if description := strings.TrimSpace(item.Description); description != "" {
+			children = append(children, element("p", nil, text(description)))
+		}
+		if facts := publicModelFacts(item, data.Vendors); len(facts) > 0 {
+			children = append(children, element("p", nil, text(strings.Join(facts, " · "))))
+		}
+		children = append(children, element("p", nil, text(publicPriceSummary(item, data.GroupRatio))))
+		list.AppendChild(element("article", map[string]string{"class": "server-fallback__price"}, children...))
 	}
 
 	sectionChildren := []*html.Node{element("h2", nil, text("Public model prices"))}
@@ -321,6 +412,74 @@ func pricingPageFallback(data controller.PublicPricingData) *html.Node {
 	}
 	main.AppendChild(element("section", nil, sectionChildren...))
 	return main
+}
+
+func publicModelPageFallback(data controller.PublicPricingData, item model.Pricing) *html.Node {
+	description := strings.TrimSpace(item.Description)
+	if description == "" {
+		description = "Compare the current public API pricing, supported endpoints and capabilities for " + item.ModelName + "."
+	}
+	main := element("main", map[string]string{
+		"class":                "server-fallback server-fallback--pricing",
+		"data-server-fallback": "model",
+	},
+		element("section", map[string]string{"class": "server-fallback__hero"},
+			element("p", map[string]string{"class": "server-fallback__eyebrow"}, text("TaoDock model catalog")),
+			element("h1", nil, text(item.ModelName+" API Pricing")),
+			element("p", map[string]string{"class": "server-fallback__lead"}, text(description)),
+			element("nav", map[string]string{"aria-label": "Model resources"},
+				link("/models", "All models"),
+				link("https://docs.taodock.com/quick-start.html", "Quick start"),
+				link("/sign-in?redirect="+url.QueryEscape("/models/"+escapePathSegment(item.ModelName)), "Sign in for account-specific options"),
+			),
+		),
+	)
+
+	details := []*html.Node{
+		element("h2", nil, text("Current public API price")),
+		element("p", nil, text(publicPriceSummary(item, data.GroupRatio))),
+	}
+	if facts := publicModelFacts(item, data.Vendors); len(facts) > 0 {
+		details = append(details,
+			element("h2", nil, text("Model details")),
+			element("p", nil, text(strings.Join(facts, " · "))),
+		)
+	}
+	if tags := strings.TrimSpace(item.Tags); tags != "" {
+		details = append(details,
+			element("h2", nil, text("Capabilities and tags")),
+			element("p", nil, text(tags)),
+		)
+	}
+	main.AppendChild(element("section", nil, details...))
+	return main
+}
+
+func publicModelFacts(item model.Pricing, vendors []model.PricingVendor) []string {
+	facts := make([]string, 0, 2)
+	for _, vendor := range vendors {
+		if item.VendorID == vendor.ID && strings.TrimSpace(vendor.Name) != "" {
+			facts = append(facts, "Provider: "+vendor.Name)
+			break
+		}
+	}
+	if len(item.SupportedEndpointTypes) > 0 {
+		endpoints := make([]string, 0, len(item.SupportedEndpointTypes))
+		for _, endpoint := range item.SupportedEndpointTypes {
+			endpoints = append(endpoints, string(endpoint))
+		}
+		facts = append(facts, "Endpoints: "+strings.Join(endpoints, ", "))
+	}
+	return facts
+}
+
+func publicModelByName(data controller.PublicPricingData, name string) (model.Pricing, bool) {
+	for _, item := range data.Pricing {
+		if item.ModelName == name {
+			return item, true
+		}
+	}
+	return model.Pricing{}, false
 }
 
 func escapePathSegment(value string) string {
@@ -470,7 +629,7 @@ func notFoundFallback() *html.Node {
 		element("p", nil, text("The requested TaoDock page does not exist or has moved.")),
 		element("nav", map[string]string{"aria-label": "Return to a public page"},
 			link("/", "Go to the homepage"),
-			link("/pricing", "View model pricing"),
+			link("/models", "View model pricing"),
 			link("https://docs.taodock.com/", "Open the documentation"),
 		),
 	)

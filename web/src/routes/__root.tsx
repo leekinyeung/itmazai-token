@@ -36,6 +36,7 @@ import { NotFoundError } from '@/features/errors/not-found-error'
 import { getSetupStatus } from '@/features/setup/api'
 import { usePageMetadata } from '@/hooks/use-page-metadata'
 import { useSystemConfig } from '@/hooks/use-system-config'
+import { ensureFullLanguageResource } from '@/i18n/config'
 import {
   bootstrapAuthentication,
   clearAuthenticatedClientState,
@@ -52,6 +53,7 @@ function RootComponent() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
+  const isAuthenticated = useAuthStore((state) => !!state.auth.user)
 
   // Load system configuration (logo, system name, etc.) from backend
   const { systemName } = useSystemConfig({ autoLoad: true })
@@ -69,6 +71,11 @@ function RootComponent() {
       saveAffiliateCode(aff)
     }
   }, [])
+
+  useEffect(() => {
+    if (pathname === '/' && !isAuthenticated) return
+    void ensureFullLanguageResource()
+  }, [isAuthenticated, pathname])
 
   useEffect(
     () =>

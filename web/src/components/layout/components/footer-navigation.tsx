@@ -69,7 +69,7 @@ export function FooterNavigation(props: { columns?: FooterColumn[] }) {
 
   const products: FooterColumn['links'] = []
   if (modules.pricing.enabled) {
-    products.push({ text: 'Model Square', href: '/pricing' })
+    products.push({ text: 'Model Square', href: '/models' })
   }
   if (modules.rankings.enabled) {
     products.push({ text: 'Rankings', href: '/rankings' })
@@ -79,7 +79,10 @@ export function FooterNavigation(props: { columns?: FooterColumn[] }) {
   const about: FooterColumn['links'] = []
   if (modules.about) about.push({ text: 'About us', href: '/about' })
 
-  const documentation: FooterColumn['links'] = []
+  const documentation: FooterColumn['links'] = [
+    { text: 'AI gateway comparisons', href: '/compare' },
+    { text: 'Frequently asked questions', href: '/faq' },
+  ]
   if (modules.docs) {
     if (customDocs) {
       documentation.push({ text: 'Developer documentation', href: customDocs })

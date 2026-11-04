@@ -17,41 +17,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import z from 'zod'
 
-import { ModelDetails } from '@/features/pricing/components/model-details'
-import { getModuleAccessForGuard } from '@/lib/nav-modules'
-import { useAuthStore } from '@/stores/auth-store'
-
-const modelDetailsSearchSchema = z.object({
-  search: z.string().optional(),
-  sort: z.string().optional(),
-  vendor: z.string().optional(),
-  group: z.string().optional(),
-  quotaType: z.string().optional(),
-  endpointType: z.string().optional(),
-  tag: z.string().optional(),
-  tokenUnit: z.enum(['M', 'K']).optional(),
-  view: z.enum(['card', 'table']).optional().catch(undefined),
-  rechargePrice: z.boolean().optional(),
-})
+import { parsePricingSearch } from '@/features/pricing/route-search'
+import { modelDetailsPath } from '@/lib/model-path'
 
 export const Route = createFileRoute('/pricing/$modelId/')({
-  validateSearch: modelDetailsSearchSchema,
-  beforeLoad: async ({ context, location }) => {
-    const access = await getModuleAccessForGuard(context.queryClient, 'pricing')
-    if (!access.enabled) {
-      throw redirect({ to: '/' })
+  validateSearch: parsePricingSearch,
+  beforeLoad: ({ params, search }) => {
+    const query = new URLSearchParams()
+    for (const [key, value] of Object.entries(search)) {
+      if (value !== undefined) query.set(key, String(value))
     }
-    if (access.requireAuth) {
-      const { auth } = useAuthStore.getState()
-      if (!auth.user) {
-        throw redirect({
-          to: '/sign-in',
-          search: { redirect: location.href },
-        })
-      }
-    }
+    const queryString = query.toString()
+    const path = modelDetailsPath(params.modelId)
+    throw redirect({
+      href: queryString ? `${path}?${queryString}` : path,
+      replace: true,
+    })
   },
-  component: ModelDetails,
 })

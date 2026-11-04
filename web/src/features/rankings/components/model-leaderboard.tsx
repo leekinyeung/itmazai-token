@@ -41,7 +41,7 @@ type ModelLeaderboardProps = {
  * single ranked list rather than two independent lists.
  *
  * Both the model name and vendor name are clickable: model jumps to
- * `/pricing/{modelName}` and vendor jumps to `/pricing?vendor={vendor}`.
+ * `/models/{modelName}` and vendor jumps to `/models?vendor={vendor}`.
  */
 export function ModelLeaderboard(props: ModelLeaderboardProps) {
   const limited = props.limit ? props.rows.slice(0, props.limit) : props.rows

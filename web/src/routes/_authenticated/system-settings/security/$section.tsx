@@ -22,7 +22,7 @@ import { SecuritySettings } from '@/features/system-settings/security'
 import {
   SECURITY_DEFAULT_SECTION,
   SECURITY_SECTION_IDS,
-} from '@/features/system-settings/security/section-registry.tsx'
+} from '@/features/system-settings/security/route-constants'
 
 export const Route = createFileRoute(
   '/_authenticated/system-settings/security/$section'
@@ -35,8 +35,7 @@ export const Route = createFileRoute(
         replace: true,
       })
     }
-    const validSections = SECURITY_SECTION_IDS as unknown as string[]
-    if (!validSections.includes(params.section)) {
+    if (!(SECURITY_SECTION_IDS as readonly string[]).includes(params.section)) {
       throw redirect({
         to: '/system-settings/security/$section',
         params: { section: SECURITY_DEFAULT_SECTION },

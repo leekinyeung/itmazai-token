@@ -20,8 +20,8 @@ const legacyOrigin = 'https://legacy-route.invalid'
 
 const legacyConsoleRoutes: Record<string, string> = {
   '/console': '/dashboard',
-  '/console/models': '/models',
-  '/console/deployment': '/models/deployments',
+  '/console/models': '/admin/models',
+  '/console/deployment': '/admin/models/deployments',
   '/console/subscription': '/subscriptions',
   '/console/channel': '/channels',
   '/console/token': '/keys',
@@ -92,6 +92,15 @@ export function resolveLegacyRoute(rawHref: string): string | null {
   if (pathname.startsWith('/console/chat/')) {
     const chatID = pathname.slice('/console/chat/'.length)
     return buildTargetHref(chatID ? `/chat/${chatID}` : '/dashboard', source)
+  }
+  if (pathname === '/models/metadata') {
+    return buildTargetHref('/admin/models/metadata', source)
+  }
+  if (pathname === '/models/vendors') {
+    return buildTargetHref('/admin/models/vendors', source)
+  }
+  if (pathname === '/models/deployments') {
+    return buildTargetHref('/admin/models/deployments', source)
   }
 
   const target = legacyConsoleRoutes[pathname]

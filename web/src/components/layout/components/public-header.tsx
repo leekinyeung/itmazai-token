@@ -17,13 +17,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { NotificationPopover } from '@/components/notification-popover'
-import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,11 +40,11 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SystemUpdateAction } from '@/features/system-update/system-update-action'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { useNotifications } from '@/hooks/use-notifications'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
+import { ROLE } from '@/lib/roles'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -47,6 +53,15 @@ import type { TopNavLink } from '../types'
 import { HeaderLogo } from './header-logo'
 
 const AUTH_PROMPT_SECONDS = 5
+const LazyProfileDropdown = lazy(async () => {
+  const { ProfileDropdown } = await import('@/components/profile-dropdown')
+  return { default: ProfileDropdown }
+})
+const LazySystemUpdateAction = lazy(async () => {
+  const { SystemUpdateAction } =
+    await import('@/features/system-update/system-update-action')
+  return { default: SystemUpdateAction }
+})
 
 type AuthPromptTarget = {
   title: string
@@ -128,7 +143,13 @@ export function PublicHeader(props: PublicHeaderProps) {
       {t('Sign in')}
     </Button>
   )
-  if (isAuthenticated) authContent = <ProfileDropdown />
+  if (isAuthenticated) {
+    authContent = (
+      <Suspense fallback={<Skeleton className='size-6 rounded-full' />}>
+        <LazyProfileDropdown />
+      </Suspense>
+    )
+  }
   if (loading) authContent = <Skeleton className='h-8 w-20 rounded-lg' />
 
   useEffect(() => {
@@ -234,7 +255,11 @@ export function PublicHeader(props: PublicHeaderProps) {
                   )}
                 </span>
               </Link>
-              <SystemUpdateAction presentation='version' />
+              {(user?.role ?? 0) >= ROLE.ADMIN && (
+                <Suspense fallback={null}>
+                  <LazySystemUpdateAction presentation='version' />
+                </Suspense>
+              )}
             </div>
 
             {/* Desktop nav */}
@@ -314,7 +339,11 @@ export function PublicHeader(props: PublicHeaderProps) {
             <div className='flex shrink-0 items-center gap-2 lg:hidden'>
               {showThemeSwitch && <ThemeSwitch />}
               {showAuthButtons && !loading && isAuthenticated && (
-                <ProfileDropdown />
+                <Suspense
+                  fallback={<Skeleton className='size-6 rounded-full' />}
+                >
+                  <LazyProfileDropdown />
+                </Suspense>
               )}
               <SheetTrigger
                 render={

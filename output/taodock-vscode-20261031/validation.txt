@@ -1,0 +1,97 @@
+TaoDock VS Code extension 0.1.0 — validation record
+Date: 2026-10-31 (Asia/Shanghai)
+Extension ID: taodock.taodock
+Source: extensions/taodock-vscode
+Release status: PUBLISHED and publicly downloadable on Open VSX: taodock.taodock@0.1.0.
+Publishing blockers: resolved. Optional publisher/namespace ownership verification has not been requested; namespace is currently unverified.
+
+Observed validation:
+- bun run typecheck — passed against @types/vscode 1.104.0.
+- bun test — 23 passed, 0 failed, 167 assertions.
+- bun run package — passed using @vscode/vsce 4.1.0; VSIX contains 27 files.
+- node --check scripts/publish-openvsx.mjs — passed.
+- Open VSX library import check — createNamespace and publish exports are callable.
+- Real VS Code 1.128.0 extension host — activation, all manifest commands, and native tool-message conversion passed; exit code 0. See host-test-result.json.
+- Host invocation:
+  '/Applications/Visual Studio Code.app/Contents/MacOS/Code' --user-data-dir /private/tmp/taodock-vscode-profile --extensions-dir /private/tmp/taodock-vscode-extensions --extensionDevelopmentPath=/Users/leekinyeung/GolandProjects/itmazai-token/extensions/taodock-vscode --extensionTestsPath=/Users/leekinyeung/GolandProjects/itmazai-token/extensions/taodock-vscode/test/host.cjs --disable-extensions --disable-workspace-trust --skip-welcome --skip-release-notes
+- VSIX archive inspection — identity is taodock.taodock@0.1.0; packaged JavaScript matches the final build; corresponding source/build files included; no node_modules or test reports.
+- New source whitespace checks — passed.
+
+Security references consulted before implementation:
+- OWASP ASVS 5.0.0 (latest stable version verified on 2026-10-31): https://github.com/OWASP/ASVS/tree/v5.0.0
+- Authentication Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+- Session Management Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+Applicable client controls considered: ASVS 12.2.1 / 12.3.2 (HTTPS and certificate validation), 14.2.1 (credentials in headers, never URL), 14.2.3 (fixed trusted origin), 16.2.5 / 16.5.1 (no secret or prompt disclosure in diagnostics/errors).
+Implementation: native VS Code Secret Storage; masked input; key validation before replacement; deletion and replacement cancel active requests; HTTPS-only fixed service URL; redirect:error; no cookies; sanitized HTTP errors; no generation retries; no extension analytics.
+Focused regressions: HTTP 401/403/429, preserving existing key after invalid replacement, cancelled setup, invalid header input, key removal cancellation, pre-cancelled requests, malformed/truncated SSE, undeclared and duplicate tool calls, complete tool-batch validation, seven-language coverage.
+Server key permissions, revocation and billing remain enforced by the existing platform; no server auth/session or database behavior changed. No full ASVS compliance claim is made.
+
+Limitations:
+- No production model generation or live tool-call round trip was run: no TaoDock test API key was configured.
+- Minimum supported editor API was type-checked; real host validation used VS Code 1.128.0.
+- Text chat and text tool results only. No image input, media generation or inline completion.
+- Editor context budgets are conservative estimates, not advertised maximum model capabilities or billing usage.
+- Both the key model-list endpoint and public model catalog must be reachable.
+- Final publication completed through the authenticated Open VSX browser session; no personal access token was generated or stored by the agent. Earlier failed attempts are retained below as history.
+
+Release artifacts:
+- taodock-0.1.0.vsix (SHA-256 76155762cd27c546df9f30ba0f8aabcbcc6ecb4010d5cdf7f71b2e24b2c8b4fa)
+- taodock-vscode-0.1.0-source.zip (SHA-256 fe96f0652f70ddc5bc02ce7b0c410b9806dce569a93b9161e6e5999ea3d0cf76)
+- listing.md — bilingual listing copy, setup instructions, compatibility and privacy details.
+
+Publishing once credentials are available:
+From extensions/taodock-vscode, run bun run publish:openvsx.
+The script reads OVSX_PAT or OVSX_PAT_FILE (default /private/tmp/taodock-ovsx-token; regular file, mode 600), creates the namespace only when absent, uploads the VSIX and verifies the registry version and SHA-256. It does not sign the Publisher Agreement.
+Never paste a publishing token into chat or include it in source files.
+
+Publication continuation on 2026-10-31:
+- User confirmed login and publisher setup and authorized publishing to Open VSX.
+- Rechecked local VSIX identity and SHA-256 against the release record: passed.
+- Submitted the VSIX through https://open-vsx.org/publish in the signed-in in-app browser.
+- Open VSX rejected the upload with: You must log in with an Eclipse Foundation account and sign a Publisher Agreement before publishing any extension.
+- Profile for leekinyeung confirms Publisher Agreement required and offers Log in with Eclipse.
+- Opened that login flow; Eclipse shows a sign-in form.
+- Automatic approval review rejected initiating GitHub-to-Eclipse authentication/account linking because the user had chosen to complete login and publisher setup personally. No workaround was attempted.
+- The Eclipse login tab is preserved for user handoff.
+- Proof screenshot: eclipse-login-required.jpg.
+- No package was published. Resume the upload after the user has completed Eclipse login/account linking and signed the Open VSX Publisher Agreement.
+
+Further continuation on 2026-10-31:
+- User reported completing Eclipse login and Publisher Agreement and authorized continuing publication.
+- Browser connection was restored after resetting the stale UI session.
+- Reused the existing Eclipse login to complete the Open VSX account association; no credential or new GitHub linking action was performed.
+- Open VSX Profile now exposes Review & sign, but still states Publisher Agreement required.
+- Opened and read the Open VSX Publisher Agreement v1.1 (September 2025). The final Agree button has not been clicked.
+- Requested explicit action-time authorization before accepting the legally binding agreement. Awaiting the account holder's approval or their manual signing.
+- Confirmation screenshot: publisher-agreement-confirmation.jpg.
+- Release package remains unchanged and checksum matches the validated VSIX. No new upload was attempted during this continuation.
+
+FINAL PUBLICATION RESULT — 2026-10-31:
+- User personally clicked Agree and explicitly authorized creation of taodock and publication of TaoDock 0.1.0.
+- Open VSX Profile confirmed Publisher Agreement signed.
+- Created namespace taodock in the authenticated Namespaces view. Public namespace API confirmed creation.
+- Uploaded the unchanged validated VSIX through the official browser Publish page.
+- Initial asynchronous processing showed Under review / Deactivated. This cleared without code changes or duplicate uploads.
+- Public API now returns taodock.taodock@0.1.0 with downloadable=true, published by leekinyeung.
+- Published timestamp: 2026-10-31T03:33:50.902271Z (2026-10-31 11:33:50 Asia/Shanghai).
+- Downloaded the public VSIX and compared SHA-256 to the local release: MATCH, 76155762cd27c546df9f30ba0f8aabcbcc6ecb4010d5cdf7f71b2e24b2c8b4fa.
+- Actual public package size: 147980 bytes.
+- Downloaded the public README and compared it to listing.md: exact match; Chinese and English copy present.
+- Opened and verified the public listing: https://open-vsx.org/extension/taodock/taodock
+- Public listing exposes version 0.1.0 and its Download link.
+- Screenshot saved: openvsx-published.jpg. Browser tab retained as the completed deliverable.
+- Namespace verified=false; the public listing shows its standard unverified publisher notice. Claiming namespace ownership is a separate optional process and was not performed.
+- No unresolved publication blocker remains. Production model generation was not performed; prior testing limitations still apply.
+- Full registry metadata: openvsx-published.json. Receipt: publication-receipt.json.
+
+NAMESPACE OWNERSHIP APPLICATION — 2026-10-31:
+- User explicitly requested applying for taodock publisher verification and removing the unverified-publisher notice.
+- Consulted the official Managing Namespaces, Guidelines on Namespace Requests and repository namespace-claim template.
+- Confirmed current GitHub account is leekinyeung, account created on 2022-03-21, same publisher as the extension, and owner of the manifest-linked public repository. No older public commit/issue activity was found, so the application states the verified account creation date without claiming a specific contribution history.
+- Verified namespace remains unverified and no existing taodock application was found. Marketplace publisher URL returned HTTP 404.
+- Used the official template headings and Option 4 justification based on the existing product/extension, manifest, public package source and repository ownership. No DNS or email verification was claimed.
+- GitHub connector create_issue could not access the external repository (integration permission 403). Used the already authenticated local GitHub CLI as leekinyeung.
+- Submitted: https://github.com/EclipseFdn/open-vsx.org/issues/15036
+- Re-read the public issue and verified author, title and exact submitted body.
+- Application receipt: namespace-claim-receipt.json.
+- Approval is pending. The agent cannot grant namespace OWNER rights; the page notice remains until Open VSX administrators approve the application.

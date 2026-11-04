@@ -39,7 +39,7 @@ export function HomeModelPrices(props: {
     <Button
       variant='link'
       className='home-text-link'
-      render={<Link to='/pricing' />}
+      render={<Link to='/models' />}
     >
       {t('Browse all models and pricing')}
       <HugeiconsIcon icon={ArrowRight01Icon} size={15} aria-hidden='true' />
@@ -89,7 +89,7 @@ export function HomeModelPrices(props: {
                 )}
                 <div className='home-price-model-identity'>
                   <Link
-                    to='/pricing/$modelId'
+                    to='/models/$modelId'
                     params={{ modelId: model.model_name }}
                   >
                     {model.model_name}

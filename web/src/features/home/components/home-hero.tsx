@@ -61,7 +61,7 @@ export function HomeHero(props: HomeHeroProps) {
   }, [t])
 
   const primaryAction = (
-    <Button className='home-primary-action' render={<Link to='/pricing' />}>
+    <Button className='home-primary-action' render={<Link to='/models' />}>
       {t('Explore models')}
       <HugeiconsIcon icon={ArrowRight01Icon} size={16} aria-hidden='true' />
     </Button>

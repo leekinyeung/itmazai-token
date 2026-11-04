@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useTranslation } from 'react-i18next'
 
-import { CodeBlock } from '@/components/ai-elements/code-block'
 import { CopyButton } from '@/components/copy-button'
 
 export function HomeRequestPreview(props: {
@@ -56,14 +55,15 @@ export function HomeRequestPreview(props: {
           {t('Copy')}
         </CopyButton>
       </div>
-      <CodeBlock
-        code={command}
-        language='bash'
-        enableCollapse={false}
-        showLineNumbers={false}
-        title={t('cURL example')}
-        className='home-curl-code'
-      />
+      <pre
+        aria-label={t('cURL example')}
+        aria-readonly='true'
+        className='home-server-code home-curl-code'
+        role='textbox'
+        tabIndex={0}
+      >
+        <code>{command}</code>
+      </pre>
       <div className='home-terminal-response'>
         <span>{t('Example only')}</span>
         <code>{props.modelName ? 'HTTP/1.1 200 OK' : 'GET /v1/models'}</code>

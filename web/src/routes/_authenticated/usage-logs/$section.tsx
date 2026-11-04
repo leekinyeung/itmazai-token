@@ -17,42 +17,66 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import z from 'zod'
 
 import { UsageLogs } from '@/features/usage-logs'
 import {
   isUsageLogsSectionId,
   USAGE_LOGS_DEFAULT_SECTION,
-} from '@/features/usage-logs/section-registry'
+} from '@/features/usage-logs/route-constants'
+import {
+  optionalSearchNumber,
+  searchNumber,
+  searchString,
+  searchStringArray,
+} from '@/lib/route-search'
 
 const logTypeValues = ['0', '1', '2', '3', '4', '5', '6', '7'] as const
-const logTypeSearchSchema = z
-  .preprocess(
-    (value) => {
-      if (value == null || value === '') return undefined
-      return Array.isArray(value) ? value : [value]
-    },
-    z.array(z.enum(logTypeValues)).optional()
-  )
-  .catch([])
+const LOG_TYPE_VALUES = new Set(logTypeValues)
 
-const usageLogsSearchSchema = z.object({
-  page: z.number().optional().catch(1),
-  pageSize: z.number().optional().catch(undefined),
-  type: logTypeSearchSchema.optional(),
-  filter: z.string().optional().catch(''),
-  model: z.string().optional().catch(''),
-  token: z.string().optional().catch(''),
-  channel: z.string().optional().catch(''),
-  group: z.string().optional().catch(''),
-  username: z.string().optional().catch(''),
-  requestId: z.string().optional().catch(''),
-  upstreamRequestId: z.string().optional().catch(''),
-  startTime: z.number().optional(),
-  endTime: z.number().optional(),
-})
+type UsageLogsRouteSearch = {
+  page?: number
+  pageSize?: number
+  type?: string[]
+  filter?: string
+  model?: string
+  token?: string
+  channel?: string
+  group?: string
+  username?: string
+  requestId?: string
+  upstreamRequestId?: string
+  startTime?: number
+  endTime?: number
+}
+
+function parseUsageLogsSearch(
+  search: Record<string, unknown>
+): UsageLogsRouteSearch {
+  let parsedType: string[] | undefined
+  if (Array.isArray(search.type)) {
+    parsedType = searchStringArray(search.type, LOG_TYPE_VALUES)
+  } else if (search.type != null && search.type !== '') {
+    parsedType = searchStringArray([search.type], LOG_TYPE_VALUES)
+  }
+  return {
+    page: searchNumber(search.page, 1),
+    pageSize: optionalSearchNumber(search.pageSize),
+    type: parsedType,
+    filter: searchString(search.filter),
+    model: searchString(search.model),
+    token: searchString(search.token),
+    channel: searchString(search.channel),
+    group: searchString(search.group),
+    username: searchString(search.username),
+    requestId: searchString(search.requestId),
+    upstreamRequestId: searchString(search.upstreamRequestId),
+    startTime: optionalSearchNumber(search.startTime),
+    endTime: optionalSearchNumber(search.endTime),
+  }
+}
 
 export const Route = createFileRoute('/_authenticated/usage-logs/$section')({
+  validateSearch: parseUsageLogsSearch,
   beforeLoad: ({ params, search }) => {
     if (!isUsageLogsSectionId(params.section)) {
       throw redirect({
@@ -73,6 +97,5 @@ export const Route = createFileRoute('/_authenticated/usage-logs/$section')({
       })
     }
   },
-  validateSearch: usageLogsSearchSchema,
   component: UsageLogs,
 })

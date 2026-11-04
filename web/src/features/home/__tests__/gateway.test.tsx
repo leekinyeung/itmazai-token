@@ -198,11 +198,11 @@ test('resizing switches animated paths to the visible diagram', () => {
   ).toBeNull()
 })
 
-test('mobile resizing leaves the hidden desktop frame unchanged until returning to desktop', () => {
+test('mobile resizing remounts and measures the visible desktop frame on return', () => {
   vi.stubGlobal('innerHeight', 900)
   const view = render(<HomeGateway logo='/logo.png' brand='Local brand' />)
   const container = view.container.querySelector('.home-gateway')
-  const desktop = view.container.querySelector('.home-gateway-lines')
+  let desktop = view.container.querySelector('.home-gateway-lines')
   if (!container || !desktop) throw new Error('Missing gateway diagram')
   Object.defineProperty(container, 'clientWidth', {
     configurable: true,
@@ -215,12 +215,12 @@ test('mobile resizing leaves the hidden desktop frame unchanged until returning 
     matches.set('(max-width: 1023px)', true)
     mediaQueries.get('(max-width: 1023px)')?.dispatchEvent(new Event('change'))
   })
+  expect(view.container.querySelector('.home-gateway-lines')).toBeNull()
   Object.defineProperty(container, 'clientWidth', {
     configurable: true,
     value: 390,
   })
   act(() => window.dispatchEvent(new Event('resize')))
-  expect(desktop).toHaveStyle({ height: '380px' })
 
   Object.defineProperty(container, 'clientWidth', {
     configurable: true,
@@ -231,6 +231,8 @@ test('mobile resizing leaves the hidden desktop frame unchanged until returning 
     matches.set('(max-width: 1023px)', false)
     mediaQueries.get('(max-width: 1023px)')?.dispatchEvent(new Event('change'))
   })
+  desktop = view.container.querySelector('.home-gateway-lines')
+  if (!desktop) throw new Error('Missing remounted desktop diagram')
   expect(
     Number.parseFloat((desktop as SVGSVGElement).style.height)
   ).toBeCloseTo(330)

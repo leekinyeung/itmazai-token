@@ -6,6 +6,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -269,18 +270,21 @@ func InjectGoogleAnalytics() {
 	analyticsInjectBuilder := &strings.Builder{}
 	if os.Getenv("GOOGLE_ANALYTICS_ID") != "" {
 		gaID := os.Getenv("GOOGLE_ANALYTICS_ID")
-		// Google Analytics 4 (gtag.js)
-		analyticsInjectBuilder.WriteString("<script async src=\"https://www.googletagmanager.com/gtag/js?id=")
-		analyticsInjectBuilder.WriteString(gaID)
-		analyticsInjectBuilder.WriteString("\"></script>")
-		analyticsInjectBuilder.WriteString("<script>")
-		analyticsInjectBuilder.WriteString("window.dataLayer = window.dataLayer || [];")
-		analyticsInjectBuilder.WriteString("function gtag(){dataLayer.push(arguments);}")
-		analyticsInjectBuilder.WriteString("gtag('js', new Date());")
-		analyticsInjectBuilder.WriteString("gtag('config', '")
-		analyticsInjectBuilder.WriteString(gaID)
-		analyticsInjectBuilder.WriteString("');")
-		analyticsInjectBuilder.WriteString("</script>")
+		// Queue the initial page view immediately, but keep third-party parsing off
+		// the critical path until the visitor interacts or the page has been idle.
+		analyticsInjectBuilder.WriteString("<script>(function(id){")
+		analyticsInjectBuilder.WriteString("window.dataLayer=window.dataLayer||[];")
+		analyticsInjectBuilder.WriteString("window.gtag=window.gtag||function(){window.dataLayer.push(arguments)};")
+		analyticsInjectBuilder.WriteString("window.gtag('js',new Date());window.gtag('config',id);")
+		analyticsInjectBuilder.WriteString("var loaded=false,timer;function load(){if(loaded)return;loaded=true;clearTimeout(timer);")
+		analyticsInjectBuilder.WriteString("['pointerdown','keydown','touchstart'].forEach(function(event){window.removeEventListener(event,load)});")
+		analyticsInjectBuilder.WriteString("var script=document.createElement('script');script.async=true;script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(id);document.head.appendChild(script)}")
+		analyticsInjectBuilder.WriteString("['pointerdown','keydown','touchstart'].forEach(function(event){window.addEventListener(event,load,{once:true,passive:true})});")
+		analyticsInjectBuilder.WriteString("function schedule(){timer=window.setTimeout(load,8000)}")
+		analyticsInjectBuilder.WriteString("if(document.readyState==='complete'){schedule()}else{window.addEventListener('load',schedule,{once:true})}")
+		analyticsInjectBuilder.WriteString("})('")
+		analyticsInjectBuilder.WriteString(template.JSEscapeString(gaID))
+		analyticsInjectBuilder.WriteString("');</script>")
 	}
 	analyticsInjectBuilder.WriteString("<!--Google Analytics QuantumNous-->\n")
 	analyticsInject := []byte(analyticsInjectBuilder.String())

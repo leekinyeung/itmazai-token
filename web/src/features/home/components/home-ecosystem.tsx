@@ -115,7 +115,7 @@ export function HomeEcosystem(props: {
         <Button
           variant='link'
           className='home-text-link'
-          render={<Link to='/pricing' />}
+          render={<Link to='/models' />}
         >
           {t('Browse all models and pricing')}
           <ArrowRight size={15} aria-hidden='true' />

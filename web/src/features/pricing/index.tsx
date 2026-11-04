@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PublicLayout } from '@/components/layout'
@@ -30,7 +30,6 @@ import {
   PricingSidebar,
   PricingToolbar,
   ModelCardGrid,
-  ModelDetailsDrawer,
 } from './components'
 import { EXCLUDED_GROUPS, VIEW_MODES } from './constants'
 import { useFilters } from './hooks/use-filters'
@@ -38,17 +37,11 @@ import { usePricingData } from './hooks/use-pricing-data'
 
 export function Pricing() {
   const { t } = useTranslation()
-  const [selectedModelName, setSelectedModelName] = useState<string | null>(
-    null
-  )
-
   const {
     models,
     vendors,
     groupRatio,
     usableGroup,
-    endpointMap,
-    autoGroups,
     isLoading,
     priceRate,
     usdExchangeRate,
@@ -83,20 +76,6 @@ export function Pricing() {
     clearSearch,
   } = useFilters(models || [])
 
-  const handleModelClick = useCallback((modelName: string) => {
-    setSelectedModelName(modelName)
-  }, [])
-
-  const selectedModel = useMemo(
-    () =>
-      selectedModelName
-        ? (models || []).find(
-            (model) => model.model_name === selectedModelName
-          ) || null
-        : null,
-    [models, selectedModelName]
-  )
-
   const availableGroups = useMemo(
     () =>
       Object.keys(usableGroup || {}).filter(
@@ -125,7 +104,6 @@ export function Pricing() {
       return (
         <ModelCardGrid
           models={filteredModels}
-          onModelClick={handleModelClick}
           priceRate={priceRate}
           usdExchangeRate={usdExchangeRate}
           tokenUnit={tokenUnit}
@@ -143,7 +121,6 @@ export function Pricing() {
         tokenUnit={tokenUnit}
         showRechargePrice={showRechargePrice}
         selectedGroup={groupFilter}
-        onModelClick={handleModelClick}
       />
     )
   }
@@ -179,7 +156,7 @@ export function Pricing() {
         <PageTransition className='relative mx-auto w-full max-w-[1800px] px-3 pt-16 pb-8 sm:px-6 sm:pt-20 sm:pb-10 xl:px-8'>
           <header className='mx-auto mb-5 max-w-3xl pt-5 text-center sm:mb-10 sm:pt-10'>
             <h1 className='text-[clamp(2rem,5.5vw,3.5rem)] leading-[1.15] font-bold tracking-tight'>
-              {t('Model Square')}
+              {t('AI Models & API Pricing')}
             </h1>
             <p className='text-muted-foreground/80 mt-3 text-sm sm:mt-4 sm:text-base'>
               {t('This site currently has {{count}} models enabled', {
@@ -259,29 +236,6 @@ export function Pricing() {
               {renderPricingContent()}
             </main>
           </div>
-
-          {selectedModel && (
-            <ModelDetailsDrawer
-              open={Boolean(selectedModel)}
-              onOpenChange={(open) => {
-                if (!open) setSelectedModelName(null)
-              }}
-              model={selectedModel}
-              groupRatio={groupRatio || {}}
-              usableGroup={usableGroup || {}}
-              endpointMap={
-                (endpointMap as Record<
-                  string,
-                  { path?: string; method?: string }
-                >) || {}
-              }
-              autoGroups={autoGroups || []}
-              priceRate={priceRate ?? 1}
-              usdExchangeRate={usdExchangeRate ?? 1}
-              tokenUnit={tokenUnit}
-              showRechargePrice={showRechargePrice}
-            />
-          )}
         </PageTransition>
       </div>
     </PublicLayout>

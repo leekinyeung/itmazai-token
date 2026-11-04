@@ -1,0 +1,81 @@
+{
+  "allVersions": {
+    "latest": "https://open-vsx.org/api/taodock/taodock/latest",
+    "0.1.0": "https://open-vsx.org/api/taodock/taodock/0.1.0"
+  },
+  "allVersionsUrl": "https://open-vsx.org/api/taodock/taodock/versions",
+  "bugs": "https://github.com/leekinyeung/itmazai-token/issues",
+  "bundledExtensions": [],
+  "categories": [
+    "AI",
+    "Chat"
+  ],
+  "dependencies": [],
+  "deprecated": false,
+  "description": "Use TaoDock chat models in VS Code with your own API key. Streaming, tool calling and secure key storage.",
+  "displayName": "TaoDock — 众妙之门 AI Models",
+  "downloadCount": 0,
+  "downloadSizes": {
+    "universal": 147980
+  },
+  "downloadable": true,
+  "downloads": {
+    "universal": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/taodock.taodock-0.1.0.vsix"
+  },
+  "engines": {
+    "vscode": "^1.104.0"
+  },
+  "extensionKind": [
+    "workspace"
+  ],
+  "files": {
+    "download": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/taodock.taodock-0.1.0.vsix",
+    "signature": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/taodock.taodock-0.1.0.sigzip",
+    "manifest": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/package.json",
+    "readme": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/readme.md",
+    "changelog": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/changelog.md",
+    "license": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/LICENSE.txt",
+    "icon": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/icon.png",
+    "vsixmanifest": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/extension.vsixmanifest",
+    "sha256": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/taodock.taodock-0.1.0.sha256",
+    "publicKey": "https://open-vsx.org/api/-/public-key/14ccb407-4e79-41ed-be5a-6d608325c45a"
+  },
+  "galleryColor": "",
+  "galleryTheme": "",
+  "homepage": "https://taodock.com",
+  "license": "AGPL-3.0-only",
+  "localizedLanguages": [],
+  "name": "taodock",
+  "namespace": "taodock",
+  "namespaceDisplayName": "taodock",
+  "namespaceUrl": "https://open-vsx.org/api/taodock",
+  "preRelease": false,
+  "preview": false,
+  "publishedBy": {
+    "avatarUrl": "https://avatars.githubusercontent.com/u/102016531?v=4",
+    "homepage": "https://github.com/leekinyeung",
+    "loginName": "leekinyeung",
+    "provider": "github"
+  },
+  "publishedWithTrustedPublishing": false,
+  "repository": "https://github.com/leekinyeung/itmazai-token.git",
+  "reviewCount": 0,
+  "reviewsUrl": "https://open-vsx.org/api/taodock/taodock/reviews",
+  "sponsorLink": "",
+  "tags": [
+    "byok",
+    "claude",
+    "gpt",
+    "language model",
+    "language-models",
+    "taodock",
+    "众妙之门"
+  ],
+  "targetPlatform": "universal",
+  "timestamp": "2026-10-31T03:33:50.902271Z",
+  "verified": false,
+  "version": "0.1.0",
+  "versionAlias": [
+    "latest"
+  ]
+}

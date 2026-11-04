@@ -32,7 +32,7 @@ type ModelLinkProps = EntityLinkBaseProps & {
 
 /**
  * Link wrapping a model name. Navigates to the existing model details
- * page (`/pricing/{modelName}`). Renders the model name itself by
+ * page (`/models/{modelName}`). Renders the model name itself by
  * default; pass `children` to wrap arbitrary content.
  *
  * A subtle persistent underline acts as the link affordance (so
@@ -42,7 +42,7 @@ type ModelLinkProps = EntityLinkBaseProps & {
 export function ModelLink(props: ModelLinkProps) {
   return (
     <Link
-      to='/pricing/$modelId'
+      to='/models/$modelId'
       params={{ modelId: props.modelName }}
       className={cn(
         'decoration-foreground/30 hover:decoration-foreground underline decoration-1 underline-offset-4 transition-colors',
@@ -61,7 +61,7 @@ type VendorLinkProps = EntityLinkBaseProps & {
 
 /**
  * Link wrapping a vendor name. Navigates to the pricing page filtered by
- * that vendor (`/pricing?vendor={vendor}`). Renders the vendor name
+ * that vendor (`/models?vendor={vendor}`). Renders the vendor name
  * itself by default. Uses the same subtle persistent underline as
  * {@link ModelLink}, scaled for the smaller secondary text it usually
  * wraps.
@@ -69,7 +69,7 @@ type VendorLinkProps = EntityLinkBaseProps & {
 export function VendorLink(props: VendorLinkProps) {
   return (
     <Link
-      to='/pricing'
+      to='/models'
       search={{ vendor: props.vendor }}
       className={cn(
         'hover:text-foreground underline decoration-current/40 decoration-1 underline-offset-2 transition-colors hover:decoration-current',

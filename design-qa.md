@@ -665,3 +665,39 @@ final result: passed
 Latest footer-specific report: [output/taodock-footer-20261102/design-qa.md](output/taodock-footer-20261102/design-qa.md). Prior QA history above is preserved.
 
 The selected footer concept and final implementation were compared in `output/taodock-footer-20261102/comparison-full.jpg` and `comparison-detail.jpg`. The approved plan intentionally retains global typography, localized branding and the existing attribution. Final evidence includes four desktop/mobile light/dark screenshots, 32 page/viewport/mode captures, 120 theme/font inheritance checks, minimum muted-text contrast 5.49:1, and 51 passing regression tests. Typecheck, targeted lint/format, i18n sync, production build and diff checks passed. UI preview uses deterministic local API fixtures.
+
+# 模型检测页面设计验收 — 2026-11-03
+
+## 基准与范围
+
+- 视觉基准：`/Users/leekinyeung/.codex/generated_images/01a1a040-26ee-77c0-818b-0010de23c30f/exec-671a5e90-1133-48ec-83e2-ffbb11947f13.png`
+- 页面路由：`/model-evaluation`
+- 功能定位：与现有用户、渠道、令牌、计费、日志和模型配置无业务关联的独立工具。
+
+## 视口验收
+
+| 场景 | 视口 | 截图 | 结果 |
+| --- | --- | --- | --- |
+| 桌面深色 | 1440 × 1024 | `output/model-evaluation-qa/desktop-dark-1440x1024.png` | 通过 |
+| 桌面浅色 | 1440 × 1024 | `output/model-evaluation-qa/desktop-light-1440x1024.png` | 通过 |
+| 移动端深色 | 390 × 844 | `output/model-evaluation-qa/mobile-dark-390x844.png` | 通过 |
+
+桌面端在方案 3 的深色分层卡片、蓝紫强调色、指标进度与结果摘要基础上收敛为连接配置与检测结果两栏工作台。移动端按照连接配置、检测结果的顺序纵向排列；表单、按钮、状态提示和指标内容均未出现溢出或遮挡。
+
+## 功能验收
+
+- 模型列表可以从 OpenAI 兼容 `/models` 接口加载，失败后可手动输入模型名。
+- 检测用例固定为应用内置的英文事实问答基准，不在页面展示，用户无需填写或查看提示词、预期输出和检索上下文。
+- 三项指标完整链路运行通过：Answer Relevancy、G-Eval Correctness、Faithfulness。
+- DeepEval 使用各指标自带的裁判提示模板；内置基准始终提供预期输出与检索上下文，因此三项指标全部执行。
+- 指标低于阈值时总结果判定失败；全部指标通过时总结果判定通过。
+- API Key 仅用于浏览器直连模型服务，未进入 WebSocket 消息或浏览器存储。
+- worker 缺失、跨域、混合内容、鉴权、取消和超时均有明确状态或错误处理。
+
+## 差异分级
+
+- P0：无
+- P1：无
+- P2：无
+
+final result: passed

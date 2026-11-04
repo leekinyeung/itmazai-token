@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import type { Row, PaginationState } from '@tanstack/react-table'
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -39,7 +39,6 @@ export interface PricingTableProps {
   tokenUnit?: TokenUnit
   showRechargePrice?: boolean
   selectedGroup?: string
-  onModelClick?: (modelName: string) => void
 }
 
 export function PricingTable(props: PricingTableProps) {
@@ -52,7 +51,6 @@ export function PricingTable(props: PricingTableProps) {
     tokenUnit = DEFAULT_TOKEN_UNIT,
     showRechargePrice = false,
     selectedGroup,
-    onModelClick,
   } = props
 
   const [pagination, setPagination] = useState<PaginationState>({
@@ -80,13 +78,6 @@ export function PricingTable(props: PricingTableProps) {
     withFacetedRowModel: false,
   })
 
-  const handleRowClick = useCallback(
-    (model: PricingModel) => {
-      onModelClick?.(model.model_name)
-    },
-    [onModelClick]
-  )
-
   return (
     <div className='space-y-4'>
       <DataTableView
@@ -103,8 +94,7 @@ export function PricingTable(props: PricingTableProps) {
           <DataTableRow
             key={row.id}
             row={row}
-            className='hover:bg-muted/30 cursor-pointer transition-colors'
-            onClick={() => handleRowClick(row.original)}
+            className='hover:bg-muted/30 transition-colors'
           />
         )}
       />

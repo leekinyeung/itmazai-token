@@ -34,10 +34,19 @@ const metadata = Object.fromEntries(
     tag.getAttribute('content'),
   ])
 )
-const homepageTitle =
-  'TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation'
+const pageMetadata = JSON.parse(
+  readFileSync(resolve(webRoot, 'public/page-metadata.json'), 'utf8')
+) as {
+  siteName: string
+  pages: Record<
+    string,
+    { title: string; description: string; language?: string }
+  >
+  noIndexRoutes: string[]
+}
+const homepageTitle = 'Unified AI API Gateway | TaoDock'
 const homepageDescription =
-  'Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides.'
+  'Connect leading AI models through one familiar API, from your first prototype to your next production release.'
 
 describe('website social sharing', () => {
   it('provides Twitter large image and Open Graph metadata before JavaScript runs', () => {
@@ -49,7 +58,7 @@ describe('website social sharing', () => {
         'twitter:image': 'https://taodock.com/social-card.png',
         'twitter:image:alt': 'TaoDock',
         'og:type': 'website',
-        'og:site_name': '众妙之门 TaoDock',
+        'og:site_name': 'TaoDock',
         'og:title': homepageTitle,
         'og:url': 'https://taodock.com/',
         'og:description': metadata.description,
@@ -59,6 +68,17 @@ describe('website social sharing', () => {
       })
     )
     expect(metadata.description).toBeTruthy()
+    for (const key of [
+      'title',
+      'description',
+      'og:site_name',
+      'og:title',
+      'og:description',
+      'twitter:title',
+      'twitter:description',
+    ]) {
+      expect(metadata[key]).not.toMatch(/[\u3400-\u9fff]/)
+    }
   })
 
   it('describes the homepage in the initial HTML before JavaScript runs', () => {
@@ -69,6 +89,16 @@ describe('website social sharing', () => {
     expect(
       head.querySelector('link[rel="canonical"]')?.getAttribute('href')
     ).toBe('https://taodock.com/')
+  })
+
+  it('keeps core public page titles within 60 characters and branded with TaoDock', () => {
+    expect(pageMetadata.siteName).toBe('TaoDock')
+    for (const [path, page] of Object.entries(pageMetadata.pages)) {
+      if (path.includes(':') || page.language) continue
+      const title = path === '/' ? page.title : `${page.title} | TaoDock`
+      expect(title).toMatch(/\| TaoDock$/)
+      expect([...title].length).toBeLessThanOrEqual(60)
+    }
   })
 
   it('provides a valid XML sitemap for the core public pages', () => {
@@ -82,16 +112,55 @@ describe('website social sharing', () => {
     expect(sitemap.documentElement.namespaceURI).toBe(
       'http://www.sitemaps.org/schemas/sitemap/0.9'
     )
-    expect(
-      Array.from(
-        sitemap.querySelectorAll('url > loc'),
-        (loc) => loc.textContent
-      )
-    ).toEqual([
-      'https://taodock.com/',
-      'https://taodock.com/pricing',
-      'https://taodock.com/integrations',
-    ])
+    const sitemapEntries = Array.from(
+      sitemap.querySelectorAll('url'),
+      (url) => {
+        expect(url.querySelectorAll('loc')).toHaveLength(1)
+        expect(url.querySelectorAll('lastmod')).toHaveLength(1)
+
+        const lastmod = url.querySelector('lastmod')?.textContent
+        expect(lastmod).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+
+        return {
+          loc: url.querySelector('loc')?.textContent,
+          lastmod,
+        }
+      }
+    )
+    const locations = sitemapEntries.map((entry) => entry.loc)
+    expect(locations).toEqual([...locations].sort())
+    expect(new Set(sitemapEntries.map((entry) => entry.loc)).size).toBe(
+      sitemapEntries.length
+    )
+    expect(sitemapEntries).toEqual(
+      expect.arrayContaining([
+        { loc: 'https://taodock.com/', lastmod: '2026-11-04' },
+        { loc: 'https://taodock.com/models', lastmod: '2026-11-04' },
+        {
+          loc: 'https://taodock.com/integrations',
+          lastmod: '2026-11-04',
+        },
+        {
+          loc: 'https://taodock.com/model-evaluation',
+          lastmod: '2026-11-04',
+        },
+        { loc: 'https://taodock.com/about', lastmod: '2026-11-02' },
+        { loc: 'https://taodock.com/rankings', lastmod: '2026-11-02' },
+        {
+          loc: 'https://taodock.com/privacy-policy',
+          lastmod: '2026-11-02',
+        },
+        {
+          loc: 'https://taodock.com/user-agreement',
+          lastmod: '2026-11-03',
+        },
+      ])
+    )
+    expect(sitemapEntries).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ loc: 'https://taodock.com/pricing' }),
+      ])
+    )
   })
 
   it('allows search crawlers and advertises the sitemap in robots.txt', () => {
@@ -100,8 +169,9 @@ describe('website social sharing', () => {
     expect(robots).toMatch(/^User-agent: \*$/m)
     for (const path of [
       '/',
-      '/pricing',
+      '/models',
       '/integrations',
+      '/model-evaluation',
       '/about',
       '/rankings',
       '/privacy-policy',
@@ -112,19 +182,16 @@ describe('website social sharing', () => {
     for (const path of ['/console/', '/dashboard/', '/v1/']) {
       expect(robots).toMatch(new RegExp(`^Disallow: ${path}$`, 'm'))
     }
-    expect(robots.trimEnd().split('\n').slice(-2)).toEqual([
+    expect(robots.trimEnd().split('\n').slice(-3)).toEqual([
       'Sitemap: https://taodock.com/sitemap.xml',
+      'Sitemap: https://taodock.com/sitemap-models.xml',
       'Sitemap: https://docs.taodock.com/sitemap.xml',
     ])
     expect(robots).not.toMatch(/^Disallow:\s*\/\s*$/m)
   })
 
   it('declares account, authentication and console routes as noindex pages', () => {
-    const manifest = JSON.parse(
-      readFileSync(resolve(webRoot, 'public/page-metadata.json'), 'utf8')
-    ) as { noIndexRoutes: string[] }
-
-    expect(manifest.noIndexRoutes).toEqual(
+    expect(pageMetadata.noIndexRoutes).toEqual(
       expect.arrayContaining([
         '/sign-in',
         '/sign-up',
@@ -137,9 +204,10 @@ describe('website social sharing', () => {
         '/console/*legacy',
       ])
     )
-    expect(manifest.noIndexRoutes).not.toContain('/')
-    expect(manifest.noIndexRoutes).not.toContain('/pricing')
-    expect(manifest.noIndexRoutes).not.toContain('/integrations')
+    expect(pageMetadata.noIndexRoutes).not.toContain('/')
+    expect(pageMetadata.noIndexRoutes).not.toContain('/models')
+    expect(pageMetadata.noIndexRoutes).toContain('/admin/models/:section')
+    expect(pageMetadata.noIndexRoutes).not.toContain('/integrations')
 
     const sitemap = readFileSync(resolve(webRoot, 'public/sitemap.xml'), 'utf8')
     for (const privatePath of ['/console', '/dashboard', '/v1']) {

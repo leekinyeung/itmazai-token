@@ -1,0 +1,861 @@
+{
+  "version": 1,
+  "origin": "https://taodock.com",
+  "compareHub": {
+    "path": "/compare",
+    "title": "AI API Gateway Comparisons",
+    "description": "Compare TaoDock with OpenRouter, LiteLLM, Portkey, Requesty and SiliconFlow across deployment, routing, access, usage and operational trade-offs.",
+    "updatedAt": "2026-11-04",
+    "structuredData": [
+      "{\"@context\":\"https://schema.org\",\"@type\":\"CollectionPage\",\"name\":\"AI API Gateway Comparisons\",\"description\":\"Compare TaoDock with established AI gateways and model routing platforms using sourced, review-dated decision guides.\",\"url\":\"https://taodock.com/compare\",\"inLanguage\":\"en\",\"hasPart\":[{\"@type\":\"Article\",\"name\":\"TaoDock vs LiteLLM: Hosted Platform or Self-Hosted Gateway\",\"url\":\"https://taodock.com/compare/taodock-vs-litellm\"},{\"@type\":\"Article\",\"name\":\"TaoDock vs OpenRouter: Choosing a Unified AI API Gateway\",\"url\":\"https://taodock.com/compare/taodock-vs-openrouter\"},{\"@type\":\"Article\",\"name\":\"TaoDock vs Portkey: AI Model Access or Enterprise Control\",\"url\":\"https://taodock.com/compare/taodock-vs-portkey\"},{\"@type\":\"Article\",\"name\":\"TaoDock vs Requesty: Comparing Hosted AI Model Routers\",\"url\":\"https://taodock.com/compare/taodock-vs-requesty\"},{\"@type\":\"Article\",\"name\":\"TaoDock vs SiliconFlow: Aggregated Gateway or Inference Cloud\",\"url\":\"https://taodock.com/compare/taodock-vs-siliconflow\"}]}",
+      "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"AI gateway comparisons\",\"item\":\"https://taodock.com/compare\"}]}"
+    ]
+  },
+  "pages": [
+    {
+      "kind": "comparison",
+      "slug": "taodock-vs-litellm",
+      "path": "/compare/taodock-vs-litellm",
+      "title": "TaoDock vs LiteLLM: Hosted Platform or Self-Hosted Gateway",
+      "description": "Compare TaoDock and LiteLLM across hosting, provider integration, virtual keys, routing, budgets, logging and operations before choosing an AI gateway.",
+      "primaryKeyword": "TaoDock vs LiteLLM",
+      "cluster": "AI gateway comparisons",
+      "subject": "LiteLLM",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "LiteLLM getting started",
+          "url": "https://docs.litellm.ai/docs/"
+        },
+        {
+          "label": "LiteLLM provider directory",
+          "url": "https://docs.litellm.ai/docs/providers"
+        },
+        {
+          "label": "LiteLLM proxy architecture",
+          "url": "https://docs.litellm.ai/docs/proxy/architecture"
+        },
+        {
+          "label": "TaoDock API integration guide",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        }
+      ],
+      "related": [
+        "/compare/taodock-vs-portkey",
+        "/compare/taodock-vs-openrouter",
+        "/integrations/openai-sdk",
+        "/models"
+      ],
+      "steps": [],
+      "faqItems": [
+        {
+          "question": "Is LiteLLM a hosted model provider?",
+          "answer": "LiteLLM is an open-source SDK and gateway that connects to model providers configured by its operator. A team normally supplies provider credentials and runs or purchases the surrounding service. TaoDock exposes a hosted catalog and account experience at taodock.com."
+        },
+        {
+          "question": "Can an application switch between TaoDock and LiteLLM by changing the base URL?",
+          "answer": "A basic OpenAI-compatible chat integration may need only a base URL, key and model change, but production migration must also verify model IDs, supported parameters, streaming, tool calls, errors, retries and usage accounting."
+        },
+        {
+          "question": "Which option gives more infrastructure control?",
+          "answer": "A self-hosted LiteLLM deployment gives the operating team direct control over its gateway configuration and provider credentials. TaoDock users consume the policies and upstream catalog configured by the TaoDock platform operator."
+        },
+        {
+          "question": "Which option requires less gateway operations work?",
+          "answer": "Using hosted TaoDock avoids operating the gateway stack. Self-hosting LiteLLM requires deployment, upgrades, database and cache decisions, monitoring, backups and incident response, although managed LiteLLM offerings can change that trade-off."
+        }
+      ],
+      "draft": false,
+      "body": "## The central difference\n\nThe most important difference between TaoDock and LiteLLM is not the request format. It is who operates the gateway. LiteLLM is an open-source Python SDK and proxy that gives an engineering team a unified interface across model providers. TaoDock is a hosted unified AI API platform with a model catalog, accounts, API keys, quotas, usage records and billing exposed as a ready-to-use service.\n\nChoose LiteLLM when your team wants to own provider credentials, deployment topology and gateway policy, and is prepared to operate the supporting infrastructure. Choose TaoDock when you want to create an account and key, select from the platform's available models and let the service operator maintain the upstream connections and gateway runtime.\n\nBoth can be valid for the same organization. A platform team might run LiteLLM for internal provider access while individual users consume TaoDock for a managed catalog or desktop-client workflow. The right comparison starts with ownership and operating cost, then moves to protocols and features.\n\n## Deployment and responsibility\n\nLiteLLM documents a library mode and a Proxy Server, also described as its LLM Gateway. In proxy mode, the operator configures model deployments, provider credentials, virtual keys, budgets, routing and integrations. The deployment can be placed inside the organization's network and connected to its database, cache, identity and observability systems.\n\nThat control is valuable when data paths, private endpoints, custom provider accounts or infrastructure policy must remain under the organization's administration. It also creates responsibility. Someone must patch the service, manage secrets, size the database and cache, monitor latency and errors, back up state, test upgrades and respond when a provider or the gateway fails.\n\nTaoDock's public service shifts those operational duties to the TaoDock operator. The user works with the console and API instead of deploying the gateway. This is simpler for an application team, but it provides less control over the physical deployment and the upstream credentials configured behind the catalog. Check the service's privacy, support and data-handling terms if those constraints are important.\n\n## Provider and model configuration\n\nLiteLLM's provider directory documents a large set of native, self-hosted and OpenAI-compatible integrations. The operator maps provider-specific models into gateway model names and can expose model groups to clients. That makes it suitable for organizations with existing OpenAI, Anthropic, Azure, Bedrock, Vertex AI or private inference accounts that they want to normalize through one endpoint.\n\nTaoDock users do not configure those provider adapters. They select from the models enabled by the TaoDock deployment. The public [model catalog](/models) shows discoverable models and protocols, while `GET /v1/models` returns the exact IDs accessible to a particular API key. This reduces setup work but means the available catalog is determined by the platform rather than by each user.\n\nIf a required model or private endpoint is non-negotiable, verify its availability before evaluating convenience features. LiteLLM may be preferable when the organization must bring a specific provider account. TaoDock may be preferable when its existing catalog already covers the application and the team wants to avoid provider onboarding.\n\n## API surface and protocol translation\n\nLiteLLM presents an OpenAI-format interface and translates requests and responses for its supported providers. Its documentation distinguishes capabilities by provider and endpoint. TaoDock also presents OpenAI-compatible endpoints and supports additional protocols where the selected model and channel advertise them.\n\nProtocol translation is not a promise that every provider feature behaves identically. Optional parameters, tool schemas, streaming deltas, image inputs, audio, embeddings and provider-specific response fields can differ. Before choosing either gateway, define the minimum contract your application needs and run the same fixture suite against the exact model configuration.\n\nFor a conventional SDK integration, the variables are straightforward: API base URL, credential and model ID. The [OpenAI SDK guide](/integrations/openai-sdk) shows the TaoDock side. With LiteLLM, use the client setup documented for the proxy and the model group configured by its operator.\n\n## Routing, retries and fallback\n\nLiteLLM documents load balancing, retries and fallbacks across deployments. Because the operator controls the model list and routing policy, it can define several provider deployments behind one client-facing model group. This is useful for capacity distribution, regional routing or failover, but the policy must be designed and monitored by the team running the gateway.\n\nTaoDock applies routing through configured channels, priorities, model mappings and groups. Users call the model ID made available by the service; administrators manage the upstream policy. The application still needs sensible timeouts and idempotency because no gateway can make every failure safe to replay.\n\nTest routing with failure cases. A gateway can retry a request before response bytes are returned, but a partial stream, tool execution or long-running task changes the risk. Confirm the behavior for rate limits, provider timeouts, client cancellation and partially delivered output. Record which errors the client may retry and cap the number of attempts.\n\n## Keys, budgets and access control\n\nLiteLLM Proxy supports virtual keys and can apply budgets or limits by key, user, team and other configured scopes. The exact authentication and enterprise capabilities depend on the deployed edition and configuration. An operator must connect those controls to the organization's identity and administration process.\n\nTaoDock exposes API-key management directly to its users. A user can create separate keys for applications and apply the expiration, quota, model and network restrictions offered by the console. The platform separately maintains the user's account balance and group access. This is convenient for individual developers, small teams and services that want application-level credentials without operating their own key service.\n\nIn both cases, do not reuse an administrator or provider credential in client applications. Issue a narrowly scoped gateway key, store it on the server, rotate it, and retain enough audit context to identify which application made a request.\n\n## Logging, cost and billing\n\nLiteLLM can record spend and request metadata, expose an administration UI and send callbacks to observability platforms. The usefulness of those records depends on the operator's database, retention, callback and privacy configuration. Running the gateway also means reconciling its calculated costs with invoices from the underlying providers.\n\nTaoDock records usage and consumption in the user's console and applies the platform's configured pricing and group rules. The user funds or manages the TaoDock account rather than reconciling several provider accounts. That can simplify application billing, although the platform's price and available routes may differ from direct provider contracts.\n\nFor either choice, validate cost with representative traffic. Compare recorded input, cached input, output and task units against the final charge. Do not rely on a generic tokens-per-request estimate for multimodal or dynamic task pricing.\n\n## Decision matrix\n\n| Decision area        | TaoDock                                                | LiteLLM                                                             | Question to ask                              |\n| -------------------- | ------------------------------------------------------ | ------------------------------------------------------------------- | -------------------------------------------- |\n| Delivery             | Hosted service and console                             | SDK or gateway operated by your team, or a managed LiteLLM offering | Who owns uptime and upgrades?                |\n| Provider credentials | Managed by the platform operator                       | Configured by the gateway operator                                  | Must credentials remain in your environment? |\n| Catalog              | Models enabled by TaoDock                              | Models and deployments you configure                                | Is the required model already available?     |\n| Access               | User accounts and application keys                     | Virtual keys and configured identity controls                       | Who provisions and revokes access?           |\n| Cost operations      | TaoDock pricing, account quota and consumption records | Gateway spend tracking plus provider invoices                       | Who reconciles usage and invoices?           |\n| Customization        | Uses platform policies                                 | Direct control over routing and callbacks                           | How much policy customization is required?   |\n\n## When TaoDock fits better\n\nTaoDock fits teams that want a working hosted endpoint, public catalog, user console and per-application key workflow without deploying an LLM gateway. It is also well suited to desktop-client integrations where a user wants to create a key, connect an application and see request records in one place.\n\nThe trade-off is dependence on the service's model catalog and policies. Confirm model availability, protocol support, quota and current pricing before building around a specific ID.\n\n## When LiteLLM fits better\n\nLiteLLM fits platform teams that already own provider accounts, need private or regional endpoints, want detailed routing control, or must deploy the gateway inside their infrastructure. The open-source SDK can also be useful inside an application that needs a common provider interface without exposing a shared proxy.\n\nThe trade-off is operational responsibility. Budget time for security updates, dependency and configuration changes, database migrations, monitoring, backups and provider-specific regression tests. A proof of concept that starts quickly can still require substantial production work.\n\n## Migration checklist\n\nInventory the endpoints, parameters and models your application actually uses. On the target gateway, create a non-production key and expose only the required model. Change the base URL, key and model name in a staging environment. Run tests for ordinary responses, streaming, tools, structured output, cancellation, authentication errors, exhausted quota and provider failure.\n\nCompare usage records and charges for the same fixtures. Check whether logs contain the identifiers your support team needs without storing secrets or sensitive prompt content unnecessarily. Finally, move a small percentage of traffic, watch latency and error distribution, and retain a rollback path until the new gateway has completed a representative billing cycle.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"AI gateway comparisons\",\"item\":\"https://taodock.com/compare\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"TaoDock vs LiteLLM: Hosted Platform or Self-Hosted Gateway\",\"item\":\"https://taodock.com/compare/taodock-vs-litellm\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"TaoDock vs LiteLLM: Hosted Platform or Self-Hosted Gateway\",\"description\":\"Compare TaoDock and LiteLLM across hosting, provider integration, virtual keys, routing, budgets, logging and operations before choosing an AI gateway.\",\"datePublished\":\"2026-11-04\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"mainEntityOfPage\":\"https://taodock.com/compare/taodock-vs-litellm\",\"author\":{\"@type\":\"Organization\",\"name\":\"TaoDock\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"TaoDock\",\"url\":\"https://taodock.com\"}}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"Is LiteLLM a hosted model provider?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"LiteLLM is an open-source SDK and gateway that connects to model providers configured by its operator. A team normally supplies provider credentials and runs or purchases the surrounding service. TaoDock exposes a hosted catalog and account experience at taodock.com.\"}},{\"@type\":\"Question\",\"name\":\"Can an application switch between TaoDock and LiteLLM by changing the base URL?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"A basic OpenAI-compatible chat integration may need only a base URL, key and model change, but production migration must also verify model IDs, supported parameters, streaming, tool calls, errors, retries and usage accounting.\"}},{\"@type\":\"Question\",\"name\":\"Which option gives more infrastructure control?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"A self-hosted LiteLLM deployment gives the operating team direct control over its gateway configuration and provider credentials. TaoDock users consume the policies and upstream catalog configured by the TaoDock platform operator.\"}},{\"@type\":\"Question\",\"name\":\"Which option requires less gateway operations work?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Using hosted TaoDock avoids operating the gateway stack. Self-hosting LiteLLM requires deployment, upgrades, database and cache decisions, monitoring, backups and incident response, although managed LiteLLM offerings can change that trade-off.\"}}]}"
+      ]
+    },
+    {
+      "kind": "comparison",
+      "slug": "taodock-vs-openrouter",
+      "path": "/compare/taodock-vs-openrouter",
+      "title": "TaoDock vs OpenRouter: Choosing a Unified AI API Gateway",
+      "description": "Compare TaoDock and OpenRouter across model access, deployment, routing, API keys, usage records and billing to choose the right AI gateway for your team.",
+      "primaryKeyword": "TaoDock vs OpenRouter",
+      "cluster": "AI gateway comparisons",
+      "subject": "OpenRouter",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "OpenRouter pricing and plan features",
+          "url": "https://openrouter.ai/pricing/"
+        },
+        {
+          "label": "OpenRouter provider directory",
+          "url": "https://openrouter.ai/providers/"
+        },
+        {
+          "label": "TaoDock model catalog",
+          "url": "https://taodock.com/models"
+        },
+        {
+          "label": "TaoDock API integration guide",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        }
+      ],
+      "related": [
+        "/compare/taodock-vs-requesty",
+        "/compare/taodock-vs-siliconflow",
+        "/integrations/openai-sdk",
+        "/models"
+      ],
+      "steps": [],
+      "faqItems": [
+        {
+          "question": "Is TaoDock an OpenRouter drop-in replacement?",
+          "answer": "Both expose OpenAI-compatible model access, but model IDs, supported endpoints, account controls and provider behavior differ. Treat a move as a short migration: list the models available to the new key, update the base URL and model ID, then verify streaming, tools and billing with real requests."
+        },
+        {
+          "question": "Which platform is easier for a small application?",
+          "answer": "OpenRouter is attractive when the priority is immediate access to a broad hosted marketplace. TaoDock is attractive when the application also needs TaoDock account quotas, dedicated keys, request records and the platform's configured routing and billing controls."
+        },
+        {
+          "question": "Can I compare prices from this page?",
+          "answer": "Use each platform's live pricing page. Model availability, provider selection, platform plans and group rules can change, so this guide deliberately avoids copying volatile prices into a permanent comparison table."
+        },
+        {
+          "question": "Do both work with the OpenAI SDK?",
+          "answer": "Both document OpenAI-compatible access. Compatibility is endpoint- and model-specific, so verify the exact API path, streaming format, tool support and model ID required by your application."
+        }
+      ],
+      "draft": false,
+      "body": "## The short answer\n\nTaoDock and OpenRouter both reduce the work required to connect an application to multiple AI models, but they approach the problem from different operating models. OpenRouter is primarily a hosted model marketplace and routing service: a developer funds one account, uses one API surface, and selects from the providers and model variants available through that service. TaoDock is a unified AI API platform with a public model catalog plus account, key, quota, usage and administrative controls built around the gateway.\n\nChoose OpenRouter when the main goal is broad hosted model discovery with provider-aware routing and a single commercial relationship. Choose TaoDock when you want the gateway experience to include end-user accounts, dedicated application keys, configurable quotas, request records and the billing behavior exposed by the TaoDock deployment. Neither choice is universally better. The deciding question is whether your team mainly needs a model marketplace or a gateway-centered application and account platform.\n\n## Product model and ownership\n\nOpenRouter operates as a managed service. Your application sends requests to OpenRouter, and OpenRouter applies the provider selection, policies and commercial rules associated with your account and plan. Its official provider directory is useful when provider-level data handling, regional location or bring-your-own-key support influences a decision.\n\nTaoDock also offers a hosted API at `https://taodock.com/v1`, but its visible product surface is broader than a model list. Users register, create separate API keys, select permitted models and groups, monitor request records and manage quota inside the same platform. For a team building on the hosted TaoDock service, that can reduce the number of separate account and usage systems needed around the model gateway.\n\nThis difference affects responsibility. A managed marketplace optimizes for choosing models and providers without running the gateway. A gateway platform with account and billing controls optimizes for connecting applications and users through the rules configured by the platform operator. Review who owns provider credentials, who sets model access and who supports downstream users before comparing individual feature checkboxes.\n\n## API compatibility and model identifiers\n\nBoth products support OpenAI-compatible requests, so a conventional integration often starts by changing the base URL, API key and model name. That similarity should not be mistaken for identical behavior. A model ID on one platform may not exist on the other, and the same model family can be backed by different provider variants, context limits or supported endpoints.\n\nFor TaoDock, request `GET /v1/models` with the intended API key and copy an exact returned ID. The public [model catalog](/models) helps with discovery, but the key-specific model list is the operational source for an application. Then verify the endpoint advertised for that model. Chat Completions, Anthropic Messages, image generation and task-style APIs are separate capabilities; a familiar model name does not make every protocol interchangeable.\n\nFor OpenRouter, use its current model and provider documentation to select the desired route. If an application depends on provider preferences, data policies or automatic routing, reproduce those requirements explicitly rather than assuming a base URL change preserves them.\n\n## Routing and resilience\n\nOpenRouter exposes routing choices that can select or prioritize providers for a model. Its plan page also distinguishes features such as auto-routing, preferred vendors and data-policy routing. These are important when the same model is served by several providers and the developer wants the managed platform to make provider-level decisions.\n\nTaoDock routes through channels configured by its platform administrators. Channel priority, model mapping, availability, user groups and platform policies determine which upstream is used. From the application perspective, the stable contract is the TaoDock model ID and supported endpoint. The operational team controls the upstream configuration behind that contract.\n\nIf resilience is the reason for evaluating a gateway, test failure behavior rather than only reading a feature name. Use a staging key and confirm how each product handles provider timeouts, rate limits, streaming failures and retries. Automatic retries can help before response bytes are sent, but replaying a partially streamed or tool-executing request can create duplicate work. Your application should still use request identifiers, bounded retries and clear timeout rules.\n\n## Keys, quotas and team controls\n\nOpenRouter plan features include workspace, budget and administrative capabilities that vary by plan. Check the live plan matrix because limits and commercial packaging can change. If you use bring-your-own keys, verify the current allowances and fees rather than relying on an old comparison article.\n\nTaoDock users can create dedicated API keys for separate applications and apply quota, expiration, model and network restrictions offered by the console. The account balance and a key's own quota are distinct controls. This is useful when a developer wants to isolate a desktop client, backend service and experimental agent instead of sharing one credential everywhere.\n\nNeither platform removes the need for credential hygiene. Keep keys in environment variables or a server-side secret store, do not ship them in browser bundles, and revoke a key when it is exposed. Use a different key per application so a compromised integration can be disabled without interrupting unrelated workloads.\n\n## Usage records and billing\n\nOpenRouter publishes its current platform plans and model prices. TaoDock publishes model prices and shows the request consumption recorded for the user's account. In both cases, model price is only one part of the bill: provider route, cache behavior, input and output size, image or task units, account group and product plan can affect the final amount.\n\nDo not select a gateway from a copied price table. Compare the live price for the exact model and route on the day of testing. Send representative prompts, record token or task usage, and reconcile the resulting charge with the platform's request record. That exercise also exposes differences in token accounting, cache reporting and error charging that a marketing table cannot capture.\n\nTaoDock's account-oriented logs are particularly relevant when individual users or applications need their own keys and quotas. OpenRouter's activity and export capabilities may be a better fit when the team wants provider-marketplace analytics within the OpenRouter workspace. Evaluate the retention and export behavior required by your support and finance processes.\n\n## Decision matrix\n\n| Decision area    | TaoDock                                                           | OpenRouter                                         | Question to ask                                                |\n| ---------------- | ----------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------- |\n| Operating model  | Hosted unified gateway with user, key, quota and billing surfaces | Managed model marketplace and router               | Do you need a model marketplace, an account platform, or both? |\n| Model discovery  | Public catalog plus key-specific `/v1/models`                     | Hosted model and provider directories              | Which exact IDs and endpoints does the application require?    |\n| Provider control | Controlled by TaoDock channel configuration                       | Provider and routing options exposed by OpenRouter | Who should own provider selection and policy?                  |\n| Credentials      | Dedicated TaoDock application keys                                | OpenRouter keys and plan-dependent BYOK options    | How will keys be separated, rotated and revoked?               |\n| Usage control    | Account balance, key quota and platform group rules               | Plan-dependent budgets and workspace controls      | Where must spend limits be enforced?                           |\n| Operations       | Request logs and platform administration                          | Managed service activity and provider routing      | Which team investigates failures and billing questions?        |\n\n## When TaoDock is the stronger fit\n\nTaoDock is a strong candidate when the desired outcome includes an end-user console, application-specific API keys, quota controls, request records and a catalog governed by the platform operator. It also fits users who want to connect supported desktop clients or the OpenAI SDK to the same account and then review usage in one console.\n\nIt is not enough to say that TaoDock supports many upstreams. The practical advantage appears when the configured catalog, model groups and account controls match the organization using the service. Confirm the available models and protocols with a real key before committing an application.\n\n## When OpenRouter is the stronger fit\n\nOpenRouter is a strong candidate when a developer wants a managed marketplace with extensive model and provider discovery, provider-level routing options and a single hosted API account. Teams that do not want to operate gateway infrastructure or build their own provider-selection layer can value that specialization.\n\nIts commercial and administrative features differ by plan, so review the current official matrix. Provider data policies also matter: select providers and routing settings that satisfy the application's privacy, regional and retention requirements.\n\n## A safe migration test\n\nCreate a dedicated non-production key on the target platform. List models available to that key, choose the exact replacement ID and update only the base URL, credential and model configuration in a staging environment. Run a short non-streaming request, a streaming request, a tool call if used, and a realistic long prompt. Confirm the response shape, latency, usage record and charge.\n\nNext, test an unavailable model, invalid key, exhausted quota, provider timeout and client cancellation. Record which errors are safe to retry. Only then move production traffic gradually, retaining the previous configuration long enough to compare logs and roll back. This process is more reliable than treating OpenAI compatibility as proof of identical runtime behavior.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"AI gateway comparisons\",\"item\":\"https://taodock.com/compare\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"TaoDock vs OpenRouter: Choosing a Unified AI API Gateway\",\"item\":\"https://taodock.com/compare/taodock-vs-openrouter\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"TaoDock vs OpenRouter: Choosing a Unified AI API Gateway\",\"description\":\"Compare TaoDock and OpenRouter across model access, deployment, routing, API keys, usage records and billing to choose the right AI gateway for your team.\",\"datePublished\":\"2026-11-04\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"mainEntityOfPage\":\"https://taodock.com/compare/taodock-vs-openrouter\",\"author\":{\"@type\":\"Organization\",\"name\":\"TaoDock\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"TaoDock\",\"url\":\"https://taodock.com\"}}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"Is TaoDock an OpenRouter drop-in replacement?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Both expose OpenAI-compatible model access, but model IDs, supported endpoints, account controls and provider behavior differ. Treat a move as a short migration: list the models available to the new key, update the base URL and model ID, then verify streaming, tools and billing with real requests.\"}},{\"@type\":\"Question\",\"name\":\"Which platform is easier for a small application?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"OpenRouter is attractive when the priority is immediate access to a broad hosted marketplace. TaoDock is attractive when the application also needs TaoDock account quotas, dedicated keys, request records and the platform's configured routing and billing controls.\"}},{\"@type\":\"Question\",\"name\":\"Can I compare prices from this page?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Use each platform's live pricing page. Model availability, provider selection, platform plans and group rules can change, so this guide deliberately avoids copying volatile prices into a permanent comparison table.\"}},{\"@type\":\"Question\",\"name\":\"Do both work with the OpenAI SDK?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Both document OpenAI-compatible access. Compatibility is endpoint- and model-specific, so verify the exact API path, streaming format, tool support and model ID required by your application.\"}}]}"
+      ]
+    },
+    {
+      "kind": "comparison",
+      "slug": "taodock-vs-portkey",
+      "path": "/compare/taodock-vs-portkey",
+      "title": "TaoDock vs Portkey: AI Model Access or Enterprise Control",
+      "description": "Compare TaoDock with Portkey across unified model access, routing, observability, guardrails, governance, API keys, billing and deployment priorities.",
+      "primaryKeyword": "TaoDock vs Portkey",
+      "cluster": "AI gateway comparisons",
+      "subject": "Portkey",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "Portkey AI Gateway",
+          "url": "https://portkey.ai/features/ai-gateway"
+        },
+        {
+          "label": "Portkey guardrails",
+          "url": "https://portkey.ai/features/guardrails"
+        },
+        {
+          "label": "TaoDock API integration guide",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        },
+        {
+          "label": "TaoDock model catalog",
+          "url": "https://taodock.com/models"
+        }
+      ],
+      "related": [
+        "/compare/taodock-vs-litellm",
+        "/compare/taodock-vs-requesty",
+        "/integrations/openai-sdk",
+        "/models"
+      ],
+      "steps": [],
+      "faqItems": [
+        {
+          "question": "Are TaoDock and Portkey designed for the same buyer?",
+          "answer": "They overlap at the AI gateway layer, but their emphasis differs. TaoDock combines model access with user accounts, keys, quotas and billing. Portkey emphasizes production gateway controls, observability, guardrails and enterprise governance."
+        },
+        {
+          "question": "Does TaoDock replace Portkey guardrails and observability?",
+          "answer": "Do not assume so. TaoDock provides request records and gateway controls, while Portkey documents a broader guardrail and observability product surface. List each required control and verify it in the current product before migrating."
+        },
+        {
+          "question": "Can Portkey route to a TaoDock-compatible endpoint?",
+          "answer": "Portkey documents custom hosts and unified API routing, but compatibility depends on the selected protocol and configuration. Test with a restricted key and confirm that authorization, paths, streaming and usage reporting behave as intended."
+        },
+        {
+          "question": "Which is simpler for an individual developer?",
+          "answer": "TaoDock is usually the more direct path when the developer wants a hosted model catalog, account balance and application key. Portkey becomes relevant when the application needs a dedicated production control plane around multiple model providers."
+        }
+      ],
+      "draft": false,
+      "body": "## Start with the job to be done\n\nTaoDock and Portkey both sit between applications and AI models, but their primary jobs are different. TaoDock provides unified model access together with user registration, API keys, quotas, request records and platform billing. Portkey presents an enterprise-oriented AI gateway and control plane with routing, observability, guardrails, key management and governance capabilities.\n\nAs of this page's review date, the official Portkey gateway page says the product is now PRISMA AIRS AI Gateway. This guide keeps the familiar Portkey name because it remains the comparison query and appears throughout existing integrations, while current packaging and commercial details should be checked on the official page.\n\nThat distinction matters more than a raw feature count. A developer who wants one account and key for available chat, image, audio or task models has a different problem from a platform team standardizing how hundreds of applications call provider accounts under shared security and observability policies.\n\nChoose TaoDock when the public model catalog and account workflow are the product you need. Evaluate Portkey when the organization already has model providers and needs a production control layer around traffic, safety, policy and operations. Some architectures can use both layers, but every additional gateway adds latency, failure modes and another place to investigate billing.\n\n## Product scope\n\nTaoDock exposes a model square, console and API. Users create credentials, see the models and protocols available to their group, send requests and review consumption. Platform administrators configure upstream channels, mappings, priorities, user groups and pricing. The hosted user consumes that configured service rather than assembling providers independently.\n\nPortkey's official material positions its gateway as part of a production stack that includes observability, guardrails, governance and prompt-related workflows. It documents routing features such as fallbacks, retries, load balancing and conditional routing, plus key management and caching. Its current branding and packaging may change, so use the official site when evaluating plans or enterprise deployment choices.\n\nThe result is a different center of gravity. TaoDock centers the model-access account and billing experience. Portkey centers the platform controls applied to model and agent traffic. Compare only the capabilities required by your workload; buying a larger control plane does not automatically improve a simple integration.\n\n## Model access and provider ownership\n\nWith TaoDock, the platform operator selects and configures upstream channels. The user sees the resulting catalog and obtains model IDs from the public [pricing page](/models) or the key-specific `/v1/models` endpoint. This reduces provider onboarding for the user but limits choices to what the service exposes.\n\nPortkey is typically configured in front of provider accounts or custom model hosts selected by the organization. Its value is applying a common gateway configuration to those targets. That is useful when the company already has commercial agreements, private endpoints or region-specific deployments that must remain under its control.\n\nAsk who owns the provider relationship. If the answer is the end user who wants a ready-made catalog, TaoDock aligns naturally. If the answer is a central platform team that must govern its own provider accounts, Portkey's operating model may be closer.\n\n## Routing and reliability\n\nPortkey documents conditional routing, fallbacks, automatic retries and load balancing. These controls are designed for teams that want gateway-level policies across provider targets. Caching and batching can also change cost and latency characteristics when they are suitable for the request pattern.\n\nTaoDock routes through configured channel priorities and model mappings. An application uses the public model ID while the service determines the eligible upstream channel. This hides provider configuration from the user and lets the operator change routing without requiring every client to adopt a new provider SDK.\n\nBoth approaches need workload-specific testing. A retry is safe only when the request has not produced irreversible effects or partial output. Semantic caching is appropriate only when response reuse is valid for the prompt, user and policy context. Conditional routing must not send restricted data to an ineligible region or provider. Write these constraints before configuring either gateway.\n\n## Observability and request records\n\nPortkey emphasizes detailed observability for production AI traffic, including metrics and traces used to diagnose latency, errors, cost and model behavior. Its enterprise positioning is relevant when platform and security teams require centralized investigation across many applications.\n\nTaoDock provides request and usage logs tied to the user's account and API keys. These records help a developer confirm which model was called, how usage was calculated and what consumption was recorded. They support the operational workflow of the hosted platform but should not be assumed to provide every trace, evaluation or export feature of a dedicated observability product.\n\nDefine the questions your team must answer during an incident. If it only needs to find a failed request, status, model and charge, TaoDock's records may be sufficient. If it needs distributed traces across agents, prompts, guardrail decisions and downstream tools, evaluate Portkey's current observability features and any external integrations.\n\n## Guardrails and governance\n\nPortkey documents input and output guardrails, including controls intended for prompt injection, sensitive information and policy enforcement. It also presents organization-wide governance features. These are meaningful for regulated or large-scale deployments, but they must be configured, tested and monitored; the presence of a catalog of guardrails is not proof that every risk is handled.\n\nTaoDock should be evaluated primarily as the model access, account and billing gateway described by its current product. Request policies and access restrictions can reduce exposure, but do not market them as equivalent to a dedicated enterprise guardrail suite without verifying the exact control.\n\nIf guardrails are mandatory, create a requirements matrix with the protected data, enforcement point, failure action, logging requirement and bypass tests. Run adversarial and false-positive cases against the chosen product. Keep application-level authorization and data minimization even when a gateway performs content checks.\n\n## Keys, users and billing\n\nTaoDock exposes self-service user accounts and dedicated API keys. Keys can carry the quota, expiration, model and network restrictions available in the console. Users operate against a TaoDock balance and the pricing rules shown by the platform. This model is convenient when the gateway must also function as a service portal.\n\nPortkey documents virtual keys and centralized provider-key management. These controls are aimed at organizations distributing access to applications and teams while keeping provider secrets out of application code. Commercial plans and enterprise identity features should be checked directly because packaging changes.\n\nThe billing workflows also differ. TaoDock settles usage under its platform pricing. A Portkey deployment may track cost while the organization remains responsible for provider invoices and its Portkey plan. Compare the complete cost of service, including provider spend, gateway fees, operational staff, observability retention and support.\n\n## Decision matrix\n\n| Decision area      | TaoDock                                                | Portkey                                                      | Question to ask                                                          |\n| ------------------ | ------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------ |\n| Primary job        | Hosted model access, accounts, keys, quota and billing | Production gateway, observability, guardrails and governance | Are you selling/consuming access or governing existing provider traffic? |\n| Provider ownership | Platform-configured upstreams                          | Organization-configured providers and targets                | Who owns provider credentials and contracts?                             |\n| Routing            | Channel priority and model mapping managed by TaoDock  | Explicit gateway configurations and routing strategies       | Who designs and tests routing policy?                                    |\n| Visibility         | User request and consumption records                   | Production observability and tracing product                 | What incident questions must the logs answer?                            |\n| Safety             | Platform access and request controls                   | Dedicated guardrail catalog and policy workflows             | Which controls are mandatory and testable?                               |\n| Billing            | TaoDock account and model pricing                      | Provider invoices plus gateway plan and tracking             | Which team reconciles spend?                                             |\n\n## When TaoDock is the clearer choice\n\nTaoDock is the clearer choice when a user wants to sign up, create a key and call models from an existing catalog without bringing provider accounts or operating a gateway control plane. It also fits service scenarios that need user quotas, platform billing and straightforward client integrations.\n\nConfirm that the available model, endpoint and service terms meet the application. A simpler product is valuable only when it covers the required contract.\n\n## When Portkey is the clearer choice\n\nPortkey is the clearer choice when an organization is building a central AI platform across existing provider accounts and needs advanced routing, observability, guardrails or enterprise governance. The additional product surface is justified when those controls are required across many teams and workloads.\n\nTreat enterprise claims as inputs to a proof of concept. Verify data residency, identity integration, failure behavior, guardrail enforcement, export, retention and support in the exact plan under consideration.\n\n## Migration and layered architectures\n\nFor a migration, inventory the current model endpoints, provider credentials, routing policies, safety controls, logs and billing responsibilities. Recreate the smallest viable configuration on the target. Use non-production keys and sanitized prompts, then test ordinary responses, streams, tools, errors, timeouts and policy failures.\n\nFor a layered architecture, document which gateway authenticates the application, which one owns retries and routing, which one records the authoritative usage and how request IDs cross the boundary. Avoid enabling retries or caching independently at both layers without understanding duplication. Measure the added latency and define a single incident owner before moving production traffic.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"AI gateway comparisons\",\"item\":\"https://taodock.com/compare\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"TaoDock vs Portkey: AI Model Access or Enterprise Control\",\"item\":\"https://taodock.com/compare/taodock-vs-portkey\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"TaoDock vs Portkey: AI Model Access or Enterprise Control\",\"description\":\"Compare TaoDock with Portkey across unified model access, routing, observability, guardrails, governance, API keys, billing and deployment priorities.\",\"datePublished\":\"2026-11-04\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"mainEntityOfPage\":\"https://taodock.com/compare/taodock-vs-portkey\",\"author\":{\"@type\":\"Organization\",\"name\":\"TaoDock\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"TaoDock\",\"url\":\"https://taodock.com\"}}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"Are TaoDock and Portkey designed for the same buyer?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"They overlap at the AI gateway layer, but their emphasis differs. TaoDock combines model access with user accounts, keys, quotas and billing. Portkey emphasizes production gateway controls, observability, guardrails and enterprise governance.\"}},{\"@type\":\"Question\",\"name\":\"Does TaoDock replace Portkey guardrails and observability?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Do not assume so. TaoDock provides request records and gateway controls, while Portkey documents a broader guardrail and observability product surface. List each required control and verify it in the current product before migrating.\"}},{\"@type\":\"Question\",\"name\":\"Can Portkey route to a TaoDock-compatible endpoint?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Portkey documents custom hosts and unified API routing, but compatibility depends on the selected protocol and configuration. Test with a restricted key and confirm that authorization, paths, streaming and usage reporting behave as intended.\"}},{\"@type\":\"Question\",\"name\":\"Which is simpler for an individual developer?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"TaoDock is usually the more direct path when the developer wants a hosted model catalog, account balance and application key. Portkey becomes relevant when the application needs a dedicated production control plane around multiple model providers.\"}}]}"
+      ]
+    },
+    {
+      "kind": "comparison",
+      "slug": "taodock-vs-requesty",
+      "path": "/compare/taodock-vs-requesty",
+      "title": "TaoDock vs Requesty: Comparing Hosted AI Model Routers",
+      "description": "Compare TaoDock and Requesty across hosted model access, routing, caching, bring-your-own keys, analytics, quotas, billing and integration workflow.",
+      "primaryKeyword": "TaoDock vs Requesty",
+      "cluster": "AI gateway comparisons",
+      "subject": "Requesty",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "Requesty quickstart and product capabilities",
+          "url": "https://docs.requesty.ai/"
+        },
+        {
+          "label": "TaoDock API integration guide",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        },
+        {
+          "label": "TaoDock API key guide",
+          "url": "https://docs.taodock.com/en/guide/keys.html"
+        }
+      ],
+      "related": [
+        "/compare/taodock-vs-openrouter",
+        "/compare/taodock-vs-portkey",
+        "/integrations/openai-sdk",
+        "/models"
+      ],
+      "steps": [],
+      "faqItems": [
+        {
+          "question": "Are TaoDock and Requesty both managed services?",
+          "answer": "Both provide hosted API access, but their account models and feature emphasis differ. Requesty documents routing, caching, analytics and bring-your-own keys, while TaoDock combines its configured catalog with user keys, quotas, request logs and platform billing."
+        },
+        {
+          "question": "Does Requesty use the same model IDs as TaoDock?",
+          "answer": "Do not assume so. List the models available to the intended key on each platform and update the application's model configuration during migration."
+        },
+        {
+          "question": "Which platform should I use for provider-owned discounts?",
+          "answer": "Requesty documents bring-your-own-key support for using provider accounts. TaoDock users normally consume the pricing and upstream routes configured by TaoDock. Verify current commercial terms on both services before deciding."
+        },
+        {
+          "question": "How should I compare automatic caching?",
+          "answer": "Test it with prompts that are safe to reuse and confirm cache scope, isolation, expiry, reporting and pricing. Never assume a cache is appropriate for user-specific, sensitive or rapidly changing responses."
+        }
+      ],
+      "draft": false,
+      "body": "## Two hosted routes to a unified API\n\nTaoDock and Requesty both offer a hosted path from an application to multiple AI models. A developer can use a common API shape instead of maintaining a separate provider SDK and credential for every model family. The similarities make them easy to place in the same shortlist, but their operating and billing choices deserve a closer look.\n\nRequesty presents itself as a model router with fallback, caching, analytics, load balancing, bring-your-own keys and a unified bill. TaoDock presents a unified gateway with a public model catalog, user accounts, application keys, quotas, request records and platform billing. The right option depends on whether provider-level routing and BYOK are central requirements or whether the account-and-catalog experience is the main need.\n\nUse this guide to frame a proof of concept. Do not choose from a copied provider count or price claim; both products can change their catalog and commercial terms after publication.\n\n## Account and provider model\n\nTaoDock users create an account on the platform, fund or manage quota, create one or more API keys and call the models available to their group. Upstream channels and provider credentials are configured by the TaoDock operator. The user works with the resulting catalog and pricing rather than connecting each provider account.\n\nRequesty documents both unified access and bring-your-own-key behavior. BYOK matters when an organization wants to retain provider discounts, committed use, data agreements or direct account ownership while adding a routing layer. It also creates a two-party operational model: the team must understand which failures or charges belong to the provider account and which belong to the router.\n\nAsk whether the application needs its own provider contracts. If not, a platform catalog and unified account can be simpler. If yes, confirm every required provider and feature is supported by the BYOK path, and verify how provider credentials are stored, rotated and scoped.\n\n## Models and API compatibility\n\nBoth services document OpenAI-compatible usage. For a basic chat application, migration often changes three values: base URL, API key and model name. Production compatibility requires more evidence. Model identifiers differ, and a model exposed by one platform can use a different provider route or parameter set on the other.\n\nOn TaoDock, use `GET /v1/models` with the intended key and copy an exact ID. Check the model details for supported endpoints and current pricing. On Requesty, use its current model documentation and the model names available to the account. Then run the same requests through both services.\n\nInclude non-streaming and streaming chat, tools, structured outputs, image or audio input if applicable, cancellation and error fixtures. An OpenAI-compatible response shape does not guarantee identical optional fields, token accounting or provider extensions.\n\n## Routing, fallback and load balancing\n\nRequesty documents automatic fallback and load balancing across providers, including routing based on factors such as cost, latency or configured weights. This is attractive when the application wants the managed router to choose among several targets and continue through some provider failures.\n\nTaoDock routes through the channel priorities, model mappings and groups configured by the platform. The application calls a TaoDock model ID, and the operator controls eligible upstream paths. Users generally do not define per-request provider routing through the public console.\n\nFor either service, test failure semantics. A fallback from one provider to another may change response style, context limits or supported tools even if the public model name appears equivalent. A retry after partial streaming can duplicate tokens or actions. Define acceptable substitutes and safe retry points before enabling automatic behavior.\n\n## Caching and response reuse\n\nRequesty highlights automatic caching as a cost and latency feature. Caching can be valuable for repeated, deterministic prompts, but it needs clear isolation and freshness rules. Ask how keys, users, organizations, model parameters and system prompts affect the cache key. Verify expiry, bypass behavior, reporting and whether cached responses receive the same policy checks as fresh responses.\n\nTaoDock model pricing can include provider cache behavior where supported, and request logs can report relevant usage, but that is different from assuming an application-level semantic response cache. Consult the exact model and gateway behavior rather than applying Requesty's caching claim to TaoDock.\n\nDo not cache personalized, sensitive or time-dependent output solely to reduce cost. If caching is required, include it in the threat model and functional tests.\n\n## Keys, quotas and access\n\nTaoDock exposes self-service API-key controls. A user can create a key per application and apply supported expiration, quota, model and IP restrictions. The key quota is separate from the overall account balance, allowing a limited credential for a desktop client or experiment.\n\nRequesty documents API keys, groups and organization management capabilities. Evaluate how those controls map to your team structure and plan. If BYOK is used, also restrict the underlying provider credential so a compromise of the router configuration does not grant broader access than necessary.\n\nBoth services should receive server-side credentials, not keys embedded in public frontend code. Keep a rotation process and attach a non-secret application identifier to logs so the team can trace usage without recording the key itself.\n\n## Analytics, usage and billing\n\nRequesty documents spend, latency and error analytics by dimensions such as key, user, model or project. It also states that hosted usage is billed without a token markup and that BYOK retains provider pricing; verify the current official terms and any plan fees at the time of purchase.\n\nTaoDock records request usage and consumption under its configured model prices and group rules. Users can compare the public catalog with the charge recorded for a real request. This creates a single platform balance and support path, but it is not the same commercial model as bringing a provider account.\n\nCompare total cost rather than one token price. Include router plan fees, provider commitments, cache hit behavior, failed-request policy, support and the engineering time required to reconcile invoices. Use representative prompts and record actual charges from both systems.\n\n## Decision matrix\n\n| Decision area | TaoDock                                          | Requesty                                              | Question to ask                                 |\n| ------------- | ------------------------------------------------ | ----------------------------------------------------- | ----------------------------------------------- |\n| Access model  | Hosted TaoDock catalog and platform balance      | Hosted router with unified access and documented BYOK | Do you need direct provider accounts?           |\n| Routing       | Operator-managed channels and priorities         | Managed fallbacks and load balancing                  | Who chooses provider routes?                    |\n| Caching       | Depends on configured model/provider behavior    | Automatic caching is a named product feature          | Is response reuse safe and measurable?          |\n| Keys          | Self-service application keys and quota controls | Keys, groups and organization management              | Which scopes must be enforced?                  |\n| Analytics     | User request and consumption logs                | Spend, latency and error analytics                    | What dimensions must support and finance query? |\n| Billing       | TaoDock price and group rules                    | Router terms plus hosted or BYOK provider charges     | Which commercial model is simpler to reconcile? |\n\n## When TaoDock fits better\n\nTaoDock fits when the desired workflow is to register, create a dedicated key, choose from an existing catalog and manage quota and request records without connecting provider accounts. It is especially direct for supported desktop clients and small applications that value one console.\n\nVerify that the catalog contains the required model and endpoint. A unified platform is useful only when its available routes meet the workload.\n\n## When Requesty fits better\n\nRequesty fits when managed fallback, load balancing, caching, detailed analytics or bring-your-own provider accounts are central to the architecture. Teams with provider commitments may value retaining those relationships while adding a shared router.\n\nValidate each feature in the intended plan and region. Test cache isolation, provider failover, BYOK errors and the attribution of usage between Requesty and the provider invoice.\n\n## Migration test plan\n\nCreate isolated staging keys. List models on each platform and choose an exact mapping rather than assuming names are portable. Run a fixed set of sanitized prompts and record response shape, time to first token, total latency, usage and charge. Include repeated prompts only if caching is part of the evaluation.\n\nThen inject failures: invalid credentials, unavailable models, quota exhaustion, provider timeouts, cancelled streams and unsupported tools. Confirm which layer returns the error and whether any retry or fallback occurred. Move production traffic gradually and keep a rollback configuration until logs and billing have been reconciled.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"AI gateway comparisons\",\"item\":\"https://taodock.com/compare\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"TaoDock vs Requesty: Comparing Hosted AI Model Routers\",\"item\":\"https://taodock.com/compare/taodock-vs-requesty\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"TaoDock vs Requesty: Comparing Hosted AI Model Routers\",\"description\":\"Compare TaoDock and Requesty across hosted model access, routing, caching, bring-your-own keys, analytics, quotas, billing and integration workflow.\",\"datePublished\":\"2026-11-04\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"mainEntityOfPage\":\"https://taodock.com/compare/taodock-vs-requesty\",\"author\":{\"@type\":\"Organization\",\"name\":\"TaoDock\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"TaoDock\",\"url\":\"https://taodock.com\"}}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"Are TaoDock and Requesty both managed services?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Both provide hosted API access, but their account models and feature emphasis differ. Requesty documents routing, caching, analytics and bring-your-own keys, while TaoDock combines its configured catalog with user keys, quotas, request logs and platform billing.\"}},{\"@type\":\"Question\",\"name\":\"Does Requesty use the same model IDs as TaoDock?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Do not assume so. List the models available to the intended key on each platform and update the application's model configuration during migration.\"}},{\"@type\":\"Question\",\"name\":\"Which platform should I use for provider-owned discounts?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Requesty documents bring-your-own-key support for using provider accounts. TaoDock users normally consume the pricing and upstream routes configured by TaoDock. Verify current commercial terms on both services before deciding.\"}},{\"@type\":\"Question\",\"name\":\"How should I compare automatic caching?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Test it with prompts that are safe to reuse and confirm cache scope, isolation, expiry, reporting and pricing. Never assume a cache is appropriate for user-specific, sensitive or rapidly changing responses.\"}}]}"
+      ]
+    },
+    {
+      "kind": "comparison",
+      "slug": "taodock-vs-siliconflow",
+      "path": "/compare/taodock-vs-siliconflow",
+      "title": "TaoDock vs SiliconFlow: Aggregated Gateway or Inference Cloud",
+      "description": "Compare TaoDock and SiliconFlow across provider aggregation, first-party inference, OpenAI-compatible APIs, model coverage, account controls, pricing and deployment.",
+      "primaryKeyword": "TaoDock vs SiliconFlow",
+      "cluster": "AI gateway comparisons",
+      "subject": "SiliconFlow",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "SiliconFlow platform overview",
+          "url": "https://docs.siliconflow.cn/docs/userguide/introduction"
+        },
+        {
+          "label": "SiliconFlow global pricing",
+          "url": "https://www.siliconflow.com/pricing"
+        },
+        {
+          "label": "TaoDock API integration guide",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        },
+        {
+          "label": "TaoDock model catalog",
+          "url": "https://taodock.com/models"
+        }
+      ],
+      "related": [
+        "/compare/taodock-vs-openrouter",
+        "/compare/taodock-vs-requesty",
+        "/integrations/openai-sdk",
+        "/models"
+      ],
+      "steps": [],
+      "faqItems": [
+        {
+          "question": "Is SiliconFlow an AI gateway like TaoDock?",
+          "answer": "SiliconFlow is primarily an inference cloud and model API platform with its own serving infrastructure and deployment products. TaoDock is a gateway that aggregates configured upstream channels and adds user, key, quota and billing controls."
+        },
+        {
+          "question": "Can the same OpenAI SDK code call both services?",
+          "answer": "A basic integration can often switch by changing the base URL, key and model ID. Verify each model's endpoint, supported parameters, streaming, tools and error behavior before treating the services as interchangeable."
+        },
+        {
+          "question": "Which is better for open-weight model inference?",
+          "answer": "SiliconFlow focuses directly on serving and deploying many open-weight models. TaoDock may expose SiliconFlow or other providers through its configured channels. Choose based on the exact model, route, region, price and operational ownership required."
+        },
+        {
+          "question": "Should I copy prices from a comparison article?",
+          "answer": "No. Both catalogs can change. Use the live pricing pages and reconcile the charge from representative requests on the day you evaluate the services."
+        }
+      ],
+      "draft": false,
+      "body": "## Different layers of the AI API stack\n\nTaoDock and SiliconFlow can both supply an API key and an OpenAI-compatible base URL, but they occupy different layers. SiliconFlow is an inference cloud and model API platform. Its official overview describes language, speech, image, video and vector capabilities, as well as reserved instances, inference acceleration and private deployment. TaoDock is a unified API gateway that connects configured upstream channels and adds user accounts, keys, quotas, logs and billing around the resulting catalog.\n\nChoose SiliconFlow when the primary requirement is direct access to models served by its inference platform or a SiliconFlow deployment product. Choose TaoDock when the goal is a gateway account that can aggregate models from different upstream types and present them through common user and billing controls.\n\nThe products can also appear in the same architecture: a TaoDock operator may configure a SiliconFlow channel, while applications call the TaoDock model ID. In that case, understand which layer is authoritative for credentials, retries, usage and support.\n\n## Provider aggregation versus inference service\n\nSiliconFlow develops and operates inference infrastructure. Users select from the models and modalities offered by its platform, and enterprise customers can evaluate dedicated or private deployment options. The provider relationship is direct: SiliconFlow is the service delivering the model API.\n\nTaoDock aggregates upstream channels selected by the platform operator. Those channels can represent commercial model APIs, cloud services, self-hosted endpoints and other compatible gateways. Users do not manage every upstream credential; they consume the catalog published by TaoDock.\n\nThis distinction changes the reason to buy. Direct inference is attractive when a specific hosted model, price, latency or deployment option is the priority. Aggregation is attractive when an application wants one account and credential across several upstream ecosystems, with consistent user and quota management.\n\n## Model and modality coverage\n\nSiliconFlow's official materials describe language, image, video, speech and vector models. Its current global and regional catalogs may differ, and models can be added, renamed or retired. Review the correct regional endpoint and live catalog for the account that will run production traffic.\n\nTaoDock also exposes several protocol families, but availability depends on the configured model and channel. A model shown in the public [model catalog](/models) should be checked against the exact endpoint it advertises. The key-specific `/v1/models` response is the practical list an application can call.\n\nDo not compare only the number of models. Identify the exact text, image, audio, video or embedding workload, required context length, tool behavior, output format and region. A shorter catalog that covers the tested workload can be more useful than a larger list without the required protocol.\n\n## API compatibility\n\nSiliconFlow documents OpenAI- and Anthropic-compatible conversation protocols for supported services. TaoDock exposes OpenAI-compatible endpoints and other protocols where its channels implement them. A basic SDK integration often uses the same client library with a different base URL and API key.\n\nCompatibility still varies by model. Optional sampling fields, reasoning output, tool schemas, image input, streaming events and usage fields can differ. Model IDs are service-specific. For example, an ID with a provider prefix on SiliconFlow may map to a different public name on TaoDock, or may not be available at all.\n\nUse contract tests. List models, send a minimal chat, stream a response, call one harmless tool, test structured output and exercise the maximum prompt shape the application expects. Preserve raw error status and request IDs for debugging, but never log credentials.\n\n## Routing and operational control\n\nWith SiliconFlow, routing inside the inference service is generally part of the provider's platform. The customer chooses the model or deployment product and consumes the resulting endpoint. Enterprise products may provide additional capacity and deployment controls; verify them in the current agreement.\n\nWith TaoDock, gateway administrators configure channels, priorities, model mappings and groups. The public model name can remain stable while the operator changes eligible upstreams. This separation is useful when the platform wants to manage provider diversity or expose different service groups to users.\n\nIf TaoDock routes to SiliconFlow, avoid ambiguous ownership. Decide whether TaoDock or the client retries failures, which service's request ID is retained, where model deprecations are communicated and which usage record is authoritative. Duplicate retry policies can multiply cost or side effects.\n\n## Accounts, keys and quota\n\nSiliconFlow users create platform API keys and consume the balance or commercial plan associated with that service. Spending limits and enterprise controls should be verified in the relevant regional product.\n\nTaoDock users can create separate keys for applications and apply supported quota, expiration, model and network restrictions. The user's overall balance and the individual key quota are separate. This is valuable when the same account connects a desktop client, an agent and a backend service that should not share one unrestricted credential.\n\nIn a layered TaoDock-to-SiliconFlow deployment, the application should receive only the TaoDock key. The upstream SiliconFlow credential belongs in the protected channel configuration, not in user code. Rotate both layers according to their different exposure and ownership.\n\n## Pricing and usage records\n\nSiliconFlow publishes live prices for the models and modalities offered by its service. TaoDock publishes the prices applied to its public catalog and records consumption for user requests. The prices should not be expected to match: TaoDock's route, group and platform rules can differ from a direct SiliconFlow account.\n\nCompare a complete workload. Text models may charge input, cached input and output separately. Image, video and audio models can use per-output, duration, character or task units. Request parameters can change the billable quantity. Send representative requests and reconcile both the returned usage and the account charge.\n\nAvoid permanently embedding model prices in application logic. Retrieve or review current catalog information and set budget alerts with enough margin for model and traffic changes.\n\n## Decision matrix\n\n| Decision area    | TaoDock                                   | SiliconFlow                                        | Question to ask                                               |\n| ---------------- | ----------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------- |\n| Product layer    | Multi-upstream gateway and service portal | Inference cloud and deployment platform            | Do you need aggregation or a direct inference provider?       |\n| Catalog          | Models configured across TaoDock channels | Models served by SiliconFlow                       | Which exact model, modality and region is required?           |\n| Credentials      | TaoDock user and application keys         | SiliconFlow platform keys                          | Who should own upstream credentials?                          |\n| Routing          | Gateway channel priority and mapping      | Provider-managed serving and deployment options    | Who controls provider selection and capacity?                 |\n| Usage            | TaoDock request and consumption records   | SiliconFlow usage and billing records              | Which record is authoritative for support?                    |\n| Commercial model | TaoDock prices and groups                 | Direct SiliconFlow pricing and enterprise products | Is direct provider pricing or unified billing more important? |\n\n## When TaoDock is the stronger fit\n\nTaoDock is stronger when the application wants one account and API key across a catalog assembled from multiple upstream types, with self-service key limits and platform request records. It also simplifies supported client integrations because the same credential can be used across tools without exposing provider keys.\n\nThe limitation is that users depend on TaoDock's configured catalog and routes. Verify model availability, current pricing and protocol support for the exact key.\n\n## When SiliconFlow is the stronger fit\n\nSiliconFlow is stronger when its inference catalog, serving performance, direct pricing, reserved capacity or private deployment options are the primary requirements. A team that only needs SiliconFlow models may not benefit from an additional aggregation layer.\n\nThe limitation is provider concentration. If the application later needs models or account controls outside the SiliconFlow platform, it may add another provider integration or gateway.\n\n## Migration and layered deployment\n\nTo migrate, map each production model to an exact target ID and endpoint. Change the base URL, key and model only in a staging environment. Test streaming, tools, multimodal input, errors, cancellation and usage. Compare latency and charges with enough requests to capture normal variation.\n\nFor a layered deployment, use a restricted TaoDock key for the application and a protected SiliconFlow credential in the channel. Propagate non-secret request identifiers, define one retry owner and monitor both usage records during rollout. Document how a SiliconFlow model retirement or regional outage is reflected in the TaoDock catalog and communicated to users.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"AI gateway comparisons\",\"item\":\"https://taodock.com/compare\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"TaoDock vs SiliconFlow: Aggregated Gateway or Inference Cloud\",\"item\":\"https://taodock.com/compare/taodock-vs-siliconflow\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"TaoDock vs SiliconFlow: Aggregated Gateway or Inference Cloud\",\"description\":\"Compare TaoDock and SiliconFlow across provider aggregation, first-party inference, OpenAI-compatible APIs, model coverage, account controls, pricing and deployment.\",\"datePublished\":\"2026-11-04\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"mainEntityOfPage\":\"https://taodock.com/compare/taodock-vs-siliconflow\",\"author\":{\"@type\":\"Organization\",\"name\":\"TaoDock\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"TaoDock\",\"url\":\"https://taodock.com\"}}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"Is SiliconFlow an AI gateway like TaoDock?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"SiliconFlow is primarily an inference cloud and model API platform with its own serving infrastructure and deployment products. TaoDock is a gateway that aggregates configured upstream channels and adds user, key, quota and billing controls.\"}},{\"@type\":\"Question\",\"name\":\"Can the same OpenAI SDK code call both services?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"A basic integration can often switch by changing the base URL, key and model ID. Verify each model's endpoint, supported parameters, streaming, tools and error behavior before treating the services as interchangeable.\"}},{\"@type\":\"Question\",\"name\":\"Which is better for open-weight model inference?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"SiliconFlow focuses directly on serving and deploying many open-weight models. TaoDock may expose SiliconFlow or other providers through its configured channels. Choose based on the exact model, route, region, price and operational ownership required.\"}},{\"@type\":\"Question\",\"name\":\"Should I copy prices from a comparison article?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"No. Both catalogs can change. Use the live pricing pages and reconcile the charge from representative requests on the day you evaluate the services.\"}}]}"
+      ]
+    },
+    {
+      "kind": "faq",
+      "slug": "faq",
+      "path": "/faq",
+      "title": "TaoDock AI API Frequently Asked Questions",
+      "description": "Answers about TaoDock accounts, API keys, OpenAI-compatible endpoints, models, quota, security, client setup, and common request errors.",
+      "primaryKeyword": "AI API FAQ",
+      "cluster": "TaoDock support",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "TaoDock API integration overview",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        },
+        {
+          "label": "TaoDock client guides",
+          "url": "https://docs.taodock.com/en/guide/clients.html"
+        }
+      ],
+      "related": [
+        "/integrations",
+        "/integrations/openai-sdk",
+        "/models",
+        "/compare"
+      ],
+      "steps": [],
+      "faqItems": [
+        {
+          "question": "How do I create a TaoDock account?",
+          "answer": "Open the sign-up page, complete the required registration and verification steps, then sign in. Registration availability and methods may depend on the current deployment settings."
+        },
+        {
+          "question": "Where do I create a TaoDock API key?",
+          "answer": "After signing in, open the API keys area and create a key. Give each application or environment its own key so permissions, quota, rotation, and revocation can be managed independently."
+        },
+        {
+          "question": "Can I recover the full value of an API key later?",
+          "answer": "Treat the value shown at creation as a secret and store it securely. If a usable key value is lost or exposed, revoke it and create a replacement instead of sharing or logging it."
+        },
+        {
+          "question": "What base URL should OpenAI-compatible clients use?",
+          "answer": "Most clients and SDKs should use https://taodock.com/v1. Some client presets, such as a host-oriented New API preset, may require https://taodock.com instead; follow the client-specific integration guide."
+        },
+        {
+          "question": "How do I find the correct model ID?",
+          "answer": "Use TaoDock's model page or call the /v1/models endpoint with the same API key. Copy the exact API ID returned to that key rather than guessing from a display name."
+        },
+        {
+          "question": "Does TaoDock support every OpenAI API endpoint and parameter?",
+          "answer": "No universal compatibility claim applies to every endpoint, field, model, and upstream provider. Check the API guide and test the exact endpoint, model, and optional parameters your application uses."
+        },
+        {
+          "question": "Why can my key see one model but not another?",
+          "answer": "Model visibility can depend on key restrictions, user group, configured channels, model availability, and deployment policy. Compare the key's permissions with the live model list."
+        },
+        {
+          "question": "What is the difference between account balance and key quota?",
+          "answer": "Account resources apply to the account, while a key can have a narrower usage limit. A request may be rejected by the key's limit even when the account still has available balance."
+        },
+        {
+          "question": "How are request charges determined?",
+          "answer": "Charges depend on the selected model, usage, pricing configuration, and applicable billing rules. Review the current pricing page and the request's usage record rather than relying on a permanent value in a tutorial."
+        },
+        {
+          "question": "What does a 401 error mean?",
+          "answer": "The API key is normally missing, invalid, disabled, expired, or sent to the wrong service. Recheck the Authorization value and base URL, and rotate the key if it may have been exposed."
+        },
+        {
+          "question": "What should I check for a 404 response?",
+          "answer": "Confirm the base URL and operation path, then verify the exact model ID. Avoid adding /v1 or a resource path twice when a client already appends it."
+        },
+        {
+          "question": "Why am I receiving a 429 or quota error?",
+          "answer": "Inspect whether the response represents rate limiting, account resources, or a key-level quota. Do not retry indefinitely; correct the limit or use bounded retries only for transient rate conditions."
+        },
+        {
+          "question": "Why does streaming work on one network but not another?",
+          "answer": "VPNs, reverse proxies, antivirus inspection, and corporate networks can buffer or terminate event streams. Compare a non-streaming request and a direct network before changing model or gateway settings."
+        },
+        {
+          "question": "Why do tools, images, or files fail when text chat works?",
+          "answer": "Basic chat compatibility does not prove advanced feature support. Confirm the exact model and channel support the request format and capability, then test the smallest feature-specific request."
+        },
+        {
+          "question": "Is it safe to put a TaoDock key in browser JavaScript?",
+          "answer": "No. Code delivered to a public browser exposes the key to visitors. Keep the key in a trusted backend or controlled local client and have the browser call your authenticated server."
+        },
+        {
+          "question": "Should a team share one API key?",
+          "answer": "Prefer separate keys per application, environment, team, or user boundary. Separate credentials improve least privilege, usage attribution, rotation, incident containment, and revocation."
+        },
+        {
+          "question": "Which desktop and self-hosted clients can connect to TaoDock?",
+          "answer": "OpenAI-compatible clients can often connect by changing their base URL, key, and model. TaoDock publishes guides for Cherry Studio, WorkBuddy, Open WebUI, AionUi, DeepChat, and SDK integrations."
+        },
+        {
+          "question": "What information should I include when troubleshooting a failed request?",
+          "answer": "Share the timestamp, endpoint, model, status, non-secret request identifier, client version, and a sanitized error. Never share API keys, Authorization headers, passwords, private prompts, or other credentials."
+        }
+      ],
+      "draft": false,
+      "body": "## Accounts and access\n\nTaoDock separates account access from API credentials. Sign in to manage keys, models, quota, and request records. Applications should use dedicated API keys instead of browser session credentials. A key can be narrowed to the models and usage appropriate for one workload, making it safer to rotate or revoke without disrupting unrelated systems.\n\nStore credentials in a secret manager or controlled client configuration. Never commit a key, place it in a public browser bundle, or copy it into screenshots and issue reports. If exposure is possible, revoke the key and replace it.\n\n## Models, protocols, and usage\n\nThe live model list is the authority for what a particular key can access. OpenAI compatibility makes common clients and SDKs easier to configure, but capabilities still vary by endpoint, model, channel, and request fields. Validate ordinary responses, streaming, errors, and every advanced feature your application relies on.\n\nQuota and pricing are operational settings rather than permanent tutorial facts. Check current pricing and the actual usage record for a request. Give development, staging, production, and independent clients separate keys so limits and activity remain understandable.\n\n## Diagnosing a request\n\nBegin with the smallest non-streaming text request using an exact model ID. Confirm the base URL, key status, permissions, and quota. Then add streaming, tools, images, files, or other optional fields one at a time. This sequence reveals whether the problem is connectivity, authentication, model access, or a particular feature.\n\nWhen requesting support, provide non-secret context: time, endpoint, model, status, request identifier, client version, and sanitized error. Remove keys, authorization headers, private prompt content, and personal data.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"FAQ\",\"item\":\"https://taodock.com/faq\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"How do I create a TaoDock account?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Open the sign-up page, complete the required registration and verification steps, then sign in. Registration availability and methods may depend on the current deployment settings.\"}},{\"@type\":\"Question\",\"name\":\"Where do I create a TaoDock API key?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"After signing in, open the API keys area and create a key. Give each application or environment its own key so permissions, quota, rotation, and revocation can be managed independently.\"}},{\"@type\":\"Question\",\"name\":\"Can I recover the full value of an API key later?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Treat the value shown at creation as a secret and store it securely. If a usable key value is lost or exposed, revoke it and create a replacement instead of sharing or logging it.\"}},{\"@type\":\"Question\",\"name\":\"What base URL should OpenAI-compatible clients use?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Most clients and SDKs should use https://taodock.com/v1. Some client presets, such as a host-oriented New API preset, may require https://taodock.com instead; follow the client-specific integration guide.\"}},{\"@type\":\"Question\",\"name\":\"How do I find the correct model ID?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Use TaoDock's model page or call the /v1/models endpoint with the same API key. Copy the exact API ID returned to that key rather than guessing from a display name.\"}},{\"@type\":\"Question\",\"name\":\"Does TaoDock support every OpenAI API endpoint and parameter?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"No universal compatibility claim applies to every endpoint, field, model, and upstream provider. Check the API guide and test the exact endpoint, model, and optional parameters your application uses.\"}},{\"@type\":\"Question\",\"name\":\"Why can my key see one model but not another?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Model visibility can depend on key restrictions, user group, configured channels, model availability, and deployment policy. Compare the key's permissions with the live model list.\"}},{\"@type\":\"Question\",\"name\":\"What is the difference between account balance and key quota?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Account resources apply to the account, while a key can have a narrower usage limit. A request may be rejected by the key's limit even when the account still has available balance.\"}},{\"@type\":\"Question\",\"name\":\"How are request charges determined?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Charges depend on the selected model, usage, pricing configuration, and applicable billing rules. Review the current pricing page and the request's usage record rather than relying on a permanent value in a tutorial.\"}},{\"@type\":\"Question\",\"name\":\"What does a 401 error mean?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"The API key is normally missing, invalid, disabled, expired, or sent to the wrong service. Recheck the Authorization value and base URL, and rotate the key if it may have been exposed.\"}},{\"@type\":\"Question\",\"name\":\"What should I check for a 404 response?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Confirm the base URL and operation path, then verify the exact model ID. Avoid adding /v1 or a resource path twice when a client already appends it.\"}},{\"@type\":\"Question\",\"name\":\"Why am I receiving a 429 or quota error?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Inspect whether the response represents rate limiting, account resources, or a key-level quota. Do not retry indefinitely; correct the limit or use bounded retries only for transient rate conditions.\"}},{\"@type\":\"Question\",\"name\":\"Why does streaming work on one network but not another?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"VPNs, reverse proxies, antivirus inspection, and corporate networks can buffer or terminate event streams. Compare a non-streaming request and a direct network before changing model or gateway settings.\"}},{\"@type\":\"Question\",\"name\":\"Why do tools, images, or files fail when text chat works?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Basic chat compatibility does not prove advanced feature support. Confirm the exact model and channel support the request format and capability, then test the smallest feature-specific request.\"}},{\"@type\":\"Question\",\"name\":\"Is it safe to put a TaoDock key in browser JavaScript?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"No. Code delivered to a public browser exposes the key to visitors. Keep the key in a trusted backend or controlled local client and have the browser call your authenticated server.\"}},{\"@type\":\"Question\",\"name\":\"Should a team share one API key?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Prefer separate keys per application, environment, team, or user boundary. Separate credentials improve least privilege, usage attribution, rotation, incident containment, and revocation.\"}},{\"@type\":\"Question\",\"name\":\"Which desktop and self-hosted clients can connect to TaoDock?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"OpenAI-compatible clients can often connect by changing their base URL, key, and model. TaoDock publishes guides for Cherry Studio, WorkBuddy, Open WebUI, AionUi, DeepChat, and SDK integrations.\"}},{\"@type\":\"Question\",\"name\":\"What information should I include when troubleshooting a failed request?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Share the timestamp, endpoint, model, status, non-secret request identifier, client version, and a sanitized error. Never share API keys, Authorization headers, passwords, private prompts, or other credentials.\"}}]}"
+      ]
+    },
+    {
+      "kind": "integration",
+      "slug": "aionui",
+      "path": "/integrations/aionui",
+      "title": "Connect AionUI to TaoDock's OpenAI-Compatible API",
+      "description": "Configure AionUI with TaoDock's API base URL and a restricted key, verify an actual model request, and diagnose connection and quota errors.",
+      "primaryKeyword": "TaoDock AionUI integration",
+      "cluster": "Desktop AI client integrations",
+      "subject": "AionUI",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "TaoDock AionUI client guide",
+          "url": "https://docs.taodock.com/en/guide/clients.html#aionui"
+        },
+        {
+          "label": "TaoDock API integration overview",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        }
+      ],
+      "related": [
+        "/integrations/deepchat",
+        "/integrations/cherry-studio",
+        "/integrations/openai-sdk",
+        "/models"
+      ],
+      "steps": [
+        {
+          "title": "Create a dedicated TaoDock key",
+          "description": "Issue a key for AionUI, restrict its model access, and set a quota that matches the device or user."
+        },
+        {
+          "title": "Add an OpenAI-compatible provider",
+          "description": "Open AionUI's provider settings and add a custom OpenAI-compatible connection."
+        },
+        {
+          "title": "Enter the TaoDock values",
+          "description": "Use https://taodock.com/v1 as the Base URL, paste the dedicated key, and choose an exact model ID exposed to it."
+        },
+        {
+          "title": "Test and confirm usage",
+          "description": "Send a short chat from AionUI and confirm the matching model, key, status, and usage in TaoDock."
+        }
+      ],
+      "docsUrl": "https://docs.taodock.com/en/guide/clients.html#aionui",
+      "faqItems": [
+        {
+          "question": "What Base URL should AionUI use?",
+          "answer": "Use https://taodock.com/v1 for an OpenAI-compatible TaoDock connection."
+        },
+        {
+          "question": "How should I choose the model name in AionUI?",
+          "answer": "Fetch or copy an exact model ID available to the same TaoDock key. Do not rely on a display name or assume IDs are portable between gateways."
+        },
+        {
+          "question": "Does a successful text chat verify every AionUI feature?",
+          "answer": "No. Test tools, images, files, streaming, and other advanced behavior separately with the exact model you intend to use."
+        }
+      ],
+      "draft": false,
+      "body": "## Integration overview\n\nAionUI can use an OpenAI-compatible provider for chat and supported model capabilities. TaoDock supplies that API surface while centralizing the credential, model permissions, upstream channels, quota, and request records. The integration reduces the number of provider secrets stored in the desktop client and gives the TaoDock operator a single place to revoke access.\n\nAn OpenAI-compatible connection is a protocol starting point, not a promise that all models expose the same features. Context limits, multimodal input, tools, reasoning controls, and streaming details depend on the model and channel. Establish a working text request first and then validate each production feature independently.\n\n## Prerequisites\n\nYou need a TaoDock account with usable quota, permission to create API keys, and at least one available model. Install a current AionUI release and confirm that the device can reach TaoDock over HTTPS.\n\nCreate an API key only for this AionUI installation. Limit it to the models the user needs and apply a quota. If several people or machines use AionUI, create a distinct key for each operational boundary. Separate keys simplify revocation, rotation, investigation, and cost attribution.\n\nUse the key to list models in TaoDock before configuring the client. Copy an exact API ID. This preliminary test proves the key can authenticate and prevents a guessed model name from obscuring an otherwise correct connection.\n\n## Configure AionUI\n\nOpen AionUI's settings and find its model provider configuration. Add a custom or OpenAI-compatible provider and set:\n\n- **Base URL:** `https://taodock.com/v1`\n- **API key:** the dedicated TaoDock key\n- **Model:** an exact model ID available to that key\n\nThe base URL ends at `/v1`. Do not append an operation such as `/chat/completions`; AionUI constructs that portion. Save the provider, select it for a new conversation, and keep advanced overrides at their defaults for the first test.\n\nIf AionUI allows a custom provider name, use a clear label such as `TaoDock`. When multiple providers expose models with similar names, the label helps prevent a test from silently using an old connection.\n\n## Verify a real request\n\nStart a new chat and send a short deterministic prompt: `Reply with exactly: AionUI connection verified.` Confirm the response and then inspect TaoDock's newest request record. The record should identify the dedicated key, exact model, successful status, and plausible token usage at the matching time.\n\nThis server-side check matters because a client can retain an earlier provider or fall back to another model. Verify streaming next if it is enabled for normal use. Then test images, tools, long context, or structured output one at a time. Use sanitized input and retain non-secret request identifiers when troubleshooting.\n\n## Troubleshooting\n\n### Unauthorized or invalid API key\n\nRecopy the key without quotes or spaces. Confirm that it is active and that AionUI is sending it to the TaoDock provider. If the credential appeared in a screenshot, terminal history, shared configuration, or issue report, revoke it and create a replacement rather than continuing to use it.\n\n### Endpoint not found\n\nCheck that the Base URL is exactly `https://taodock.com/v1`. A site root can lead the client to the wrong path; a full operation URL can cause the operation to be appended twice. Test the same key against `/v1/models` to distinguish an endpoint issue from a model issue.\n\n### Model not found\n\nRefresh or recopy the model list using the same key. Model IDs are exact and may differ from display labels. TaoDock also needs a usable channel for the selected model and the key's group must have access. If another known model succeeds, investigate the failing model path rather than changing authentication.\n\n### Insufficient quota\n\nReview the account balance and the limit on the AionUI key. A narrow key quota can reject a request even when the account is funded. Confirm the request was expected before increasing the limit. Do not substitute a broadly privileged key only to bypass a deliberate restriction.\n\n### Streaming stops early\n\nTry the same prompt without streaming. If it completes, update AionUI and test another model. VPNs, reverse proxies, antivirus inspection, and corporate networks can buffer or terminate event streams. Compare with a direct network before modifying TaoDock channel routing.\n\n### Advanced features fail\n\nBasic text compatibility does not validate every request field. Confirm that the model and channel support AionUI's particular tool, image, file, audio, or reasoning request. Reduce the case to one feature and inspect a sanitized gateway error. Unsupported client fields should be diagnosed separately from credentials and quota.\n\n## Operating the connection safely\n\nKeep the AionUI key isolated, rotate it when device ownership changes, and revoke it when the client is no longer used. Begin with conservative quota and expand it based on observed requests. Review the TaoDock model and usage record periodically for unexpected selections or repeated errors.\n\nFor a team, document the connection owner, intended models, quota policy, and recovery procedure without storing the secret in the document. After an AionUI upgrade, rerun the deterministic prompt and one representative advanced request. Consult the official TaoDock client guide for the current screen labels and fields.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Integrations\",\"item\":\"https://taodock.com/integrations\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Connect AionUI to TaoDock's OpenAI-Compatible API\",\"item\":\"https://taodock.com/integrations/aionui\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"HowTo\",\"name\":\"Connect AionUI to TaoDock's OpenAI-Compatible API\",\"description\":\"Configure AionUI with TaoDock's API base URL and a restricted key, verify an actual model request, and diagnose connection and quota errors.\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"step\":[{\"@type\":\"HowToStep\",\"position\":1,\"name\":\"Create a dedicated TaoDock key\",\"text\":\"Issue a key for AionUI, restrict its model access, and set a quota that matches the device or user.\"},{\"@type\":\"HowToStep\",\"position\":2,\"name\":\"Add an OpenAI-compatible provider\",\"text\":\"Open AionUI's provider settings and add a custom OpenAI-compatible connection.\"},{\"@type\":\"HowToStep\",\"position\":3,\"name\":\"Enter the TaoDock values\",\"text\":\"Use https://taodock.com/v1 as the Base URL, paste the dedicated key, and choose an exact model ID exposed to it.\"},{\"@type\":\"HowToStep\",\"position\":4,\"name\":\"Test and confirm usage\",\"text\":\"Send a short chat from AionUI and confirm the matching model, key, status, and usage in TaoDock.\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"What Base URL should AionUI use?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Use https://taodock.com/v1 for an OpenAI-compatible TaoDock connection.\"}},{\"@type\":\"Question\",\"name\":\"How should I choose the model name in AionUI?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Fetch or copy an exact model ID available to the same TaoDock key. Do not rely on a display name or assume IDs are portable between gateways.\"}},{\"@type\":\"Question\",\"name\":\"Does a successful text chat verify every AionUI feature?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"No. Test tools, images, files, streaming, and other advanced behavior separately with the exact model you intend to use.\"}}]}"
+      ]
+    },
+    {
+      "kind": "integration",
+      "slug": "cherry-studio",
+      "path": "/integrations/cherry-studio",
+      "title": "Connect Cherry Studio to TaoDock's OpenAI-Compatible API",
+      "description": "Configure Cherry Studio with TaoDock, verify a real chat request, and troubleshoot API host, key, model, quota, and streaming problems.",
+      "primaryKeyword": "TaoDock Cherry Studio integration",
+      "cluster": "Desktop AI client integrations",
+      "subject": "Cherry Studio",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "TaoDock Cherry Studio guide",
+          "url": "https://docs.taodock.com/en/guide/cherry-studio.html"
+        },
+        {
+          "label": "TaoDock client guides",
+          "url": "https://docs.taodock.com/en/guide/clients.html"
+        },
+        {
+          "label": "TaoDock API integration overview",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        }
+      ],
+      "related": [
+        "/integrations/open-webui",
+        "/integrations/deepchat",
+        "/integrations/openai-sdk",
+        "/models"
+      ],
+      "steps": [
+        {
+          "title": "Create a restricted TaoDock API key",
+          "description": "Sign in to TaoDock, create a key for Cherry Studio, and limit its model access and quota to what this client needs."
+        },
+        {
+          "title": "Add the New API provider",
+          "description": "In Cherry Studio provider settings, choose the New API preset and enter https://taodock.com as the API Host."
+        },
+        {
+          "title": "Enter the key and synchronize models",
+          "description": "Paste the dedicated TaoDock key, fetch the available models, and enable only the exact model IDs returned for that key."
+        },
+        {
+          "title": "Send and verify a real request",
+          "description": "Start a new chat, send a short prompt, and confirm the request and usage record in TaoDock before relying on the connection."
+        }
+      ],
+      "docsUrl": "https://docs.taodock.com/en/guide/cherry-studio.html",
+      "faqItems": [
+        {
+          "question": "Should the Cherry Studio API Host include /v1?",
+          "answer": "No. When using Cherry Studio's New API preset, enter https://taodock.com as the API Host. The preset constructs the API path."
+        },
+        {
+          "question": "Why does Cherry Studio show no models?",
+          "answer": "Confirm that the key is active and allowed to access models, then refresh the provider's model list. Copy an exact model ID from TaoDock rather than guessing one."
+        },
+        {
+          "question": "Can I reuse my main TaoDock key in Cherry Studio?",
+          "answer": "It can work, but a dedicated restricted key is safer and makes quota, revocation, and usage review easier for this client."
+        }
+      ],
+      "draft": false,
+      "body": "## What this integration does\n\nCherry Studio can connect to services that expose an OpenAI-compatible interface. TaoDock provides that interface while placing the API key, model access, provider channels, quota, and usage records under one gateway account. The practical result is that Cherry Studio can use models made available by TaoDock without storing every upstream provider credential in the desktop client.\n\nThe compatibility layer does not mean that every model behaves identically. Model IDs, context limits, tool support, vision support, streaming behavior, and provider errors still depend on the selected model and the channel behind it. Treat the first connection as a real integration test, not only as a successful settings save.\n\n## Prerequisites\n\nYou need a TaoDock account, an active balance or quota, and permission to create an API key. The key must be allowed to use at least one model. You also need a current Cherry Studio installation with access to provider settings.\n\nCreate a separate key for this client. Give it only the models Cherry Studio needs and set a sensible quota. If the desktop is shared, managed by another person, or used for demonstrations, assume that anything pasted into its settings can be read by someone with access to that profile. Never paste an upstream provider secret when a restricted TaoDock key is sufficient.\n\nBefore configuration, open TaoDock's model list or call `/v1/models` with the new key. Record an exact model ID. A familiar marketing name is not necessarily the value that the API accepts.\n\n## Exact Cherry Studio configuration\n\nOpen Cherry Studio settings and go to the model provider area. Add or enable the **New API** provider preset. Use these values:\n\n- **API Host:** `https://taodock.com`\n- **API Key:** the dedicated TaoDock key you created\n- **Model:** an exact model ID returned for that key\n\nFor this preset, do not append `/v1` to the API Host. Cherry Studio builds the endpoint from the host. Adding the version segment again can produce a path such as `/v1/v1/...` and a 404 response.\n\nUse the provider's model synchronization or model management control to fetch available models. Enable one known model first. A short list makes initial diagnosis easier than importing every possible model at once. Save the provider, then select it in a new conversation.\n\n## Verify the connection with a real request\n\nSend a deterministic prompt such as: `Reply with exactly: TaoDock connection verified.` A visible assistant response proves that Cherry Studio reached a model, but complete verification also includes the gateway record.\n\nIn TaoDock, inspect the newest request or usage log. Check that it belongs to the dedicated key, uses the intended model, records a successful status, and shows plausible token usage. Do not use or share prompt content as a support artifact if it contains private information. A request identifier, timestamp, model, status, and sanitized error are normally more useful.\n\nNext, enable streaming if that is how the client will normally operate. Send a longer prompt and make sure text arrives progressively and completes cleanly. If you plan to use images, tools, or reasoning controls, test those capabilities individually with the exact model; an ordinary text response does not verify them.\n\n## Troubleshooting\n\n### Authentication errors\n\nA 401 response usually means the key is missing, copied incorrectly, disabled, expired, or sent to the wrong host. Recopy the TaoDock key without surrounding spaces. Confirm that the host is HTTPS and contains no extra path. If the key may have been exposed, revoke it and create another instead of repeatedly pasting it into screenshots or chat messages.\n\n### Model not found or unavailable\n\nA 404 or model-related error often indicates an incorrect model ID or a key that is not authorized for that model. Refresh the list in Cherry Studio and compare the selected value character for character with TaoDock. A model may also be temporarily unavailable because no usable channel is configured for it. Try another model already known to work before changing unrelated settings.\n\n### Quota or billing failures\n\nIf the request is rejected for insufficient quota, inspect both the account balance and the dedicated key's limit. A key-level limit can block requests even when the account still has funds. Verify the group and model permissions assigned to the key. Do not respond by creating an unlimited key unless that broader access is intentional.\n\n### Streaming stops or returns an empty answer\n\nFirst retry with streaming disabled. If a non-streaming request succeeds, update Cherry Studio and test a different model to isolate a client, model, or provider-specific stream issue. Proxies, VPNs, and corporate inspection products can buffer or terminate event streams; test once on a direct network before changing gateway routing.\n\n### Tools or attachments do not work\n\nOpenAI-compatible text chat is only the baseline. Confirm that the chosen model and its TaoDock channel support the exact tool, image, audio, or document behavior that Cherry Studio is sending. Review the sanitized gateway error and the model's documented capability instead of assuming that all models accept the same request fields.\n\n## Operational recommendations\n\nKeep the key dedicated to Cherry Studio, rotate it if the device changes owners, and revoke it when the client is retired. Start with a low quota and expand it after observing real usage. For a team deployment, document the provider name, base host, allowed models, key owner, and renewal procedure without writing the secret itself.\n\nReview logs for unexpected model selection or repeated failures. If several desktop clients use the same gateway, give each client or person a distinct key so a problem can be contained without interrupting everyone. This also makes usage attribution more reliable than sharing one credential across machines.\n\nThe official TaoDock Cherry Studio guide remains the source of truth for the current client screens. Recheck it after a major Cherry Studio update because labels and provider presets can move even when the underlying API values remain the same.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Integrations\",\"item\":\"https://taodock.com/integrations\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Connect Cherry Studio to TaoDock's OpenAI-Compatible API\",\"item\":\"https://taodock.com/integrations/cherry-studio\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"HowTo\",\"name\":\"Connect Cherry Studio to TaoDock's OpenAI-Compatible API\",\"description\":\"Configure Cherry Studio with TaoDock, verify a real chat request, and troubleshoot API host, key, model, quota, and streaming problems.\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"step\":[{\"@type\":\"HowToStep\",\"position\":1,\"name\":\"Create a restricted TaoDock API key\",\"text\":\"Sign in to TaoDock, create a key for Cherry Studio, and limit its model access and quota to what this client needs.\"},{\"@type\":\"HowToStep\",\"position\":2,\"name\":\"Add the New API provider\",\"text\":\"In Cherry Studio provider settings, choose the New API preset and enter https://taodock.com as the API Host.\"},{\"@type\":\"HowToStep\",\"position\":3,\"name\":\"Enter the key and synchronize models\",\"text\":\"Paste the dedicated TaoDock key, fetch the available models, and enable only the exact model IDs returned for that key.\"},{\"@type\":\"HowToStep\",\"position\":4,\"name\":\"Send and verify a real request\",\"text\":\"Start a new chat, send a short prompt, and confirm the request and usage record in TaoDock before relying on the connection.\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"Should the Cherry Studio API Host include /v1?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"No. When using Cherry Studio's New API preset, enter https://taodock.com as the API Host. The preset constructs the API path.\"}},{\"@type\":\"Question\",\"name\":\"Why does Cherry Studio show no models?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Confirm that the key is active and allowed to access models, then refresh the provider's model list. Copy an exact model ID from TaoDock rather than guessing one.\"}},{\"@type\":\"Question\",\"name\":\"Can I reuse my main TaoDock key in Cherry Studio?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"It can work, but a dedicated restricted key is safer and makes quota, revocation, and usage review easier for this client.\"}}]}"
+      ]
+    },
+    {
+      "kind": "integration",
+      "slug": "deepchat",
+      "path": "/integrations/deepchat",
+      "title": "Connect DeepChat to TaoDock's OpenAI-Compatible API",
+      "description": "Set up DeepChat with TaoDock using OpenAI Completions, validate a live request, and troubleshoot base URL, key, model, quota, and feature issues.",
+      "primaryKeyword": "TaoDock DeepChat integration",
+      "cluster": "Desktop AI client integrations",
+      "subject": "DeepChat",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "TaoDock DeepChat client guide",
+          "url": "https://docs.taodock.com/en/guide/clients.html#deepchat"
+        },
+        {
+          "label": "TaoDock API integration overview",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        }
+      ],
+      "related": [
+        "/integrations/aionui",
+        "/integrations/cherry-studio",
+        "/integrations/openai-sdk",
+        "/models"
+      ],
+      "steps": [
+        {
+          "title": "Create a key for DeepChat",
+          "description": "Generate a TaoDock key restricted to the models and quota this DeepChat installation needs."
+        },
+        {
+          "title": "Select OpenAI Completions",
+          "description": "In DeepChat provider settings, choose the OpenAI Completions connection type."
+        },
+        {
+          "title": "Set the base and model values",
+          "description": "Enter https://taodock.com/v1 as the base URL, paste the dedicated key, and select an exact TaoDock model ID."
+        },
+        {
+          "title": "Run a verified chat",
+          "description": "Send a deterministic prompt and confirm the matching request, model, key, status, and usage in TaoDock."
+        }
+      ],
+      "docsUrl": "https://docs.taodock.com/en/guide/clients.html#deepchat",
+      "faqItems": [
+        {
+          "question": "Which DeepChat provider type works with TaoDock?",
+          "answer": "Select OpenAI Completions and configure it with the TaoDock OpenAI-compatible base URL and key."
+        },
+        {
+          "question": "What base URL should I enter?",
+          "answer": "Use https://taodock.com/v1. DeepChat appends the operation path for requests."
+        },
+        {
+          "question": "Why do text requests work while an advanced feature fails?",
+          "answer": "The exact model or channel may not support the advanced fields DeepChat sends. Validate tools, images, files, and other features separately."
+        }
+      ],
+      "draft": false,
+      "body": "## What the DeepChat connection provides\n\nDeepChat can send OpenAI Completions-style requests to an OpenAI-compatible service. TaoDock acts as that service and applies the key's model permissions, quota, and configured upstream channel. It also provides request and usage records that help the operator confirm which model handled a conversation.\n\nThis arrangement avoids entering a collection of upstream provider credentials into DeepChat. It does not erase model differences. Streaming, tools, images, files, context size, and provider-specific options must be supported by the exact model and TaoDock channel. Build confidence with a basic completion, then test each feature your workflow depends on.\n\n## Prepare TaoDock\n\nSign in to an account with permission to create keys and confirm that it has usable quota. Create a key dedicated to DeepChat. Restrict its models and set a limit suitable for the user or device. Do not share an unlimited administrative key across desktop applications.\n\nList the models visible to the dedicated key. Copy an exact ID for the initial connection. This step proves that authorization and model access are working before the client is involved. It also avoids confusing a model's friendly display name with its API identifier.\n\nInstall or update DeepChat and make sure the device can reach `https://taodock.com` securely. If it operates behind a company proxy, note that streaming traffic may be handled differently from ordinary HTTPS requests.\n\n## Configure DeepChat\n\nOpen DeepChat's provider or model settings. Select **OpenAI Completions** and enter:\n\n- **Base URL:** `https://taodock.com/v1`\n- **API key:** the restricted TaoDock key\n- **Model:** an exact model ID available to that key\n\nThe Base URL should not include `/chat/completions`; DeepChat constructs the request path. Save the provider and select it in a new conversation. Keep custom request parameters at their defaults until a standard request has succeeded.\n\nWhen multiple OpenAI-compatible connections exist, name this configuration clearly. Confirm the active provider and model before every diagnostic prompt so an older connection cannot produce a misleading success.\n\n## Test and verify the request\n\nSend: `Reply with exactly: DeepChat connected to TaoDock.` Confirm that the response matches. Then open TaoDock's request records and find the event at the same timestamp. Verify the dedicated key, model, successful status, and token usage.\n\nA client-visible answer plus a server-side usage record establishes the complete path. Next, test the normal streaming mode with a longer prompt. If DeepChat will use tools, images, files, or long context, run a small sanitized test for each. Record request identifiers and errors, but never copy the API key into support material.\n\n## Troubleshooting\n\n### DeepChat reports an invalid key\n\nRemove quotes, spaces, and line breaks from the copied value. Confirm that the key remains active and belongs to TaoDock. Check that the DeepChat provider is not sending it to a different saved Base URL. Rotate the key immediately if it has been disclosed.\n\n### The request path returns 404\n\nUse `https://taodock.com/v1` as the Base URL. A root URL may not point to the API, while a full operation URL can be duplicated by the client. If `/v1/models` works with the same key, the credential and API version are reachable and the remaining problem is likely the model or operation.\n\n### The model is unavailable\n\nCopy the exact ID returned for the dedicated key. Ensure the key's group has permission and TaoDock has a usable channel. If another model succeeds, preserve the working base URL and key while investigating that one model. Avoid changing several settings at once.\n\n### Quota is exhausted\n\nInspect both account-level resources and the key's own quota. A dedicated key is supposed to enforce its narrower limit. Confirm that usage is legitimate before increasing it, and investigate repeated automatic retries if consumption is unexpected.\n\n### Streaming is blank or interrupted\n\nDisable streaming for one request. If the full response succeeds, update DeepChat, test another model, and compare on a network without VPN or HTTP inspection. Intermediaries can buffer server-sent events or close idle connections. If non-streaming also fails, focus first on the status and sanitized gateway error.\n\n### Tools, files, or images are rejected\n\nVerify capability support for the exact model and channel. OpenAI-compatible text completion does not guarantee every multimodal or tool schema. Reduce the request to the smallest failing feature and compare it with a direct API request using the same model and fields.\n\n## Maintenance and security\n\nUse separate keys for separate DeepChat users or installations when practical. A compromised or retired device can then be revoked without affecting other clients. Keep quotas conservative, review unexpected models, and rotate credentials during ownership changes.\n\nDocument the Base URL, intended model IDs, key owner, quota policy, and validation prompt without recording the secret. After major client upgrades, rerun the basic prompt, streaming test, and one representative advanced feature. Use the official TaoDock DeepChat guide as the current reference for screen-specific configuration.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Integrations\",\"item\":\"https://taodock.com/integrations\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Connect DeepChat to TaoDock's OpenAI-Compatible API\",\"item\":\"https://taodock.com/integrations/deepchat\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"HowTo\",\"name\":\"Connect DeepChat to TaoDock's OpenAI-Compatible API\",\"description\":\"Set up DeepChat with TaoDock using OpenAI Completions, validate a live request, and troubleshoot base URL, key, model, quota, and feature issues.\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"step\":[{\"@type\":\"HowToStep\",\"position\":1,\"name\":\"Create a key for DeepChat\",\"text\":\"Generate a TaoDock key restricted to the models and quota this DeepChat installation needs.\"},{\"@type\":\"HowToStep\",\"position\":2,\"name\":\"Select OpenAI Completions\",\"text\":\"In DeepChat provider settings, choose the OpenAI Completions connection type.\"},{\"@type\":\"HowToStep\",\"position\":3,\"name\":\"Set the base and model values\",\"text\":\"Enter https://taodock.com/v1 as the base URL, paste the dedicated key, and select an exact TaoDock model ID.\"},{\"@type\":\"HowToStep\",\"position\":4,\"name\":\"Run a verified chat\",\"text\":\"Send a deterministic prompt and confirm the matching request, model, key, status, and usage in TaoDock.\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"Which DeepChat provider type works with TaoDock?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Select OpenAI Completions and configure it with the TaoDock OpenAI-compatible base URL and key.\"}},{\"@type\":\"Question\",\"name\":\"What base URL should I enter?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Use https://taodock.com/v1. DeepChat appends the operation path for requests.\"}},{\"@type\":\"Question\",\"name\":\"Why do text requests work while an advanced feature fails?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"The exact model or channel may not support the advanced fields DeepChat sends. Validate tools, images, files, and other features separately.\"}}]}"
+      ]
+    },
+    {
+      "kind": "integration",
+      "slug": "open-webui",
+      "path": "/integrations/open-webui",
+      "title": "Connect Open WebUI to TaoDock's OpenAI-Compatible API",
+      "description": "Add TaoDock as an OpenAI connection in Open WebUI, test model discovery and chat, and troubleshoot credentials, permissions, quota, and streams.",
+      "primaryKeyword": "TaoDock Open WebUI integration",
+      "cluster": "Self-hosted AI client integrations",
+      "subject": "Open WebUI",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "TaoDock Open WebUI guide",
+          "url": "https://docs.taodock.com/en/guide/open-webui.html"
+        },
+        {
+          "label": "TaoDock client guides",
+          "url": "https://docs.taodock.com/en/guide/clients.html"
+        },
+        {
+          "label": "TaoDock API integration overview",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        }
+      ],
+      "related": [
+        "/integrations/openai-sdk",
+        "/integrations/cherry-studio",
+        "/compare/taodock-vs-litellm",
+        "/models"
+      ],
+      "steps": [
+        {
+          "title": "Create a key for the Open WebUI deployment",
+          "description": "Issue a restricted TaoDock key for this instance and decide which models and quota its users may consume."
+        },
+        {
+          "title": "Open the connection settings",
+          "description": "In Open WebUI, open Admin Settings, choose Connections, and add an OpenAI-compatible connection."
+        },
+        {
+          "title": "Enter the TaoDock connection values",
+          "description": "Set the OpenAI URL to https://taodock.com/v1 and provide the dedicated TaoDock API key."
+        },
+        {
+          "title": "Discover and test models",
+          "description": "Refresh the model list, select an exact available model, send a test chat, and verify the corresponding TaoDock request record."
+        }
+      ],
+      "docsUrl": "https://docs.taodock.com/en/guide/open-webui.html",
+      "faqItems": [
+        {
+          "question": "Where is TaoDock configured in Open WebUI?",
+          "answer": "An Open WebUI administrator adds it under Admin Settings, Connections, as an OpenAI-compatible connection."
+        },
+        {
+          "question": "What OpenAI URL should Open WebUI use?",
+          "answer": "Set the URL to https://taodock.com/v1 and use a dedicated TaoDock API key."
+        },
+        {
+          "question": "Should one key be shared by multiple Open WebUI instances?",
+          "answer": "Separate keys are recommended so each instance can have its own model permissions, quota, usage attribution, rotation, and revocation."
+        }
+      ],
+      "draft": false,
+      "body": "## Why connect Open WebUI through TaoDock\n\nOpen WebUI provides a self-hosted interface for model conversations. TaoDock provides an OpenAI-compatible API gateway that can expose permitted models through one endpoint and one restricted key. Connecting the two lets an administrator control model access, quota, upstream channels, and usage records in TaoDock while users work in the Open WebUI interface.\n\nThe two systems still have different responsibilities. Open WebUI manages its users, conversation experience, and local deployment. TaoDock authenticates its API key, selects an available channel according to gateway configuration, and records API usage. Decide who administers each layer before production use, especially when the Open WebUI instance serves several people.\n\n## Prerequisites and access design\n\nYou need administrator access to Open WebUI and permission to create TaoDock API keys. The TaoDock account must have quota and at least one usable model. Create a dedicated key for the Open WebUI instance rather than using a personal key copied from another client.\n\nRestrict the key to the intended models and set a quota based on the number of users and expected traffic. TaoDock sees requests under the gateway key, so a single shared connection may not provide per-user attribution by itself. Use Open WebUI's own user controls for interface access and review both systems' records when investigating activity.\n\nList models with the dedicated key before configuration. This proves that the key is active and establishes the exact identifiers Open WebUI should receive. It also separates gateway authorization problems from client setup problems.\n\n## Configure the connection\n\nSign in to Open WebUI as an administrator. Open **Admin Settings**, choose **Connections**, and add an OpenAI-compatible connection. Enter:\n\n- **OpenAI URL:** `https://taodock.com/v1`\n- **API key:** the dedicated TaoDock key for this Open WebUI instance\n\nThe URL should stop at `/v1`. Do not append `/models` or `/chat/completions`; Open WebUI calls those operations itself. Save the connection and refresh the model list. Select one exact TaoDock model for the initial test.\n\nIf the instance already has other OpenAI-compatible connections, name the connection clearly so administrators can tell which models and errors belong to TaoDock. Avoid disabling a working connection until the new path is verified.\n\n## Test model discovery and chat\n\nFirst confirm that Open WebUI displays models available to the dedicated key. If the list is empty, do not manually invent an ID as the first response; inspect the connection, key permissions, and TaoDock model list.\n\nStart a new chat with one known model and send: `Answer with exactly: Open WebUI connected to TaoDock.` Confirm the response appears. In TaoDock, find the request at the same time and verify its key, model, status, and usage. This proves that the visible response used the intended gateway rather than another configured provider.\n\nTest streaming with a longer response. Then test each production capability—tools, images, files, structured output, or reasoning controls—separately. OpenAI-compatible endpoints can accept ordinary chat while a particular model or channel does not support an advanced field. Use sanitized prompts in tests and preserve request identifiers instead of secrets.\n\n## Troubleshooting checklist\n\n### The model list is empty\n\nVerify the URL includes `/v1` and that the key is copied exactly. Call TaoDock's model endpoint using the same key. If the direct list is also empty or rejected, fix its model permissions, group, status, or quota before changing Open WebUI. If the direct list works, review Open WebUI server logs for a connection or TLS error and restart or refresh the connection as appropriate for the deployment.\n\n### Open WebUI reports unauthorized\n\nA 401 generally means the API key is missing, invalid, disabled, or sent to the wrong endpoint. Replace the key if it may have been exposed. Remember that a secret stored in a server-side administrator connection should not be placed in browser-visible custom JavaScript or shared screenshots.\n\n### A selected model returns 404 or unavailable\n\nCopy the exact model identifier returned to this key. Check that TaoDock has a usable channel for the model and that the key's group can access it. If several models work and one fails, treat it as a model or provider path issue rather than rebuilding the entire connection.\n\n### Requests fail for quota\n\nInspect the TaoDock account balance and the key-specific quota. A shared interface can consume a narrow key limit faster than a single desktop client. Increase limits intentionally and monitor usage; do not replace the key with an unrestricted administrator credential as a shortcut.\n\n### Streaming hangs behind a reverse proxy\n\nTry non-streaming chat and a direct network route. Reverse proxies in front of either Open WebUI or the client may buffer server-sent events or apply short timeouts. Review proxy streaming and idle-timeout configuration, but keep authentication headers out of diagnostic output.\n\n### Tools, images, or files fail\n\nConfirm capability support for the exact model and TaoDock channel. Reduce the request to the smallest failing example and compare it with an API call that uses the same fields. Some client features transform files or tool schemas before sending them, so a basic text test cannot validate those paths.\n\n## Production operations\n\nUse separate TaoDock keys for development, staging, and production Open WebUI instances. Rotate keys through the administrator connection and verify a test request before revoking the old credential. Record the key's owner, allowed models, and quota policy without recording the secret.\n\nMonitor repeated errors and unexpected model usage. When many Open WebUI users share one gateway credential, pair TaoDock's aggregate API record with Open WebUI's own audit or user context. Define which administrator handles client access, which handles gateway routing, and who responds when an upstream provider is unavailable.\n\nRevisit the official TaoDock Open WebUI guide after significant client upgrades. The exact menu labels can change, while the core connection remains the TaoDock `/v1` base URL plus a restricted API key.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Integrations\",\"item\":\"https://taodock.com/integrations\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Connect Open WebUI to TaoDock's OpenAI-Compatible API\",\"item\":\"https://taodock.com/integrations/open-webui\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"HowTo\",\"name\":\"Connect Open WebUI to TaoDock's OpenAI-Compatible API\",\"description\":\"Add TaoDock as an OpenAI connection in Open WebUI, test model discovery and chat, and troubleshoot credentials, permissions, quota, and streams.\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"step\":[{\"@type\":\"HowToStep\",\"position\":1,\"name\":\"Create a key for the Open WebUI deployment\",\"text\":\"Issue a restricted TaoDock key for this instance and decide which models and quota its users may consume.\"},{\"@type\":\"HowToStep\",\"position\":2,\"name\":\"Open the connection settings\",\"text\":\"In Open WebUI, open Admin Settings, choose Connections, and add an OpenAI-compatible connection.\"},{\"@type\":\"HowToStep\",\"position\":3,\"name\":\"Enter the TaoDock connection values\",\"text\":\"Set the OpenAI URL to https://taodock.com/v1 and provide the dedicated TaoDock API key.\"},{\"@type\":\"HowToStep\",\"position\":4,\"name\":\"Discover and test models\",\"text\":\"Refresh the model list, select an exact available model, send a test chat, and verify the corresponding TaoDock request record.\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"Where is TaoDock configured in Open WebUI?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"An Open WebUI administrator adds it under Admin Settings, Connections, as an OpenAI-compatible connection.\"}},{\"@type\":\"Question\",\"name\":\"What OpenAI URL should Open WebUI use?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Set the URL to https://taodock.com/v1 and use a dedicated TaoDock API key.\"}},{\"@type\":\"Question\",\"name\":\"Should one key be shared by multiple Open WebUI instances?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Separate keys are recommended so each instance can have its own model permissions, quota, usage attribution, rotation, and revocation.\"}}]}"
+      ]
+    },
+    {
+      "kind": "integration",
+      "slug": "openai-sdk",
+      "path": "/integrations/openai-sdk",
+      "title": "Use the OpenAI SDK with TaoDock's Compatible API",
+      "description": "Point the OpenAI SDK at TaoDock, keep credentials in environment variables, verify models and chat responses, and handle common API errors safely.",
+      "primaryKeyword": "TaoDock OpenAI SDK integration",
+      "cluster": "Developer API integrations",
+      "subject": "OpenAI SDK",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "TaoDock API integration overview",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        },
+        {
+          "label": "TaoDock client guides",
+          "url": "https://docs.taodock.com/en/guide/clients.html"
+        }
+      ],
+      "related": [
+        "/integrations/open-webui",
+        "/integrations/cherry-studio",
+        "/compare/taodock-vs-litellm",
+        "/models"
+      ],
+      "steps": [
+        {
+          "title": "Create a least-privilege API key",
+          "description": "Generate a TaoDock key for this application, restrict its models and quota, and store it in TAODOCK_API_KEY."
+        },
+        {
+          "title": "Configure the SDK client",
+          "description": "Initialize the OpenAI SDK with base_url or baseURL set to https://taodock.com/v1 and the environment-supplied key."
+        },
+        {
+          "title": "List and select a model",
+          "description": "Query the models endpoint with the same client and use an exact model ID returned for the key."
+        },
+        {
+          "title": "Send and reconcile a test request",
+          "description": "Make a small completion request, preserve its non-secret request context, and verify status, model, tokens, and usage in TaoDock."
+        }
+      ],
+      "docsUrl": "https://docs.taodock.com/en/api/overview.html",
+      "faqItems": [
+        {
+          "question": "Does the OpenAI SDK need a different package for TaoDock?",
+          "answer": "No. Configure the supported OpenAI SDK with TaoDock's base URL and a TaoDock API key."
+        },
+        {
+          "question": "What base URL should SDK code use?",
+          "answer": "Use https://taodock.com/v1 and let the SDK append resource paths."
+        },
+        {
+          "question": "Is every OpenAI SDK method supported for every TaoDock model?",
+          "answer": "No. Compatibility and capabilities depend on the endpoint, selected model, channel, and fields. Test the exact methods your application uses."
+        }
+      ],
+      "draft": false,
+      "body": "## When to use the SDK integration\n\nAn application already built around an OpenAI SDK can often connect to TaoDock by changing the base URL, API key, and model ID. TaoDock then authenticates the application key, applies its permissions and quota, routes the request through configured channels, and records usage. This is useful when an application needs access to multiple providers without embedding every upstream credential.\n\nOpenAI compatibility reduces client changes, but it is not a guarantee that every method, request field, model feature, or error behaves identically. Validate the precise endpoints your application uses. Streaming, tools, images, audio, files, structured output, embeddings, and response APIs should each be tested with their selected model.\n\n## Prepare credentials and models\n\nCreate a TaoDock API key specifically for the application and environment. Development, staging, and production should not share one credential. Restrict model access and set quota or expiration according to the workload. Store the secret in a managed environment variable or secret store—not in source code, browser bundles, logs, screenshots, or committed `.env` files.\n\nFor local examples, use the variable name `TAODOCK_API_KEY`. The name makes it clear that this is a gateway credential rather than a direct upstream provider key. Load it through your runtime's normal environment mechanism.\n\nBefore sending a completion, use the same SDK client or a direct request to list models. Select an exact model ID returned to the key. This avoids assuming that identifiers from another gateway are portable.\n\n## Python configuration\n\nInitialize the supported Python SDK with TaoDock's API base and the environment variable:\n\n```python\nimport os\nfrom openai import OpenAI\n\nclient = OpenAI(\n    api_key=os.environ[\"TAODOCK_API_KEY\"],\n    base_url=\"https://taodock.com/v1\",\n)\n\nmodels = client.models.list()\nprint([model.id for model in models.data])\n\nresponse = client.chat.completions.create(\n    model=\"YOUR_MODEL_ID\",\n    messages=[{\"role\": \"user\", \"content\": \"Reply with exactly: SDK connected\"}],\n)\nprint(response.choices[0].message.content)\n```\n\nReplace `YOUR_MODEL_ID` with a value returned for the key. Do not copy a model name from a pricing article or another platform without checking the live list.\n\n## JavaScript and TypeScript configuration\n\nServer-side JavaScript can configure the official SDK in the same way:\n\n```typescript\nimport OpenAI from 'openai'\n\nconst client = new OpenAI({\n  apiKey: process.env.TAODOCK_API_KEY,\n  baseURL: 'https://taodock.com/v1',\n})\n\nconst models = await client.models.list()\nconsole.log(models.data.map((model) => model.id))\n\nconst response = await client.chat.completions.create({\n  model: 'YOUR_MODEL_ID',\n  messages: [{ role: 'user', content: 'Reply with exactly: SDK connected' }],\n})\nconsole.log(response.choices[0]?.message.content)\n```\n\nRun this only in a trusted server or local process. Shipping a TaoDock key in public browser JavaScript exposes it to every visitor. A browser application should call your authenticated backend, which holds and controls the gateway credential.\n\n## Verify more than the response text\n\nAfter the test returns, find the matching request in TaoDock. Confirm the dedicated key, exact model, status, token usage, and charge or quota change. Preserve a non-secret request identifier if available so client and gateway records can be correlated.\n\nTest failure behavior deliberately. Use a disabled test key, a nonexistent model, and an intentionally small quota in a non-production environment. Confirm that the application distinguishes authentication failures, permission or model errors, rate limits, quota exhaustion, provider failures, and timeouts. Retry only errors that are safe for the operation; uncontrolled retries can multiply cost or duplicate side effects.\n\nFor streaming, consume and close the stream according to the SDK's documented lifecycle. Test client cancellation and make sure your server stops unnecessary downstream work. For tools or structured output, validate the exact schema and model instead of inferring support from an ordinary chat completion.\n\n## Common errors\n\n### 401 authentication failed\n\nConfirm `TAODOCK_API_KEY` is present in the actual process environment and not only in an unopened shell or ignored file. Check for whitespace and verify that the client uses the TaoDock base URL. Revoke any key that has appeared in an exception dump or public log.\n\n### 404 endpoint or model not found\n\nThe base URL is `https://taodock.com/v1`; the SDK appends paths. A full operation path can be duplicated. If model listing works, use one of its exact IDs and confirm the key's permissions and TaoDock channel availability.\n\n### 429 or quota errors\n\nRate limits and quota are different conditions even when an SDK surfaces similar status handling. Inspect the sanitized response and TaoDock records. Use bounded exponential backoff only for retryable rate or transient failures. Increasing a key limit is an access decision, not a generic error-recovery step.\n\n### Timeout or upstream failure\n\nSet explicit client timeouts appropriate for the endpoint and model. Preserve error type, status, request identifier, model, and duration while excluding prompts and secrets where possible. Define whether the application or TaoDock owns retries and fallback so both layers do not independently duplicate requests.\n\n### Unsupported parameters\n\nRemove optional fields until the smallest request succeeds, then restore them one at a time. Optional parameters and zero values may have meaningful semantics. Consult the TaoDock API guide and the chosen model's capability rather than assuming an SDK method maps identically across providers.\n\n## Production checklist\n\nUse separate least-privilege keys per service and environment. Keep secrets in a vault or managed runtime store, rotate them, and revoke unused credentials. Pin and test SDK upgrades. Apply request timeouts, bounded concurrency, and intentional retry rules. Monitor error distribution, latency, usage, and quota without recording authentication headers or sensitive prompt content.\n\nBefore migration, run representative non-streaming, streaming, tool, cancellation, and error fixtures. Compare response shape and usage with the previous path. Roll out gradually and keep a reversible configuration until the new gateway has handled normal traffic and failure conditions.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Integrations\",\"item\":\"https://taodock.com/integrations\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Use the OpenAI SDK with TaoDock's Compatible API\",\"item\":\"https://taodock.com/integrations/openai-sdk\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"HowTo\",\"name\":\"Use the OpenAI SDK with TaoDock's Compatible API\",\"description\":\"Point the OpenAI SDK at TaoDock, keep credentials in environment variables, verify models and chat responses, and handle common API errors safely.\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"step\":[{\"@type\":\"HowToStep\",\"position\":1,\"name\":\"Create a least-privilege API key\",\"text\":\"Generate a TaoDock key for this application, restrict its models and quota, and store it in TAODOCK_API_KEY.\"},{\"@type\":\"HowToStep\",\"position\":2,\"name\":\"Configure the SDK client\",\"text\":\"Initialize the OpenAI SDK with base_url or baseURL set to https://taodock.com/v1 and the environment-supplied key.\"},{\"@type\":\"HowToStep\",\"position\":3,\"name\":\"List and select a model\",\"text\":\"Query the models endpoint with the same client and use an exact model ID returned for the key.\"},{\"@type\":\"HowToStep\",\"position\":4,\"name\":\"Send and reconcile a test request\",\"text\":\"Make a small completion request, preserve its non-secret request context, and verify status, model, tokens, and usage in TaoDock.\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"Does the OpenAI SDK need a different package for TaoDock?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"No. Configure the supported OpenAI SDK with TaoDock's base URL and a TaoDock API key.\"}},{\"@type\":\"Question\",\"name\":\"What base URL should SDK code use?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Use https://taodock.com/v1 and let the SDK append resource paths.\"}},{\"@type\":\"Question\",\"name\":\"Is every OpenAI SDK method supported for every TaoDock model?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"No. Compatibility and capabilities depend on the endpoint, selected model, channel, and fields. Test the exact methods your application uses.\"}}]}"
+      ]
+    },
+    {
+      "kind": "integration",
+      "slug": "workbuddy",
+      "path": "/integrations/workbuddy",
+      "title": "Connect WorkBuddy to TaoDock's OpenAI-Compatible API",
+      "description": "Set up WorkBuddy with TaoDock's OpenAI-compatible endpoint, validate an actual request, and resolve key, model, quota, and protocol issues.",
+      "primaryKeyword": "TaoDock WorkBuddy integration",
+      "cluster": "Desktop AI client integrations",
+      "subject": "WorkBuddy",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04",
+      "reviewedAt": "2026-11-04",
+      "sources": [
+        {
+          "label": "TaoDock WorkBuddy guide",
+          "url": "https://docs.taodock.com/en/guide/workbuddy.html"
+        },
+        {
+          "label": "TaoDock client guides",
+          "url": "https://docs.taodock.com/en/guide/clients.html"
+        },
+        {
+          "label": "TaoDock API integration overview",
+          "url": "https://docs.taodock.com/en/api/overview.html"
+        }
+      ],
+      "related": [
+        "/integrations/cherry-studio",
+        "/integrations/openai-sdk",
+        "/compare/taodock-vs-openrouter",
+        "/models"
+      ],
+      "steps": [
+        {
+          "title": "Issue a WorkBuddy-specific API key",
+          "description": "Create a TaoDock key with only the model permissions and quota that WorkBuddy requires."
+        },
+        {
+          "title": "Add a custom OpenAI-compatible provider",
+          "description": "Open WorkBuddy's model service settings, add a custom provider, and keep its custom protocol option disabled."
+        },
+        {
+          "title": "Enter the endpoint and model",
+          "description": "Set the service URL to https://taodock.com/v1, paste the dedicated key, and use an exact model ID available to that key."
+        },
+        {
+          "title": "Verify the request in both products",
+          "description": "Send a short prompt from WorkBuddy, then confirm the status, model, key, and usage in TaoDock's request records."
+        }
+      ],
+      "docsUrl": "https://docs.taodock.com/en/guide/workbuddy.html",
+      "faqItems": [
+        {
+          "question": "What URL should WorkBuddy use for TaoDock?",
+          "answer": "Use https://taodock.com/v1 as the OpenAI-compatible service URL."
+        },
+        {
+          "question": "Should WorkBuddy's custom protocol option be enabled?",
+          "answer": "No. Follow the TaoDock guide and keep the custom protocol option disabled for this OpenAI-compatible connection."
+        },
+        {
+          "question": "Why does a model work in TaoDock but not WorkBuddy?",
+          "answer": "Confirm that WorkBuddy uses the exact API model ID and that the selected feature is supported by that model and channel."
+        }
+      ],
+      "draft": false,
+      "body": "## Integration overview\n\nWorkBuddy can call an OpenAI-compatible service instead of connecting directly to each upstream model provider. TaoDock supplies the compatible endpoint and centralizes the API key, allowed models, quota, channels, and usage records. This keeps provider credentials out of the desktop client and gives an operator one place to revoke or restrict access.\n\nCompatibility covers the API contract that the client uses; it does not make every model interchangeable. WorkBuddy features that depend on tools, vision, long context, structured output, or a particular streaming convention must be verified with the selected model. The safest rollout begins with a basic chat and then tests each advanced capability separately.\n\n## Before you start\n\nConfirm that your TaoDock account can create keys and has usable quota. Create a new key specifically for WorkBuddy. Restrict its model access to the small set you intend to use and apply a quota appropriate for the device or user. A separate credential makes rotation and investigation much easier than sharing a broad key across applications.\n\nObtain an exact model ID from TaoDock's model list or `/v1/models` using that key. Model display names in a user interface may differ from the API value. If the key cannot see the model before WorkBuddy is configured, the client will not fix that authorization problem.\n\nUse a current WorkBuddy version and make sure the device can reach `https://taodock.com` over TLS. Corporate proxies or VPNs sometimes interfere with streaming; knowing whether the same endpoint works with a direct request helps isolate those network conditions.\n\n## WorkBuddy settings\n\nOpen WorkBuddy's settings and locate its model service or custom provider configuration. Add an OpenAI-compatible service and enter:\n\n- **Service URL:** `https://taodock.com/v1`\n- **API key:** the dedicated TaoDock key\n- **Model:** an exact model ID returned by TaoDock\n- **Custom protocol:** disabled\n\nThe `/v1` segment is required in WorkBuddy's service URL. Do not add `/chat/completions`; the client appends the operation path. Do not put a trailing operation path copied from a command-line example into the base field.\n\nSave the connection and select the new provider and model for a fresh conversation. Avoid changing timeout, proxy, sampling, and advanced model settings simultaneously. A minimal configuration makes any error easier to attribute.\n\n## Validate an actual completion\n\nSend a short instruction with a predictable result, for example: `Return the words WorkBuddy connected and nothing else.` Confirm that the assistant responds and that the selected provider remains TaoDock.\n\nThen open TaoDock's request records. Find the matching timestamp and verify the key, model, successful status, and token usage. This second check catches cases where a client silently falls back to a different provider. It also confirms that quota accounting is associated with the intended credential.\n\nRun a second test using the mode your team expects in production. If streaming is enabled, confirm that partial text arrives and the stream closes normally. If WorkBuddy uses tools or workspace context, test with sanitized content and check the gateway error details if it fails. Never include a live key in a screenshot or support transcript.\n\n## Common problems\n\n### 401 unauthorized\n\nRecopy the key and remove spaces or quotes. Make sure WorkBuddy is sending it to TaoDock rather than to a provider configuration left over from an earlier test. Check whether the TaoDock key has been disabled or expired. Rotate the credential immediately if it has appeared in logs, screen recordings, or public issue reports.\n\n### 404 endpoint or model errors\n\nThe service URL must be `https://taodock.com/v1`, not the site root and not the full chat-completions endpoint. For a model error, list models with the same key and copy the precise ID. The model also needs a usable TaoDock channel; a catalog entry alone does not guarantee that every account or group can call it.\n\n### Insufficient quota\n\nReview account balance, key quota, group access, and model availability. A restricted WorkBuddy key can correctly reject a request even when a broader administrator key succeeds. Increase the narrow limit only after confirming that the request is expected. Repeated retries against a quota failure create noise without resolving the cause.\n\n### Streaming or connection resets\n\nTest a non-streaming request. If it succeeds, update WorkBuddy, try a second model, and temporarily bypass any VPN or HTTP inspection layer. Event streams can be buffered by intermediaries. If all request types fail, verify DNS and TLS access to TaoDock before changing the API protocol setting.\n\n### Feature-specific failures\n\nA plain chat response does not prove tool calling, image input, file processing, or structured output. Confirm the selected model's capabilities and the fields WorkBuddy sends. Try the smallest feature-specific request and compare its sanitized error with a direct API request using the same model.\n\n## Safe ongoing use\n\nGive each team, device, or automation a distinct key. That design lets you revoke one WorkBuddy installation without breaking unrelated applications. Keep key quotas conservative until the usage pattern is understood and review the TaoDock records for unexpected models or repeated failures.\n\nWhen upgrading WorkBuddy, run the small verification prompt again before a broad rollout. Client updates can change provider labels or request behavior. Keep the official TaoDock WorkBuddy guide bookmarked for current screen-specific instructions, while this page provides the validation and operational checklist around those settings.",
+      "structuredData": [
+        "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://taodock.com/\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Integrations\",\"item\":\"https://taodock.com/integrations\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Connect WorkBuddy to TaoDock's OpenAI-Compatible API\",\"item\":\"https://taodock.com/integrations/workbuddy\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"HowTo\",\"name\":\"Connect WorkBuddy to TaoDock's OpenAI-Compatible API\",\"description\":\"Set up WorkBuddy with TaoDock's OpenAI-compatible endpoint, validate an actual request, and resolve key, model, quota, and protocol issues.\",\"dateModified\":\"2026-11-04\",\"inLanguage\":\"en\",\"step\":[{\"@type\":\"HowToStep\",\"position\":1,\"name\":\"Issue a WorkBuddy-specific API key\",\"text\":\"Create a TaoDock key with only the model permissions and quota that WorkBuddy requires.\"},{\"@type\":\"HowToStep\",\"position\":2,\"name\":\"Add a custom OpenAI-compatible provider\",\"text\":\"Open WorkBuddy's model service settings, add a custom provider, and keep its custom protocol option disabled.\"},{\"@type\":\"HowToStep\",\"position\":3,\"name\":\"Enter the endpoint and model\",\"text\":\"Set the service URL to https://taodock.com/v1, paste the dedicated key, and use an exact model ID available to that key.\"},{\"@type\":\"HowToStep\",\"position\":4,\"name\":\"Verify the request in both products\",\"text\":\"Send a short prompt from WorkBuddy, then confirm the status, model, key, and usage in TaoDock's request records.\"}]}",
+        "{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\",\"mainEntity\":[{\"@type\":\"Question\",\"name\":\"What URL should WorkBuddy use for TaoDock?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Use https://taodock.com/v1 as the OpenAI-compatible service URL.\"}},{\"@type\":\"Question\",\"name\":\"Should WorkBuddy's custom protocol option be enabled?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"No. Follow the TaoDock guide and keep the custom protocol option disabled for this OpenAI-compatible connection.\"}},{\"@type\":\"Question\",\"name\":\"Why does a model work in TaoDock but not WorkBuddy?\",\"acceptedAnswer\":{\"@type\":\"Answer\",\"text\":\"Confirm that WorkBuddy uses the exact API model ID and that the selected feature is supported by that model and channel.\"}}]}"
+      ]
+    }
+  ]
+}

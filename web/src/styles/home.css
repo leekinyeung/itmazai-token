@@ -104,6 +104,18 @@ For commercial licensing, please contact support@quantumnous.com
 .home-section {
   padding-block: 7.5rem;
 }
+
+/* Keep the complete document accessible while skipping below-fold layout and
+ * paint work until a section approaches the viewport. The intrinsic sizes
+ * preserve a stable scrollbar before the browser has measured each section. */
+.home-live,
+.home-ecosystem,
+.home-capabilities,
+.home-setup,
+.home-cta {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}
 .home-main h2:not(.home-eyebrow) {
   font-size: clamp(2rem, 3.1vw, 3.1rem);
   line-height: 1.2;

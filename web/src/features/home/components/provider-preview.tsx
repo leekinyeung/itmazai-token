@@ -65,7 +65,7 @@ export function ProviderPreview(props: {
           className='home-link h-auto gap-1.5 p-0 text-[15px] font-medium'
           render={
             <Link
-              to='/pricing'
+              to='/models'
               search={{ search: props.provider.search }}
               aria-label={t('Explore {{provider}} models', {
                 provider: props.provider.name,

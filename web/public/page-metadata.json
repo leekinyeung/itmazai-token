@@ -1,6 +1,6 @@
 {
   "origin": "https://taodock.com",
-  "siteName": "众妙之门 TaoDock",
+  "siteName": "TaoDock",
   "noIndexRoutes": [
     "/forgot-password",
     "/oauth",
@@ -24,8 +24,8 @@
     "/dashboard/:section",
     "/errors/:error",
     "/keys",
-    "/models",
-    "/models/:section",
+    "/admin/models",
+    "/admin/models/:section",
     "/playground",
     "/profile",
     "/redemption-codes",
@@ -61,20 +61,24 @@
   ],
   "pages": {
     "/": {
-      "title": "TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation",
-      "description": "Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides."
+      "title": "Unified AI API Gateway | TaoDock",
+      "description": "Connect leading AI models through one familiar API, from your first prototype to your next production release."
     },
-    "/pricing": {
-      "title": "AI Model API Pricing",
+    "/models": {
+      "title": "AI Models & API Pricing",
       "description": "Explore available AI models, supported API endpoints and current pricing on {{systemName}}."
     },
-    "/pricing/:modelId": {
+    "/models/:modelId": {
       "title": "{{modelName}} API Pricing and Capabilities",
       "description": "View API capabilities, supported endpoints and current pricing for {{modelName}} on {{systemName}}."
     },
     "/integrations": {
       "title": "AI Client and SDK Integrations",
       "description": "Connect Cherry Studio, WorkBuddy, Open WebUI, AionUI, DeepChat and OpenAI SDK applications to {{systemName}} through one OpenAI-compatible API."
+    },
+    "/model-evaluation": {
+      "title": "OpenAI-Compatible Model Evaluation",
+      "description": "Evaluate model responses with Answer Relevancy, Correctness and Faithfulness metrics powered by DeepEval."
     },
     "/about": {
       "title": "About the Platform",
@@ -91,6 +95,109 @@
     "/user-agreement": {
       "title": "User Agreement",
       "description": "Read the user agreement for using {{systemName}} and its AI API services."
+    },
+    "/compare": {
+      "title": "AI API Gateway Comparisons",
+      "description": "Compare TaoDock with OpenRouter, LiteLLM, Portkey, Requesty and SiliconFlow across deployment, routing, access, usage and operational trade-offs.",
+      "language": "en",
+      "ogType": "website",
+      "updatedAt": "2026-11-04"
+    },
+    "/compare/taodock-vs-litellm": {
+      "title": "TaoDock vs LiteLLM: Hosted Platform or Self-Hosted Gateway",
+      "description": "Compare TaoDock and LiteLLM across hosting, provider integration, virtual keys, routing, budgets, logging and operations before choosing an AI gateway.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/compare/taodock-vs-openrouter": {
+      "title": "TaoDock vs OpenRouter: Choosing a Unified AI API Gateway",
+      "description": "Compare TaoDock and OpenRouter across model access, deployment, routing, API keys, usage records and billing to choose the right AI gateway for your team.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/compare/taodock-vs-portkey": {
+      "title": "TaoDock vs Portkey: AI Model Access or Enterprise Control",
+      "description": "Compare TaoDock with Portkey across unified model access, routing, observability, guardrails, governance, API keys, billing and deployment priorities.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/compare/taodock-vs-requesty": {
+      "title": "TaoDock vs Requesty: Comparing Hosted AI Model Routers",
+      "description": "Compare TaoDock and Requesty across hosted model access, routing, caching, bring-your-own keys, analytics, quotas, billing and integration workflow.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/compare/taodock-vs-siliconflow": {
+      "title": "TaoDock vs SiliconFlow: Aggregated Gateway or Inference Cloud",
+      "description": "Compare TaoDock and SiliconFlow across provider aggregation, first-party inference, OpenAI-compatible APIs, model coverage, account controls, pricing and deployment.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/faq": {
+      "title": "TaoDock AI API Frequently Asked Questions",
+      "description": "Answers about TaoDock accounts, API keys, OpenAI-compatible endpoints, models, quota, security, client setup, and common request errors.",
+      "language": "en",
+      "ogType": "website",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/integrations/aionui": {
+      "title": "Connect AionUI to TaoDock's OpenAI-Compatible API",
+      "description": "Configure AionUI with TaoDock's API base URL and a restricted key, verify an actual model request, and diagnose connection and quota errors.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/integrations/cherry-studio": {
+      "title": "Connect Cherry Studio to TaoDock's OpenAI-Compatible API",
+      "description": "Configure Cherry Studio with TaoDock, verify a real chat request, and troubleshoot API host, key, model, quota, and streaming problems.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/integrations/deepchat": {
+      "title": "Connect DeepChat to TaoDock's OpenAI-Compatible API",
+      "description": "Set up DeepChat with TaoDock using OpenAI Completions, validate a live request, and troubleshoot base URL, key, model, quota, and feature issues.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/integrations/open-webui": {
+      "title": "Connect Open WebUI to TaoDock's OpenAI-Compatible API",
+      "description": "Add TaoDock as an OpenAI connection in Open WebUI, test model discovery and chat, and troubleshoot credentials, permissions, quota, and streams.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/integrations/openai-sdk": {
+      "title": "Use the OpenAI SDK with TaoDock's Compatible API",
+      "description": "Point the OpenAI SDK at TaoDock, keep credentials in environment variables, verify models and chat responses, and handle common API errors safely.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
+    },
+    "/integrations/workbuddy": {
+      "title": "Connect WorkBuddy to TaoDock's OpenAI-Compatible API",
+      "description": "Set up WorkBuddy with TaoDock's OpenAI-compatible endpoint, validate an actual request, and resolve key, model, quota, and protocol issues.",
+      "language": "en",
+      "ogType": "article",
+      "publishedAt": "2026-11-04",
+      "updatedAt": "2026-11-04"
     }
   }
 }

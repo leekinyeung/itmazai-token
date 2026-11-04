@@ -60,7 +60,7 @@ export function Integrations() {
             </p>
           </div>
           <div className='flex flex-wrap gap-3'>
-            <Button size='lg' render={<Link to='/pricing' />}>
+            <Button size='lg' render={<Link to='/models' />}>
               {t(INTEGRATION_COPY.pricingLink)}
               <ArrowRight aria-hidden='true' />
             </Button>
@@ -99,7 +99,21 @@ export function Integrations() {
                   <CardContent className='text-muted-foreground flex-1 leading-6'>
                     {t(INTEGRATION_COPY.clients[integration.id])}
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className='flex flex-wrap gap-3'>
+                    <Button
+                      variant='link'
+                      className='h-auto px-0'
+                      render={
+                        <Link
+                          to='/integrations/$slug'
+                          params={{ slug: integration.id }}
+                          aria-label={`${t('Integration guide')}: ${integration.name}`}
+                        />
+                      }
+                    >
+                      {t('Integration guide')}
+                      <ArrowRight aria-hidden='true' />
+                    </Button>
                     <Button
                       variant='link'
                       className='h-auto px-0'

@@ -22,7 +22,7 @@ import { ModelSettings } from '@/features/system-settings/models'
 import {
   MODELS_DEFAULT_SECTION,
   MODELS_SECTION_IDS,
-} from '@/features/system-settings/models/section-registry.tsx'
+} from '@/features/system-settings/models/route-constants'
 
 export const Route = createFileRoute(
   '/_authenticated/system-settings/models/$section'
@@ -42,8 +42,7 @@ export const Route = createFileRoute(
         replace: true,
       })
     }
-    const validSections = MODELS_SECTION_IDS as unknown as string[]
-    if (!validSections.includes(params.section)) {
+    if (!(MODELS_SECTION_IDS as readonly string[]).includes(params.section)) {
       throw redirect({
         to: '/system-settings/models/$section',
         params: { section: MODELS_DEFAULT_SECTION },

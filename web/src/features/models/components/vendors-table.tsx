@@ -49,7 +49,7 @@ import { vendorErrorMessage, type VendorOperation } from '../vendor-api'
 import { VendorOperationDialog } from './dialogs/vendor-operation-dialog'
 import { useModels } from './models-provider'
 
-const route = getRouteApi('/_authenticated/models/$section')
+const route = getRouteApi('/_authenticated/admin/models/$section')
 
 export function VendorsTable() {
   const { t } = useTranslation()
@@ -162,7 +162,7 @@ export function VendorsTable() {
           className='h-auto p-0 tabular-nums'
           onClick={() =>
             void navigate({
-              to: '/models/$section',
+              to: '/admin/models/$section',
               params: { section: 'metadata' },
               search: { vendor: [String(row.original.id)], page: 1 },
             })

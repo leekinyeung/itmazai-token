@@ -30,6 +30,8 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers()
   vi.doUnmock('../locales/fr.json')
+  vi.doUnmock('../locales/zh.json')
+  vi.unstubAllGlobals()
   window.localStorage.clear()
 })
 
@@ -40,6 +42,29 @@ test('English boot does not register unselected language resources', async () =>
   for (const language of ['zhCN', 'zhTW', 'fr', 'ja', 'ru', 'vi']) {
     expect(i18n.hasResourceBundle(language, 'translation')).toBe(false)
   }
+})
+
+test('the public home boots from its compact translation asset', async () => {
+  window.localStorage.setItem('i18nextLng', 'zhCN')
+  const fetchMock = vi.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        en: { 'Loading...': 'Loading...' },
+        zh: { 'Loading...': '轻量首页' },
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    )
+  )
+  vi.stubGlobal('fetch', fetchMock)
+  vi.doMock('../locales/zh.json', () => {
+    throw new Error('Full locale should not load on the public home')
+  })
+
+  const { default: i18n, i18nReady } = await import('../config')
+  await i18nReady
+
+  expect(i18n.t('Loading...')).toBe('轻量首页')
+  expect(fetchMock).toHaveBeenCalledOnce()
 })
 
 test.each(['zhCN', 'zhTW', 'fr', 'ru', 'ja', 'vi', 'en'])(

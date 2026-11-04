@@ -73,7 +73,7 @@ export function CTA(props: CTAProps) {
           <Button
             variant='outline'
             className='border-border/50 hover:border-border hover:bg-muted/50 rounded-lg'
-            render={<Link to='/pricing' />}
+            render={<Link to='/models' />}
           >
             {t('View Pricing')}
           </Button>

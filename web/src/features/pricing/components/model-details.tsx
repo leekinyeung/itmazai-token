@@ -599,7 +599,7 @@ function ModelHeader(props: { model: PricingModel }) {
       <div className='flex items-center gap-2.5'>
         {modelIcon}
         <h1 className='font-mono text-xl font-bold tracking-tight sm:text-2xl'>
-          {model.model_name}
+          {t('{{model}} API Pricing', { model: model.model_name })}
         </h1>
         <CopyButton
           value={model.model_name || ''}
@@ -1590,8 +1590,8 @@ export function ModelDetailsDrawer(props: ModelDetailsDrawerProps) {
 
 export function ModelDetails() {
   const { t } = useTranslation()
-  const { modelId } = useParams({ from: '/pricing/$modelId/' })
-  const search = useSearch({ from: '/pricing/$modelId/' })
+  const { modelId } = useParams({ from: '/models/$modelId/' })
+  const search = useSearch({ from: '/models/$modelId/' })
 
   const {
     models,
@@ -1650,7 +1650,7 @@ export function ModelDetails() {
           <Button
             variant='outline'
             size='sm'
-            render={<Link to='/pricing' search={search} />}
+            render={<Link to='/models' search={search} />}
           >
             {t('Back to Models')}
           </Button>
@@ -1665,7 +1665,7 @@ export function ModelDetails() {
         <Button
           variant='ghost'
           size='sm'
-          render={<Link to='/pricing' search={search} />}
+          render={<Link to='/models' search={search} />}
           className='text-muted-foreground hover:text-foreground mb-4 h-auto gap-1 px-0 py-1 text-xs'
         >
           <ArrowLeft className='size-3.5' />

@@ -80,7 +80,7 @@ afterEach(() => {
   }
 })
 
-test('the build-time shell stays minimal in every supported language', async () => {
+test('the build-time snapshot renders the full default home in every supported language', async () => {
   for (const [language, translation] of [
     ['en', en.translation],
     ['zhCN', zh.translation],
@@ -104,37 +104,56 @@ test('the build-time shell stays minimal in every supported language', async () 
     )
 
     expect(
-      view.container.querySelector('[data-server-home-variant="loading"]')
+      view.container.querySelector('[data-server-home-variant="default"]')
     ).toBeInTheDocument()
     expect(
       view.container.querySelector('[data-fallback-i18n="Loading..."]')
-    ).toHaveTextContent(
-      (translation as Record<string, string>)['Loading...'] ?? 'Loading...'
-    )
-    expect((translation as Record<string, string>).TaoDock).toBeTruthy()
-    expect(view.container.querySelector('.server-home-logo')).toHaveAttribute(
-      'src',
-      '/logo.png'
-    )
-    expect(view.container.querySelector('.server-home-logo')).toHaveAttribute(
-      'width',
-      '56'
-    )
-    expect(view.container.querySelector('main')).toHaveAttribute(
-      'aria-busy',
-      'true'
-    )
-    expect(view.container.querySelector('[role="status"]')).toHaveAttribute(
-      'aria-live',
-      'polite'
-    )
-    expect(view.container.querySelector('.home-hero')).not.toBeInTheDocument()
-    expect(
-      view.container.querySelector('.home-gateway')
     ).not.toBeInTheDocument()
-    expect(view.container.querySelector('nav')).not.toBeInTheDocument()
-    expect(view.container.querySelector('a')).not.toBeInTheDocument()
-    expect(view.container.querySelector('svg')).not.toBeInTheDocument()
+    expect((translation as Record<string, string>).TaoDock).toBeTruthy()
+    expect(view.container.querySelector('.home-hero')).toBeInTheDocument()
+    expect(view.container.querySelector('.home-live')).toBeInTheDocument()
+    expect(view.container.querySelector('.home-ecosystem')).toBeInTheDocument()
+    expect(
+      view.container.querySelector('.home-capabilities')
+    ).toBeInTheDocument()
+    expect(view.container.querySelector('.home-setup')).toBeInTheDocument()
+    expect(view.container.querySelector('.home-cta')).toBeInTheDocument()
+    expect(view.container.querySelector('footer')).toBeInTheDocument()
+    expect(
+      view.container.querySelector('.home-gateway[data-motion="false"]')
+    ).toBeInTheDocument()
+    expect(
+      view.container.querySelector('[data-fallback-i18n="Explore models"]')
+    ).toHaveTextContent(
+      (translation as Record<string, string>)['Explore models'] ??
+        'Explore models'
+    )
+    expect(
+      view.container.querySelector('[data-server-api-base]')
+    ).toHaveTextContent('__API_BASE__')
+    expect(view.container.querySelector('.home-price-loading')).toHaveAttribute(
+      'role',
+      'status'
+    )
+    expect(
+      view.container.querySelector('a[href="/sign-in?redirect=%2Fkeys"]')
+    ).toBeInTheDocument()
+    const guides = [
+      ...view.container.querySelectorAll<HTMLAnchorElement>(
+        '.home-integration-guides a'
+      ),
+    ]
+    const chinese = language === 'zhCN' || language === 'zhTW'
+    expect(guides.map((link) => link.getAttribute('href'))).toEqual([
+      `https://docs.taodock.com${chinese ? '' : '/en'}/guide/cherry-studio.html`,
+      `https://docs.taodock.com${chinese ? '' : '/en'}/guide/open-webui.html`,
+      `https://docs.taodock.com${chinese ? '' : '/en'}/guide/workbuddy.html`,
+    ])
+    expect(guides.map((link) => link.dataset.fallbackDocPath)).toEqual([
+      '/guide/cherry-studio.html',
+      '/guide/open-webui.html',
+      '/guide/workbuddy.html',
+    ])
     expect(view.container.querySelector('animate')).not.toBeInTheDocument()
     view.unmount()
   }
@@ -148,7 +167,7 @@ test('the custom-content shell preserves an administrator-defined brand', async 
   })
   const { container } = render(
     <I18nextProvider i18n={instance}>
-      <HomeServerFrame brand='Acme & Partners' logo='/brand.svg' />
+      <HomeServerFrame brand='Acme & Partners' logo='/brand.svg' custom />
     </I18nextProvider>
   )
 
@@ -157,9 +176,13 @@ test('the custom-content shell preserves an administrator-defined brand', async 
     'src',
     '/brand.svg'
   )
+  expect(container.querySelector('[data-server-home-bloom]')).toHaveAttribute(
+    'aria-hidden',
+    'true'
+  )
   expect(container.querySelector('.home-hero')).not.toBeInTheDocument()
   expect(
-    container.querySelector('[data-server-home-variant="loading"]')
+    container.querySelector('[data-server-home-variant="custom"]')
   ).toBeInTheDocument()
 })
 

@@ -1,0 +1,42 @@
+[
+  {
+    "url": "https://docs.taodock.com/?utm_source=huggingface&utm_medium=readme&utm_campaign=taodock-introduction",
+    "status": 200
+  },
+  {
+    "url": "https://docs.taodock.com/api/overview.html",
+    "status": 200
+  },
+  {
+    "url": "https://docs.taodock.com/guide/clients.html",
+    "status": 200
+  },
+  {
+    "url": "https://docs.taodock.com/quick-start.html",
+    "status": 200
+  },
+  {
+    "url": "https://open-vsx.org/extension/taodock/taodock",
+    "status": 200
+  },
+  {
+    "url": "https://taodock.com/?utm_source=huggingface&utm_medium=readme&utm_campaign=taodock-introduction",
+    "status": 200
+  },
+  {
+    "url": "https://taodock.com/keys",
+    "status": 200
+  },
+  {
+    "url": "https://taodock.com/pricing",
+    "status": 200
+  },
+  {
+    "url": "https://taodock.com/sign-up",
+    "status": 200
+  },
+  {
+    "url": "https://taodock.com/usage-logs/common",
+    "status": 200
+  }
+]

@@ -25,6 +25,10 @@ import { PaymentSettingsSection } from '../integrations/payment-settings-section
 import { RatioSettingsCard } from '../models/ratio-settings-card'
 import type { BillingSettings } from '../types'
 import { createSectionRegistry } from '../utils/section-registry'
+import {
+  BILLING_DEFAULT_SECTION,
+  type BillingSectionId,
+} from './route-constants'
 
 const getModelDefaults = (settings: BillingSettings) => ({
   ModelPrice: settings.ModelPrice,
@@ -195,20 +199,18 @@ const BILLING_SECTIONS = [
   },
 ] as const
 
-export type BillingSectionId = (typeof BILLING_SECTIONS)[number]['id']
-
 const billingRegistry = createSectionRegistry<
   BillingSectionId,
   BillingSettings
 >({
   sections: BILLING_SECTIONS,
-  defaultSection: 'quota',
+  defaultSection: BILLING_DEFAULT_SECTION,
   basePath: '/system-settings/billing',
   urlStyle: 'path',
 })
 
-export const BILLING_SECTION_IDS = billingRegistry.sectionIds
-export const BILLING_DEFAULT_SECTION = billingRegistry.defaultSection
+export { BILLING_DEFAULT_SECTION, BILLING_SECTION_IDS } from './route-constants'
+export type { BillingSectionId } from './route-constants'
 export const getBillingSectionNavItems = billingRegistry.getSectionNavItems
 export const getBillingSectionContent = billingRegistry.getSectionContent
 export const getBillingSectionMeta = billingRegistry.getSectionMeta

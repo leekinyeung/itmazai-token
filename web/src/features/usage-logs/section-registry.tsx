@@ -18,6 +18,11 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { createSectionRegistry } from '@/features/system-settings/utils/section-registry'
 
+import {
+  USAGE_LOGS_DEFAULT_SECTION,
+  type UsageLogsSectionId,
+} from './route-constants'
+
 /**
  * Usage logs page section definitions
  */
@@ -39,24 +44,21 @@ const USAGE_LOGS_SECTIONS = [
   },
 ] as const
 
-export type UsageLogsSectionId = (typeof USAGE_LOGS_SECTIONS)[number]['id']
-
 const usageLogsRegistry = createSectionRegistry<
   UsageLogsSectionId,
   Record<string, never>,
   []
 >({
   sections: USAGE_LOGS_SECTIONS,
-  defaultSection: 'common',
+  defaultSection: USAGE_LOGS_DEFAULT_SECTION,
   basePath: '/usage-logs',
   urlStyle: 'path',
 })
 
-export const USAGE_LOGS_SECTION_IDS = usageLogsRegistry.sectionIds
-export const USAGE_LOGS_DEFAULT_SECTION = usageLogsRegistry.defaultSection
-
-/** Type guard for validating section IDs without casting. Use with z.string().refine() or params checks. */
-export function isUsageLogsSectionId(s: string): s is UsageLogsSectionId {
-  return (USAGE_LOGS_SECTION_IDS as readonly string[]).includes(s)
-}
+export {
+  isUsageLogsSectionId,
+  USAGE_LOGS_DEFAULT_SECTION,
+  USAGE_LOGS_SECTION_IDS,
+} from './route-constants'
+export type { UsageLogsSectionId } from './route-constants'
 export const getUsageLogsSectionNavItems = usageLogsRegistry.getSectionNavItems

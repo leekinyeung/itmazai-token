@@ -1,0 +1,842 @@
+[
+  {
+    "preset": "default",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 8.329144034571286
+  },
+  {
+    "preset": "default",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 8.329144034571286
+  },
+  {
+    "preset": "default",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 8.329144034571286
+  },
+  {
+    "preset": "anthropic",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 8.158336924189319
+  },
+  {
+    "preset": "anthropic",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 8.158336924189319
+  },
+  {
+    "preset": "anthropic",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 8.158336924189319
+  },
+  {
+    "preset": "simple-large",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 10.033105671373262
+  },
+  {
+    "preset": "simple-large",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 10.033105671373262
+  },
+  {
+    "preset": "simple-large",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 10.033105671373262
+  },
+  {
+    "preset": "underground",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.490595909672463
+  },
+  {
+    "preset": "underground",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.490595909672463
+  },
+  {
+    "preset": "underground",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.490595909672463
+  },
+  {
+    "preset": "rose-garden",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.428190236343905
+  },
+  {
+    "preset": "rose-garden",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.428190236343905
+  },
+  {
+    "preset": "rose-garden",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.428190236343905
+  },
+  {
+    "preset": "lake-view",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 13.107301419083358
+  },
+  {
+    "preset": "lake-view",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 13.107301419083358
+  },
+  {
+    "preset": "lake-view",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 13.107301419083358
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.424112127157237
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.424112127157237
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.424112127157237
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.40240796033113
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.40240796033113
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.40240796033113
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.476662352689079
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.476662352689079
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.476662352689079
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.444546536940033
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.444546536940033
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 1440,
+    "contrast": 11.444546536940033
+  },
+  {
+    "preset": "default",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 8.329144034571286
+  },
+  {
+    "preset": "default",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 8.329144034571286
+  },
+  {
+    "preset": "default",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 8.329144034571286
+  },
+  {
+    "preset": "anthropic",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 8.158336924189319
+  },
+  {
+    "preset": "anthropic",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 8.158336924189319
+  },
+  {
+    "preset": "anthropic",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 8.158336924189319
+  },
+  {
+    "preset": "simple-large",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 10.033105671373262
+  },
+  {
+    "preset": "simple-large",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 10.033105671373262
+  },
+  {
+    "preset": "simple-large",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 10.033105671373262
+  },
+  {
+    "preset": "underground",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.490595909672463
+  },
+  {
+    "preset": "underground",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.490595909672463
+  },
+  {
+    "preset": "underground",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.490595909672463
+  },
+  {
+    "preset": "rose-garden",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.428190236343905
+  },
+  {
+    "preset": "rose-garden",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.428190236343905
+  },
+  {
+    "preset": "rose-garden",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.428190236343905
+  },
+  {
+    "preset": "lake-view",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 13.107301419083358
+  },
+  {
+    "preset": "lake-view",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 13.107301419083358
+  },
+  {
+    "preset": "lake-view",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 13.107301419083358
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.424112127157237
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.424112127157237
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.424112127157237
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.40240796033113
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.40240796033113
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.40240796033113
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.476662352689079
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.476662352689079
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.476662352689079
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "system",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.444546536940033
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "sans",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.444546536940033
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "serif",
+    "theme": "font-inter dark",
+    "width": 375,
+    "contrast": 11.444546536940033
+  },
+  {
+    "preset": "default",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 6.263084250832732
+  },
+  {
+    "preset": "default",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 6.263084250832732
+  },
+  {
+    "preset": "default",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 6.263084250832732
+  },
+  {
+    "preset": "anthropic",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 5.494614618458983
+  },
+  {
+    "preset": "anthropic",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 5.494614618458983
+  },
+  {
+    "preset": "anthropic",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 5.494614618458983
+  },
+  {
+    "preset": "simple-large",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 10.55598204002478
+  },
+  {
+    "preset": "simple-large",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 10.55598204002478
+  },
+  {
+    "preset": "simple-large",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 10.55598204002478
+  },
+  {
+    "preset": "underground",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 15.005240324026879
+  },
+  {
+    "preset": "underground",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 15.005240324026879
+  },
+  {
+    "preset": "underground",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 15.005240324026879
+  },
+  {
+    "preset": "rose-garden",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 14.817554972871688
+  },
+  {
+    "preset": "rose-garden",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 14.817554972871688
+  },
+  {
+    "preset": "rose-garden",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 14.817554972871688
+  },
+  {
+    "preset": "lake-view",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 11.29023812578276
+  },
+  {
+    "preset": "lake-view",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 11.29023812578276
+  },
+  {
+    "preset": "lake-view",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 11.29023812578276
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 15.044995389362166
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 15.044995389362166
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 15.044995389362166
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 14.986505161134144
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 14.986505161134144
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 14.986505161134144
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 15.006402067667898
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 15.006402067667898
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 15.006402067667898
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 14.817932073060886
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 14.817932073060886
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 375,
+    "contrast": 14.817932073060886
+  },
+  {
+    "preset": "default",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 6.263084250832732
+  },
+  {
+    "preset": "default",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 6.263084250832732
+  },
+  {
+    "preset": "default",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 6.263084250832732
+  },
+  {
+    "preset": "anthropic",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 5.494614618458983
+  },
+  {
+    "preset": "anthropic",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 5.494614618458983
+  },
+  {
+    "preset": "anthropic",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 5.494614618458983
+  },
+  {
+    "preset": "simple-large",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 10.55598204002478
+  },
+  {
+    "preset": "simple-large",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 10.55598204002478
+  },
+  {
+    "preset": "simple-large",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 10.55598204002478
+  },
+  {
+    "preset": "underground",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 15.005240324026879
+  },
+  {
+    "preset": "underground",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 15.005240324026879
+  },
+  {
+    "preset": "underground",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 15.005240324026879
+  },
+  {
+    "preset": "rose-garden",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 14.817554972871688
+  },
+  {
+    "preset": "rose-garden",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 14.817554972871688
+  },
+  {
+    "preset": "rose-garden",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 14.817554972871688
+  },
+  {
+    "preset": "lake-view",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 11.29023812578276
+  },
+  {
+    "preset": "lake-view",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 11.29023812578276
+  },
+  {
+    "preset": "lake-view",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 11.29023812578276
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 15.044995389362166
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 15.044995389362166
+  },
+  {
+    "preset": "sunset-glow",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 15.044995389362166
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 14.986505161134144
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 14.986505161134144
+  },
+  {
+    "preset": "forest-whisper",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 14.986505161134144
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 15.006402067667898
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 15.006402067667898
+  },
+  {
+    "preset": "ocean-breeze",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 15.006402067667898
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "system",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 14.817932073060886
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "sans",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 14.817932073060886
+  },
+  {
+    "preset": "lavender-dream",
+    "font": "serif",
+    "theme": "font-inter light",
+    "width": 1440,
+    "contrast": 14.817932073060886
+  }
+]

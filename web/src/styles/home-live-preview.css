@@ -177,6 +177,16 @@ For commercial licensing, please contact support@quantumnous.com
   margin: 0;
   box-shadow: none;
 }
+.home-main .home-server-code {
+  overflow-x: auto;
+  padding-block: 16px;
+  color: var(--home-success-text);
+  font:
+    12px/1.8 ui-monospace,
+    monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .home-curl-code .cm-editor,
 .home-curl-code .cm-scroller,
 .home-curl-code .cm-content {

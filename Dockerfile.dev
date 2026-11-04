@@ -1,6 +1,15 @@
 # Backend-only build for frontend development
 # Skips frontend build and uses a placeholder for //go:embed web/dist
 
+FROM oven/bun:1.4.0 AS model-evaluation-worker
+
+WORKDIR /build/tools/model-evaluation-worker
+COPY tools/model-evaluation-worker/package.json tools/model-evaluation-worker/bun.lock ./
+RUN bun install --frozen-lockfile
+COPY tools/model-evaluation-worker/tsconfig.json ./
+COPY tools/model-evaluation-worker/src ./src
+RUN bun run build
+
 FROM golang:1.26.1-alpine AS builder
 
 ENV GO111MODULE=on CGO_ENABLED=0
@@ -33,7 +42,9 @@ RUN apt-get update \
     && update-ca-certificates
 
 COPY --from=builder /build/new-api /
+COPY --from=model-evaluation-worker /build/tools/model-evaluation-worker/dist/model-evaluation-worker /model-evaluation-worker
 COPY LICENSE NOTICE THIRD-PARTY-LICENSES.md /licenses/
+ENV MODEL_EVALUATION_WORKER_PATH=/model-evaluation-worker
 EXPOSE 3000
 WORKDIR /data
 ENTRYPOINT ["/new-api"]

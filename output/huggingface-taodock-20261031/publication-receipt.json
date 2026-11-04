@@ -1,0 +1,26 @@
+{
+  "platform": "Hugging Face",
+  "url": "https://huggingface.co/taodock/taodock",
+  "repository": "taodock/taodock",
+  "author": "taodock",
+  "private": false,
+  "createdAt": "2026-10-31T04:53:00.000Z",
+  "lastModified": "2026-10-31T04:58:13.000Z",
+  "revision": "7721f08396376644ae95dba2698b358227a37e01",
+  "tags": [
+    "taodock",
+    "api-gateway",
+    "developer-tools",
+    "en",
+    "zh",
+    "region:us"
+  ],
+  "files": [
+    ".gitattributes",
+    "README.md"
+  ],
+  "localSha256": "f1f16fef5482a09964e84bf4b0fd346b6ce4950170d8fbcf98e0d7189edb0e83",
+  "publishedSha256": "f1f16fef5482a09964e84bf4b0fd346b6ce4950170d8fbcf98e0d7189edb0e83",
+  "exactMatch": true,
+  "verifiedAt": "2026-10-31T04:58:20.940144+00:00"
+}

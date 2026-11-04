@@ -13,6 +13,7 @@ import (
 
 type PublicPricingData struct {
 	Pricing      []model.Pricing
+	Vendors      []model.PricingVendor
 	GroupRatio   map[string]float64
 	UsableGroups map[string]string
 }
@@ -62,6 +63,7 @@ func pricingDataForGroup(group string) PublicPricingData {
 
 	return PublicPricingData{
 		Pricing:      pricing,
+		Vendors:      model.GetVendors(),
 		GroupRatio:   groupRatio,
 		UsableGroups: usableGroups,
 	}
@@ -89,7 +91,7 @@ func GetPricing(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"success":            true,
 		"data":               pricingData.Pricing,
-		"vendors":            model.GetVendors(),
+		"vendors":            pricingData.Vendors,
 		"group_ratio":        pricingData.GroupRatio,
 		"usable_group":       pricingData.UsableGroups,
 		"supported_endpoint": model.GetSupportedEndpointMap(),

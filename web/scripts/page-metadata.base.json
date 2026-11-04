@@ -1,0 +1,100 @@
+{
+  "origin": "https://taodock.com",
+  "siteName": "TaoDock",
+  "noIndexRoutes": [
+    "/forgot-password",
+    "/oauth",
+    "/oauth/:provider",
+    "/otp",
+    "/register",
+    "/reset",
+    "/sign-in",
+    "/sign-up",
+    "/setup",
+    "/user/reset",
+    "/401",
+    "/403",
+    "/404",
+    "/500",
+    "/503",
+    "/chat2link",
+    "/channels",
+    "/chat/:chatId",
+    "/dashboard",
+    "/dashboard/:section",
+    "/errors/:error",
+    "/keys",
+    "/admin/models",
+    "/admin/models/:section",
+    "/playground",
+    "/profile",
+    "/redemption-codes",
+    "/security",
+    "/subscriptions",
+    "/system-info",
+    "/system-settings",
+    "/system-settings/auth",
+    "/system-settings/auth/:section",
+    "/system-settings/billing",
+    "/system-settings/billing/:section",
+    "/system-settings/content",
+    "/system-settings/content/:section",
+    "/system-settings/models",
+    "/system-settings/models/:section",
+    "/system-settings/operations",
+    "/system-settings/operations/:section",
+    "/system-settings/request-policies",
+    "/system-settings/request-policies/:section",
+    "/system-settings/security",
+    "/system-settings/security/:section",
+    "/system-settings/site",
+    "/system-settings/site/:section",
+    "/task-plugins",
+    "/usage-logs",
+    "/usage-logs/:section",
+    "/users",
+    "/wallet",
+    "/login",
+    "/forbidden",
+    "/console",
+    "/console/*legacy"
+  ],
+  "pages": {
+    "/": {
+      "title": "Unified AI API Gateway | TaoDock",
+      "description": "Connect leading AI models through one familiar API, from your first prototype to your next production release."
+    },
+    "/models": {
+      "title": "AI Models & API Pricing",
+      "description": "Explore available AI models, supported API endpoints and current pricing on {{systemName}}."
+    },
+    "/models/:modelId": {
+      "title": "{{modelName}} API Pricing and Capabilities",
+      "description": "View API capabilities, supported endpoints and current pricing for {{modelName}} on {{systemName}}."
+    },
+    "/integrations": {
+      "title": "AI Client and SDK Integrations",
+      "description": "Connect Cherry Studio, WorkBuddy, Open WebUI, AionUI, DeepChat and OpenAI SDK applications to {{systemName}} through one OpenAI-compatible API."
+    },
+    "/model-evaluation": {
+      "title": "OpenAI-Compatible Model Evaluation",
+      "description": "Evaluate model responses with Answer Relevancy, Correctness and Faithfulness metrics powered by DeepEval."
+    },
+    "/about": {
+      "title": "About the Platform",
+      "description": "Learn about {{systemName}}, a unified API platform for connecting applications and agents to AI models."
+    },
+    "/rankings": {
+      "title": "Usage Rankings",
+      "description": "View the usage rankings and available reporting periods published by {{systemName}}."
+    },
+    "/privacy-policy": {
+      "title": "Privacy Policy",
+      "description": "Read the privacy policy published by {{systemName}}, including how information is handled when you use the platform."
+    },
+    "/user-agreement": {
+      "title": "User Agreement",
+      "description": "Read the user agreement for using {{systemName}} and its AI API services."
+    }
+  }
+}

@@ -18,6 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { createSectionRegistry } from '@/features/system-settings/utils/section-registry'
 
+import { MODELS_DEFAULT_SECTION, type ModelsSectionId } from './route-constants'
+
 /**
  * Models page section definitions
  */
@@ -39,19 +41,17 @@ const MODELS_SECTIONS = [
   },
 ] as const
 
-export type ModelsSectionId = (typeof MODELS_SECTIONS)[number]['id']
-
 const modelsRegistry = createSectionRegistry<
   ModelsSectionId,
   Record<string, never>,
   []
 >({
   sections: MODELS_SECTIONS,
-  defaultSection: 'metadata',
-  basePath: '/models',
+  defaultSection: MODELS_DEFAULT_SECTION,
+  basePath: '/admin/models',
   urlStyle: 'path',
 })
 
-export const MODELS_SECTION_IDS = modelsRegistry.sectionIds
-export const MODELS_DEFAULT_SECTION = modelsRegistry.defaultSection
+export { MODELS_DEFAULT_SECTION, MODELS_SECTION_IDS } from './route-constants'
+export type { ModelsSectionId } from './route-constants'
 export const getModelsSectionNavItems = modelsRegistry.getSectionNavItems

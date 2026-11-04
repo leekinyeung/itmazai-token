@@ -57,7 +57,7 @@ function PrimaryLoginHarness(props: { result: LoginResult }) {
   return (
     <button
       type='button'
-      onClick={() => void handleLoginResult(props.result, '/pricing?view=grid')}
+      onClick={() => void handleLoginResult(props.result, '/models?view=grid')}
     >
       Primary authentication succeeded
     </button>
@@ -77,7 +77,7 @@ function renderLoginVerification(
         expires_at: Math.floor(Date.now() / 1000) + 300,
         methods: [{ method: '2fa', available: true }],
       },
-      redirectTo: '/pricing?view=grid',
+      redirectTo: '/models?view=grid',
     })
   }
   const root = createRootRoute({ component: Outlet })
@@ -94,7 +94,7 @@ function renderLoginVerification(
     }),
     createRoute({
       getParentRoute: () => root,
-      path: '/pricing',
+      path: '/models',
       component: () => <div>Pricing destination</div>,
     }),
     createRoute({
@@ -171,7 +171,7 @@ it('accepts a completed Passkey login without opening another verification dialo
     })
   )
   await waitFor(() =>
-    expect(router.state.location.href).toBe('/pricing?view=grid')
+    expect(router.state.location.href).toBe('/models?view=grid')
   )
   expect(useAuthStore.getState().auth.user?.id).toBe(42)
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -197,7 +197,7 @@ it('writes authentication only after verification and preserves the original des
     await pending.promise
   })
   await waitFor(() =>
-    expect(router.state.location.href).toBe('/pricing?view=grid')
+    expect(router.state.location.href).toBe('/models?view=grid')
   )
   expect(useAuthStore.getState().auth.user?.id).toBe(42)
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()

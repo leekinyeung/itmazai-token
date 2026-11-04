@@ -24,6 +24,10 @@ import { ChatSettingsSection } from './chat-settings-section'
 import { DashboardSection } from './dashboard-section'
 import { DrawingSettingsSection } from './drawing-settings-section'
 import { FAQSection } from './faq-section'
+import {
+  CONTENT_DEFAULT_SECTION,
+  type ContentSectionId,
+} from './route-constants'
 import { UptimeKumaSection } from './uptime-kuma-section'
 
 /**
@@ -118,20 +122,18 @@ const CONTENT_SECTIONS = [
   },
 ] as const
 
-export type ContentSectionId = (typeof CONTENT_SECTIONS)[number]['id']
-
 const contentRegistry = createSectionRegistry<
   ContentSectionId,
   ContentSettings
 >({
   sections: CONTENT_SECTIONS,
-  defaultSection: 'dashboard',
+  defaultSection: CONTENT_DEFAULT_SECTION,
   basePath: '/system-settings/content',
   urlStyle: 'path',
 })
 
-export const CONTENT_SECTION_IDS = contentRegistry.sectionIds
-export const CONTENT_DEFAULT_SECTION = contentRegistry.defaultSection
+export { CONTENT_DEFAULT_SECTION, CONTENT_SECTION_IDS } from './route-constants'
+export type { ContentSectionId } from './route-constants'
 export const getContentSectionNavItems = contentRegistry.getSectionNavItems
 export const getContentSectionContent = contentRegistry.getSectionContent
 export const getContentSectionMeta = contentRegistry.getSectionMeta

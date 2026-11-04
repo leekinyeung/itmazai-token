@@ -116,10 +116,12 @@ async function renderFooter(
 test('a non-demo site exposes product, documentation and about destinations', async () => {
   const footer = within(await renderFooter())
   for (const [name, href] of [
-    ['Model Square', '/pricing'],
+    ['Model Square', '/models'],
     ['Rankings', '/rankings'],
     ['Console', '/dashboard'],
     ['Integrations', '/integrations'],
+    ['AI gateway comparisons', '/compare'],
+    ['Frequently asked questions', '/faq'],
     ['About us', '/about'],
   ]) {
     expect(footer.getByRole('link', { name })).toHaveAttribute('href', href)
@@ -154,7 +156,7 @@ test('a non-demo site exposes product, documentation and about destinations', as
   expect(footer.queryByRole('link', { name: 'New API' })).toBeNull()
 })
 
-test('disabled modules retain the independent integration guide group', async () => {
+test('disabled modules retain public content and integration guide links', async () => {
   const footer = within(
     await renderFooter({
       status: {
@@ -169,7 +171,13 @@ test('disabled modules retain the independent integration guide group', async ()
     })
   )
   expect(footer.queryByRole('heading', { name: 'Products' })).toBeNull()
-  expect(footer.queryByRole('heading', { name: 'Documentation' })).toBeNull()
+  expect(footer.getByRole('heading', { name: 'Documentation' })).toBeVisible()
+  expect(
+    footer.getByRole('link', { name: 'AI gateway comparisons' })
+  ).toHaveAttribute('href', '/compare')
+  expect(
+    footer.getByRole('link', { name: 'Frequently asked questions' })
+  ).toHaveAttribute('href', '/faq')
   expect(footer.queryByRole('link', { name: 'About us' })).toBeNull()
   expect(footer.queryByRole('heading', { name: 'About' })).toBeNull()
   expect(
@@ -178,7 +186,7 @@ test('disabled modules retain the independent integration guide group', async ()
   expect(
     footer.getByRole('navigation', { name: 'Footer navigation' })
   ).toBeVisible()
-  expect(footer.getAllByRole('link')).toHaveLength(4)
+  expect(footer.getAllByRole('link')).toHaveLength(6)
 })
 
 test('a custom documentation address replaces the handbook links without guessing paths', async () => {

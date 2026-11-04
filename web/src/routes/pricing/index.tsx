@@ -17,41 +17,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import z from 'zod'
 
-import { Pricing } from '@/features/pricing'
-import { getModuleAccessForGuard } from '@/lib/nav-modules'
-import { useAuthStore } from '@/stores/auth-store'
-
-const pricingSearchSchema = z.object({
-  search: z.string().optional(),
-  sort: z.string().optional(),
-  vendor: z.string().optional(),
-  group: z.string().optional(),
-  quotaType: z.string().optional(),
-  endpointType: z.string().optional(),
-  tag: z.string().optional(),
-  tokenUnit: z.enum(['M', 'K']).optional(),
-  view: z.enum(['card', 'table']).optional().catch(undefined),
-  rechargePrice: z.boolean().optional(),
-})
+import { parsePricingSearch } from '@/features/pricing/route-search'
 
 export const Route = createFileRoute('/pricing/')({
-  validateSearch: pricingSearchSchema,
-  beforeLoad: async ({ context, location }) => {
-    const access = await getModuleAccessForGuard(context.queryClient, 'pricing')
-    if (!access.enabled) {
-      throw redirect({ to: '/' })
-    }
-    if (access.requireAuth) {
-      const { auth } = useAuthStore.getState()
-      if (!auth.user) {
-        throw redirect({
-          to: '/sign-in',
-          search: { redirect: location.href },
-        })
-      }
-    }
+  validateSearch: parsePricingSearch,
+  beforeLoad: ({ search }) => {
+    throw redirect({ to: '/models', search, replace: true })
   },
-  component: Pricing,
 })

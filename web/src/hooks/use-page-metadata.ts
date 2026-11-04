@@ -36,11 +36,14 @@ export function usePageMetadata(systemName: string, pathname: string): void {
       : `${t(page.title, values)} | ${displayName}`
   }
   let description = t(
-    'Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides.'
+    'Connect leading AI models through one familiar API, from your first prototype to your next production release.'
   )
   if (page) description = t(page.description, values)
   const canonicalUrl = page?.canonicalUrl ?? null
-  const language = toIntlLocale(i18n.resolvedLanguage || i18n.language) || 'en'
+  const language =
+    page?.language ||
+    toIntlLocale(i18n.resolvedLanguage || i18n.language) ||
+    'en'
 
   useEffect(() => {
     document.title = title
@@ -55,6 +58,37 @@ export function usePageMetadata(systemName: string, pathname: string): void {
       ['meta[name="twitter:description"]', description],
     ]) {
       document.querySelector(selector)?.setAttribute('content', content)
+    }
+    const ensureMeta = (
+      attribute: 'name' | 'property',
+      key: string,
+      content: string
+    ) => {
+      let meta = document.querySelector<HTMLMetaElement>(
+        `meta[${attribute}="${key}"]`
+      )
+      meta ??= document.createElement('meta')
+      meta.setAttribute(attribute, key)
+      meta.setAttribute('content', content)
+      if (!meta.isConnected) document.head.appendChild(meta)
+      return meta
+    }
+    ensureMeta('property', 'og:type', page?.ogType || 'website')
+    const publishedAt = document.querySelector<HTMLMetaElement>(
+      'meta[property="article:published_time"]'
+    )
+    const updatedAt = document.querySelector<HTMLMetaElement>(
+      'meta[property="article:modified_time"]'
+    )
+    if (page?.publishedAt) {
+      ensureMeta('property', 'article:published_time', page.publishedAt)
+    } else {
+      publishedAt?.remove()
+    }
+    if (page?.updatedAt) {
+      ensureMeta('property', 'article:modified_time', page.updatedAt)
+    } else {
+      updatedAt?.remove()
     }
     let canonical = document.querySelector<HTMLLinkElement>(
       'link[rel="canonical"]'
@@ -79,5 +113,5 @@ export function usePageMetadata(systemName: string, pathname: string): void {
       canonical.remove()
       openGraphUrl.remove()
     }
-  }, [canonicalUrl, description, displayName, language, title])
+  }, [canonicalUrl, description, displayName, language, page, title])
 }

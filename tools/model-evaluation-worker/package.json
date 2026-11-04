@@ -1,0 +1,22 @@
+{
+  "name": "model-evaluation-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun build ./src/bootstrap.ts --compile --outfile ./dist/model-evaluation-worker --external ai --external @anthropic-ai/sdk --external @aws-sdk/client-bedrock-runtime --external @google/genai --external @langchain/core --external @mastra/core --external @mastra/observability --external @openai/agents --external @typesafe-ai/sdk --external ollama --external vitest",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "1.9.0",
+    "@sentry/node": "11.10.0",
+    "deepeval": "0.9.24",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.4",
+    "@types/node": "26.1.1",
+    "typescript": "5.9.3"
+  }
+}

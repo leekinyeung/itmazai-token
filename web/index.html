@@ -6,30 +6,22 @@
     <meta name="google" content="notranslate" />
 
     <!-- Primary Meta Tags -->
-    <title>
-      TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation
-    </title>
-    <meta
-      name="title"
-      content="TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation"
-    />
+    <title>Unified AI API Gateway | TaoDock</title>
+    <meta name="title" content="Unified AI API Gateway | TaoDock" />
     <meta
       name="description"
-      content="Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides."
+      content="Connect leading AI models through one familiar API, from your first prototype to your next production release."
     />
     <link rel="canonical" href="https://taodock.com/" />
 
     <!-- Social cards must be present in the initial HTML for crawlers. -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="众妙之门 TaoDock" />
+    <meta property="og:site_name" content="TaoDock" />
     <meta property="og:url" content="https://taodock.com/" />
-    <meta
-      property="og:title"
-      content="TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation"
-    />
+    <meta property="og:title" content="Unified AI API Gateway | TaoDock" />
     <meta
       property="og:description"
-      content="Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides."
+      content="Connect leading AI models through one familiar API, from your first prototype to your next production release."
     />
     <meta property="og:image" content="https://taodock.com/social-card.png" />
     <meta property="og:image:type" content="image/png" />
@@ -38,13 +30,10 @@
     <meta property="og:image:alt" content="TaoDock" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="TaoDock - Unified AI API Gateway for Multi-Model Chat and Image Generation"
-    />
+    <meta name="twitter:title" content="Unified AI API Gateway | TaoDock" />
     <meta
       name="twitter:description"
-      content="Connect apps and agents to text, image, audio and video models through one unified AI API. Explore model pricing and integration guides."
+      content="Connect leading AI models through one familiar API, from your first prototype to your next production release."
     />
     <meta name="twitter:image" content="https://taodock.com/social-card.png" />
     <meta name="twitter:image:alt" content="TaoDock" />
@@ -156,30 +145,114 @@
         z-index: 1;
       }
       .server-home-frame {
-        display: flex;
-        min-height: 100svh;
-        color: oklch(0.145 0 0);
-        background: oklch(1 0 0);
         font-family:
           'Public Sans Variable', 'Public Sans', ui-sans-serif, system-ui,
           sans-serif;
       }
+      .server-home-frame[data-server-home-variant='custom'],
+      .server-home-frame[data-server-home-variant='loading'] {
+        --server-home-orbit-opacity-low: 0.5;
+        --server-home-orbit-opacity-high: 0.86;
+        --server-home-orbit-opacity-static: 0.68;
+        display: flex;
+        min-height: 100svh;
+        overflow: hidden;
+        isolation: isolate;
+        color: oklch(0.145 0 0);
+        background:
+          radial-gradient(
+            circle at 50% 48%,
+            oklch(0.7 0.17 250 / 0.1),
+            transparent 22rem
+          ),
+          radial-gradient(
+            ellipse at 45% 54%,
+            oklch(0.72 0.2 328 / 0.06),
+            transparent 30rem
+          ),
+          oklch(1 0 0);
+      }
       .server-home-loading {
+        position: relative;
+        z-index: 1;
         display: flex;
         flex: 1;
         min-height: 100svh;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 1rem;
-        padding: 1.5rem;
+        gap: 0.75rem;
+        padding: max(1.5rem, env(safe-area-inset-top))
+          max(1.25rem, env(safe-area-inset-right))
+          max(1.5rem, env(safe-area-inset-bottom))
+          max(1.25rem, env(safe-area-inset-left));
         text-align: center;
+      }
+      .server-home-mark {
+        position: relative;
+        display: grid;
+        width: 12rem;
+        height: 12rem;
+        margin-bottom: 0.25rem;
+        place-items: center;
+      }
+      .server-home-bloom {
+        position: absolute;
+        inset: 0;
+        animation: server-home-bloom-spin 18s linear infinite;
+        will-change: transform;
+      }
+      .server-home-orbit {
+        --server-home-orbit-rotation: 0deg;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 10.5rem;
+        height: 4.5rem;
+        border-radius: 999px;
+        background: radial-gradient(
+          ellipse at center,
+          transparent 36%,
+          var(--server-home-orbit-color) 54%,
+          transparent 74%
+        );
+        filter: blur(8px);
+        opacity: var(--server-home-orbit-opacity-static);
+        transform: translate(-50%, -50%)
+          rotate(var(--server-home-orbit-rotation)) scale(0.94);
+        animation: server-home-orbit-breathe 3.6s ease-in-out infinite alternate;
+        will-change: transform, opacity;
+      }
+      .server-home-orbit--blue {
+        --server-home-orbit-color: oklch(0.72 0.17 245 / 0.72);
+        --server-home-orbit-rotation: 10deg;
+      }
+      .server-home-orbit--violet {
+        --server-home-orbit-color: oklch(0.64 0.21 286 / 0.65);
+        --server-home-orbit-rotation: 130deg;
+        animation-delay: -1.2s;
+      }
+      .server-home-orbit--pink {
+        --server-home-orbit-color: oklch(0.72 0.22 334 / 0.62);
+        --server-home-orbit-rotation: 250deg;
+        animation-delay: -2.4s;
+      }
+      .server-home-logo-shell {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        width: 5rem;
+        height: 5rem;
+        place-items: center;
+        animation: server-home-logo-float 2.8s ease-in-out infinite;
+        will-change: transform;
       }
       .server-home-logo {
         display: block;
-        width: 3.5rem;
-        height: 3.5rem;
-        border-radius: 0.75rem;
+        width: 4.5rem;
+        height: 4.5rem;
+        border-radius: 1.125rem;
+        filter: drop-shadow(0 1rem 1.5rem oklch(0.38 0.15 270 / 0.2));
         object-fit: contain;
       }
       .server-home-brand {
@@ -187,6 +260,7 @@
         font-size: 1.125rem;
         line-height: 1.75rem;
         font-weight: 600;
+        letter-spacing: -0.015em;
       }
       .server-home-message {
         margin: 0;
@@ -194,12 +268,115 @@
         font-size: 0.875rem;
         line-height: 1.25rem;
       }
-      html.dark .server-home-frame {
+      @keyframes server-home-bloom-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes server-home-orbit-breathe {
+        from {
+          opacity: var(--server-home-orbit-opacity-low);
+          transform: translate(-50%, -50%)
+            rotate(var(--server-home-orbit-rotation)) scale(0.92);
+        }
+        to {
+          opacity: var(--server-home-orbit-opacity-high);
+          transform: translate(-50%, -50%)
+            rotate(var(--server-home-orbit-rotation)) scale(1.08);
+        }
+      }
+      @keyframes server-home-logo-float {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(-0.2rem) scale(1.025);
+        }
+      }
+      .server-home-menu,
+      .server-home-menu::before,
+      .server-home-menu::after {
+        display: block;
+        width: 1rem;
+        height: 1.5px;
+        border-radius: 999px;
+        background: currentColor;
+      }
+      .server-home-menu {
+        position: relative;
+      }
+      .server-home-menu::before,
+      .server-home-menu::after {
+        content: '';
+        position: absolute;
+        left: 0;
+      }
+      .server-home-menu::before {
+        top: -4px;
+      }
+      .server-home-menu::after {
+        top: 4px;
+      }
+      html.dark .server-home-frame[data-server-home-variant='custom'],
+      html.dark .server-home-frame[data-server-home-variant='loading'] {
+        --server-home-orbit-opacity-low: 0.58;
+        --server-home-orbit-opacity-high: 0.94;
+        --server-home-orbit-opacity-static: 0.82;
         color: oklch(0.965 0 0);
-        background: oklch(0.235 0 0);
+        background:
+          radial-gradient(
+            circle at 50% 48%,
+            oklch(0.55 0.2 260 / 0.2),
+            transparent 24rem
+          ),
+          radial-gradient(
+            ellipse at 44% 55%,
+            oklch(0.58 0.22 328 / 0.11),
+            transparent 32rem
+          ),
+          oklch(0.235 0 0);
       }
       html.dark .server-home-message {
         color: oklch(0.78 0 0);
+      }
+      html.dark .server-home-logo {
+        filter: drop-shadow(0 1.25rem 2rem oklch(0.2 0.12 270 / 0.55));
+      }
+      @media (max-width: 30rem) {
+        .server-home-mark {
+          width: 9.5rem;
+          height: 9.5rem;
+        }
+        .server-home-orbit {
+          width: 8.25rem;
+          height: 3.5rem;
+          filter: blur(7px);
+        }
+        .server-home-logo-shell {
+          width: 4.5rem;
+          height: 4.5rem;
+        }
+        .server-home-logo {
+          width: 4rem;
+          height: 4rem;
+          border-radius: 1rem;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .server-home-bloom,
+        .server-home-orbit,
+        .server-home-logo-shell {
+          animation: none;
+        }
+        .server-home-bloom {
+          transform: rotate(8deg);
+        }
+        .server-home-orbit {
+          opacity: var(--server-home-orbit-opacity-static);
+          transform: translate(-50%, -50%)
+            rotate(var(--server-home-orbit-rotation)) scale(1);
+        }
       }
     </style>
     <!-- Resolve the theme before first paint so the page never flashes light
@@ -294,8 +471,17 @@
           brandKey === '眾妙之門'
             ? copy.TaoDock || rawBrand
             : rawBrand
-        var translate = function (key) {
-          return copy[key] || (resources.en && resources.en[key]) || key
+        var translate = function (key, element) {
+          var result = copy[key] || (resources.en && resources.en[key]) || key
+          if (element && element.hasAttribute('data-fallback-brand-value')) {
+            result = result.replace(/\{\{brand\}\}/g, brand)
+          }
+          if (element && element.hasAttribute('data-fallback-audience')) {
+            var audienceKey = element.getAttribute('data-fallback-audience')
+            var audience = copy[audienceKey] || audienceKey
+            result = result.replace(/\{\{audience\}\}/g, audience)
+          }
+          return result
         }
 
         fallback
@@ -306,7 +492,29 @@
         fallback
           .querySelectorAll('[data-fallback-i18n]')
           .forEach(function (el) {
-            el.textContent = translate(el.getAttribute('data-fallback-i18n'))
+            el.textContent = translate(
+              el.getAttribute('data-fallback-i18n'),
+              el
+            )
+          })
+        fallback
+          .querySelectorAll('[data-fallback-i18n-aria-label]')
+          .forEach(function (el) {
+            var key = el.getAttribute('data-fallback-i18n-aria-label')
+            el.setAttribute('aria-label', translate(key, el))
+          })
+        var docsLanguagePath =
+          language === 'zh' || language === 'zh-TW' ? '' : '/en'
+        fallback
+          .querySelectorAll('[data-fallback-doc-path]')
+          .forEach(function (el) {
+            var docPath = el.getAttribute('data-fallback-doc-path') || ''
+            if (docPath.charAt(0) === '/' && docPath.charAt(1) !== '/') {
+              el.setAttribute(
+                'href',
+                'https://docs.taodock.com' + docsLanguagePath + docPath
+              )
+            }
           })
         document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
       })()

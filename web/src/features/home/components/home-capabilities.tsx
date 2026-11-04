@@ -28,17 +28,16 @@ import {
 } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import { getEndpointTypeLabels } from '@/features/pricing/constants'
-import type { PricingModel } from '@/features/pricing/types'
+import { usePricingData } from '@/features/pricing/hooks/use-pricing-data'
 import { toIntlLocale } from '@/i18n/languages'
 import { formatNumber } from '@/lib/format'
 
 export function HomeCapabilities(props: {
   apiBaseUrl: string
-  models: PricingModel[]
-  endpointMap: Record<string, unknown>
   docsUrl: string
 }) {
   const { t, i18n } = useTranslation()
+  const pricing = usePricingData()
   const locale = toIntlLocale(i18n.resolvedLanguage || i18n.language)
   const protocolLabels: Record<string, string> = {
     ...getEndpointTypeLabels(t),
@@ -90,34 +89,33 @@ export function HomeCapabilities(props: {
     ],
   ]
   const enabledTypes = new Set(
-    props.models.flatMap((model) => model.supported_endpoint_types ?? [])
+    pricing.models.flatMap((model) => model.supported_endpoint_types ?? [])
   )
-  const endpoints = Object.entries(props.endpointMap).flatMap(
-    ([name, value]) => {
-      if (
-        !enabledTypes.has(name) ||
-        !value ||
-        typeof value !== 'object' ||
-        !('path' in value) ||
-        typeof value.path !== 'string'
-      ) {
-        return []
-      }
-      return [
-        {
-          name,
-          path: value.path,
-          count: props.models.filter((model) =>
-            model.supported_endpoint_types?.includes(name)
-          ).length,
-          method:
-            'method' in value && typeof value.method === 'string'
-              ? value.method
-              : 'POST',
-        },
-      ]
+  const endpointMap: Record<string, unknown> = pricing.endpointMap
+  const endpoints = Object.entries(endpointMap).flatMap(([name, value]) => {
+    if (
+      !enabledTypes.has(name) ||
+      !value ||
+      typeof value !== 'object' ||
+      !('path' in value) ||
+      typeof value.path !== 'string'
+    ) {
+      return []
     }
-  )
+    return [
+      {
+        name,
+        path: value.path,
+        count: pricing.models.filter((model) =>
+          model.supported_endpoint_types?.includes(name)
+        ).length,
+        method:
+          'method' in value && typeof value.method === 'string'
+            ? value.method
+            : 'POST',
+      },
+    ]
+  })
   return (
     <section
       className='home-capabilities home-container home-section'

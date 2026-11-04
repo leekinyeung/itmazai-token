@@ -1,7 +1,12 @@
 User-agent: *
 Allow: /
-Allow: /pricing
+Allow: /models
 Allow: /integrations
+Allow: /compare
+Allow: /faq
+Allow: /blog
+Allow: /use-cases
+Allow: /model-evaluation
 Allow: /about
 Allow: /rankings
 Allow: /privacy-policy
@@ -12,4 +17,5 @@ Disallow: /dashboard/
 Disallow: /v1/
 
 Sitemap: https://taodock.com/sitemap.xml
+Sitemap: https://taodock.com/sitemap-models.xml
 Sitemap: https://docs.taodock.com/sitemap.xml

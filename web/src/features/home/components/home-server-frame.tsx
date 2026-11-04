@@ -18,37 +18,71 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useTranslation } from 'react-i18next'
 
-export function HomeServerFrame(props: { brand: string; logo: string }) {
+import { HomeServerSnapshot } from './home-server-snapshot'
+
+export function HomeServerFrame(props: {
+  brand: string
+  logo: string
+  docsUrl?: string
+  apiBaseUrl?: string
+  custom?: boolean
+}) {
   const { t } = useTranslation()
 
   return (
     <div
-      className='server-home-frame'
+      className={
+        props.custom
+          ? 'server-home-frame'
+          : 'server-home-frame bg-background text-foreground relative flex min-h-svh flex-col overflow-x-clip'
+      }
       data-server-fallback='home'
-      data-server-home-variant='loading'
+      data-server-home-variant={props.custom ? 'custom' : 'default'}
       data-server-brand={props.brand}
     >
-      <main className='server-home-loading' aria-busy='true'>
-        <img
-          src={props.logo}
-          alt=''
-          width={56}
-          height={56}
-          className='server-home-logo'
-          data-server-logo='true'
+      {props.custom ? (
+        <main className='server-home-loading' aria-busy='true'>
+          <div className='server-home-mark'>
+            <div
+              className='server-home-bloom'
+              aria-hidden='true'
+              data-server-home-bloom='true'
+            >
+              <span className='server-home-orbit server-home-orbit--blue' />
+              <span className='server-home-orbit server-home-orbit--violet' />
+              <span className='server-home-orbit server-home-orbit--pink' />
+            </div>
+            <div className='server-home-logo-shell'>
+              <img
+                src={props.logo}
+                alt=''
+                width={72}
+                height={72}
+                className='server-home-logo'
+                data-server-logo='true'
+              />
+            </div>
+          </div>
+          <p className='server-home-brand' data-fallback-brand='true'>
+            {props.brand}
+          </p>
+          <p
+            className='server-home-message'
+            role='status'
+            aria-live='polite'
+            data-fallback-i18n='Loading...'
+          >
+            {t('Loading...')}
+          </p>
+        </main>
+      ) : (
+        <HomeServerSnapshot
+          brand={props.brand}
+          logo={props.logo}
+          docsUrl={props.docsUrl ?? '__DOCS__'}
+          apiBaseUrl={props.apiBaseUrl ?? '__API_BASE__'}
         />
-        <p className='server-home-brand' data-fallback-brand='true'>
-          {props.brand}
-        </p>
-        <p
-          className='server-home-message'
-          role='status'
-          aria-live='polite'
-          data-fallback-i18n='Loading...'
-        >
-          {t('Loading...')}
-        </p>
-      </main>
+      )}
     </div>
   )
 }

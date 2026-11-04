@@ -22,14 +22,13 @@ import { BillingSettings } from '@/features/system-settings/billing'
 import {
   BILLING_DEFAULT_SECTION,
   BILLING_SECTION_IDS,
-} from '@/features/system-settings/billing/section-registry.tsx'
+} from '@/features/system-settings/billing/route-constants'
 
 export const Route = createFileRoute(
   '/_authenticated/system-settings/billing/$section'
 )({
   beforeLoad: ({ params }) => {
-    const validSections = BILLING_SECTION_IDS as unknown as string[]
-    if (!validSections.includes(params.section)) {
+    if (!(BILLING_SECTION_IDS as readonly string[]).includes(params.section)) {
       throw redirect({
         to: '/system-settings/billing/$section',
         params: { section: BILLING_DEFAULT_SECTION },

@@ -1,0 +1,39 @@
+### Namespace
+
+taodock
+
+### Ownership
+
+- [x] The namespace is not currently owned on Open VSX: https://open-vsx.org/api/taodock reports `verified: false`.
+
+### Account Age
+
+- [x] The requesting GitHub account, [leekinyeung](https://github.com/leekinyeung), was created on 2022-03-21, more than 12 months ago. [Public account metadata](https://api.github.com/users/leekinyeung)
+
+### VS Code Publisher with Repo
+
+- [ ] The namespace is also a publisher account on the VS Code Marketplace and has an extension published there with a repository specified.
+
+### VS Code Publisher without Repo
+
+- [ ] The namespace is also a publisher account on the VS Code Marketplace without an extension repository.
+
+### Not a VS Code Marketplace Publisher
+
+No publisher was found at https://marketplace.visualstudio.com/publishers/taodock (HTTP 404). The namespace does not match my GitHub login; I am using Option 4 below.
+
+### All Other Cases
+
+- [x] I am providing the following justification for a namespace aligned with my published extension and product name.
+
+### Claim evidence
+
+Please grant ownership of `taodock` to `@leekinyeung`.
+
+- I created this namespace and published [TaoDock 0.1.0](https://open-vsx.org/extension/taodock/taodock) as `leekinyeung`. I have signed the Open VSX Publisher Agreement.
+- `taodock` is the name of the TaoDock product and extension; my personal GitHub login is `leekinyeung`.
+- The [published manifest](https://open-vsx.org/api/taodock/taodock/0.1.0/file/package.json) identifies publisher `taodock`, author `TaoDock`, homepage https://taodock.com, and repository https://github.com/leekinyeung/itmazai-token, which is owned by my GitHub account.
+- The published VSIX includes the extension's corresponding source and build files.
+- [TaoDock documentation](https://docs.taodock.com) uses the same product name and service domain.
+
+This request is to verify the namespace for the existing extension and remove its unverified-publisher notice.

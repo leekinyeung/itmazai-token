@@ -137,8 +137,8 @@ async function renderLanding(
       ),
   })
   const destinations = [
-    '/pricing',
-    '/pricing/$modelId',
+    '/models',
+    '/models/$modelId',
     '/sign-in',
     '/keys',
     '/about',
@@ -179,7 +179,7 @@ test('the homepage inherits the global light theme without a local mode override
     'Four steps. One connected workflow.',
     'Your next idea starts with one connection.',
   ]) {
-    expect(screen.getByRole('region', { name })).toBeVisible()
+    expect(await screen.findByRole('region', { name })).toBeVisible()
   }
   expect(screen.queryByRole('form')).not.toBeInTheDocument()
 })
@@ -189,7 +189,7 @@ test('switching the global theme updates the homepage while retaining its conten
   const writeText = vi.spyOn(navigator.clipboard, 'writeText')
   await renderLanding({ theme: 'light', themeControls: true })
   const home = await screen.findByRole('main')
-  const code = screen.getByRole('textbox', { name: 'cURL example' })
+  const code = await screen.findByRole('textbox', { name: 'cURL example' })
   for (const mode of ['Dark', 'Light']) {
     await user.click(screen.getByRole('button', { name: 'Toggle theme' }))
     await user.click(screen.getByRole('menuitem', { name: mode }))
@@ -455,7 +455,7 @@ test('a catalog error provides the model-square fallback without invented prices
   expect(pricingLinks.length).toBeGreaterThan(0)
   for (const link of pricingLinks) {
     expect(link.tagName).toBe('A')
-    expect(link).toHaveAttribute('href', '/pricing')
+    expect(link).toHaveAttribute('href', '/models')
   }
   const integrations = screen.getByRole('button', {
     name: 'Explore integrations',
@@ -511,7 +511,7 @@ test('opening a real model uses the existing model detail route', async () => {
   const router = await renderLanding()
   await user.click(await screen.findByRole('link', { name: 'alpha-chat' }))
   await screen.findByRole('heading', { name: 'Destination' })
-  expect(router.state.location.pathname).toBe('/pricing/alpha-chat')
+  expect(router.state.location.pathname).toBe('/models/alpha-chat')
 })
 
 test('the accordion opens from the keyboard and exposes its description', async () => {
@@ -666,7 +666,7 @@ test('a long model identifier retains its complete name, detail URL and request 
   const list = await screen.findByRole('list', { name: 'Current model prices' })
   expect(within(list).getByRole('link', { name })).toHaveAttribute(
     'href',
-    `/pricing/${encodeURIComponent(name)}`
+    `/models/${encodeURIComponent(name)}`
   )
   expect(list).toHaveTextContent('Per-request0.02')
   expect(list).toHaveTextContent('USD / request')

@@ -21,10 +21,11 @@ import { memo, useMemo, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { getLobeIcon } from '@/lib/lobe-icon'
+import { modelDetailsPath } from '@/lib/model-path'
 import { cn } from '@/lib/utils'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
@@ -47,7 +48,7 @@ import { ModelPerfBadge, type ModelPerfBadgeData } from './model-perf-badge'
 
 export interface ModelCardProps {
   model: PricingModel
-  onClick: (modelName: string) => void
+  onClick?: (modelName: string) => void
   priceRate?: number
   usdExchangeRate?: number
   tokenUnit?: TokenUnit
@@ -402,14 +403,14 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
           perf={props.perf}
           className='border-border/60 border-t pt-2'
         >
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={() => props.onClick(props.model.model_name || '')}
+          <a
+            href={modelDetailsPath(props.model.model_name)}
+            className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+            onClick={() => props.onClick?.(props.model.model_name)}
           >
             {t('Details')}
             <ChevronRight aria-hidden className='size-3.5' />
-          </Button>
+          </a>
         </ModelPerfBadge>
       </CardFooter>
     </Card>

@@ -1,0 +1,29 @@
+TaoDock 全站效果图生成说明
+生成日期：2026-10-30
+生成方式：内置 image_gen 工具
+用途：设计确认，预览图，不作为实际业务数据或服务能力证明
+设计基准：1440 × 1024 桌面视口；输出实际尺寸均为 1487 × 1058，保留工具原始比例
+共同规范：design-spec.md
+
+以下共同提示词原样用于三次生成：
+Use case: ui-mockup.
+Create a realistic production-quality UI design for the Chinese-language TaoDock AI API gateway website, part of ONE coherent site-wide design system. The design concept has the descriptive name "清朗秩序". This is a visual confirmation mockup, not a new feature specification.
+Target dimensions: exactly 1440 x 1024 desktop screen composition, crisp high-resolution flat front-on UI, no desktop/device/browser frame, no presentation mockup perspective, no exterior margins, no invented watermarks. Fit the composition naturally with no clipped UI and excellent Chinese typography. Use a focused primary screen, not a feature inventory. Organize primarily with alignment, spacing and thin separators, then subtle surface tints; use few purpose-driven panels and no nested cards.
+SHARED DESIGN SYSTEM:
+Light canvas #F6F8FB, surfaces #FFFFFF, main text #17212F, secondary text #5D697A, primary blue #1D4ED8 with white text, hover/selection background #EAF0FF, decorative borders #E1E7F0, necessary input borders #7D8A9C. Dark canvas #11151C, surfaces #191F2A, raised surface #202837, main text #F1F5F9, secondary #A7B3C6, primary #93B4FF with #11151C text, accent #24324F, borders #364152, necessary input edges #7D8DA5. Success green #087A55 light / #6CDEAA dark, caution amber #96580B light / #F3C36B dark, error #BE3040 light / #FF94A3 dark.
+Use clean Public Sans-style Latin and high-quality modern Chinese sans serif, body 14-16px, labels >=12px, main work-page title 28px semibold, section titles 18px, metric numerals 30px with tabular alignment. No serif. Standard buttons/inputs 40px high, ~10px corners; panels ~16px corners; labels ~7px corners. Content spacing follows 4px grid, major gaps24px, panel padding24px, minor gaps8/12/16px. Subtle restrained elevation only on actual popovers. No global glass, no neon, no glow, no overdecorated colored cards. Use consistent thin-stroke interface icons in the Hugeicons style. Preserve brand logo from actual image reference when supplied, small at natural proportions; brand wordmark exactly "TaoDock". Current date anchor 2026-10-30 Asia/Shanghai. Dates must be relative to this date and mock values must be explicitly labeled "示例数据". Do not make claims of real price, availability, uptime or customer endorsements.
+Layout and language constraints: realistic readable Simplified Chinese with correct exact requested copy; use short labels instead of unreadable microtext. Whole UI uses one visual system, background, controls, typography and borders across homepage, dashboard and log views. No additional themes or alternative designs in this single image.
+
+画面说明与输入参考：
+1. homepage-light.png
+浅色官网首页；主标题“好模型，为你的应用所用。”，获取 API Key 和浏览模型入口，右侧保留已有模型生态图，五个厂商入口，统一接口与文档区域。输入：当前首页桌面截图、站点现有 logo.png、model-ecosystem.png。排版改用新规范，现有图像作为内容与品牌参考。
+
+2. dashboard-light.png
+浅色数据看板；统一顶部导航和 232 px 侧栏，四指标统计条、七天调用趋势、模型分布与最近调用表格。示例日期 2026-10-24 至 2026-10-30。输入：仓库 dashboard.zh-CN.jpg 与站点现有 logo.png，作为已有功能和品牌参考。
+
+3. usage-logs-dark.png
+同一套规范的深色使用日志；相同导航和侧栏，日期/模型/状态筛选、摘要、八行记录、详情入口和分页。示例日期 2026-10-30。输入：仓库 usage-logs.zh-CN.jpg 与站点现有 logo.png。所有数值为演示，未使用真实用户或可用凭据。
+
+审阅：
+三个画面均已目视检查，中文主要标题、导航和操作可辨认，未发现主体内容截断。首页保留既有模型生态插画；控制台使用稳定平面结构；深色日志通过表面和边界分层。效果图供整体风格确认；生成图中的尺寸、图表配色细节和产品元信息以规范及未来经过验证的实现为准。
+

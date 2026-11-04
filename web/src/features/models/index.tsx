@@ -44,7 +44,7 @@ import {
   MODELS_SECTION_IDS,
 } from './section-registry'
 
-const route = getRouteApi('/_authenticated/models/$section')
+const route = getRouteApi('/_authenticated/admin/models/$section')
 
 const SECTION_META: Record<
   ModelsSectionId,
@@ -63,7 +63,7 @@ const SECTION_META: Record<
 
 function ModelsContent() {
   const { t } = useTranslation()
-  const navigate = useNavigate({ from: '/models/$section' })
+  const navigate = useNavigate({ from: '/admin/models/$section' })
   const { tabCategory, setTabCategory, setOpen, setCurrentVendor } = useModels()
   const params = route.useParams()
   const activeSection = (params.section ??
@@ -82,7 +82,7 @@ function ModelsContent() {
   const handleSectionChange = useCallback(
     (section: string) => {
       void navigate({
-        to: '/models/$section',
+        to: '/admin/models/$section',
         params: { section: section as ModelsSectionId },
         search: (previous) => previous,
       })

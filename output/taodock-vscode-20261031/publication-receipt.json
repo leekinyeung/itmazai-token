@@ -1,0 +1,18 @@
+{
+  "status": "published",
+  "extensionId": "taodock.taodock",
+  "version": "0.1.0",
+  "namespace": "taodock",
+  "namespaceVerified": false,
+  "publishedBy": "leekinyeung",
+  "publishedAtUTC": "2026-10-31T03:33:50.902271Z",
+  "listing": "https://open-vsx.org/extension/taodock/taodock",
+  "download": "https://open-vsx.org/api/taodock/taodock/0.1.0/file/taodock.taodock-0.1.0.vsix",
+  "downloadable": true,
+  "sha256": "76155762cd27c546df9f30ba0f8aabcbcc6ecb4010d5cdf7f71b2e24b2c8b4fa",
+  "publicDownloadMatchesLocalPackage": true,
+  "publishedReadmeMatchesValidatedCopy": true,
+  "screenshot": "openvsx-published.jpg",
+  "namespaceClaimIssue": "https://github.com/EclipseFdn/open-vsx.org/issues/15036",
+  "namespaceClaimStatus": "open"
+}

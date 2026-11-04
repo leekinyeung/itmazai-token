@@ -17,26 +17,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import z from 'zod'
 
 import { Users } from '@/features/users'
 import { ROLE } from '@/lib/roles'
+import {
+  optionalSearchNumber,
+  searchNumber,
+  searchString,
+  searchStringArray,
+} from '@/lib/route-search'
 import { useAuthStore } from '@/stores/auth-store'
 
-const usersSearchSchema = z.object({
-  page: z.number().optional().catch(1),
-  pageSize: z.number().optional().catch(undefined),
-  filter: z.string().optional().catch(''),
-  status: z
-    .array(z.enum(['-1', '1', '2']))
-    .optional()
-    .catch([]),
-  role: z
-    .array(z.enum(['1', '10', '100']))
-    .optional()
-    .catch([]),
-  group: z.array(z.string()).optional().catch([]),
-})
+const USER_STATUS_VALUES = new Set(['-1', '1', '2'] as const)
+const USER_ROLE_VALUES = new Set(['1', '10', '100'] as const)
 
 export const Route = createFileRoute('/_authenticated/users/')({
   beforeLoad: () => {
@@ -48,6 +41,22 @@ export const Route = createFileRoute('/_authenticated/users/')({
       })
     }
   },
-  validateSearch: usersSearchSchema,
+  validateSearch: (
+    search
+  ): {
+    page?: number
+    pageSize?: number
+    filter?: string
+    status?: ('-1' | '1' | '2')[]
+    role?: ('1' | '10' | '100')[]
+    group?: string[]
+  } => ({
+    page: searchNumber(search.page, 1),
+    pageSize: optionalSearchNumber(search.pageSize),
+    filter: searchString(search.filter),
+    status: searchStringArray(search.status, USER_STATUS_VALUES),
+    role: searchStringArray(search.role, USER_ROLE_VALUES),
+    group: searchStringArray(search.group),
+  }),
   component: Users,
 })

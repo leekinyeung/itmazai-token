@@ -16,24 +16,39 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { usePricingData } from '@/features/pricing/hooks/use-pricing-data'
+import { usePricingData } from '@/features/pricing/hooks/use-pricing-data'
 
 import { HomeModelPrices } from './home-model-prices'
 import { HomeRequestPreview } from './home-request-preview'
 
 import '@/styles/home-live-preview.css'
 
-export function HomeLivePreview(props: {
-  pricing: ReturnType<typeof usePricingData>
+export function HomeLivePreview({
+  apiBaseUrl,
+  onModelCountChange,
+}: {
   apiBaseUrl: string
+  onModelCountChange?: (count: number | undefined) => void
 }) {
   const { t } = useTranslation()
+  const pricing = usePricingData()
+  useEffect(() => {
+    onModelCountChange?.(
+      pricing.isLoading || pricing.error ? undefined : pricing.models.length
+    )
+  }, [
+    onModelCountChange,
+    pricing.error,
+    pricing.isLoading,
+    pricing.models.length,
+  ])
   const exampleModel =
-    props.pricing.isLoading || props.pricing.error
+    pricing.isLoading || pricing.error
       ? undefined
-      : props.pricing.models.find(
+      : pricing.models.find(
           (model) =>
             model.model_name.trim() &&
             model.supported_endpoint_types?.includes('openai')
@@ -56,12 +71,12 @@ export function HomeLivePreview(props: {
             )}
           </p>
           <HomeRequestPreview
-            apiBaseUrl={props.apiBaseUrl}
+            apiBaseUrl={apiBaseUrl}
             modelName={exampleModel?.model_name}
           />
         </div>
         <div className='home-live-prices'>
-          <HomeModelPrices pricing={props.pricing} />
+          <HomeModelPrices pricing={pricing} />
           <p className='home-fine-print'>
             {t(
               'Prices follow the model square currency and units. Availability and billing depend on the selected model and group.'

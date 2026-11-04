@@ -1,0 +1,19 @@
+Generation mode: built-in image_gen
+
+Use case: ads-marketing.
+Asset type: one finished Chinese Douyin vertical image-post promotional poster, 9:16 portrait, intended canvas 1080 × 1920.
+Brand: Taodock, an AI API gateway for developers and teams. Audience: software developers and small technical teams.
+Create a polished restrained premium technology advertising poster. Dark midnight navy and cobalt backdrop with fine subtle grid, soft luminous cyan accents, generous negative space. Large beautifully typeset simplified Chinese headline in crisp white. Centerpiece: an original sophisticated 3D illustration of three translucent model-service blocks joining a single elegant docking hub with fine glowing connection lines, representing unified model connectivity. Treat this as a conceptual product illustration, NOT a screenshot; no invented dashboard, numbers, charts, ratings or performance metrics. No people, foreign model logos or other company brands.
+Layout: brand near top left and small visible product-promotion label near it; main headline in upper third; hero illustration across middle; three concise feature labels below in clear aligned layout with understated abstract symbols; audience line and scope note near lower part. Important copy stays comfortably inside central safe area: approximately left 10%, right 20%, top 10%, bottom 17%. Strong readability at phone size. Required fine print must remain readable and high contrast, not hairline or obscured.
+Render ONLY the following exact text, with no additions, perfect spelling and no duplicated words:
+"Taodock"
+"产品推广"
+"多模型接入"
+"一个入口管理"
+"访问权限管理"
+"用量记录查询"
+"面向开发者与团队"
+"功能及可用范围以实际服务为准"
+"本图由 AI 生成"
+The first two main headline lines are “多模型接入” and “一个入口管理”. The feature area uses only “访问权限管理” and “用量记录查询” with two restrained icons. Taodock is a text wordmark, not an invented third party emblem.
+Constraints: objective feature introduction, clean precise Chinese typography, no price offers, no free-trial claims, no guaranteed outcomes, no superlatives, no official endorsement or authorization claims, no fake user testimonials, no official Douyin logo, no website/domain, URL, QR code, phone number, contact information, external traffic directions, clickbait, imitation of platform buttons or interaction UI. Opaque full-bleed background. Deliver one complete refined poster.

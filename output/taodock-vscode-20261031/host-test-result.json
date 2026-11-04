@@ -1,0 +1,8 @@
+{
+  "vscode": "1.128.0",
+  "extension": "taodock.taodock",
+  "version": "0.1.0",
+  "activation": "passed",
+  "commands": "passed",
+  "nativeToolRoundTrip": "passed"
+}

@@ -17,19 +17,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import z from 'zod'
 
 import { Redemptions } from '@/features/redemption-codes'
 import { REDEMPTION_FILTER_VALUES } from '@/features/redemption-codes/constants'
 import { ROLE } from '@/lib/roles'
+import {
+  searchNumber,
+  searchString,
+  searchStringArray,
+} from '@/lib/route-search'
 import { useAuthStore } from '@/stores/auth-store'
 
-const redemptionsSearchSchema = z.object({
-  page: z.number().optional().catch(1),
-  pageSize: z.number().optional().catch(10),
-  filter: z.string().optional().catch(''),
-  status: z.array(z.enum(REDEMPTION_FILTER_VALUES)).optional().catch([]),
-})
+const REDEMPTION_FILTERS = new Set(REDEMPTION_FILTER_VALUES)
 
 export const Route = createFileRoute('/_authenticated/redemption-codes/')({
   beforeLoad: () => {
@@ -41,6 +40,18 @@ export const Route = createFileRoute('/_authenticated/redemption-codes/')({
       })
     }
   },
-  validateSearch: redemptionsSearchSchema,
+  validateSearch: (
+    search
+  ): {
+    page?: number
+    pageSize?: number
+    filter?: string
+    status?: (typeof REDEMPTION_FILTER_VALUES)[number][]
+  } => ({
+    page: searchNumber(search.page, 1),
+    pageSize: searchNumber(search.pageSize, 10),
+    filter: searchString(search.filter),
+    status: searchStringArray(search.status, REDEMPTION_FILTERS),
+  }),
   component: Redemptions,
 })

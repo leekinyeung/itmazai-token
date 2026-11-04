@@ -79,7 +79,7 @@ test('the static catalog has the exact language-independent contract', () => {
   }
 })
 
-test('the overview renders synchronously with native pricing and documentation anchors', async () => {
+test('the overview renders native tutorial links plus deep documentation links', async () => {
   const fetchSpy = vi.spyOn(globalThis, 'fetch')
   const view = await renderIntegrations()
 
@@ -94,10 +94,13 @@ test('the overview renders synchronously with native pricing and documentation a
     expect(
       screen.getByText(INTEGRATION_COPY.clients[integration.id])
     ).toBeVisible()
+    expect(
+      view.container.querySelector(`a[href="/integrations/${integration.id}"]`)
+    ).toHaveTextContent('Integration guide')
   }
 
   const pricing =
-    view.container.querySelector<HTMLAnchorElement>('a[href="/pricing"]')
+    view.container.querySelector<HTMLAnchorElement>('a[href="/models"]')
   expect(pricing?.tagName).toBe('A')
   expect(pricing).toHaveTextContent(INTEGRATION_COPY.pricingLink)
 

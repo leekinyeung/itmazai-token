@@ -893,7 +893,7 @@ export function useChannelsColumns(
                             if (!deploymentId) {
                               return
                             }
-                            const targetUrl = `/models/deployments?dFilter=${encodeURIComponent(String(deploymentId))}`
+                            const targetUrl = `/admin/models/deployments?dFilter=${encodeURIComponent(String(deploymentId))}`
                             window.open(targetUrl, '_blank', 'noopener')
                           }}
                         />

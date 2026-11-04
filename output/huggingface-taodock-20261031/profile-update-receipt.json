@@ -1,0 +1,13 @@
+{
+  "profileUrl": "https://huggingface.co/taodock",
+  "displayName": "TaoDock · 众妙之门",
+  "homepage": "https://taodock.com",
+  "documentationUrl": "https://docs.taodock.com",
+  "bio": "众妙之门 TaoDock：统一 AI API 网关，支持对话、图片生成、密钥管理与使用记录。\nTaoDock: an AI API gateway for chat and image generation, with API key management and usage records.\n文档 / Docs: https://docs.taodock.com",
+  "logoSource": "web/public/logo.png",
+  "avatarUrl": "https://cdn-avatars.huggingface.co/v1/production/uploads/6ae572488dbb176a7b75af88/MPagOL7hJAZf1RC4ciR-k.png",
+  "documentationDisplay": "Full URL in profile bio; Hugging Face renders this field as plain text",
+  "verification": "Saved profile verified with the public user overview and the visible profile page",
+  "screenshot": "/Users/leekinyeung/GolandProjects/itmazai-token/output/huggingface-taodock-20261031/profile-updated.jpg",
+  "verifiedAt": "2026-10-31T05:45:20.334661+00:00"
+}

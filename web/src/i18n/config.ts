@@ -25,11 +25,58 @@ import { initializeFrontendCache } from '@/lib/frontend-cache'
 import {
   convertDetectedLanguage,
   INTERFACE_LANGUAGE_OPTIONS,
+  type InterfaceLanguageCode,
 } from './languages'
-import en from './locales/en.json'
 import { loadLanguageResource } from './resource-loader'
 
 initializeFrontendCache()
+
+type Translation = Record<string, string>
+type HomeCopy = Record<string, Translation>
+
+const homeCopyLanguages: Record<InterfaceLanguageCode, string> = {
+  en: 'en',
+  zhCN: 'zh',
+  zhTW: 'zh-TW',
+  fr: 'fr',
+  ru: 'ru',
+  ja: 'ja',
+  vi: 'vi',
+}
+
+let homeCopyRequest: Promise<HomeCopy> | undefined
+
+function isHomePage(): boolean {
+  return typeof window !== 'undefined' && window.location.pathname === '/'
+}
+
+async function loadHomeLanguageResource(
+  language: InterfaceLanguageCode
+): Promise<Translation> {
+  homeCopyRequest ??= fetch('/home-fallback-copy.json', {
+    credentials: 'same-origin',
+  }).then(async (response) => {
+    if (!response.ok) throw new Error('Failed to load home translations')
+    return (await response.json()) as HomeCopy
+  })
+  const resources = await homeCopyRequest
+  const translation = resources[homeCopyLanguages[language]]
+  if (!translation) throw new Error('Unsupported home translation language')
+  return translation
+}
+
+async function loadPreferredLanguageResource(
+  language: InterfaceLanguageCode
+): Promise<Translation> {
+  if (isHomePage()) {
+    try {
+      return await loadHomeLanguageResource(language)
+    } catch {
+      // Development and tests do not generate the server snapshot assets.
+    }
+  }
+  return loadLanguageResource(language)
+}
 
 const backend: BackendModule = {
   type: 'backend',
@@ -38,16 +85,13 @@ const backend: BackendModule = {
     if (namespace !== 'translation') {
       throw new Error('Unsupported translation namespace')
     }
-    if (language === 'en') {
-      return en.translation
-    }
     const code = INTERFACE_LANGUAGE_OPTIONS.find(
       (option) => option.code === language
     )?.code
-    if (!code || code === 'en') {
+    if (!code) {
       throw new Error('Unsupported interface language')
     }
-    return loadLanguageResource(code)
+    return loadPreferredLanguageResource(code)
   },
 }
 
@@ -56,7 +100,7 @@ export const i18nReady = i18n
   .use(initReactI18next)
   .use(backend)
   .init({
-    resources: { en },
+    resources: {},
     partialBundledLanguages: true,
     fallbackLng: 'en',
     supportedLngs: INTERFACE_LANGUAGE_OPTIONS.map((option) => option.code),
@@ -85,6 +129,36 @@ export const i18nReady = i18n
 
 let languageSelection = 0
 
+let fullLanguageRequest: Promise<void> | undefined
+let fullLanguageCode: InterfaceLanguageCode | undefined
+
+/** Replace the compact home resource before rendering application routes. */
+export async function ensureFullLanguageResource(): Promise<void> {
+  await i18nReady
+  const matched = i18n.services.languageUtils.getBestMatchFromCodes([
+    i18n.resolvedLanguage || i18n.language,
+  ])
+  const code = INTERFACE_LANGUAGE_OPTIONS.find(
+    (option) => option.code === matched
+  )?.code
+  if (!code) return
+  if (fullLanguageCode === code && fullLanguageRequest) {
+    return fullLanguageRequest
+  }
+
+  fullLanguageCode = code
+  fullLanguageRequest = loadLanguageResource(code)
+    .then((translation) => {
+      i18n.addResourceBundle(code, 'translation', translation, true, true)
+    })
+    .catch((error) => {
+      fullLanguageCode = undefined
+      fullLanguageRequest = undefined
+      throw error
+    })
+  return fullLanguageRequest
+}
+
 /** Commit a preference only after its resources are ready and it is still the latest choice. */
 export async function changeInterfaceLanguage(
   language: string
@@ -97,10 +171,8 @@ export async function changeInterfaceLanguage(
     INTERFACE_LANGUAGE_OPTIONS.find((option) => option.code === matched)
       ?.code ?? 'en'
   try {
-    if (code !== 'en') {
-      const translation = await loadLanguageResource(code)
-      i18n.addResourceBundle(code, 'translation', translation)
-    }
+    const translation = await loadPreferredLanguageResource(code)
+    i18n.addResourceBundle(code, 'translation', translation, true, true)
   } catch (error) {
     if (selection !== languageSelection) return false
     throw error

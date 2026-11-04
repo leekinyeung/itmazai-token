@@ -2,11 +2,86 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://taodock.com/</loc>
+    <lastmod>2026-11-04</lastmod>
   </url>
   <url>
-    <loc>https://taodock.com/pricing</loc>
+    <loc>https://taodock.com/about</loc>
+    <lastmod>2026-11-02</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/compare</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/compare/taodock-vs-litellm</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/compare/taodock-vs-openrouter</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/compare/taodock-vs-portkey</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/compare/taodock-vs-requesty</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/compare/taodock-vs-siliconflow</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/faq</loc>
+    <lastmod>2026-11-04</lastmod>
   </url>
   <url>
     <loc>https://taodock.com/integrations</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/integrations/aionui</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/integrations/cherry-studio</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/integrations/deepchat</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/integrations/open-webui</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/integrations/openai-sdk</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/integrations/workbuddy</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/model-evaluation</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/models</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/privacy-policy</loc>
+    <lastmod>2026-11-02</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/rankings</loc>
+    <lastmod>2026-11-02</lastmod>
+  </url>
+  <url>
+    <loc>https://taodock.com/user-agreement</loc>
+    <lastmod>2026-11-03</lastmod>
   </url>
 </urlset>
