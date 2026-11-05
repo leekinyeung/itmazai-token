@@ -28,7 +28,6 @@ interface FeaturedIntegrationGuidesProps {
   id: string
   headingLevel: 'h2' | 'h3'
   className?: string
-  fallbackMarkers?: boolean
 }
 
 export function FeaturedIntegrationGuides(
@@ -42,13 +41,7 @@ export function FeaturedIntegrationGuides(
       className={cn('home-integration-guides', props.className)}
       aria-labelledby={props.id}
     >
-      <Heading
-        id={props.id}
-        className='home-integration-guides-title'
-        data-fallback-i18n={
-          props.fallbackMarkers ? 'Integration guides' : undefined
-        }
-      >
+      <Heading id={props.id} className='home-integration-guides-title'>
         {t('Integration guides')}
       </Heading>
       <ul>
@@ -63,21 +56,12 @@ export function FeaturedIntegrationGuides(
                     guide.docPath,
                     i18n.resolvedLanguage || i18n.language
                   )}
-                  data-fallback-doc-path={
-                    props.fallbackMarkers ? guide.docPath : undefined
-                  }
                   target='_blank'
                   rel='noopener noreferrer'
                 />
               }
             >
-              <span
-                data-fallback-i18n={
-                  props.fallbackMarkers ? guide.labelKey : undefined
-                }
-              >
-                {t(guide.labelKey)}
-              </span>
+              <span>{t(guide.labelKey)}</span>
             </Button>
           </li>
         ))}

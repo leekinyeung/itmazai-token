@@ -2,6 +2,7 @@ package router
 
 import (
 	"bytes"
+	"fmt"
 	"net/url"
 	"strings"
 	"unicode/utf8"
@@ -11,12 +12,13 @@ import (
 )
 
 type publicPageMetadata struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Language    string `json:"language"`
-	OGType      string `json:"ogType"`
-	PublishedAt string `json:"publishedAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	Title          string   `json:"title"`
+	Description    string   `json:"description"`
+	Language       string   `json:"language"`
+	OGType         string   `json:"ogType"`
+	PublishedAt    string   `json:"publishedAt"`
+	UpdatedAt      string   `json:"updatedAt"`
+	StructuredData []string `json:"structuredData"`
 }
 
 type publicPageMetadataRenderer struct {
@@ -49,9 +51,9 @@ func normalizePagePath(escapedPath string) string {
 	return path
 }
 
-func (renderer *publicPageMetadataRenderer) publicPage(escapedPath string) (string, string, string, bool) {
+func (renderer *publicPageMetadataRenderer) publicPage(escapedPath string) (publicPageMetadata, string, string, string, bool) {
 	if renderer == nil {
-		return "", "", "", false
+		return publicPageMetadata{}, "", "", "", false
 	}
 	path := normalizePagePath(escapedPath)
 	if page, ok := renderer.Pages[path]; ok && !strings.Contains(path, ":") {
@@ -60,21 +62,21 @@ func (renderer *publicPageMetadataRenderer) publicPage(escapedPath string) (stri
 			title = page.Title
 		}
 		description := strings.ReplaceAll(page.Description, "{{systemName}}", renderer.SiteName)
-		return title, description, renderer.Origin + path, true
+		return page, title, description, renderer.Origin + path, true
 	}
 
 	modelName, ok := publicModelNameFromPath(path)
 	if !ok {
-		return "", "", "", false
+		return publicPageMetadata{}, "", "", "", false
 	}
 	page, ok := renderer.Pages["/models/:modelId"]
 	if !ok {
-		return "", "", "", false
+		return publicPageMetadata{}, "", "", "", false
 	}
 	values := strings.NewReplacer("{{systemName}}", renderer.SiteName, "{{modelName}}", modelName)
 	title := values.Replace(page.Title) + " | " + renderer.SiteName
 	canonical := renderer.Origin + "/models/" + escapePathSegment(modelName)
-	return title, values.Replace(page.Description), canonical, true
+	return page, title, values.Replace(page.Description), canonical, true
 }
 
 func publicModelNameFromPath(path string) (string, bool) {
@@ -89,18 +91,31 @@ func publicModelNameFromPath(path string) (string, bool) {
 	return modelName, true
 }
 
-func (renderer *publicPageMetadataRenderer) render(escapedPath string, fallback *html.Node, structuredData ...string) []byte {
-	title, description, canonical, ok := renderer.publicPage(escapedPath)
+func escapePathSegment(value string) string {
+	var builder strings.Builder
+	for i := range len(value) {
+		character := value[i]
+		if (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') ||
+			(character >= '0' && character <= '9') || strings.ContainsRune("-._~", rune(character)) {
+			builder.WriteByte(character)
+			continue
+		}
+		builder.WriteString(fmt.Sprintf("%%%02X", character))
+	}
+	return builder.String()
+}
+
+func (renderer *publicPageMetadataRenderer) render(escapedPath string) []byte {
+	page, title, description, canonical, ok := renderer.publicPage(escapedPath)
 	if !ok {
 		return nil
 	}
-	page := renderer.Pages[normalizePagePath(escapedPath)]
-	return renderPageHTMLWithOptions(renderer.index, title, description, renderer.SiteName, canonical, false, fallback, publicPageRenderOptions{
+	return renderPageHTMLWithOptions(renderer.index, title, description, renderer.SiteName, canonical, false, publicPageRenderOptions{
 		Language:       page.Language,
 		OGType:         page.OGType,
 		PublishedAt:    page.PublishedAt,
 		UpdatedAt:      page.UpdatedAt,
-		StructuredData: structuredData,
+		StructuredData: page.StructuredData,
 	})
 }
 
@@ -134,13 +149,8 @@ func routePatternMatches(pattern, path string) bool {
 	return len(patternParts) == len(pathParts)
 }
 
-// Render through the HTML parser so model IDs and branding cannot become markup.
-func renderPublicPageHTML(index []byte, title, description, siteName, canonical string) []byte {
-	return renderPageHTML(index, title, description, siteName, canonical, false, nil)
-}
-
-func renderPageHTML(index []byte, title, description, siteName, canonical string, noIndex bool, fallback *html.Node) []byte {
-	return renderPageHTMLWithOptions(index, title, description, siteName, canonical, noIndex, fallback, publicPageRenderOptions{})
+func renderPageHTML(index []byte, title, description, siteName, canonical string, noIndex bool) []byte {
+	return renderPageHTMLWithOptions(index, title, description, siteName, canonical, noIndex, publicPageRenderOptions{})
 }
 
 type publicPageRenderOptions struct {
@@ -151,35 +161,32 @@ type publicPageRenderOptions struct {
 	StructuredData []string
 }
 
-func renderPageHTMLWithOptions(index []byte, title, description, siteName, canonical string, noIndex bool, fallback *html.Node, options publicPageRenderOptions) []byte {
+func renderPageHTMLWithOptions(index []byte, title, description, siteName, canonical string, noIndex bool, options publicPageRenderOptions) []byte {
 	document, err := html.Parse(bytes.NewReader(index))
 	if err != nil {
 		return nil
 	}
 	var head *html.Node
-	var root *html.Node
 	for node := document.FirstChild; node != nil; node = node.NextSibling {
 		if node.Type != html.ElementNode || node.Data != "html" {
 			continue
 		}
 		if options.Language != "" {
-			setAttribute(node, "lang", options.Language)
+			languageSet := false
+			for index := range node.Attr {
+				if node.Attr[index].Key == "lang" {
+					node.Attr[index].Val = options.Language
+					languageSet = true
+					break
+				}
+			}
+			if !languageSet {
+				node.Attr = append(node.Attr, html.Attribute{Key: "lang", Val: options.Language})
+			}
 		}
 		for child := node.FirstChild; child != nil; child = child.NextSibling {
 			if child.Type == html.ElementNode && child.Data == "head" {
 				head = child
-			}
-			if child.Type == html.ElementNode && child.Data == "body" {
-				for bodyChild := child.FirstChild; bodyChild != nil; bodyChild = bodyChild.NextSibling {
-					if bodyChild.Type != html.ElementNode {
-						continue
-					}
-					for _, attribute := range bodyChild.Attr {
-						if attribute.Key == "id" && attribute.Val == "root" {
-							root = bodyChild
-						}
-					}
-				}
 			}
 		}
 	}
@@ -282,12 +289,23 @@ func renderPageHTMLWithOptions(index []byte, title, description, siteName, canon
 			head.AppendChild(renderStructuredData(value))
 		}
 	}
-	if root != nil && fallback != nil {
-		root.AppendChild(fallback)
-	}
 	var output bytes.Buffer
 	if html.Render(&output, document) != nil {
 		return nil
 	}
 	return output.Bytes()
+}
+
+func renderStructuredData(value string) *html.Node {
+	node := &html.Node{Type: html.ElementNode, Data: "script", Attr: []html.Attribute{
+		{Key: "type", Val: "application/ld+json"},
+		{Key: "data-public-content-jsonld", Val: "true"},
+	}}
+	node.AppendChild(&html.Node{Type: html.TextNode, Data: value})
+	return node
+}
+
+func validStructuredData(value string) bool {
+	var decoded any
+	return !strings.Contains(strings.ToLower(value), "</script") && common.Unmarshal([]byte(value), &decoded) == nil
 }

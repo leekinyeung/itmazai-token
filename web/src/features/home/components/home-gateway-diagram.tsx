@@ -38,7 +38,6 @@ export function GatewayDiagram(props: {
   brand: string
   svgRef: Ref<SVGSVGElement>
   height?: number
-  fallbackMarkers?: boolean
 }) {
   const { t } = useTranslation()
   const layout = props.layout
@@ -185,9 +184,7 @@ export function GatewayDiagram(props: {
       focusable='false'
       style={props.mobile ? undefined : { height: props.height }}
     >
-      <title data-fallback-brand={props.fallbackMarkers || undefined}>
-        {props.brand}
-      </title>
+      <title>{props.brand}</title>
       <defs>
         <linearGradient
           id={`${props.namespace}-tile`}
@@ -336,9 +333,6 @@ export function GatewayDiagram(props: {
               textAnchor='middle'
               textLength={[...tile.label].length * 6.8 > 80 ? 80 : undefined}
               lengthAdjust='spacingAndGlyphs'
-              data-fallback-i18n={
-                props.fallbackMarkers ? tile.labelKey : undefined
-              }
             >
               {tile.label}
             </text>
@@ -364,7 +358,6 @@ export function GatewayDiagram(props: {
           width={40}
           height={40}
           aria-label={props.brand}
-          data-server-logo={props.fallbackMarkers || undefined}
         />
       </g>
     </svg>

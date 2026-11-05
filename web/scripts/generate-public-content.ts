@@ -20,8 +20,6 @@ import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { Marked, Renderer } from 'marked'
-
 import {
   parsePublicContent,
   validatePublicContentCollection,
@@ -29,7 +27,6 @@ import {
   type PublicContentFaqItem,
   type PublicContentManifest,
   type PublicContentPage,
-  type PublicContentStep,
 } from '../src/features/public-content/content-schema'
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url))
@@ -47,27 +44,6 @@ const baseLastModified: Record<string, string> = {
   '/privacy-policy': '2026-11-02',
   '/rankings': '2026-11-02',
   '/user-agreement': '2026-11-03',
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
-}
-
-const renderer = new Renderer()
-renderer.html = ({ text }) => escapeHtml(text)
-const markdown = new Marked({ gfm: true, breaks: false, renderer })
-
-function renderMarkdown(body: string): string {
-  const output = markdown.parse(body)
-  if (typeof output !== 'string') {
-    throw new Error('Public Markdown rendering unexpectedly became async')
-  }
-  return output
 }
 
 async function markdownFiles(directory: string): Promise<string[]> {
@@ -166,62 +142,6 @@ function structuredData(page: PublicContentPage): string[] {
   )
 }
 
-function renderSteps(steps: PublicContentStep[]): string {
-  if (steps.length === 0) return ''
-  return `<section><h2>Setup steps</h2><ol>${steps
-    .map(
-      (step) =>
-        `<li><h3>${escapeHtml(step.title)}</h3><p>${escapeHtml(step.description)}</p></li>`
-    )
-    .join('')}</ol></section>`
-}
-
-function renderFaq(items: PublicContentFaqItem[]): string {
-  if (items.length === 0) return ''
-  return `<section><h2>Frequently asked questions</h2>${items
-    .map(
-      (item) =>
-        `<details><summary>${escapeHtml(item.question)}</summary><p>${escapeHtml(item.answer)}</p></details>`
-    )
-    .join('')}</section>`
-}
-
-function renderSources(page: PublicContentPage): string {
-  if (page.sources.length === 0) return ''
-  return `<section><h2>Sources and review notes</h2><ul>${page.sources
-    .map(
-      (source) =>
-        `<li><a href="${escapeHtml(source.url)}">${escapeHtml(source.label)}</a></li>`
-    )
-    .join('')}</ul></section>`
-}
-
-function renderRelated(page: PublicContentPage): string {
-  if (page.related.length === 0) return ''
-  return `<nav aria-label="Related resources"><h2>Related resources</h2><ul>${page.related
-    .map(
-      (path) => `<li><a href="${escapeHtml(path)}">${escapeHtml(path)}</a></li>`
-    )
-    .join('')}</ul></nav>`
-}
-
-function renderFallback(page: PublicContentPage): string {
-  const parentPath = page.kind === 'comparison' ? '/compare' : '/integrations'
-  const parentLabel =
-    page.kind === 'comparison' ? 'Comparisons' : 'Integrations'
-  const breadcrumb =
-    page.kind === 'faq'
-      ? `<a href="/">Home</a> / FAQ`
-      : `<a href="/">Home</a> / <a href="${parentPath}">${parentLabel}</a> / ${escapeHtml(page.subject || page.title)}`
-  const reviewed = page.reviewedAt
-    ? `<p>Reviewed ${escapeHtml(page.reviewedAt)} · Updated ${escapeHtml(page.updatedAt)}</p>`
-    : `<p>Updated ${escapeHtml(page.updatedAt)}</p>`
-  const docs = page.docsUrl
-    ? `<p><a href="${escapeHtml(page.docsUrl)}">Read the full documentation</a></p>`
-    : ''
-  return `<main class="server-fallback server-fallback--content" data-server-fallback="public-content"><article><nav aria-label="Breadcrumb">${breadcrumb}</nav><header class="server-fallback__hero"><p class="server-fallback__eyebrow">${escapeHtml(page.cluster)}</p><h1>${escapeHtml(page.title)}</h1><p class="server-fallback__lead">${escapeHtml(page.description)}</p>${reviewed}</header>${renderSteps(page.steps)}<div class="server-fallback__article">${renderMarkdown(page.body)}</div>${renderFaq(page.faqItems)}${renderSources(page)}${docs}${renderRelated(page)}<section><h2>Start building with TaoDock</h2><p>Create an account, generate a dedicated API key, and verify the models available to that key before sending production traffic.</p><nav aria-label="Get started"><a href="/sign-up">Create an account</a><a href="/models">Browse models and pricing</a></nav></section></article></main>`
-}
-
 function compareHubStructuredData(pages: PublicContentPage[]): string[] {
   return [
     {
@@ -254,17 +174,6 @@ function compareHubStructuredData(pages: PublicContentPage[]): string[] {
   ].map((value) => JSON.stringify(value).replaceAll('<', '\\u003c'))
 }
 
-function renderCompareHub(pages: PublicContentPage[]): string {
-  return `<main class="server-fallback server-fallback--content" data-server-fallback="public-content"><header class="server-fallback__hero"><p class="server-fallback__eyebrow">AI gateway comparisons</p><h1>Compare TaoDock with other AI API gateways</h1><p class="server-fallback__lead">Use sourced, review-dated guides to compare deployment models, provider access, routing, key controls, usage records and operational trade-offs.</p></header><section><h2>Comparison guides</h2><div class="server-fallback__card-list">${pages
-    .map(
-      (page) =>
-        `<article class="server-fallback__card"><h3><a href="${page.path}">${escapeHtml(page.subject || page.title)}</a></h3><p>${escapeHtml(page.description)}</p><p>Reviewed ${escapeHtml(page.reviewedAt || page.updatedAt)}</p></article>`
-    )
-    .join(
-      ''
-    )}</div></section><section><h2>Choose by operating model</h2><p>Start with the deployment, ownership and control model your team needs. Then verify protocol coverage, routing behavior, access controls, usage records and current commercial terms from the linked official sources.</p><nav aria-label="Get started"><a href="/sign-up">Create an account</a><a href="/models">Browse models and pricing</a></nav></section></main>`
-}
-
 function metadataFor(page: PublicContentPage) {
   return {
     title: page.title,
@@ -273,11 +182,17 @@ function metadataFor(page: PublicContentPage) {
     ogType: page.kind === 'faq' ? 'website' : 'article',
     publishedAt: page.publishedAt,
     updatedAt: page.updatedAt,
+    structuredData: structuredData(page),
   }
 }
 
 function xmlEscape(value: string): string {
-  return escapeHtml(value).replaceAll("'", '&apos;')
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&apos;')
 }
 
 const files = await markdownFiles(contentDirectory)
@@ -334,30 +249,13 @@ const manifest: PublicContentManifest = {
   },
   pages: generatedPages,
 }
-const fallbackManifest = {
-  version: 1,
-  pages: Object.fromEntries([
-    [
-      '/compare',
-      {
-        html: renderCompareHub(comparisonPages),
-        structuredData: compareStructuredData,
-      },
-    ],
-    ...pages.map((page) => [
-      page.path,
-      { html: renderFallback(page), structuredData: structuredData(page) },
-    ]),
-  ]),
-}
-
 const baseMetadata = JSON.parse(
   await readFile(resolve(scriptDirectory, 'page-metadata.base.json'), 'utf8')
 ) as {
   origin: string
   siteName: string
   noIndexRoutes: string[]
-  pages: Record<string, Record<string, string>>
+  pages: Record<string, Record<string, unknown>>
 }
 baseMetadata.pages['/compare'] = {
   title: manifest.compareHub.title,
@@ -365,6 +263,7 @@ baseMetadata.pages['/compare'] = {
   language: 'en',
   ogType: 'website',
   updatedAt: compareUpdatedAt,
+  structuredData: compareStructuredData,
 }
 for (const page of pages) baseMetadata.pages[page.path] = metadataFor(page)
 
@@ -386,10 +285,6 @@ await Promise.all([
   writeFile(
     resolve(publicDirectory, 'public-content.json'),
     serialize(manifest)
-  ),
-  writeFile(
-    resolve(publicDirectory, 'public-content-fallback.json'),
-    serialize(fallbackManifest)
   ),
   writeFile(
     resolve(publicDirectory, 'page-metadata.json'),

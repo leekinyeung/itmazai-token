@@ -6,8 +6,8 @@
   "scripts": {
     "content:generate": "bun scripts/generate-public-content.ts",
     "dev": "bun run content:generate && rsbuild dev",
-    "build": "bun run content:generate && rsbuild build && bun scripts/generate-home-fallback.tsx",
-    "build:check": "bun run content:generate && tsgo -b && rsbuild build && bun scripts/generate-home-fallback.tsx",
+    "build": "bun run content:generate && rsbuild build && bun scripts/generate-home-copy.ts",
+    "build:check": "bun run content:generate && tsgo -b && rsbuild build && bun scripts/generate-home-copy.ts",
     "typecheck": "bun run content:generate && tsgo -b",
     "lint": "oxlint -c .oxlintrc.json .",
     "lint:fix": "oxlint -c .oxlintrc.json . --fix",

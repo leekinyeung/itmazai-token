@@ -65,6 +65,9 @@ test('the public home boots from its compact translation asset', async () => {
 
   expect(i18n.t('Loading...')).toBe('轻量首页')
   expect(fetchMock).toHaveBeenCalledOnce()
+  expect(fetchMock).toHaveBeenCalledWith('/home-copy.json', {
+    credentials: 'same-origin',
+  })
 })
 
 test.each(['zhCN', 'zhTW', 'fr', 'ru', 'ja', 'vi', 'en'])(

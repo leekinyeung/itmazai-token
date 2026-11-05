@@ -11,7 +11,6 @@ import (
 	"github.com/QuantumNous/new-api/middleware"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/net/html"
 )
 
 // WebAssets holds the embedded dashboard frontend assets.
@@ -27,25 +26,6 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 	if manifest, err := assets.BuildFS.ReadFile("web/dist/page-metadata.json"); err == nil {
 		pageMetadata = newPublicPageMetadataRenderer(assets.IndexPage, manifest)
 	}
-	var publicContent *publicContentManifest
-	if manifest, err := assets.BuildFS.ReadFile("web/dist/public-content-fallback.json"); err == nil {
-		publicContent = newPublicContentManifest(manifest)
-	}
-	var homeAssets *homePageAssets
-	if fallback, err := assets.BuildFS.ReadFile("web/dist/home-fallback.html"); err == nil {
-		if customFallback, customErr := assets.BuildFS.ReadFile("web/dist/home-custom-fallback.html"); customErr == nil {
-			if copy, copyErr := assets.BuildFS.ReadFile("web/dist/home-fallback-copy.json"); copyErr == nil {
-				homeAssets = newHomePageAssets(fallback, customFallback, copy)
-			}
-		}
-	}
-	var integrations *integrationPageContent
-	if catalog, err := assets.BuildFS.ReadFile("web/dist/integration-catalog.json"); err == nil {
-		if copy, copyErr := assets.BuildFS.ReadFile("web/dist/integration-copy.en.json"); copyErr == nil {
-			integrations = newIntegrationPageContent(catalog, copy)
-		}
-	}
-
 	router.GET(
 		"/sitemap-models.xml",
 		middleware.RouteTag("web"),
@@ -98,17 +78,15 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 			}
 			publicPage := false
 			if pageMetadata != nil {
-				_, _, _, publicPage = pageMetadata.publicPage(escapedPath)
+				_, _, _, _, publicPage = pageMetadata.publicPage(escapedPath)
 			}
-			if path == "/integrations" && integrations == nil {
-				publicPage = false
-			}
-			var contentFallback *html.Node
-			var structuredData []string
-			if isPublicContentPath(path) {
-				var contentPage bool
-				contentFallback, structuredData, contentPage = publicContent.page(path)
-				publicPage = publicPage && contentPage
+			if publicPage && strings.HasPrefix(path, "/models/") {
+				modelName, ok := publicModelNameFromPath(path)
+				if !ok {
+					publicPage = false
+				} else {
+					publicPage = publicModelExists(controller.GetAnonymousPricingData(), modelName)
+				}
 			}
 			modelsRestricted := publicPage && isModelsPagePath(path) && !middleware.HeaderNavModuleIsPublic("pricing")
 			rankingsRestricted := publicPage && path == "/rankings" && !middleware.HeaderNavModuleIsPublic("rankings")
@@ -120,35 +98,9 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 			}
 
 			if publicPage {
-				var fallback *html.Node
-				switch {
-				case path == "/":
-					fallback = homePageFallback(homeAssets)
-				case path == "/models":
-					fallback = modelsPageFallback(controller.GetAnonymousPricingData())
-				case strings.HasPrefix(path, "/models/"):
-					modelName, ok := publicModelNameFromPath(path)
-					if !ok {
-						publicPage = false
-						break
-					}
-					data := controller.GetAnonymousPricingData()
-					item, found := publicModelByName(data, modelName)
-					if !found {
-						publicPage = false
-						break
-					}
-					fallback = publicModelPageFallback(data, item)
-				case path == "/integrations":
-					fallback = integrationPageFallback(integrations)
-				case contentFallback != nil:
-					fallback = contentFallback
-				}
-				if publicPage {
-					c.Header("Cache-Control", "no-cache")
-					c.Data(http.StatusOK, "text/html; charset=utf-8", pageMetadata.render(escapedPath, fallback, structuredData...))
-					return
-				}
+				c.Header("Cache-Control", "no-cache")
+				c.Data(http.StatusOK, "text/html; charset=utf-8", pageMetadata.render(escapedPath))
+				return
 			}
 
 			validNoIndexRoute := pageMetadata != nil && pageMetadata.isNoIndexRoute(escapedPath)
@@ -165,7 +117,7 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 				if pageMetadata != nil {
 					siteName = pageMetadata.SiteName
 				}
-				page := renderPageHTML(assets.IndexPage, "Account and console | "+siteName, "Sign in to use the TaoDock account and console features.", siteName, "", true, nil)
+				page := renderPageHTML(assets.IndexPage, "Account and console | "+siteName, "Sign in to use the TaoDock account and console features.", siteName, "", true)
 				c.Data(http.StatusOK, "text/html; charset=utf-8", page)
 				return
 			}
@@ -176,7 +128,7 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 			if pageMetadata != nil {
 				siteName = pageMetadata.SiteName
 			}
-			page := renderPageHTML(assets.IndexPage, "Page not found | "+siteName, "The requested TaoDock page does not exist.", siteName, "", true, notFoundFallback())
+			page := renderPageHTML(assets.IndexPage, "Page not found | "+siteName, "The requested TaoDock page does not exist.", siteName, "", true)
 			c.Data(http.StatusNotFound, "text/html; charset=utf-8", page)
 		},
 	)
@@ -213,6 +165,15 @@ func permanentPageRedirect(path, rawQuery string) (string, bool) {
 
 func isModelsPagePath(path string) bool {
 	return path == "/models" || strings.HasPrefix(path, "/models/")
+}
+
+func publicModelExists(data controller.PublicPricingData, name string) bool {
+	for _, item := range data.Pricing {
+		if item.ModelName == name {
+			return true
+		}
+	}
+	return false
 }
 
 func isAPIOrAssetPath(requestPath string) bool {

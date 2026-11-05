@@ -53,7 +53,7 @@ function isHomePage(): boolean {
 async function loadHomeLanguageResource(
   language: InterfaceLanguageCode
 ): Promise<Translation> {
-  homeCopyRequest ??= fetch('/home-fallback-copy.json', {
+  homeCopyRequest ??= fetch('/home-copy.json', {
     credentials: 'same-origin',
   }).then(async (response) => {
     if (!response.ok) throw new Error('Failed to load home translations')

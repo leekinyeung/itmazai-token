@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useTranslation } from 'react-i18next'
 
-export function HomeSetup(props: { fallbackMarkers?: boolean } = {}) {
+export function HomeSetup() {
   const { t } = useTranslation()
   const steps = [
     ['Create your account', 'Register or sign in to open your console.'],
@@ -37,96 +37,35 @@ export function HomeSetup(props: { fallbackMarkers?: boolean } = {}) {
       className='home-setup home-container home-section'
       aria-labelledby='home-setup-title'
     >
-      <p
-        className='home-eyebrow'
-        data-fallback-i18n={
-          props.fallbackMarkers ? 'FROM IDEA TO YOUR FIRST REQUEST' : undefined
-        }
-      >
-        {t('FROM IDEA TO YOUR FIRST REQUEST')}
-      </p>
-      <h2
-        id='home-setup-title'
-        data-fallback-i18n={
-          props.fallbackMarkers
-            ? 'Four steps. One connected workflow.'
-            : undefined
-        }
-      >
-        {t('Four steps. One connected workflow.')}
-      </h2>
-      <p
-        className='home-section-description'
-        data-fallback-i18n={
-          props.fallbackMarkers
-            ? 'Start with the tools you know. Keep every request in view.'
-            : undefined
-        }
-      >
+      <p className='home-eyebrow'>{t('FROM IDEA TO YOUR FIRST REQUEST')}</p>
+      <h2 id='home-setup-title'>{t('Four steps. One connected workflow.')}</h2>
+      <p className='home-section-description'>
         {t('Start with the tools you know. Keep every request in view.')}
       </p>
       <ol className='home-step-grid'>
         {steps.map(([titleKey, descriptionKey], index) => (
           <li key={titleKey}>
             <div className='home-step-preview' aria-hidden='true'>
-              <span
-                className='home-preview-label'
-                data-fallback-i18n={
-                  props.fallbackMarkers ? 'Example only' : undefined
-                }
-              >
-                {t('Example only')}
-              </span>
+              <span className='home-preview-label'>{t('Example only')}</span>
               {index === 0 && (
                 <>
-                  <div
-                    className='home-preview-heading'
-                    data-fallback-i18n={
-                      props.fallbackMarkers ? 'Your console' : undefined
-                    }
-                  >
+                  <div className='home-preview-heading'>
                     {t('Your console')}
                   </div>
-                  <div
-                    className='home-preview-field'
-                    data-fallback-i18n={
-                      props.fallbackMarkers ? 'Account' : undefined
-                    }
-                  >
-                    {t('Account')}
-                  </div>
+                  <div className='home-preview-field'>{t('Account')}</div>
                   <div className='home-preview-field'>••••••••••••</div>
-                  <div
-                    className='home-preview-action'
-                    data-fallback-i18n={
-                      props.fallbackMarkers ? 'Ready to connect' : undefined
-                    }
-                  >
+                  <div className='home-preview-action'>
                     {t('Ready to connect')}
                   </div>
                 </>
               )}
               {index === 1 && (
                 <>
-                  <div
-                    className='home-preview-heading'
-                    data-fallback-i18n={
-                      props.fallbackMarkers ? 'API keys' : undefined
-                    }
-                  >
-                    {t('API keys')}
-                  </div>
+                  <div className='home-preview-heading'>{t('API keys')}</div>
                   <div className='home-preview-key'>
                     my-app<span>sk-••••••••••••</span>
                   </div>
-                  <div
-                    className='home-preview-tag'
-                    data-fallback-i18n={
-                      props.fallbackMarkers ? 'Application key' : undefined
-                    }
-                  >
-                    {t('Application key')}
-                  </div>
+                  <div className='home-preview-tag'>{t('Application key')}</div>
                 </>
               )}
               {index === 2 && (
@@ -140,14 +79,7 @@ export function HomeSetup(props: { fallbackMarkers?: boolean } = {}) {
               )}
               {index === 3 && (
                 <>
-                  <div
-                    className='home-preview-heading'
-                    data-fallback-i18n={
-                      props.fallbackMarkers ? 'Usage logs' : undefined
-                    }
-                  >
-                    {t('Usage logs')}
-                  </div>
+                  <div className='home-preview-heading'>{t('Usage logs')}</div>
                   {['chat/completions', 'messages', 'models'].map((path) => (
                     <div className='home-preview-log' key={path}>
                       <span>/{path}</span>
@@ -159,20 +91,8 @@ export function HomeSetup(props: { fallbackMarkers?: boolean } = {}) {
             </div>
             <div className='home-step-copy'>
               <span className='home-step-number'>{`0${index + 1}`}</span>
-              <h3
-                data-fallback-i18n={
-                  props.fallbackMarkers ? titleKey : undefined
-                }
-              >
-                {t(titleKey)}
-              </h3>
-              <p
-                data-fallback-i18n={
-                  props.fallbackMarkers ? descriptionKey : undefined
-                }
-              >
-                {t(descriptionKey)}
-              </p>
+              <h3>{t(titleKey)}</h3>
+              <p>{t(descriptionKey)}</p>
             </div>
           </li>
         ))}

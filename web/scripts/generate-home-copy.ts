@@ -20,12 +20,6 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { createInstance } from 'i18next'
-import { renderToStaticMarkup } from 'react-dom/server'
-import { I18nextProvider } from 'react-i18next'
-
-import { HomeServerFrame } from '../src/features/home/components/home-server-frame'
-
 const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const webDirectory = resolve(scriptDirectory, '..')
 const outputDirectory = resolve(webDirectory, 'dist')
@@ -230,38 +224,8 @@ for (const [language, file] of Object.entries(languages)) {
   )
 }
 
-const renderer = createInstance()
-await renderer.init({
-  lng: 'en',
-  fallbackLng: 'en',
-  initImmediate: false,
-  resources: { en: { translation: resources.en } },
-  interpolation: { escapeValue: false },
-})
-
-function render(custom: boolean) {
-  return renderToStaticMarkup(
-    <I18nextProvider i18n={renderer}>
-      <HomeServerFrame
-        brand='TaoDock'
-        logo='/logo.png'
-        docsUrl='__DOCS__'
-        apiBaseUrl='__API_BASE__'
-        custom={custom}
-      />
-    </I18nextProvider>
-  )
-}
-
 await mkdir(outputDirectory, { recursive: true })
-await Promise.all([
-  writeFile(resolve(outputDirectory, 'home-fallback.html'), render(false)),
-  writeFile(
-    resolve(outputDirectory, 'home-custom-fallback.html'),
-    render(true)
-  ),
-  writeFile(
-    resolve(outputDirectory, 'home-fallback-copy.json'),
-    JSON.stringify(resources).replaceAll('<', '\\u003c')
-  ),
-])
+await writeFile(
+  resolve(outputDirectory, 'home-copy.json'),
+  JSON.stringify(resources).replaceAll('<', '\\u003c')
+)

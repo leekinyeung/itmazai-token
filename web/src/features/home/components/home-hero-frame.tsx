@@ -29,7 +29,6 @@ interface HomeHeroFrameProps {
   gateway: ReactNode
   primaryAction: ReactNode
   secondaryAction: ReactNode
-  fallbackMarkers?: boolean
 }
 
 export function HomeHeroFrame(props: HomeHeroFrameProps) {
@@ -38,35 +37,14 @@ export function HomeHeroFrame(props: HomeHeroFrameProps) {
   return (
     <section className='home-hero' aria-labelledby='home-title'>
       <div className='home-hero-copy'>
-        <p
-          className='home-eyebrow home-hero-badge'
-          data-fallback-i18n={
-            props.fallbackMarkers ? 'MODELS · API · POSSIBILITIES' : undefined
-          }
-        >
+        <p className='home-eyebrow home-hero-badge'>
           {t('MODELS · API · POSSIBILITIES')}
         </p>
         <h1 id='home-title'>
-          <span
-            data-fallback-i18n={
-              props.fallbackMarkers
-                ? 'One gateway, endless AI possibilities.'
-                : undefined
-            }
-          >
-            {t('One gateway, endless AI possibilities.')}
-          </span>
+          <span>{t('One gateway, endless AI possibilities.')}</span>
           {props.audience}
         </h1>
-        <p
-          className='home-hero-description'
-          data-fallback-i18n={
-            props.fallbackMarkers
-              ? 'Connect leading models through {{brand}}. One familiar API, from your first prototype to your next release.'
-              : undefined
-          }
-          data-fallback-brand-value={props.fallbackMarkers || undefined}
-        >
+        <p className='home-hero-description'>
           {t(
             'Connect leading models through {{brand}}. One familiar API, from your first prototype to your next release.',
             { brand: props.brand }
@@ -76,14 +54,7 @@ export function HomeHeroFrame(props: HomeHeroFrameProps) {
           {props.primaryAction}
           {props.secondaryAction}
         </div>
-        <p
-          className='home-hero-note'
-          data-fallback-i18n={
-            props.fallbackMarkers && !props.modelCount
-              ? 'Many models. One connection.'
-              : undefined
-          }
-        >
+        <p className='home-hero-note'>
           {!props.modelCount
             ? t('Many models. One connection.')
             : t('{{formattedCount}} models, ready to explore.', {

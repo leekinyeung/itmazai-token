@@ -22,7 +22,6 @@ import { StrictMode, Suspense, use } from 'react'
 import ReactDOM from 'react-dom/client'
 
 import { installBuildMetadata } from '@/lib/build-metadata'
-import { prepareClientRoot } from '@/lib/client-handoff'
 import { applyFaviconToDom } from '@/lib/dom-utils'
 import '@/lib/dayjs'
 import { createAppQueryClient } from '@/lib/query-client'
@@ -110,8 +109,7 @@ export function App() {
   )
 }
 
-const clientRootElement = prepareClientRoot(rootElement)
-const root = ReactDOM.createRoot(clientRootElement)
+const root = ReactDOM.createRoot(rootElement)
 root.render(
   <StrictMode>
     <Suspense
