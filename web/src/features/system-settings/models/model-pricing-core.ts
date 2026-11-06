@@ -39,6 +39,10 @@ import { formatPricingNumber } from './pricing-format'
 export const createModelPricingSchema = (t: (key: string) => string) =>
   z.object({
     name: z.string().min(1, t('Model name is required')),
+    modelDiscount: z.string().refine((value) => {
+      const discount = Number(value)
+      return Number.isFinite(discount) && discount > 0 && discount <= 1
+    }, t('Model discount must be greater than 0 and no greater than 1')),
     price: z.string().optional(),
     ratio: z.string().optional(),
     cacheRatio: z.string().optional(),
@@ -66,6 +70,7 @@ export type LaneKey =
 export type ModelRatioData = {
   pluginBillingExpr?: Record<string, string>
   name: string
+  modelDiscount?: string
   price?: string
   ratio?: string
   cacheRatio?: string
@@ -86,6 +91,9 @@ export type PreviewRow = {
   value: string
   multiline?: boolean
 }
+
+type PreviewPricingValues = Omit<ModelPricingFormValues, 'modelDiscount'> &
+  Partial<Pick<ModelPricingFormValues, 'modelDiscount'>>
 
 export const EMPTY_LANE_PRICES: Record<LaneKey, string> = {
   completion: '',
@@ -222,7 +230,7 @@ export function createInitialLaneState(data?: ModelRatioData | null) {
 }
 
 export function buildPreviewRows(
-  values: ModelPricingFormValues,
+  values: PreviewPricingValues,
   mode: PricingMode,
   billingExpr: string,
   requestRuleExpr: string,
@@ -234,9 +242,19 @@ export function buildPreviewRows(
   cacheWriteMode?: CacheWriteMode,
   billingDetails?: LegacyBillingDetails
 ): PreviewRow[] {
+  const discount = Number(values.modelDiscount ?? 1)
+  const discountPercent = Number.isFinite(discount)
+    ? Math.round(discount * 10000) / 100
+    : 100
+  const discountRow: PreviewRow = {
+    key: 'modelDiscount',
+    label: t('Model discount'),
+    value: `${Number.isFinite(discount) ? discount : 1} / ${discountPercent}%`,
+  }
   if (mode === 'tiered_expr') {
     const effectiveExpr = combineBillingExpr(billingExpr, requestRuleExpr)
     return [
+      discountRow,
       { key: 'mode', label: t('Pricing'), value: t('Expression') },
       {
         key: 'expr',
@@ -249,6 +267,7 @@ export function buildPreviewRows(
 
   if (mode === 'per-request') {
     return [
+      discountRow,
       {
         key: 'price',
         label: billingDetails?.image_count
@@ -290,6 +309,7 @@ export function buildPreviewRows(
     createCacheLabel = t('Cache Creation (30m)')
   }
   const rows: PreviewRow[] = [
+    discountRow,
     {
       key: 'inputPrice',
       label: t('Input price'),

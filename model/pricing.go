@@ -33,6 +33,7 @@ type Pricing struct {
 	VendorID               int                                  `json:"vendor_id,omitempty"`
 	QuotaType              int                                  `json:"quota_type"`
 	ModelRatio             float64                              `json:"model_ratio"`
+	ModelDiscount          float64                              `json:"model_discount"`
 	ModelPrice             float64                              `json:"model_price"`
 	OwnerBy                string                               `json:"owner_by"`
 	CompletionRatio        float64                              `json:"completion_ratio"`
@@ -328,6 +329,7 @@ func updatePricing() {
 	for model, groups := range modelGroupsMap {
 		pricing := Pricing{
 			ModelName:              model,
+			ModelDiscount:          ratio_setting.GetModelDiscount(model),
 			EnableGroup:            groups.Items(),
 			SupportedEndpointTypes: modelSupportEndpointTypes[model],
 		}
@@ -430,7 +432,7 @@ func updatePricing() {
 
 	// 防止大更新后数据不通用
 	if len(pricingMap) > 0 {
-		pricingMap[0].PricingVersion = "5a90f2b86c08bd983a9a2e6d66c255f4eaef9c4bc934386d2b6ae84ef0ff1f1f"
+		pricingMap[0].PricingVersion = "d21941a4bd0b531b22f429ec232878391c41b5ae3b80db02cadc1236815693c0"
 	}
 
 	// 刷新缓存映射，供高并发快速查询

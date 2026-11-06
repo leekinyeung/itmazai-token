@@ -5,7 +5,30 @@ import (
 
 	"github.com/QuantumNous/new-api/setting/model_setting"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestModelDiscountDefaultsValidatesAndMatchesAliases(t *testing.T) {
+	original := ModelDiscount2JSONString()
+	t.Cleanup(func() { require.NoError(t, UpdateModelDiscountByJSONString(original)) })
+
+	assert.Equal(t, 1.0, GetModelDiscount("discount-missing"))
+	require.NoError(t, UpdateModelDiscountByJSONString(`{"discount-exact":0.8,"gpt-4-gizmo-*":0.7}`))
+	assert.Equal(t, 0.8, GetModelDiscount("discount-exact"))
+	assert.Equal(t, 0.7, GetModelDiscount("gpt-4-gizmo-customer"))
+
+	for _, invalid := range []string{
+		`{"discount-invalid":0}`,
+		`{"discount-invalid":-0.1}`,
+		`{"discount-invalid":1.1}`,
+		`{"discount-invalid":"0.8"}`,
+		`{"discount-invalid":NaN}`,
+		`{"discount-invalid":1e999}`,
+	} {
+		require.Error(t, UpdateModelDiscountByJSONString(invalid), invalid)
+	}
+	assert.Equal(t, 0.8, GetModelDiscount("discount-exact"), "an invalid update must not replace the active map")
+}
 
 func TestFormatMatchingModelNameDoesNotStripBase(t *testing.T) {
 	assert.Equal(t, "qwen3-max@thinking:on", FormatMatchingModelName("qwen3-max@thinking:on"))

@@ -33,6 +33,7 @@ import {
 const getModelDefaults = (settings: BillingSettings) => ({
   ModelPrice: settings.ModelPrice,
   ModelRatio: settings.ModelRatio,
+  ModelDiscount: settings.ModelDiscount,
   CacheRatio: settings.CacheRatio,
   CreateCacheRatio: settings.CreateCacheRatio,
   CompletionRatio: settings.CompletionRatio,

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
@@ -120,6 +121,49 @@ func GetGroupsEnabledModels(groups []string) []string {
 		}
 	}
 	return models
+}
+
+// GetDefaultKeyModelFallbackGroups returns the platform routing groups for a
+// model only when an unrestricted API key has no preferred group that serves
+// it. Global Auto groups keep their configured order; the remaining enabled
+// groups use stable lexical order.
+func GetDefaultKeyModelFallbackGroups(c *gin.Context, preferred []string, modelName string) []string {
+	modelLimitEnabled, tokenContext := common.GetContextKey(c, constant.ContextKeyTokenModelLimitEnabled)
+	if !tokenContext {
+		return nil
+	}
+	if enabled, ok := modelLimitEnabled.(bool); !ok || enabled {
+		return nil
+	}
+
+	enabledGroups := model.GetModelEnableGroups(modelName)
+	if len(enabledGroups) == 0 {
+		return nil
+	}
+	enabledSet := make(map[string]struct{}, len(enabledGroups))
+	for _, group := range enabledGroups {
+		enabledSet[group] = struct{}{}
+	}
+	for _, group := range preferred {
+		if _, ok := enabledSet[group]; ok {
+			return nil
+		}
+	}
+
+	ordered := make([]string, 0, len(enabledGroups))
+	for _, group := range setting.GetAutoGroups() {
+		if _, ok := enabledSet[group]; !ok {
+			continue
+		}
+		ordered = append(ordered, group)
+		delete(enabledSet, group)
+	}
+	remaining := make([]string, 0, len(enabledSet))
+	for group := range enabledSet {
+		remaining = append(remaining, group)
+	}
+	slices.Sort(remaining)
+	return append(ordered, remaining...)
 }
 
 // GetUserGroupRatio 获取用户使用某个分组的倍率

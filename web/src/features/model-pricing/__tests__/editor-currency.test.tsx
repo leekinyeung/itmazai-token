@@ -227,6 +227,7 @@ it('previews legacy conversion in the selected currency and applies only after c
     model_name: 'currency-model',
     pricing: {
       'billing_setting.billing_mode': 'ratio',
+      ModelDiscount: 1,
       ModelRatio: 1,
       CompletionRatio: 2,
       CacheRatio: 0,
@@ -995,9 +996,12 @@ it('does not block saving valid prices when a preview quantity has a fractional 
     },
     schema
   )
-  fireEvent.change(screen.getByRole('spinbutton'), {
-    target: { value: '0.5' },
-  })
+  fireEvent.change(
+    screen.getByRole('spinbutton', { name: 'Usage · seconds' }),
+    {
+      target: { value: '0.5' },
+    }
+  )
   expect(await commit(editor.ref)).toMatchObject({
     billingExpr: 'tier("base", u("seconds") * 1)',
   })

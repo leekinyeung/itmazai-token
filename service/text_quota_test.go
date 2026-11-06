@@ -94,6 +94,28 @@ func TestFixedPriceBillingDatabaseMatrix(t *testing.T) {
 	}
 }
 
+func TestCalculateAudioQuotaAppliesModelDiscount(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		value float64
+		want  int
+	}{
+		{name: "legacy discount defaults to one", value: 0, want: 45_000_000},
+		{name: "model and group discounts", value: 0.8, want: 36_000_000},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			quota, clamp := calculateAudioQuota(QuotaInfo{
+				UsePrice:      true,
+				ModelPrice:    100,
+				ModelDiscount: tc.value,
+				GroupRatio:    0.9,
+			})
+			assert.Nil(t, clamp)
+			assert.Equal(t, tc.want, quota)
+		})
+	}
+}
+
 func runFixedPriceAccountingCases(t *testing.T, db, logDB *gorm.DB) {
 	t.Helper()
 	const mixed = `len <= 32000 ? tier("short", fixed(0.01)) : tier("long", p * 2)`
@@ -111,29 +133,29 @@ func runFixedPriceAccountingCases(t *testing.T, db, logDB *gorm.DB) {
 		audio, stream, refund, insufficient, tool bool
 		realtime, reserveInsufficient             bool
 		wallet, outboundImages                    int
-		groupRatio                                float64
+		groupRatio, modelDiscount                 float64
 		want                                      int
 		unit                                      billingexpr.BillingUnit
 		requestedImages, actualImages             int
 	}{
 		{name: "missing usage charges once", expression: flat, want: 5000, unit: billingexpr.BillingUnitRequest},
 		{name: "zero usage charges once", expression: flat, usage: &dto.Usage{}, want: 5000, unit: billingexpr.BillingUnitRequest},
-		{name: "stream charges once", expression: flat, stream: true, usage: &dto.Usage{PromptTokens: 100, CompletionTokens: 20, TotalTokens: 120}, want: 5000, unit: billingexpr.BillingUnitRequest},
-		{name: "audio zero usage charges once", expression: flat, audio: true, usage: &dto.Usage{}, want: 5000, unit: billingexpr.BillingUnitRequest},
+		{name: "stream charges once", expression: flat, stream: true, usage: &dto.Usage{PromptTokens: 100, CompletionTokens: 20, TotalTokens: 120}, modelDiscount: 0.8, want: 4000, unit: billingexpr.BillingUnitRequest},
+		{name: "audio zero usage charges once", expression: flat, audio: true, usage: &dto.Usage{}, modelDiscount: 0.8, want: 4000, unit: billingexpr.BillingUnitRequest},
 		{name: "audio missing usage charges once", expression: flat, audio: true, want: 5000, unit: billingexpr.BillingUnitRequest},
 		{name: "token reservation refunds to fixed price", expression: mixed, estimate: 50000, usage: &dto.Usage{PromptTokens: 100, TotalTokens: 100}, want: 5000, unit: billingexpr.BillingUnitRequest},
 		{name: "fixed reservation settles token fallback", expression: mixed, estimate: 100, usage: &dto.Usage{PromptTokens: 50000, TotalTokens: 50000}, want: 50000, unit: billingexpr.BillingUnitToken},
 		{name: "missing usage uses estimated token fallback", expression: mixed, estimate: 50000, want: 50000, unit: billingexpr.BillingUnitToken},
 		{name: "evaluation error retains fixed reservation metadata", expression: `p == 50 ? tier("error", param("missing") * p + img_cr * 2) : tier("request", fixed(0.01))`, estimate: 100, usage: &dto.Usage{PromptTokens: 50, TotalTokens: 50}, want: 5000, unit: billingexpr.BillingUnitRequest},
 		{name: "explicit zero remains free", expression: `tier("free", fixed(0))`, usage: &dto.Usage{PromptTokens: 100, TotalTokens: 100}, unit: billingexpr.BillingUnitRequest},
-		{name: "multipliers and separate tool surcharge", expression: flat + ` * (param("fast") == true ? 2 : 1)`, groupRatio: 1.5, tool: true, want: 18000, unit: billingexpr.BillingUnitRequest},
+		{name: "multipliers and separate tool surcharge", expression: flat + ` * (param("fast") == true ? 2 : 1)`, groupRatio: 1.5, modelDiscount: 0.5, tool: true, want: 10500, unit: billingexpr.BillingUnitRequest},
 		{name: "failed request refunds exactly once", expression: flat, refund: true},
 		{name: "insufficient wallet never reserves tokens", expression: flat, insufficient: true},
-		{name: "image cache stream settles usage and refunds unused reservation", expression: imageExpression, estimate: 10000, usage: imageUsage, stream: true, want: 4113, unit: billingexpr.BillingUnitToken},
+		{name: "image cache stream settles usage and refunds unused reservation", expression: imageExpression, estimate: 10000, usage: imageUsage, stream: true, modelDiscount: 0.8, want: 3290, unit: billingexpr.BillingUnitToken},
 		{name: "audio settlement records image cache billing inputs", expression: imageExpression, estimate: 10000, usage: imageUsage, audio: true, want: 4113, unit: billingexpr.BillingUnitToken},
-		{name: "realtime records actual expression inputs", expression: imageExpression, estimate: 10000, usage: imageUsage, realtime: true, want: 4000, unit: billingexpr.BillingUnitToken},
+		{name: "realtime records actual expression inputs", expression: imageExpression, estimate: 10000, usage: imageUsage, realtime: true, modelDiscount: 0.8, want: 3200, unit: billingexpr.BillingUnitToken},
 		{name: "image cache insufficient wallet never reserves tokens", expression: imageExpression, estimate: 10000, insufficient: true},
-		{name: "image quantity refunds missing images", expression: `tier("image", fixed(0.04)) * image_count`, requestedImages: 3, actualImages: 2, want: 40000, unit: billingexpr.BillingUnitRequest},
+		{name: "image quantity refunds missing images", expression: `tier("image", fixed(0.04)) * image_count`, requestedImages: 3, actualImages: 2, modelDiscount: 0.8, want: 32000, unit: billingexpr.BillingUnitRequest},
 		{name: "image quantity keeps request when actual missing", expression: `tier("image", fixed(0.04)) * image_count`, requestedImages: 3, want: 60000, unit: billingexpr.BillingUnitRequest},
 		{name: "image quantity zero price stays free", expression: `tier("image", fixed(0)) * image_count`, requestedImages: 3, actualImages: 2, unit: billingexpr.BillingUnitRequest},
 		{name: "image quantity failure refunds reservation", expression: `tier("image", fixed(0.04)) * image_count`, requestedImages: 3, refund: true},
@@ -165,17 +187,21 @@ func runFixedPriceAccountingCases(t *testing.T, db, logDB *gorm.DB) {
 			if group == 0 {
 				group = 1
 			}
+			discount := tc.modelDiscount
+			if discount == 0 {
+				discount = 1
+			}
 			request := &billingexpr.RequestInput{Body: []byte(`{"fast":true}`)}
 			if tc.requestedImages > 0 {
 				request.ImageCount = &tc.requestedImages
 			}
 			cost, trace, err := billingexpr.RunExprWithRequest(tc.expression, billingexpr.TokenParams{P: float64(tc.estimate), Len: float64(tc.estimate)}, *request)
 			require.NoError(t, err)
-			reservation, err := billingexpr.QuotaRoundStrict(cost / 1_000_000 * common.QuotaPerUnit * group)
+			reservation, err := billingexpr.QuotaRoundStrict(cost / 1_000_000 * common.QuotaPerUnit * discount * group)
 			require.NoError(t, err)
-			snapshot := &billingexpr.BillingSnapshot{BillingMode: "tiered_expr", ExprString: tc.expression, ExprHash: billingexpr.ExprHashString(tc.expression), QuotaPerUnit: common.QuotaPerUnit, GroupRatio: group, EstimatedTier: trace.MatchedTier, EstimatedBillingUnit: trace.BillingUnit, EstimatedFixedPrice: trace.FixedPrice, EstimatedQuotaAfterGroup: reservation}
+			snapshot := &billingexpr.BillingSnapshot{BillingMode: "tiered_expr", ExprString: tc.expression, ExprHash: billingexpr.ExprHashString(tc.expression), QuotaPerUnit: common.QuotaPerUnit, ModelDiscount: discount, GroupRatio: group, EstimatedTier: trace.MatchedTier, EstimatedBillingUnit: trace.BillingUnit, EstimatedFixedPrice: trace.FixedPrice, EstimatedQuotaAfterGroup: reservation}
 			snapshot.EstimatedImageCount = trace.ImageCount
-			info := &relaycommon.RelayInfo{UserId: user.Id, TokenId: token.Id, TokenKey: token.Key, ChannelMeta: &relaycommon.ChannelMeta{ChannelId: channel.Id}, OriginModelName: "fixed-test", UsingGroup: "default", UserGroup: "default", UserSetting: dto.UserSetting{BillingPreference: "wallet_only"}, ForcePreConsume: true, StartTime: time.Now(), IsStream: tc.stream, RelayFormat: types.RelayFormatOpenAI, PriceData: hosttypes.PriceData{GroupRatioInfo: hosttypes.GroupRatioInfo{GroupRatio: group}}, TieredBillingSnapshot: snapshot, BillingRequestInput: request}
+			info := &relaycommon.RelayInfo{UserId: user.Id, TokenId: token.Id, TokenKey: token.Key, ChannelMeta: &relaycommon.ChannelMeta{ChannelId: channel.Id}, OriginModelName: "fixed-test", UsingGroup: "default", UserGroup: "default", UserSetting: dto.UserSetting{BillingPreference: "wallet_only"}, ForcePreConsume: true, StartTime: time.Now(), IsStream: tc.stream, RelayFormat: types.RelayFormatOpenAI, PriceData: hosttypes.PriceData{ModelDiscount: discount, GroupRatioInfo: hosttypes.GroupRatioInfo{GroupRatio: group}}, TieredBillingSnapshot: snapshot, BillingRequestInput: request}
 			info.SetEstimatePromptTokens(tc.estimate)
 			ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
 			ctx.Request = httptest.NewRequest("POST", "/v1/chat/completions", nil)
@@ -1033,6 +1059,7 @@ func TestComposeTieredTextQuotaKeepsToolCallSurcharges(t *testing.T) {
 		OriginModelName: "o1",
 		PriceData: hosttypes.PriceData{
 			ModelRatio:      1,
+			ModelDiscount:   0.5,
 			CompletionRatio: 1,
 			GroupRatioInfo:  hosttypes.GroupRatioInfo{GroupRatio: 1},
 		},

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -45,6 +46,7 @@ func modelManagementDB(t *testing.T, kind, dsn string) *gorm.DB {
 	}{
 		{ratio_setting.ModelPrice2JSONString(), ratio_setting.UpdateModelPriceByJSONString},
 		{ratio_setting.ModelRatio2JSONString(), ratio_setting.UpdateModelRatioByJSONString},
+		{ratio_setting.ModelDiscount2JSONString(), ratio_setting.UpdateModelDiscountByJSONString},
 		{ratio_setting.CompletionRatio2JSONString(), ratio_setting.UpdateCompletionRatioByJSONString},
 		{ratio_setting.CacheRatio2JSONString(), ratio_setting.UpdateCacheRatioByJSONString},
 		{ratio_setting.CreateCacheRatio2JSONString(), ratio_setting.UpdateCreateCacheRatioByJSONString},
@@ -779,7 +781,7 @@ export function parseTaskResult() { return {}; }
 				before, err := model.GetModelPricingSnapshot([]string{"matrix-priced", "matrix-other"})
 				require.NoError(t, err)
 				changes := []model.ModelPricingChange{
-					{ModelName: "matrix-priced", ExpectedVersion: before.EmptyVersion, Pricing: model.PricingValues{"ModelPrice": float64(0), "billing_setting.billing_mode": "ratio"}},
+					{ModelName: "matrix-priced", ExpectedVersion: before.EmptyVersion, Pricing: model.PricingValues{"ModelPrice": float64(0), "ModelDiscount": float64(0.8), "billing_setting.billing_mode": "ratio"}},
 					{ModelName: "matrix-other", ExpectedVersion: before.EmptyVersion, Pricing: model.PricingValues{"ModelRatio": float64(1), "CreateCacheRatio": 1.25}},
 				}
 				require.NoError(t, model.UpdateModelPricing(changes))
@@ -794,6 +796,7 @@ export function parseTaskResult() { return {}; }
 				require.NoError(t, err)
 				assert.Equal(t, 1.25, loaded.Entries[0].Configured["CreateCacheRatio"])
 				assert.Equal(t, "tiered_expr", loaded.Entries[1].Effective["billing_setting.billing_mode"])
+				assert.Equal(t, 0.8, loaded.Entries[1].Configured["ModelDiscount"], "omitting the field must preserve the existing discount")
 				_, oldFixed := loaded.Entries[1].Configured["ModelPrice"]
 				assert.False(t, oldFixed)
 				other := model.ModelPricingChange{ModelName: "matrix-other", ExpectedVersion: loaded.Entries[0].Version, Pricing: model.PricingValues{"ModelRatio": float64(9)}}
@@ -805,6 +808,10 @@ export function parseTaskResult() { return {}; }
 				invalid := other
 				invalid.Pricing = model.PricingValues{"ModelPrice": float64(-1)}
 				assert.Error(t, model.UpdateModelPricing([]model.ModelPricingChange{invalid}))
+				for _, discount := range []float64{0, -0.1, 1.1, math.NaN(), math.Inf(1)} {
+					invalid.Pricing = model.PricingValues{"ModelRatio": float64(1), "ModelDiscount": discount}
+					assert.Error(t, model.UpdateModelPricing([]model.ModelPricingChange{invalid}), discount)
+				}
 				// A physical failure after earlier option writes must roll back all
 				// rows and leave the previously published runtime price intact.
 				writes := 0
@@ -881,6 +888,7 @@ export function parseTaskResult() { return {}; }
 					reset, err := model.GetModelPricingSnapshot([]string{name})
 					require.NoError(t, err)
 					assert.Empty(t, reset.Entries[0].Configured)
+					assert.Equal(t, float64(1), reset.Entries[0].Effective["ModelDiscount"])
 					assert.Equal(t, builtin, reset.Entries[0].Effective["billing_setting.billing_expr"])
 				}
 			})

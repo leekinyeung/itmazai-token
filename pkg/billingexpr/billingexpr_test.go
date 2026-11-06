@@ -41,6 +41,31 @@ func TestFixedPriceBranches(t *testing.T) {
 	}
 }
 
+func TestTieredSettlementAppliesModelDiscountOnce(t *testing.T) {
+	const expression = `tier("base", p)`
+	for _, tc := range []struct {
+		name     string
+		discount float64
+		want     int
+	}{
+		{name: "legacy snapshot defaults to one", discount: 0, want: 90},
+		{name: "model and group discounts", discount: 0.8, want: 72},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			snapshot := &billingexpr.BillingSnapshot{
+				ExprString:    expression,
+				ExprHash:      billingexpr.ExprHashString(expression),
+				ModelDiscount: tc.discount,
+				GroupRatio:    0.9,
+				QuotaPerUnit:  500_000,
+			}
+			result, err := billingexpr.ComputeTieredQuota(snapshot, billingexpr.TokenParams{P: 200})
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, result.ActualQuotaAfterGroup)
+		})
+	}
+}
+
 func TestFixedPriceRejectsInvalidLeavesIncludingUnselectedBranches(t *testing.T) {
 	for _, expression := range []string{
 		`true ? tier("ok", p) : tier("bad", fixed(-0.01))`,

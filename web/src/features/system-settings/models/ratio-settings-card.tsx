@@ -118,6 +118,7 @@ const createModelSchema = (t: Translate) =>
   z.object({
     ModelPrice: createJsonStringField(t),
     ModelRatio: createJsonStringField(t),
+    ModelDiscount: createJsonStringField(t),
     CacheRatio: createJsonStringField(t),
     CreateCacheRatio: createJsonStringField(t),
     CompletionRatio: createJsonStringField(t),
@@ -238,7 +239,7 @@ export function RatioSettingsCard({
   )
   const resetMutation = useMutation({
     mutationFn: async () => {
-      if (!pricingBaseline) return
+      if (!pricingBaseline) return false
       await savePricing.mutateAsync(
         pricingBaseline.entries.map((entry) => ({
           model_name: entry.model_name,
@@ -260,6 +261,7 @@ export function RatioSettingsCard({
   const modelNormalizedDefaults = useRef({
     ModelPrice: normalizeJsonString(modelDefaults.ModelPrice),
     ModelRatio: normalizeJsonString(modelDefaults.ModelRatio),
+    ModelDiscount: normalizeJsonString(modelDefaults.ModelDiscount),
     CacheRatio: normalizeJsonString(modelDefaults.CacheRatio),
     CreateCacheRatio: normalizeJsonString(modelDefaults.CreateCacheRatio),
     CompletionRatio: normalizeJsonString(modelDefaults.CompletionRatio),
@@ -300,6 +302,7 @@ export function RatioSettingsCard({
       ...modelDefaults,
       ModelPrice: formatJsonForTextarea(modelDefaults.ModelPrice),
       ModelRatio: formatJsonForTextarea(modelDefaults.ModelRatio),
+      ModelDiscount: formatJsonForTextarea(modelDefaults.ModelDiscount),
       CacheRatio: formatJsonForTextarea(modelDefaults.CacheRatio),
       CreateCacheRatio: formatJsonForTextarea(modelDefaults.CreateCacheRatio),
       CompletionRatio: formatJsonForTextarea(modelDefaults.CompletionRatio),
@@ -335,6 +338,7 @@ export function RatioSettingsCard({
     modelNormalizedDefaults.current = {
       ModelPrice: normalizeJsonString(modelDefaults.ModelPrice),
       ModelRatio: normalizeJsonString(modelDefaults.ModelRatio),
+      ModelDiscount: normalizeJsonString(modelDefaults.ModelDiscount),
       CacheRatio: normalizeJsonString(modelDefaults.CacheRatio),
       CreateCacheRatio: normalizeJsonString(modelDefaults.CreateCacheRatio),
       CompletionRatio: normalizeJsonString(modelDefaults.CompletionRatio),
@@ -354,6 +358,7 @@ export function RatioSettingsCard({
       ...modelDefaults,
       ModelPrice: formatJsonForTextarea(modelDefaults.ModelPrice),
       ModelRatio: formatJsonForTextarea(modelDefaults.ModelRatio),
+      ModelDiscount: formatJsonForTextarea(modelDefaults.ModelDiscount),
       CacheRatio: formatJsonForTextarea(modelDefaults.CacheRatio),
       CreateCacheRatio: formatJsonForTextarea(modelDefaults.CreateCacheRatio),
       CompletionRatio: formatJsonForTextarea(modelDefaults.CompletionRatio),
@@ -402,6 +407,7 @@ export function RatioSettingsCard({
       const normalized = {
         ModelPrice: normalizeJsonString(values.ModelPrice),
         ModelRatio: normalizeJsonString(values.ModelRatio),
+        ModelDiscount: normalizeJsonString(values.ModelDiscount),
         CacheRatio: normalizeJsonString(values.CacheRatio),
         CreateCacheRatio: normalizeJsonString(values.CreateCacheRatio),
         CompletionRatio: normalizeJsonString(values.CompletionRatio),
@@ -414,7 +420,7 @@ export function RatioSettingsCard({
         PluginBillingExpr: normalizeJsonString(values.PluginBillingExpr),
       }
 
-      if (!pricingBaseline) return
+      if (!pricingBaseline) return false
       try {
         const changes = buildPricingChanges(
           pricingBaseline,
@@ -426,7 +432,7 @@ export function RatioSettingsCard({
           modelNormalizedDefaults.current.ExposeRatioEnabled
         if (!changes.length && !visibilityChanged) {
           toast.info(t('No model price changes to save'))
-          return
+          return true
         }
         await savePricing.mutateAsync(changes)
         if (visibilityChanged) {
@@ -440,8 +446,10 @@ export function RatioSettingsCard({
         modelNormalizedDefaults.current = normalized
         setSavedModelValues(normalized)
         toast.success(t('Model pricing saved'))
+        return true
       } catch (error) {
         handleServerError(error)
+        return false
       }
     },
     [t, updateOption, pricingBaseline, savePricing, pricingQuery]

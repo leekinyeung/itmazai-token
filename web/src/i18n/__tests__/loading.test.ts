@@ -70,6 +70,35 @@ test('the public home boots from its compact translation asset', async () => {
   })
 })
 
+test('loading the full resource notifies views rendered from the compact home bundle', async () => {
+  window.localStorage.setItem('i18nextLng', 'zhCN')
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          zh: { 'Loading...': '轻量首页' },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    )
+  )
+
+  const {
+    default: i18n,
+    ensureFullLanguageResource,
+    i18nReady,
+  } = await import('../config')
+  await i18nReady
+  const languageChanged = vi.fn()
+  i18n.on('languageChanged', languageChanged)
+
+  await ensureFullLanguageResource()
+
+  expect(i18n.t('Model discount')).toBe('模型折扣')
+  expect(languageChanged).toHaveBeenCalledWith('zhCN')
+})
+
 test.each(['zhCN', 'zhTW', 'fr', 'ru', 'ja', 'vi', 'en'])(
   'switching to %s loads the resource and persists the choice',
   async (language) => {

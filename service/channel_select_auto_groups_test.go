@@ -127,3 +127,64 @@ func TestCacheGetRandomSatisfiedChannelUsesTokenAutoGroupsWhenGlobalAutoIsEmpty(
 	assert.Equal(t, "default", selectedGroup)
 	assert.Equal(t, "default", common.GetContextKeyString(ctx, constant.ContextKeyAutoGroup))
 }
+
+func TestCacheGetRandomSatisfiedChannelDefaultKeyFallsBackOutsidePreferredGroups(t *testing.T) {
+	db := setupChannelSelectAutoGroupsTest(t)
+	const modelName = "default-key-runtime-model"
+	originalRatios := ratio_setting.ModelRatio2JSONString()
+	require.NoError(t, ratio_setting.UpdateModelRatioByJSONString(`{"default-key-runtime-model":1}`))
+	require.NoError(t, setting.UpdateAutoGroupsByJsonString(`["vip","default","svip"]`))
+	t.Cleanup(func() {
+		require.NoError(t, ratio_setting.UpdateModelRatioByJSONString(originalRatios))
+		model.InvalidatePricingCache()
+	})
+	createChannelSelectAutoGroupsChannel(t, db, 2201, "svip", modelName)
+	model.InitChannelCache()
+	model.InvalidatePricingCache()
+
+	gin.SetMode(gin.TestMode)
+	ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	common.SetContextKey(ctx, constant.ContextKeyUserGroup, "default")
+	common.SetContextKey(ctx, constant.ContextKeyTokenAutoGroups, []string{"vip", "default"})
+	common.SetContextKey(ctx, constant.ContextKeyTokenModelLimitEnabled, false)
+
+	retry := 0
+	channel, selectedGroup, err := CacheGetRandomSatisfiedChannel(&RetryParam{
+		Ctx:        ctx,
+		TokenGroup: "auto",
+		ModelName:  modelName,
+		Retry:      &retry,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, channel)
+	assert.Equal(t, 2201, channel.Id)
+	assert.Equal(t, "svip", selectedGroup)
+	assert.Equal(t, "svip", common.GetContextKeyString(ctx, constant.ContextKeyAutoGroup))
+
+	fixedCtx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	common.SetContextKey(fixedCtx, constant.ContextKeyUserGroup, "default")
+	common.SetContextKey(fixedCtx, constant.ContextKeyTokenModelLimitEnabled, false)
+	channel, selectedGroup, err = CacheGetRandomSatisfiedChannel(&RetryParam{
+		Ctx:        fixedCtx,
+		TokenGroup: "default",
+		ModelName:  modelName,
+		Retry:      new(int),
+	})
+	require.NoError(t, err)
+	require.NotNil(t, channel)
+	assert.Equal(t, "svip", selectedGroup)
+	assert.Equal(t, "svip", common.GetContextKeyString(fixedCtx, constant.ContextKeyAutoGroup))
+
+	limitedCtx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	common.SetContextKey(limitedCtx, constant.ContextKeyUserGroup, "default")
+	common.SetContextKey(limitedCtx, constant.ContextKeyTokenAutoGroups, []string{"vip", "default"})
+	common.SetContextKey(limitedCtx, constant.ContextKeyTokenModelLimitEnabled, true)
+	channel, _, err = CacheGetRandomSatisfiedChannel(&RetryParam{
+		Ctx:        limitedCtx,
+		TokenGroup: "auto",
+		ModelName:  modelName,
+		Retry:      &retry,
+	})
+	require.NoError(t, err)
+	assert.Nil(t, channel, "an explicitly limited key must keep its original group routing behavior")
+}

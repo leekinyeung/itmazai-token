@@ -431,6 +431,54 @@ func TestListModelsTokenLimitIncludesTieredBillingModel(t *testing.T) {
 	require.NotContains(t, ids, "zz-token-unpriced-model")
 }
 
+func TestListModelsDefaultKeyUsesAllPublishedModelsButWhitelistKeepsGroupScope(t *testing.T) {
+	withSelfUseModeDisabled(t)
+	originalRatios := ratio_setting.ModelRatio2JSONString()
+	require.NoError(t, ratio_setting.UpdateModelRatioByJSONString(`{"zz-default-key-local":1,"zz-default-key-fallback":1,"zz-default-key-hidden":1}`))
+	t.Cleanup(func() {
+		require.NoError(t, ratio_setting.UpdateModelRatioByJSONString(originalRatios))
+		model.InvalidatePricingCache()
+	})
+
+	db := setupModelListControllerTestDB(t)
+	priority := int64(0)
+	weight := uint(100)
+	require.NoError(t, db.Create(&[]model.Channel{
+		{Id: 811, Name: "default-key-local", Type: constant.ChannelTypeOpenAI, Key: "key", Status: common.ChannelStatusEnabled, Group: "default", Models: "zz-default-key-local", Priority: &priority, Weight: &weight},
+		{Id: 812, Name: "default-key-fallback", Type: constant.ChannelTypeOpenAI, Key: "key", Status: common.ChannelStatusEnabled, Group: "vip", Models: "zz-default-key-fallback,zz-default-key-hidden", Priority: &priority, Weight: &weight},
+	}).Error)
+	require.NoError(t, db.Create(&[]model.Ability{
+		{Group: "default", Model: "zz-default-key-local", ChannelId: 811, Enabled: true, Priority: &priority, Weight: weight},
+		{Group: "vip", Model: "zz-default-key-fallback", ChannelId: 812, Enabled: true, Priority: &priority, Weight: weight},
+		{Group: "vip", Model: "zz-default-key-hidden", ChannelId: 812, Enabled: true, Priority: &priority, Weight: weight},
+	}).Error)
+	require.NoError(t, db.Create(&model.Model{ModelName: "zz-default-key-hidden", Status: 0}).Error)
+	require.NoError(t, db.Model(&model.Model{}).Where("model_name = ?", "zz-default-key-hidden").Update("status", 0).Error)
+	model.InvalidatePricingCache()
+
+	defaultRecorder := httptest.NewRecorder()
+	defaultCtx, _ := gin.CreateTestContext(defaultRecorder)
+	defaultCtx.Request = httptest.NewRequest(http.MethodGet, "/v1/models", nil)
+	common.SetContextKey(defaultCtx, constant.ContextKeyUserGroup, "default")
+	common.SetContextKey(defaultCtx, constant.ContextKeyTokenGroup, "default")
+	common.SetContextKey(defaultCtx, constant.ContextKeyTokenModelLimitEnabled, false)
+	ListModels(defaultCtx, constant.ChannelTypeOpenAI)
+	defaultIDs := decodeListModelsResponse(t, defaultRecorder)
+	assert.Contains(t, defaultIDs, "zz-default-key-local")
+	assert.Contains(t, defaultIDs, "zz-default-key-fallback")
+	assert.NotContains(t, defaultIDs, "zz-default-key-hidden")
+
+	limitedRecorder := httptest.NewRecorder()
+	limitedCtx, _ := gin.CreateTestContext(limitedRecorder)
+	limitedCtx.Request = httptest.NewRequest(http.MethodGet, "/v1/models", nil)
+	common.SetContextKey(limitedCtx, constant.ContextKeyUserGroup, "default")
+	common.SetContextKey(limitedCtx, constant.ContextKeyTokenGroup, "default")
+	common.SetContextKey(limitedCtx, constant.ContextKeyTokenModelLimitEnabled, true)
+	common.SetContextKey(limitedCtx, constant.ContextKeyTokenModelLimit, map[string]bool{"zz-default-key-fallback": true})
+	ListModels(limitedCtx, constant.ChannelTypeOpenAI)
+	assert.Empty(t, decodeListModelsResponse(t, limitedRecorder), "an explicit whitelist keeps the key's original group routing scope")
+}
+
 func TestListModelsTokenLimitUsesResolvedCustomAutoGroups(t *testing.T) {
 	withSelfUseModeEnabled(t)
 	originalMax := setting.GetMaxTokenAutoGroups()

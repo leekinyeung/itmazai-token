@@ -294,6 +294,7 @@ describe('pricing synchronization', () => {
       },
     })
     expect(pricingValuesByModel(applied).get('m')).toEqual({
+      ModelDiscount: 1,
       'billing_setting.billing_mode': 'tiered_expr',
       'billing_setting.billing_expr': expression,
     })
@@ -305,6 +306,7 @@ describe('pricing synchronization', () => {
     })
     expect(pricingValuesByModel(legacy).get('m')).toEqual({
       'billing_setting.billing_mode': 'ratio',
+      ModelDiscount: 1,
       ModelRatio: 1,
       CompletionRatio: 4,
       CacheRatio: 0,
@@ -467,6 +469,7 @@ describe('pricing synchronization', () => {
           model_name: 'm',
           expected_version: 'v2',
           pricing: {
+            ModelDiscount: 1,
             'billing_setting.billing_mode': 'tiered_expr',
             'billing_setting.billing_expr': expression,
           },

@@ -54,6 +54,7 @@ func LogTaskConsumption(c *gin.Context, info *relaycommon.RelayInfo, task *model
 		other.SetPublic("task_sync", true)
 	}
 	other.SetPublic("model_price", info.PriceData.ModelPrice)
+	other.SetAdmin("model_discount", info.PriceData.NormalizedModelDiscount())
 	if info.PriceData.ModelRatio > 0 {
 		other.SetPublic("model_ratio", info.PriceData.ModelRatio)
 	}
@@ -151,6 +152,11 @@ func taskBillingOther(task *model.Task) *model.LogOther {
 	other.SetPublic("is_task", true)
 	if bc := task.PrivateData.BillingContext; bc != nil {
 		other.SetPublic("model_price", bc.ModelPrice)
+		modelDiscount := bc.ModelDiscount
+		if modelDiscount == 0 {
+			modelDiscount = 1
+		}
+		other.SetAdmin("model_discount", modelDiscount)
 		if bc.ModelRatio > 0 {
 			other.SetPublic("model_ratio", bc.ModelRatio)
 		}
@@ -417,12 +423,16 @@ func RecalculateTaskQuotaByTokens(ctx context.Context, task *model.Task, totalTo
 
 	// 计算 OtherRatios 乘积（视频折扣、时长等）
 	otherMultiplier := 1.0
+	modelDiscount := 1.0
+	if billingContext := task.PrivateData.BillingContext; billingContext != nil && billingContext.ModelDiscount != 0 {
+		modelDiscount = billingContext.ModelDiscount
+	}
 	if priceData := taskBillingContextPriceData(task.PrivateData.BillingContext); priceData != nil {
 		otherMultiplier = priceData.OtherRatioMultiplier()
 	}
 
-	// 计算实际应扣费额度: totalTokens * modelRatio * groupRatio * otherMultiplier（饱和转换，防止溢出成负数）
-	actualQuota, clamp := common.QuotaFromFloatChecked(float64(totalTokens) * modelRatio * finalGroupRatio * otherMultiplier)
+	// 计算实际应扣费额度: totalTokens * modelRatio * modelDiscount * groupRatio * otherMultiplier（饱和转换，防止溢出成负数）
+	actualQuota, clamp := common.QuotaFromFloatChecked(float64(totalTokens) * modelRatio * modelDiscount * finalGroupRatio * otherMultiplier)
 
 	reason := common.NewMessage("Recalculated from tokens: tokens {{tokens}}, model ratio {{model_ratio}}, group ratio {{group_ratio}}, other multiplier {{other_multiplier}}", map[string]any{
 		"tokens":           totalTokens,

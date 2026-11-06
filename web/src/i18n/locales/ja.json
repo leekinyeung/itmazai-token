@@ -7567,6 +7567,12 @@
     "Setup steps": "設定手順",
     "Sources and review notes": "出典と確認事項",
     "Start building with TaoDock": "TaoDock で構築を始める",
-    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "専用 API キーを作成し、利用可能なモデルを確認して、本番トラフィックを送る前に代表的なリクエストをテストしてください。"
+    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "専用 API キーを作成し、利用可能なモデルを確認して、本番トラフィックを送る前に代表的なリクエストをテストしてください。",
+    "Model discount": "モデル割引",
+    "Model discount must be greater than 0 and no greater than 1": "モデル割引は 0 より大きく 1 以下である必要があります",
+    "Model charge multiplier: {{value}} ({{percent}}% of base price)": "モデル課金係数：{{value}}（基本価格の {{percent}}%）",
+    "JSON map of model → discount coefficient. Values must be greater than 0 and no greater than 1.": "モデル → 割引係数の JSON マップ。値は 0 より大きく 1 以下である必要があります。",
+    "Restored model discount to 1 for {{count}} models": "{{count}} 件のモデル割引を 1 に戻しました",
+    "Restore discount to 1": "割引を 1 に戻す"
   }
 }

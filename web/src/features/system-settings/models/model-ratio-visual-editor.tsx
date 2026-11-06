@@ -24,7 +24,7 @@ import type {
   VisibilityState,
   SortingState,
 } from '@tanstack/react-table'
-import { Copy, Plus } from 'lucide-react'
+import { Copy, Plus, RotateCcw } from 'lucide-react'
 import {
   useState,
   useMemo,
@@ -47,6 +47,7 @@ import {
   useDataTable,
 } from '@/components/data-table'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useModelPricing } from '@/features/model-pricing/api'
 import {
   applyPricingDraft,
@@ -78,6 +79,7 @@ import {
 type ModelRatioVisualEditorProps = {
   savedModelPrice: string
   savedModelRatio: string
+  savedModelDiscount: string
   savedCacheRatio: string
   savedCreateCacheRatio: string
   savedCompletionRatio: string
@@ -89,6 +91,7 @@ type ModelRatioVisualEditorProps = {
   savedPluginBillingExpr?: string
   modelPrice: string
   modelRatio: string
+  modelDiscount: string
   cacheRatio: string
   createCacheRatio: string
   completionRatio: string
@@ -103,6 +106,7 @@ type ModelRatioVisualEditorProps = {
   filterMode?: 'all' | 'unset'
   onChange: (field: string, value: string) => void
   onSave: () => void | Promise<void>
+  onBatchDiscountSave: (value: string) => Promise<boolean>
   isSaving: boolean
 }
 
@@ -119,6 +123,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
   {
     savedModelPrice,
     savedModelRatio,
+    savedModelDiscount,
     savedCacheRatio,
     savedCreateCacheRatio,
     savedCompletionRatio,
@@ -130,6 +135,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
     savedPluginBillingExpr = '{}',
     modelPrice,
     modelRatio,
+    modelDiscount,
     cacheRatio,
     createCacheRatio,
     completionRatio,
@@ -144,6 +150,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
     filterMode = 'all',
     onChange,
     onSave,
+    onBatchDiscountSave,
     isSaving,
   },
   ref
@@ -162,6 +169,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [batchDiscount, setBatchDiscount] = useState('')
   const editorPanelRef = useRef<ModelPricingEditorPanelHandle>(null)
   // Read through a ref so the table column definitions (and therefore every
   // rendered cell) do not need to be rebuilt each time a row is opened for
@@ -231,6 +239,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
     const savedRows = buildModelSnapshots({
       modelPrice: savedModelPrice,
       modelRatio: savedModelRatio,
+      modelDiscount: savedModelDiscount,
       cacheRatio: savedCacheRatio,
       createCacheRatio: savedCreateCacheRatio,
       completionRatio: savedCompletionRatio,
@@ -244,6 +253,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
     const draftRows = buildModelSnapshots({
       modelPrice,
       modelRatio,
+      modelDiscount,
       cacheRatio,
       createCacheRatio,
       completionRatio,
@@ -288,6 +298,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
     filterMode,
     savedModelPrice,
     savedModelRatio,
+    savedModelDiscount,
     savedCacheRatio,
     savedCreateCacheRatio,
     savedCompletionRatio,
@@ -299,6 +310,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
     savedPluginBillingExpr,
     modelPrice,
     modelRatio,
+    modelDiscount,
     cacheRatio,
     createCacheRatio,
     completionRatio,
@@ -346,6 +358,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
       }
       setEditData({
         name: editableModel.name,
+        modelDiscount: editableModel.modelDiscount || '1',
         price: editableModel.price,
         ratio: editableModel.ratio,
         cacheRatio: editableModel.cacheRatio,
@@ -396,6 +409,10 @@ const ModelRatioVisualEditorComponent = forwardRef<
         fallback: {},
         silent: true,
       })
+      const discountMap = safeJsonParse<Record<string, number>>(modelDiscount, {
+        fallback: {},
+        silent: true,
+      })
       const cacheMap = safeJsonParse<Record<string, number>>(cacheRatio, {
         fallback: {},
         silent: true,
@@ -431,6 +448,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
 
       delete priceMap[name]
       delete ratioMap[name]
+      delete discountMap[name]
       delete cacheMap[name]
       delete createCacheMap[name]
       delete completionMap[name]
@@ -455,6 +473,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
 
       onChange('ModelPrice', JSON.stringify(priceMap, null, 2))
       onChange('ModelRatio', JSON.stringify(ratioMap, null, 2))
+      onChange('ModelDiscount', JSON.stringify(discountMap, null, 2))
       onChange('CacheRatio', JSON.stringify(cacheMap, null, 2))
       onChange('CreateCacheRatio', JSON.stringify(createCacheMap, null, 2))
       onChange('CompletionRatio', JSON.stringify(completionMap, null, 2))
@@ -482,6 +501,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
     [
       modelPrice,
       modelRatio,
+      modelDiscount,
       cacheRatio,
       createCacheRatio,
       completionRatio,
@@ -545,6 +565,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
       const options = pricingOptions({
         ModelPrice: modelPrice,
         ModelRatio: modelRatio,
+        ModelDiscount: modelDiscount,
         CompletionRatio: completionRatio,
         CacheRatio: cacheRatio,
         CreateCacheRatio: createCacheRatio,
@@ -561,6 +582,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
     [
       modelPrice,
       modelRatio,
+      modelDiscount,
       completionRatio,
       cacheRatio,
       createCacheRatio,
@@ -610,6 +632,58 @@ const ModelRatioVisualEditorComponent = forwardRef<
       })
     )
   }, [editData, editorOpen, persistPricingData, t, table])
+
+  const handleBatchResetDiscount = useCallback(async () => {
+    const names = table
+      .getFilteredSelectedRowModel()
+      .rows.map((row) => row.original.name)
+    if (names.length === 0) {
+      toast.error(t('Select at least one target model'))
+      return
+    }
+    const discounts = safeJsonParse<Record<string, number>>(modelDiscount, {
+      fallback: {},
+    })
+    for (const name of names) discounts[name] = 1
+    const saved = await onBatchDiscountSave(JSON.stringify(discounts, null, 2))
+    if (!saved) return
+    if (editData && names.includes(editData.name)) {
+      setEditData({ ...editData, modelDiscount: '1' })
+    }
+    table.resetRowSelection()
+    toast.success(
+      t('Restored model discount to 1 for {{count}} models', {
+        count: names.length,
+      })
+    )
+  }, [editData, modelDiscount, onBatchDiscountSave, t, table])
+
+  const handleBatchSetDiscount = useCallback(async () => {
+    const discount = Number(batchDiscount)
+    if (!Number.isFinite(discount) || discount <= 0 || discount > 1) {
+      toast.error(
+        t('Model discount must be greater than 0 and no greater than 1')
+      )
+      return
+    }
+    const names = table
+      .getFilteredSelectedRowModel()
+      .rows.map((row) => row.original.name)
+    if (names.length === 0) {
+      toast.error(t('Select at least one target model'))
+      return
+    }
+    const discounts = safeJsonParse<Record<string, number>>(modelDiscount, {
+      fallback: {},
+    })
+    for (const name of names) discounts[name] = discount
+    const saved = await onBatchDiscountSave(JSON.stringify(discounts, null, 2))
+    if (!saved) return
+    if (editData && names.includes(editData.name)) {
+      setEditData({ ...editData, modelDiscount: String(discount) })
+    }
+    table.resetRowSelection()
+  }, [batchDiscount, editData, modelDiscount, onBatchDiscountSave, t, table])
 
   useImperativeHandle(
     ref,
@@ -712,6 +786,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
                   <col className='w-9' />
                   <col className='w-[300px]' />
                   <col className='w-[120px]' />
+                  <col className='w-[110px]' />
                   <col className='w-[300px]' />
                   <col className='w-auto' />
                 </colgroup>
@@ -785,11 +860,42 @@ const ModelRatioVisualEditorComponent = forwardRef<
       </div>
 
       <DataTableBulkActions table={table} entityName={t('model')}>
+        <div className='flex items-center gap-2'>
+          <Input
+            className='h-8 w-24'
+            type='number'
+            inputMode='decimal'
+            min='0.000001'
+            max='1'
+            step='0.01'
+            value={batchDiscount}
+            onChange={(event) => setBatchDiscount(event.target.value)}
+            aria-label={t('Model discount')}
+            placeholder='0.8'
+          />
+          <Button
+            size='sm'
+            variant='outline'
+            onClick={handleBatchSetDiscount}
+            disabled={isSaving}
+          >
+            {t('Apply')}
+          </Button>
+        </div>
         <Button size='sm' disabled={!editData} onClick={handleBatchCopy}>
           <Copy data-icon='inline-start' />
           {editData
             ? t('Copy {{name}} pricing', { name: editData.name })
             : t('Open a source model first')}
+        </Button>
+        <Button
+          size='sm'
+          variant='outline'
+          onClick={handleBatchResetDiscount}
+          disabled={isSaving}
+        >
+          <RotateCcw data-icon='inline-start' />
+          {t('Restore discount to 1')}
         </Button>
       </DataTableBulkActions>
 
@@ -824,6 +930,7 @@ export const ModelRatioVisualEditor = memo(
     return (
       prevProps.savedModelPrice === nextProps.savedModelPrice &&
       prevProps.savedModelRatio === nextProps.savedModelRatio &&
+      prevProps.savedModelDiscount === nextProps.savedModelDiscount &&
       prevProps.savedCacheRatio === nextProps.savedCacheRatio &&
       prevProps.savedCreateCacheRatio === nextProps.savedCreateCacheRatio &&
       prevProps.savedCompletionRatio === nextProps.savedCompletionRatio &&
@@ -836,6 +943,7 @@ export const ModelRatioVisualEditor = memo(
       prevProps.savedPluginBillingExpr === nextProps.savedPluginBillingExpr &&
       prevProps.modelPrice === nextProps.modelPrice &&
       prevProps.modelRatio === nextProps.modelRatio &&
+      prevProps.modelDiscount === nextProps.modelDiscount &&
       prevProps.cacheRatio === nextProps.cacheRatio &&
       prevProps.createCacheRatio === nextProps.createCacheRatio &&
       prevProps.completionRatio === nextProps.completionRatio &&

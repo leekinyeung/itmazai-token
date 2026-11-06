@@ -7567,6 +7567,12 @@
     "Setup steps": "设置步骤",
     "Sources and review notes": "来源与核验说明",
     "Start building with TaoDock": "开始使用 TaoDock 构建",
-    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "创建专用 API 密钥，核对其可用模型，并在发送生产流量前测试一条有代表性的请求。"
+    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "创建专用 API 密钥，核对其可用模型，并在发送生产流量前测试一条有代表性的请求。",
+    "Model discount": "模型折扣",
+    "Model discount must be greater than 0 and no greater than 1": "模型折扣必须大于 0 且不超过 1",
+    "Model charge multiplier: {{value}} ({{percent}}% of base price)": "模型计费系数：{{value}}（基础价格的 {{percent}}%）",
+    "JSON map of model → discount coefficient. Values must be greater than 0 and no greater than 1.": "模型 → 折扣系数的 JSON 映射。值必须大于 0 且不超过 1。",
+    "Restored model discount to 1 for {{count}} models": "已将 {{count}} 个模型的模型折扣恢复为 1",
+    "Restore discount to 1": "将折扣恢复为 1"
   }
 }

@@ -53,6 +53,7 @@ import {
 type ModelFormValues = {
   ModelPrice: string
   ModelRatio: string
+  ModelDiscount: string
   CacheRatio: string
   CreateCacheRatio: string
   CompletionRatio: string
@@ -68,7 +69,7 @@ type ModelFormValues = {
 type ModelRatioFormProps = {
   form: UseFormReturn<ModelFormValues>
   savedValues: ModelFormValues
-  onSave: (values: ModelFormValues) => Promise<void>
+  onSave: (values: ModelFormValues) => Promise<boolean>
   onReset: () => void
   isSaving: boolean
   isResetting: boolean
@@ -78,6 +79,7 @@ type ModelRatioFormProps = {
 type ModelJsonFieldName =
   | 'ModelPrice'
   | 'ModelRatio'
+  | 'ModelDiscount'
   | 'CacheRatio'
   | 'CreateCacheRatio'
   | 'CompletionRatio'
@@ -100,6 +102,12 @@ const modelJsonFields: Array<{
     name: 'ModelRatio',
     labelKey: 'Model ratio',
     descriptionKey: 'JSON map of model → multiplier applied to quota billing.',
+  },
+  {
+    name: 'ModelDiscount',
+    labelKey: 'Model discount',
+    descriptionKey:
+      'JSON map of model → discount coefficient. Values must be greater than 0 and no greater than 1.',
   },
   {
     name: 'CacheRatio',
@@ -232,6 +240,21 @@ export const ModelRatioForm = memo(function ModelRatioForm({
     await form.handleSubmit(onSave)()
   }, [editMode, form, onSave])
 
+  const handleBatchDiscountSave = useCallback(
+    async (value: string) => {
+      form.setValue('ModelDiscount', value, {
+        shouldValidate: true,
+        shouldDirty: true,
+      })
+      let saved = false
+      await form.handleSubmit(async (values) => {
+        saved = await onSave(values)
+      })()
+      return saved
+    },
+    [form, onSave]
+  )
+
   return (
     <Form {...form}>
       <div className='flex min-h-0 flex-1 flex-col gap-6'>
@@ -309,6 +332,7 @@ export const ModelRatioForm = memo(function ModelRatioForm({
               ref={visualEditorRef}
               savedModelPrice={savedValues.ModelPrice}
               savedModelRatio={savedValues.ModelRatio}
+              savedModelDiscount={savedValues.ModelDiscount}
               savedCacheRatio={savedValues.CacheRatio}
               savedCreateCacheRatio={savedValues.CreateCacheRatio}
               savedCompletionRatio={savedValues.CompletionRatio}
@@ -320,6 +344,7 @@ export const ModelRatioForm = memo(function ModelRatioForm({
               savedPluginBillingExpr={savedValues.PluginBillingExpr}
               modelPrice={form.watch('ModelPrice')}
               modelRatio={form.watch('ModelRatio')}
+              modelDiscount={form.watch('ModelDiscount')}
               cacheRatio={form.watch('CacheRatio')}
               createCacheRatio={form.watch('CreateCacheRatio')}
               completionRatio={form.watch('CompletionRatio')}
@@ -337,6 +362,7 @@ export const ModelRatioForm = memo(function ModelRatioForm({
               }
               filterMode={isUnsetVariant ? 'unset' : 'all'}
               onSave={handleSave}
+              onBatchDiscountSave={handleBatchDiscountSave}
               isSaving={isSaving}
               onChange={(field, value) => {
                 const fieldMap: Record<string, keyof ModelFormValues> = {

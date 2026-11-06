@@ -7,11 +7,14 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/setting"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
 	"github.com/gin-gonic/gin"
+	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 func configureRequestAutoGroupsTest(t *testing.T) {
@@ -69,4 +72,40 @@ func TestGetRequestAutoGroupsDoesNotFallBackAfterPermissionChange(t *testing.T) 
 	groups := GetRequestAutoGroups(ctx, "default")
 
 	assert.Empty(t, groups)
+}
+
+func TestGetDefaultKeyModelFallbackGroupsKeepsPreferredAndWhitelistSemantics(t *testing.T) {
+	configureRequestAutoGroupsTest(t)
+	originalDB := model.DB
+	originalMemoryCacheEnabled := common.MemoryCacheEnabled
+	db, err := gorm.Open(sqlite.Open("file:default_key_fallback?mode=memory&cache=shared"), &gorm.Config{})
+	require.NoError(t, err)
+	require.NoError(t, db.AutoMigrate(&model.Channel{}, &model.Ability{}, &model.Model{}, &model.Vendor{}))
+	model.DB = db
+	common.MemoryCacheEnabled = false
+	model.InvalidatePricingCache()
+	t.Cleanup(func() {
+		model.DB = originalDB
+		common.MemoryCacheEnabled = originalMemoryCacheEnabled
+		model.InvalidatePricingCache()
+		sqlDB, dbErr := db.DB()
+		if dbErr == nil {
+			require.NoError(t, sqlDB.Close())
+		}
+	})
+
+	createChannelSelectAutoGroupsChannel(t, db, 1, "zeta", "default-key-model")
+	createChannelSelectAutoGroupsChannel(t, db, 2, "svip", "default-key-model")
+	createChannelSelectAutoGroupsChannel(t, db, 3, "alpha", "default-key-model")
+	model.InvalidatePricingCache()
+
+	ctx := newRequestAutoGroupsContext()
+	common.SetContextKey(ctx, constant.ContextKeyTokenModelLimitEnabled, false)
+	assert.Equal(t, []string{"svip", "alpha", "zeta"}, GetDefaultKeyModelFallbackGroups(ctx, []string{"vip", "default"}, "default-key-model"))
+	assert.Nil(t, GetDefaultKeyModelFallbackGroups(ctx, []string{"alpha"}, "default-key-model"), "a preferred serving group must keep the original route")
+
+	limited := newRequestAutoGroupsContext()
+	common.SetContextKey(limited, constant.ContextKeyTokenModelLimitEnabled, true)
+	assert.Nil(t, GetDefaultKeyModelFallbackGroups(limited, []string{"vip"}, "default-key-model"))
+	assert.Nil(t, GetDefaultKeyModelFallbackGroups(newRequestAutoGroupsContext(), []string{"vip"}, "default-key-model"))
 }

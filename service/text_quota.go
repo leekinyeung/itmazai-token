@@ -53,6 +53,7 @@ type textQuotaSummary struct {
 	CacheRatio             float64
 	ImageRatio             float64
 	ModelRatio             float64
+	ModelDiscount          float64
 	GroupRatio             float64
 	ModelPrice             float64
 	CacheCreationRatio     float64
@@ -235,6 +236,7 @@ func calculateTextQuotaSummary(ctx *gin.Context, relayInfo *relaycommon.RelayInf
 		CacheRatio:            relayInfo.PriceData.CacheRatio,
 		ImageRatio:            relayInfo.PriceData.ImageRatio,
 		ModelRatio:            relayInfo.PriceData.ModelRatio,
+		ModelDiscount:         relayInfo.PriceData.NormalizedModelDiscount(),
 		GroupRatio:            relayInfo.PriceData.GroupRatioInfo.GroupRatio,
 		ModelPrice:            relayInfo.PriceData.ModelPrice,
 		CacheCreationRatio:    relayInfo.PriceData.CacheCreationRatio,
@@ -292,6 +294,7 @@ func calculateTextQuotaSummary(ctx *gin.Context, relayInfo *relaycommon.RelayInf
 	dCacheRatio := decimal.NewFromFloat(summary.CacheRatio)
 	dImageRatio := decimal.NewFromFloat(summary.ImageRatio)
 	dModelRatio := decimal.NewFromFloat(summary.ModelRatio)
+	dModelDiscount := decimal.NewFromFloat(summary.ModelDiscount)
 	dGroupRatio := decimal.NewFromFloat(summary.GroupRatio)
 	dModelPrice := decimal.NewFromFloat(summary.ModelPrice)
 	dCacheCreationRatio := decimal.NewFromFloat(summary.CacheCreationRatio)
@@ -300,7 +303,7 @@ func calculateTextQuotaSummary(ctx *gin.Context, relayInfo *relaycommon.RelayInf
 	dCacheCreationRatio12h := decimal.NewFromFloat(summary.CacheCreationRatio12h)
 	dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
 
-	ratio := dModelRatio.Mul(dGroupRatio)
+	ratio := dModelRatio.Mul(dModelDiscount).Mul(dGroupRatio)
 	summary.ToolCallSurchargeQuota = calculateTextToolCallSurcharge(ctx, relayInfo, &summary)
 
 	var audioInputQuota decimal.Decimal
@@ -343,7 +346,7 @@ func calculateTextQuotaSummary(ctx *gin.Context, relayInfo *relaycommon.RelayInf
 			if summary.AudioInputPrice > 0 {
 				baseTokens = baseTokens.Sub(dAudioTokens)
 				audioInputQuota = decimal.NewFromFloat(summary.AudioInputPrice).
-					Div(decimal.NewFromInt(1000000)).Mul(dAudioTokens).Mul(dGroupRatio).Mul(dQuotaPerUnit)
+					Div(decimal.NewFromInt(1000000)).Mul(dAudioTokens).Mul(dModelDiscount).Mul(dGroupRatio).Mul(dQuotaPerUnit)
 			}
 		}
 
@@ -369,7 +372,7 @@ func calculateTextQuotaSummary(ctx *gin.Context, relayInfo *relaycommon.RelayInf
 		summary.Quota = quota
 		noteQuotaClamp(relayInfo, clamp)
 	} else {
-		quotaCalculateDecimal := dModelPrice.Mul(dQuotaPerUnit).Mul(dGroupRatio)
+		quotaCalculateDecimal := dModelPrice.Mul(dQuotaPerUnit).Mul(dModelDiscount).Mul(dGroupRatio)
 		quotaCalculateDecimal = quotaCalculateDecimal.Add(audioInputQuota)
 		quotaCalculateDecimal = relayInfo.PriceData.ApplyOtherRatiosToDecimal(quotaCalculateDecimal)
 		quotaCalculateDecimal = quotaCalculateDecimal.Add(summary.ToolCallSurchargeQuota)
@@ -451,7 +454,7 @@ func PostTextConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, us
 		}))
 	}
 	if summary.AudioInputPrice > 0 && summary.AudioTokens > 0 {
-		q := decimal.NewFromFloat(summary.AudioInputPrice).Div(decimal.NewFromInt(1000000)).Mul(decimal.NewFromInt(int64(summary.AudioTokens))).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit))
+		q := decimal.NewFromFloat(summary.AudioInputPrice).Div(decimal.NewFromInt(1000000)).Mul(decimal.NewFromInt(int64(summary.AudioTokens))).Mul(decimal.NewFromFloat(summary.ModelDiscount)).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit))
 		extraContent = append(extraContent, common.NewMessage("Audio input cost {{quota}}", map[string]any{"quota": logger.FormatQuota(common.QuotaFromDecimal(q))}))
 	}
 

@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -237,7 +238,8 @@ func ListModels(c *gin.Context, modelType int) {
 		return
 	}
 	ownerGroups := groups.ownerGroups
-	modelLimitEnable := common.GetContextKeyBool(c, constant.ContextKeyTokenModelLimitEnabled)
+	modelLimitValue, tokenContext := common.GetContextKey(c, constant.ContextKeyTokenModelLimitEnabled)
+	modelLimitEnable, _ := modelLimitValue.(bool)
 	var tokenModelLimit map[string]bool
 	if modelLimitEnable {
 		s, ok := common.GetContextKey(c, constant.ContextKeyTokenModelLimit)
@@ -249,6 +251,21 @@ func ListModels(c *gin.Context, modelType int) {
 		}
 	}
 	models := service.GetGroupsEnabledModels(ownerGroups)
+	if tokenContext && !modelLimitEnable {
+		models = make([]string, 0)
+		ownerGroupSet := make(map[string]struct{})
+		for _, pricing := range model.GetPricing() {
+			models = append(models, pricing.ModelName)
+			for _, group := range pricing.EnableGroup {
+				ownerGroupSet[group] = struct{}{}
+			}
+		}
+		ownerGroups = make([]string, 0, len(ownerGroupSet))
+		for group := range ownerGroupSet {
+			ownerGroups = append(ownerGroups, group)
+		}
+		slices.Sort(ownerGroups)
+	}
 	for _, modelName := range models {
 		if modelLimitEnable {
 			matchingName := ratio_setting.RoutingMatchModelName(modelName)

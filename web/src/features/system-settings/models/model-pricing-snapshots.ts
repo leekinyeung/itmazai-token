@@ -25,6 +25,7 @@ import { formatPricingNumber } from './pricing-format'
 export type ModelPricingSnapshotInput = {
   modelPrice: string
   modelRatio: string
+  modelDiscount: string
   cacheRatio: string
   createCacheRatio: string
   completionRatio: string
@@ -39,6 +40,7 @@ export type ModelPricingSnapshotInput = {
 export type ModelPricingSnapshot = {
   pluginBillingExpr?: Record<string, string>
   name: string
+  modelDiscount?: string
   price?: string
   ratio?: string
   cacheRatio?: string
@@ -158,6 +160,7 @@ export const getPriceDetail = (
 export const buildModelSnapshots = ({
   modelPrice,
   modelRatio,
+  modelDiscount,
   cacheRatio,
   createCacheRatio,
   completionRatio,
@@ -175,6 +178,10 @@ export const buildModelSnapshots = ({
   const ratioMap = safeJsonParse<Record<string, number>>(modelRatio, {
     fallback: {},
     context: 'model ratios',
+  })
+  const discountMap = safeJsonParse<Record<string, number>>(modelDiscount, {
+    fallback: {},
+    context: 'model discounts',
   })
   const cacheMap = safeJsonParse<Record<string, number>>(cacheRatio, {
     fallback: {},
@@ -227,6 +234,7 @@ export const buildModelSnapshots = ({
     ...pluginExpressionsByModel.keys(),
     ...Object.keys(priceMap),
     ...Object.keys(ratioMap),
+    ...Object.keys(discountMap),
     ...Object.keys(cacheMap),
     ...Object.keys(createCacheMap),
     ...Object.keys(completionMap),
@@ -240,6 +248,7 @@ export const buildModelSnapshots = ({
   return [...modelNames].map((name) => {
     const price = priceMap[name]?.toString() || ''
     const ratio = ratioMap[name]?.toString() || ''
+    const modelDiscount = discountMap[name]?.toString() || '1'
     const cache = cacheMap[name]?.toString() || ''
     const createCache = createCacheMap[name]?.toString() || ''
     const completion = completionMap[name]?.toString() || ''
@@ -254,6 +263,7 @@ export const buildModelSnapshots = ({
         splitBillingExprAndRequestRules(fullExpr)
       return {
         name,
+        modelDiscount,
         pluginBillingExpr: pluginExpressionsByModel.get(name),
         billingMode: 'tiered_expr',
         billingExpr: pureExpr,
@@ -272,6 +282,7 @@ export const buildModelSnapshots = ({
 
     return {
       name,
+      modelDiscount,
       pluginBillingExpr: pluginExpressionsByModel.get(name),
       price,
       ratio,
@@ -300,6 +311,7 @@ export const getSnapshotSignature = (snapshot?: ModelPricingSnapshot) => {
   return JSON.stringify({
     price: snapshot.price || '',
     ratio: snapshot.ratio || '',
+    modelDiscount: snapshot.modelDiscount || '1',
     cacheRatio: snapshot.cacheRatio || '',
     createCacheRatio: snapshot.createCacheRatio || '',
     completionRatio: snapshot.completionRatio || '',

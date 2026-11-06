@@ -68,6 +68,7 @@ type BillingSnapshot struct {
 	ModelName                 string         `json:"model_name"`
 	ExprString                string         `json:"expr_string"`
 	ExprHash                  string         `json:"expr_hash"`
+	ModelDiscount             float64        `json:"model_discount,omitempty"`
 	GroupRatio                float64        `json:"group_ratio"`
 	EstimatedPromptTokens     int            `json:"estimated_prompt_tokens"`
 	EstimatedCompletionTokens int            `json:"estimated_completion_tokens"`
@@ -81,6 +82,15 @@ type BillingSnapshot struct {
 	ExprVersion               int            `json:"expr_version"`
 	TaskUsageBilling          bool           `json:"task_usage_billing,omitempty"`
 	UsageFacts                map[string]any `json:"usage_facts,omitempty"`
+}
+
+// NormalizedModelDiscount keeps persisted snapshots from older versions at
+// their original price while treating every new snapshot as explicit.
+func (s *BillingSnapshot) NormalizedModelDiscount() float64 {
+	if s == nil || s.ModelDiscount == 0 {
+		return 1
+	}
+	return s.ModelDiscount
 }
 
 // TieredResult holds everything needed after running tiered settlement.

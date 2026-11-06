@@ -148,8 +148,12 @@ export async function ensureFullLanguageResource(): Promise<void> {
 
   fullLanguageCode = code
   fullLanguageRequest = loadLanguageResource(code)
-    .then((translation) => {
+    .then(async (translation) => {
       i18n.addResourceBundle(code, 'translation', translation, true, true)
+      // React bindings listen for language changes, not resource-store writes.
+      // Re-select the current language so routes rendered from the compact home
+      // bundle immediately pick up the complete resource.
+      await i18n.changeLanguage(code)
     })
     .catch((error) => {
       fullLanguageCode = undefined

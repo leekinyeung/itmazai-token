@@ -76,7 +76,11 @@ import {
   type DynamicPriceEntry,
 } from '../lib/dynamic-price'
 import { parseTags } from '../lib/filters'
-import { getAvailableGroups, isTokenBasedModel } from '../lib/model-helpers'
+import {
+  getAvailableGroups,
+  getModelDiscount,
+  isTokenBasedModel,
+} from '../lib/model-helpers'
 import { withPluginPricing } from '../lib/plugin-pricing'
 import { formatFixedPrice, formatGroupPrice } from '../lib/price'
 import {
@@ -652,7 +656,7 @@ function PriceSection(props: {
         showRechargePrice: props.showRechargePrice,
         priceRate: props.priceRate,
         usdExchangeRate: props.usdExchangeRate,
-        groupRatioMultiplier: 1,
+        groupRatioMultiplier: getModelDiscount(props.model),
       }),
     // Currency is read indirectly by the price formatter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1155,7 +1159,7 @@ function ProviderGroupPricingSection(
       showRechargePrice,
       priceRate: props.priceRate,
       usdExchangeRate: props.usdExchangeRate,
-      groupRatioMultiplier: 1,
+      groupRatioMultiplier: getModelDiscount(props.model),
       usageSchema: props.model.billing_usage_schema,
     })
     const formattedPricesByGroup = new Map(
@@ -1168,7 +1172,7 @@ function ProviderGroupPricingSection(
             showRechargePrice,
             priceRate: props.priceRate,
             usdExchangeRate: props.usdExchangeRate,
-            groupRatioMultiplier: ratio,
+            groupRatioMultiplier: ratio * getModelDiscount(props.model),
             usageSchema: props.model.billing_usage_schema,
           }),
         ] as const
@@ -1308,7 +1312,8 @@ function ProviderGroupPricingSection(
                               showRechargePrice,
                               priceRate: props.priceRate,
                               usdExchangeRate: props.usdExchangeRate,
-                              groupRatioMultiplier: ratio,
+                              groupRatioMultiplier:
+                                ratio * getModelDiscount(props.model),
                             })}`,
                         },
                       ]}

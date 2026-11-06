@@ -65,7 +65,7 @@ var ErrModelPricingConflict = errors.New("model pricing changed; reload before s
 // the transaction also serializes the first write to an unconfigured database.
 var modelPricingOptionKeys = []string{
 	"AudioCompletionRatio", "AudioRatio", "CacheRatio", "CompletionRatio",
-	"CreateCacheRatio", "ImageRatio", "ModelPrice", "ModelRatio",
+	"CreateCacheRatio", "ImageRatio", "ModelDiscount", "ModelPrice", "ModelRatio",
 	"billing_setting.billing_expr", "billing_setting.billing_mode", billing_setting.PluginBillingExprOption,
 }
 
@@ -171,11 +171,14 @@ func effectiveModelPricing(values map[string]map[string]any, name string) Pricin
 	result := modelPricingValues(values, name)
 	// Legacy wildcard aliases are resolved by the same normalization as relay.
 	alias := ratio_setting.FormatMatchingModelName(name)
-	for _, key := range []string{"ModelPrice", "ModelRatio", "CompletionRatio", "AudioRatio", "AudioCompletionRatio"} {
+	for _, key := range []string{"ModelPrice", "ModelRatio", "ModelDiscount", "CompletionRatio", "AudioRatio", "AudioCompletionRatio"} {
 		delete(result, key)
 		if value, exists := values[key][alias]; exists {
 			result[key] = value
 		}
+	}
+	if _, exists := result["ModelDiscount"]; !exists {
+		result["ModelDiscount"] = float64(1)
 	}
 	mode, _ := result["billing_setting.billing_mode"].(string)
 	if mode == "" {
@@ -229,7 +232,14 @@ func PreviewModelPricing(name string, draft PricingValues) (PricingValues, error
 	if err != nil {
 		return nil, err
 	}
-	if err := validateModelPricing(name, draft, modelPricingValues(values, name)); err != nil {
+	previous := modelPricingValues(values, name)
+	if discount, exists := previous["ModelDiscount"]; exists {
+		if _, submitted := draft["ModelDiscount"]; !submitted {
+			draft = maps.Clone(draft)
+			draft["ModelDiscount"] = discount
+		}
+	}
+	if err := validateModelPricing(name, draft, previous); err != nil {
 		return nil, err
 	}
 	replaceModelPricing(values, name, draft)
@@ -460,6 +470,9 @@ func validateModelPricing(name string, values, previous PricingValues) error {
 		if !ok || math.IsNaN(number) || math.IsInf(number, 0) || number < 0 {
 			return fmt.Errorf("%s must be a finite, non-negative number", key)
 		}
+		if key == "ModelDiscount" && (number <= 0 || number > 1) {
+			return errors.New("ModelDiscount must be greater than 0 and no greater than 1")
+		}
 	}
 	if values["billing_setting.billing_mode"] == "tiered_expr" {
 		if _, exists := values["billing_setting.billing_expr"]; !exists {
@@ -495,6 +508,14 @@ func UpdateModelPricing(changes []ModelPricingChange) error {
 			pricing := change.Pricing
 			if change.Reset {
 				pricing = modelPricingValues(defaults, change.ModelName)
+			} else if discount, exists := previous["ModelDiscount"]; exists {
+				if _, submitted := pricing["ModelDiscount"]; !submitted {
+					pricing = maps.Clone(pricing)
+					if pricing == nil {
+						pricing = make(PricingValues)
+					}
+					pricing["ModelDiscount"] = discount
+				}
 			}
 			if err := validateModelPricing(change.ModelName, pricing, previous); err != nil {
 				return err

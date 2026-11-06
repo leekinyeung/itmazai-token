@@ -54,11 +54,17 @@ async function renderEditor() {
     defaultOptions: { queries: { retry: false } },
   })
   client = queryClient
+  const onChange = vi.fn()
+  const onBatchDiscountSave = vi.fn(async (value: string) => {
+    onChange('ModelDiscount', value)
+    return true
+  })
   const view = render(
     <QueryClientProvider client={client}>
       <ModelRatioVisualEditor
         savedModelPrice='{}'
         savedModelRatio={modelRatio}
+        savedModelDiscount='{}'
         savedCacheRatio='{}'
         savedCreateCacheRatio='{}'
         savedCompletionRatio='{}'
@@ -69,6 +75,7 @@ async function renderEditor() {
         savedBillingExpr='{}'
         modelPrice='{}'
         modelRatio={modelRatio}
+        modelDiscount='{}'
         cacheRatio='{}'
         createCacheRatio='{}'
         completionRatio='{}'
@@ -77,8 +84,9 @@ async function renderEditor() {
         audioCompletionRatio='{}'
         billingMode='{}'
         billingExpr='{}'
-        onChange={vi.fn()}
+        onChange={onChange}
         onSave={vi.fn()}
+        onBatchDiscountSave={onBatchDiscountSave}
         isSaving={false}
       />
     </QueryClientProvider>
@@ -86,7 +94,7 @@ async function renderEditor() {
   // The real page has pricing metadata loaded long before the user drags over
   // a model name, so settle the pricing query before interacting.
   await waitFor(() => expect(queryClient.isFetching()).toBe(0))
-  return view
+  return { view, onChange, onBatchDiscountSave }
 }
 
 // A drag-select ends with mousedown/mouseup inside the row and the browser
@@ -122,4 +130,34 @@ it('keeps other rows mounted when a different model is opened for editing', asyn
     await screen.findByRole('region', { name: 'Edit model pricing' })
   ).toBeInTheDocument()
   expect(otherName).toBeInTheDocument()
+})
+
+it('batch sets and restores the selected model discount', async () => {
+  const { onBatchDiscountSave } = await renderEditor()
+  const row = await screen.findByRole('row', { name: /gpt-4\.1-mini/ })
+
+  fireEvent.click(within(row).getByRole('checkbox', { name: 'Select row' }))
+  const discount = await screen.findByPlaceholderText('0.8')
+  fireEvent.change(discount, { target: { value: '0.8' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+
+  await waitFor(() =>
+    expect(onBatchDiscountSave).toHaveBeenCalledWith(
+      JSON.stringify({ 'gpt-4.1-mini': 0.8 }, null, 2)
+    )
+  )
+  expect(
+    screen.getByRole('spinbutton', { name: 'Model discount' })
+  ).toHaveValue(0.8)
+
+  fireEvent.click(within(row).getByRole('checkbox', { name: 'Select row' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Restore discount to 1' }))
+  await waitFor(() =>
+    expect(onBatchDiscountSave).toHaveBeenCalledWith(
+      JSON.stringify({ 'gpt-4.1-mini': 1 }, null, 2)
+    )
+  )
+  expect(
+    screen.getByRole('spinbutton', { name: 'Model discount' })
+  ).toHaveValue(1)
 })

@@ -7567,6 +7567,12 @@
     "Setup steps": "Шаги настройки",
     "Sources and review notes": "Источники и примечания к проверке",
     "Start building with TaoDock": "Начните работу с TaoDock",
-    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "Создайте отдельный API-ключ, проверьте доступные ему модели и выполните репрезентативный тестовый запрос перед отправкой производственного трафика."
+    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "Создайте отдельный API-ключ, проверьте доступные ему модели и выполните репрезентативный тестовый запрос перед отправкой производственного трафика.",
+    "Model discount": "Скидка модели",
+    "Model discount must be greater than 0 and no greater than 1": "Скидка модели должна быть больше 0 и не больше 1",
+    "Model charge multiplier: {{value}} ({{percent}}% of base price)": "Коэффициент оплаты модели: {{value}} ({{percent}}% базовой цены)",
+    "JSON map of model → discount coefficient. Values must be greater than 0 and no greater than 1.": "JSON-карта модель → коэффициент скидки. Значения должны быть больше 0 и не больше 1.",
+    "Restored model discount to 1 for {{count}} models": "Скидка восстановлена до 1 для {{count}} моделей",
+    "Restore discount to 1": "Восстановить скидку до 1"
   }
 }

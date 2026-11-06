@@ -50,6 +50,17 @@ export function getConfiguredGroupRatio(
   return typeof ratio === 'number' && Number.isFinite(ratio) ? ratio : 1
 }
 
+/** Return the independent model discount, defaulting legacy payloads to 1. */
+export function getModelDiscount(model: PricingModel): number {
+  const discount = model.model_discount
+  return typeof discount === 'number' &&
+    Number.isFinite(discount) &&
+    discount > 0 &&
+    discount <= 1
+    ? discount
+    : 1
+}
+
 /**
  * Resolve the group ratio used by model square summary prices.
  *

@@ -61,6 +61,40 @@ describe('shared model pricing', () => {
     ).toHaveProperty('ModelPrice', 0)
   })
 
+  it('stores model discounts independently and keeps them during price sync', () => {
+    expect(
+      pricingFromDraft({
+        name: 'example',
+        billingMode: 'per-request',
+        price: '100',
+        modelDiscount: '0.8',
+      })
+    ).toMatchObject({ ModelPrice: 100, ModelDiscount: 0.8 })
+
+    const options = pricingOptions({
+      ModelPrice: '{"example":100}',
+      ModelDiscount: '{"example":0.8}',
+    })
+    const synced = applyPriceSyncSelections(options, {
+      example: { model_price: 120 },
+    })
+    expect(JSON.parse(synced.ModelPrice)).toEqual({ example: 120 })
+    expect(JSON.parse(synced.ModelDiscount)).toEqual({ example: 0.8 })
+  })
+
+  it('rejects invalid model discounts', () => {
+    for (const modelDiscount of ['0', '-0.1', '1.1', 'NaN', 'Infinity']) {
+      expect(() =>
+        pricingFromDraft({
+          name: 'example',
+          billingMode: 'per-token',
+          ratio: '1',
+          modelDiscount,
+        })
+      ).toThrow('Model discount must be greater than 0 and no greater than 1')
+    }
+  })
+
   it('keeps token and task expressions intact through both editing and sync', () => {
     for (const expression of [
       'len <= 200000 ? tier("short", p * 2 + cr * 0.2 + cc * 2.5) : tier("long", p * 4)',
@@ -70,6 +104,7 @@ describe('shared model pricing', () => {
         'billing_setting.billing_mode': 'tiered_expr',
         'billing_setting.billing_expr': expression,
         ModelRatio: 1,
+        ModelDiscount: 1,
       }
       expect(pricingFromDraft(pricingRow('example', values))).toEqual(values)
     }

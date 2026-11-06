@@ -287,11 +287,12 @@ it('updates the preview for explicit zero and disabled prices and explains depen
 
 function PricingFormFixture(props: {
   variant: 'default' | 'unset'
-  onSave: () => Promise<void>
+  onSave: () => Promise<boolean>
 }) {
   const values = {
     ModelPrice: props.variant === 'default' ? '{"example-model":0.1}' : '{}',
     ModelRatio: '{}',
+    ModelDiscount: '{}',
     CacheRatio: '{}',
     CreateCacheRatio: '{}',
     CompletionRatio: '{}',
@@ -330,7 +331,7 @@ it.each(['default', 'unset'] as const)(
   'keeps the %s pricing workspace shrinkable and saves from its fixed action bar',
   async (variant) => {
     const user = userEvent.setup()
-    const save = vi.fn(async () => undefined)
+    const save = vi.fn(async () => true)
     vi.spyOn(api, 'get').mockImplementation(async (url) => ({
       data: {
         success: true,

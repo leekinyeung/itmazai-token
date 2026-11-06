@@ -7567,6 +7567,12 @@
     "Setup steps": "Các bước thiết lập",
     "Sources and review notes": "Nguồn và ghi chú kiểm chứng",
     "Start building with TaoDock": "Bắt đầu xây dựng với TaoDock",
-    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "Tạo khóa API chuyên dụng, xác minh các mô hình khả dụng và thử một yêu cầu đại diện trước khi gửi lưu lượng sản xuất."
+    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "Tạo khóa API chuyên dụng, xác minh các mô hình khả dụng và thử một yêu cầu đại diện trước khi gửi lưu lượng sản xuất.",
+    "Model discount": "Chiết khấu mô hình",
+    "Model discount must be greater than 0 and no greater than 1": "Chiết khấu mô hình phải lớn hơn 0 và không vượt quá 1",
+    "Model charge multiplier: {{value}} ({{percent}}% of base price)": "Hệ số tính phí mô hình: {{value}} ({{percent}}% giá cơ bản)",
+    "JSON map of model → discount coefficient. Values must be greater than 0 and no greater than 1.": "Ánh xạ JSON mô hình → hệ số chiết khấu. Giá trị phải lớn hơn 0 và không vượt quá 1.",
+    "Restored model discount to 1 for {{count}} models": "Đã khôi phục chiết khấu về 1 cho {{count}} mô hình",
+    "Restore discount to 1": "Khôi phục chiết khấu về 1"
   }
 }

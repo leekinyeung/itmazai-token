@@ -72,6 +72,9 @@ func AppendRelayLogAdminInfo(ctx *gin.Context, relayInfo *relaycommon.RelayInfo,
 	}
 	other.SetAdmin("use_channel", ctx.GetStringSlice("use_channel"))
 	if relayInfo != nil {
+		modelDiscount := relayInfo.PriceData.NormalizedModelDiscount()
+		other.SetAdmin("model_discount", modelDiscount)
+		other.SetAdmin("effective_pricing_multiplier", modelDiscount*relayInfo.PriceData.GroupRatioInfo.GroupRatio)
 		if relayInfo.ChannelMeta != nil && relayInfo.IsModelMapped {
 			other.SetAdmin("is_model_mapped", true)
 			other.SetAdmin("upstream_model_name", relayInfo.UpstreamModelName)
@@ -325,6 +328,8 @@ func GenerateMjOtherInfo(relayInfo *relaycommon.RelayInfo, priceData hosttypes.P
 	other := model.NewLogOther()
 	other.SetPublic("model_price", priceData.ModelPrice)
 	other.SetPublic("group_ratio", priceData.GroupRatioInfo.GroupRatio)
+	other.SetAdmin("model_discount", priceData.NormalizedModelDiscount())
+	other.SetAdmin("effective_pricing_multiplier", priceData.NormalizedModelDiscount()*priceData.GroupRatioInfo.GroupRatio)
 	if priceData.GroupRatioInfo.HasSpecialRatio {
 		other.SetPublic("user_group_ratio", priceData.GroupRatioInfo.GroupSpecialRatio)
 	}

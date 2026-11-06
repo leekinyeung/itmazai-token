@@ -32,6 +32,7 @@ import type { ModelPricingEntry } from './api'
 export const PRICING_KEYS = [
   'ModelPrice',
   'ModelRatio',
+  'ModelDiscount',
   'CompletionRatio',
   'CacheRatio',
   'CreateCacheRatio',
@@ -78,6 +79,7 @@ export function modelPricingDisplay(
         ? 1
         : 0,
     model_ratio: Number(values.ModelRatio ?? Number.NaN),
+    model_discount: Number(values.ModelDiscount ?? 1),
     completion_ratio: Number(values.CompletionRatio ?? Number.NaN),
     model_price:
       values.ModelPrice === undefined ? undefined : Number(values.ModelPrice),
@@ -126,6 +128,7 @@ export const pricingFieldMap = {
   imageRatio: 'ImageRatio',
   audioRatio: 'AudioRatio',
   audioCompletionRatio: 'AudioCompletionRatio',
+  modelDiscount: 'ModelDiscount',
 } as const
 
 export function pricingOptions(
@@ -148,6 +151,7 @@ export function pricingRows(options: PricingOptions): ModelPricingSnapshot[] {
   return buildModelSnapshots({
     modelPrice: options.ModelPrice,
     modelRatio: options.ModelRatio,
+    modelDiscount: options.ModelDiscount,
     completionRatio: options.CompletionRatio,
     cacheRatio: options.CacheRatio,
     createCacheRatio: options.CreateCacheRatio,
@@ -211,10 +215,19 @@ export function pricingFromDraft(data: ModelRatioData): PricingValues {
     const value = data[field as keyof typeof pricingFieldMap]
     if (value === undefined || value === '') continue
     const number = Number(value)
+    if (
+      key === 'ModelDiscount' &&
+      (!Number.isFinite(number) || number <= 0 || number > 1)
+    ) {
+      throw new Error(
+        t('Model discount must be greater than 0 and no greater than 1')
+      )
+    }
     if (!Number.isFinite(number) || number < 0) {
       throw new Error(t('Enter a finite, non-negative price'))
     }
     if (
+      key === 'ModelDiscount' ||
       data.billingMode === 'tiered_expr' ||
       (data.billingMode === 'per-request'
         ? key === 'ModelPrice'
@@ -332,6 +345,13 @@ export function applyPriceSyncSelections(
   let result = options
   for (const [name, fields] of Object.entries(selections)) {
     const next: PricingValues = {}
+    const currentDiscounts = JSON.parse(result.ModelDiscount || '{}') as Record<
+      string,
+      number
+    >
+    if (currentDiscounts[name] !== undefined) {
+      next.ModelDiscount = currentDiscounts[name]
+    }
     const expression =
       typeof fields.billing_expr === 'string' &&
       fields.billing_expr.trim() !== ''

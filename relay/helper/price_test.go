@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
@@ -69,6 +70,44 @@ func TestModelPriceHelperTieredUsesPreloadedRequestInput(t *testing.T) {
 	require.Equal(t, "stream", info.TieredBillingSnapshot.EstimatedTier)
 	require.Equal(t, billing_setting.BillingModeTieredExpr, info.TieredBillingSnapshot.BillingMode)
 	require.Equal(t, common.QuotaPerUnit, info.TieredBillingSnapshot.QuotaPerUnit)
+}
+
+func TestModelPriceHelperAppliesFrozenDiscountAfterGroupOverride(t *testing.T) {
+	originalPrices := ratio_setting.ModelPrice2JSONString()
+	originalDiscounts := ratio_setting.ModelDiscount2JSONString()
+	originalGroups := ratio_setting.GroupRatio2JSONString()
+	originalOverrides := ratio_setting.GroupGroupRatio2JSONString()
+	t.Cleanup(func() {
+		require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(originalPrices))
+		require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString(originalDiscounts))
+		require.NoError(t, ratio_setting.UpdateGroupRatioByJSONString(originalGroups))
+		require.NoError(t, ratio_setting.UpdateGroupGroupRatioByJSONString(originalOverrides))
+	})
+
+	require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(`{"discount-price-model":100}`))
+	require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString(`{"discount-price-model":0.5}`))
+	require.NoError(t, ratio_setting.UpdateGroupRatioByJSONString(`{"billing-a":0.8,"billing-b":0.7}`))
+	require.NoError(t, ratio_setting.UpdateGroupGroupRatioByJSONString(`{"vip":{"billing-a":0.6}}`))
+
+	ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	ctx.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", nil)
+	info := &relaycommon.RelayInfo{
+		OriginModelName: "discount-price-model",
+		UserGroup:       "vip",
+		UsingGroup:      "billing-a",
+	}
+
+	price, err := ModelPriceHelper(ctx, info, 100, &types.TokenCountMeta{})
+	require.NoError(t, err)
+	assert.Equal(t, 0.5, price.ModelDiscount)
+	assert.Equal(t, 0.6, price.GroupRatioInfo.GroupRatio)
+	assert.Equal(t, 15_000_000, price.QuotaToPreConsume, "100 × 0.5 × the 0.6 override must not also multiply the base group ratio")
+
+	require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString(`{"discount-price-model":0.9}`))
+	ctx.Set(string(constant.ContextKeyAutoGroup), "billing-b")
+	refreshedGroup := HandleGroupRatio(ctx, info)
+	assert.Equal(t, 0.7, refreshedGroup.GroupRatio)
+	assert.Equal(t, 0.5, price.ModelDiscount, "the request keeps its accepted discount while group routing remains dynamic")
 }
 
 func TestFixedPricePreConsumeAndRealtimeRejection(t *testing.T) {
@@ -749,13 +788,16 @@ func TestModelPriceHelperNativeGeminiNoThinkingDoesNotAliasBillingModel(t *testi
 func TestInputPreConsumeMultiplierLegacyAndRequestPrices(t *testing.T) {
 	previous := config.GlobalConfig.ExportAllConfigs()
 	previousRatios, previousPrices := ratio_setting.ModelRatio2JSONString(), ratio_setting.ModelPrice2JSONString()
+	previousDiscounts := ratio_setting.ModelDiscount2JSONString()
 	t.Cleanup(func() {
 		require.NoError(t, config.GlobalConfig.LoadFromDB(previous))
 		require.NoError(t, ratio_setting.UpdateModelRatioByJSONString(previousRatios))
 		require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(previousPrices))
+		require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString(previousDiscounts))
 	})
 	require.NoError(t, ratio_setting.UpdateModelRatioByJSONString(`{"legacy-input-policy":1.5}`))
 	require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(`{"request-input-policy":0.01}`))
+	require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString(`{"legacy-input-policy":0.8,"request-input-policy":0.8,"fixed-input-policy":0.8,"image-input-policy":0.8}`))
 	require.NoError(t, config.GlobalConfig.LoadFromDB(map[string]string{
 		"billing_setting.billing_mode":    `{"fixed-input-policy":"tiered_expr","image-input-policy":"tiered_expr"}`,
 		"billing_setting.billing_expr":    `{"fixed-input-policy":"tier(\"request\", fixed(0.01))","image-input-policy":"tier(\"image\", p * 3) * image_count"}`,
@@ -766,12 +808,12 @@ func TestInputPreConsumeMultiplierLegacyAndRequestPrices(t *testing.T) {
 		multiplier   float64
 		prompt, want int
 	}{
-		{"legacy-input-policy", 0.5, 100, 75},
-		{"legacy-input-policy", 2.5, 100, 375},
+		{"legacy-input-policy", 0.5, 100, 60},
+		{"legacy-input-policy", 2.5, 100, 300},
 		{"legacy-input-policy", 1, 0, 0},
-		{"request-input-policy", 2.5, 100, 5000},
-		{"fixed-input-policy", 2.5, 100, 5000},
-		{"image-input-policy", 2.5, 100, 375},
+		{"request-input-policy", 2.5, 100, 4000},
+		{"fixed-input-policy", 2.5, 100, 4000},
+		{"image-input-policy", 2.5, 100, 300},
 	} {
 		t.Run(tc.model+"/"+fmt.Sprint(tc.multiplier, "/", tc.prompt), func(t *testing.T) {
 			operation_setting.GetQuotaSetting().PreConsumeMultiplier = tc.multiplier
@@ -786,7 +828,7 @@ func TestInputPreConsumeMultiplierLegacyAndRequestPrices(t *testing.T) {
 				info.Billing = reservation
 				operation_setting.GetQuotaSetting().PreConsumeMultiplier = 10
 				require.Nil(t, service.PrepareImageBillingForRequest(ctx, info, 2))
-				assert.Equal(t, 750, reservation.held, "retry must reuse the original fractional multiplier")
+				assert.Equal(t, 600, reservation.held, "retry must reuse the original fractional multiplier and frozen discount")
 			}
 		})
 	}

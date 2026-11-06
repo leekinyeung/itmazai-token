@@ -36,7 +36,7 @@ import {
   type ParsedTier,
 } from './billing-expr'
 import { compileBillingExpression } from './billing-expression/parser'
-import { getDisplayGroupRatio } from './model-helpers'
+import { getDisplayGroupRatio, getModelDiscount } from './model-helpers'
 import { withPluginPricing } from './plugin-pricing'
 import {
   evaluateTaskVisualConfig,
@@ -185,7 +185,7 @@ export function getDynamicDisplayGroupRatio(
   model: PricingModel,
   selectedGroup?: string
 ): number {
-  return getDisplayGroupRatio(model, selectedGroup)
+  return getDisplayGroupRatio(model, selectedGroup) * getModelDiscount(model)
 }
 
 function applyRechargeRate(

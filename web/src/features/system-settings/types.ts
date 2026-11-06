@@ -236,6 +236,7 @@ export type ModelSettings = {
   'grok.violation_deduction_amount': number
   ModelPrice: string
   ModelRatio: string
+  ModelDiscount: string
   CacheRatio: string
   CreateCacheRatio: string
   CompletionRatio: string
@@ -278,6 +279,7 @@ export type BillingSettings = {
   DisplayTokenStatEnabled: boolean
   ModelPrice: string
   ModelRatio: string
+  ModelDiscount: string
   CacheRatio: string
   CreateCacheRatio: string
   CompletionRatio: string

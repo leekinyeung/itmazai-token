@@ -120,6 +120,9 @@ func CacheGetRandomSatisfiedChannel(param *RetryParam) (*model.Channel, string, 
 
 	if param.TokenGroup == "auto" {
 		autoGroups := GetRequestAutoGroups(param.Ctx, userGroup)
+		if fallbackGroups := GetDefaultKeyModelFallbackGroups(param.Ctx, autoGroups, param.ModelName); len(fallbackGroups) > 0 {
+			autoGroups = fallbackGroups
+		}
 		if len(autoGroups) == 0 {
 			return nil, selectGroup, errors.New("auto groups is not enabled")
 		}
@@ -190,6 +193,21 @@ func CacheGetRandomSatisfiedChannel(param *RetryParam) (*model.Channel, string, 
 			break
 		}
 	} else {
+		if fallbackGroups := GetDefaultKeyModelFallbackGroups(param.Ctx, []string{param.TokenGroup}, param.ModelName); len(fallbackGroups) > 0 {
+			for _, group := range fallbackGroups {
+				channel, err = model.GetRandomSatisfiedChannel(group, param.ModelName, param.GetRetry(), filters)
+				if err != nil {
+					return nil, group, err
+				}
+				if channel == nil {
+					continue
+				}
+				common.SetContextKey(param.Ctx, constant.ContextKeyAutoGroup, group)
+				selectGroup = group
+				break
+			}
+			return channel, selectGroup, nil
+		}
 		channel, err = model.GetRandomSatisfiedChannel(
 			param.TokenGroup,
 			param.ModelName,

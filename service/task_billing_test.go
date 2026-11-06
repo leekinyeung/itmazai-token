@@ -1760,6 +1760,7 @@ func TestSettle_TokenRecalcFallsBackToCompletionTokens(t *testing.T) {
 		name             string
 		totalTokens      int
 		completionTokens int
+		modelDiscount    float64
 		wantSettled      bool
 		wantQuota        int
 	}{
@@ -1778,6 +1779,13 @@ func TestSettle_TokenRecalcFallsBackToCompletionTokens(t *testing.T) {
 			wantQuota:        80,
 		},
 		{
+			name:          "accepted model discount survives asynchronous settlement",
+			totalTokens:   80,
+			modelDiscount: 0.5,
+			wantSettled:   true,
+			wantQuota:     40,
+		},
+		{
 			name:        "neither token count skips recalc",
 			wantSettled: false,
 			wantQuota:   50,
@@ -1794,6 +1802,7 @@ func TestSettle_TokenRecalcFallsBackToCompletionTokens(t *testing.T) {
 			seedChannel(t, channelID)
 
 			task := makeTask(userID, channelID, preConsumed, tokenID, BillingSourceWallet, 0)
+			task.PrivateData.BillingContext.ModelDiscount = testCase.modelDiscount
 			settled := settleTaskBillingOnComplete(
 				context.Background(),
 				&mockAdaptor{},

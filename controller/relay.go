@@ -627,6 +627,7 @@ func executeTaskSubmissionWith(
 	task.PrivateData.NodeName = common.NodeName
 	task.PrivateData.BillingContext = &model.TaskBillingContext{
 		ModelPrice:      relayInfo.PriceData.ModelPrice,
+		ModelDiscount:   relayInfo.PriceData.NormalizedModelDiscount(),
 		GroupRatio:      relayInfo.PriceData.GroupRatioInfo.GroupRatio,
 		ModelRatio:      relayInfo.PriceData.ModelRatio,
 		OtherRatios:     relayInfo.PriceData.OtherRatios(),

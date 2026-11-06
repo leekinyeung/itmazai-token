@@ -7567,6 +7567,12 @@
     "Setup steps": "Étapes de configuration",
     "Sources and review notes": "Sources et notes de vérification",
     "Start building with TaoDock": "Commencer à créer avec TaoDock",
-    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "Créez une clé API dédiée, vérifiez les modèles disponibles et testez une requête représentative avant d’envoyer du trafic de production."
+    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "Créez une clé API dédiée, vérifiez les modèles disponibles et testez une requête représentative avant d’envoyer du trafic de production.",
+    "Model discount": "Remise du modèle",
+    "Model discount must be greater than 0 and no greater than 1": "La remise du modèle doit être supérieure à 0 et inférieure ou égale à 1",
+    "Model charge multiplier: {{value}} ({{percent}}% of base price)": "Coefficient de facturation du modèle : {{value}} ({{percent}} % du prix de base)",
+    "JSON map of model → discount coefficient. Values must be greater than 0 and no greater than 1.": "Mappage JSON modèle → coefficient de remise. Les valeurs doivent être supérieures à 0 et inférieures ou égales à 1.",
+    "Restored model discount to 1 for {{count}} models": "Remise rétablie à 1 pour {{count}} modèles",
+    "Restore discount to 1": "Rétablir la remise à 1"
   }
 }

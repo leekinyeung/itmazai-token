@@ -7567,6 +7567,12 @@
     "Setup steps": "Setup steps",
     "Sources and review notes": "Sources and review notes",
     "Start building with TaoDock": "Start building with TaoDock",
-    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic."
+    "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.": "Create a dedicated API key, verify its available models, and test a representative request before sending production traffic.",
+    "Model discount": "Model discount",
+    "Model discount must be greater than 0 and no greater than 1": "Model discount must be greater than 0 and no greater than 1",
+    "Model charge multiplier: {{value}} ({{percent}}% of base price)": "Model charge multiplier: {{value}} ({{percent}}% of base price)",
+    "JSON map of model → discount coefficient. Values must be greater than 0 and no greater than 1.": "JSON map of model → discount coefficient. Values must be greater than 0 and no greater than 1.",
+    "Restored model discount to 1 for {{count}} models": "Restored model discount to 1 for {{count}} models",
+    "Restore discount to 1": "Restore discount to 1"
   }
 }

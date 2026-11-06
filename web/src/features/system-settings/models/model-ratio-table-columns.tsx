@@ -167,6 +167,24 @@ export function buildModelRatioColumns({
       meta: { label: t('Mode') },
     },
     {
+      accessorKey: 'modelDiscount',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('Model discount')} />
+      ),
+      cell: ({ row }) => {
+        const discount = Number(row.original.modelDiscount || 1)
+        return (
+          <div className='font-mono tabular-nums'>
+            {discount} / {Math.round(discount * 10000) / 100}%
+          </div>
+        )
+      },
+      sortingFn: (left, right) =>
+        Number(left.original.modelDiscount || 1) -
+        Number(right.original.modelDiscount || 1),
+      meta: { label: t('Model discount') },
+    },
+    {
       id: 'priceSummary',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('Price summary')} />

@@ -1,7 +1,9 @@
 package ratio_setting
 
 import (
+	"fmt"
 	"maps"
+	"math"
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
@@ -323,6 +325,7 @@ var defaultAudioCompletionRatio = map[string]float64{
 
 var modelPriceMap = types.NewRWMap[string, float64]()
 var modelRatioMap = types.NewRWMap[string, float64]()
+var modelDiscountMap = types.NewRWMap[string, float64]()
 var completionRatioMap = types.NewRWMap[string, float64]()
 
 var defaultCompletionRatio = map[string]float64{
@@ -372,6 +375,33 @@ func GetModelPrice(name string, printErr bool) (float64, bool) {
 
 func UpdateModelRatioByJSONString(jsonStr string) error {
 	return types.LoadFromJsonStringWithCallback(modelRatioMap, jsonStr, InvalidateExposedDataCache)
+}
+
+func ModelDiscount2JSONString() string {
+	return modelDiscountMap.MarshalJSONString()
+}
+
+func UpdateModelDiscountByJSONString(jsonStr string) error {
+	discounts := make(map[string]float64)
+	if err := common.UnmarshalJsonStr(jsonStr, &discounts); err != nil {
+		return err
+	}
+	for modelName, discount := range discounts {
+		if math.IsNaN(discount) || math.IsInf(discount, 0) || discount <= 0 || discount > 1 {
+			return fmt.Errorf("ModelDiscount for %s must be greater than 0 and no greater than 1", modelName)
+		}
+	}
+	return types.LoadFromJsonStringWithCallback(modelDiscountMap, jsonStr, InvalidateExposedDataCache)
+}
+
+// GetModelDiscount returns the independently configured customer discount.
+// Missing legacy entries intentionally retain the pre-discount behavior.
+func GetModelDiscount(name string) float64 {
+	name = FormatMatchingModelName(name)
+	if discount, ok := modelDiscountMap.Get(name); ok {
+		return discount
+	}
+	return 1
 }
 
 // 处理带有思考预算的模型名称，方便统一定价
@@ -683,6 +713,10 @@ func UpdateAudioCompletionRatioByJSONString(jsonStr string) error {
 
 func GetModelRatioCopy() map[string]float64 {
 	return modelRatioMap.ReadAll()
+}
+
+func GetModelDiscountCopy() map[string]float64 {
+	return modelDiscountMap.ReadAll()
 }
 
 func GetModelPriceCopy() map[string]float64 {

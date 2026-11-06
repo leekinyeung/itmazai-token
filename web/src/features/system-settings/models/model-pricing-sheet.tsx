@@ -266,6 +266,7 @@ export const ModelPricingEditorPanel = forwardRef<
     resolver: zodResolver(createModelPricingSchema(t)),
     defaultValues: {
       name: '',
+      modelDiscount: '1',
       price: '',
       ratio: '',
       cacheRatio: '',
@@ -358,6 +359,7 @@ export const ModelPricingEditorPanel = forwardRef<
     if (editData) {
       form.reset({
         name: editData.name,
+        modelDiscount: editData.modelDiscount || '1',
         price: editData.price || '',
         ratio: editData.ratio || '',
         cacheRatio: editData.cacheRatio || '',
@@ -373,6 +375,7 @@ export const ModelPricingEditorPanel = forwardRef<
     } else {
       form.reset({
         name: '',
+        modelDiscount: '1',
         price: '',
         ratio: '',
         cacheRatio: '',
@@ -679,6 +682,7 @@ export const ModelPricingEditorPanel = forwardRef<
     (values: ModelPricingFormValues) => {
       const data: ModelRatioData = {
         name: values.name.trim(),
+        modelDiscount: values.modelDiscount || '1',
         ...(editData?.pluginBillingExpr ||
         pluginVariants?.length ||
         Object.keys(pluginExpressions).length
@@ -906,6 +910,43 @@ export const ModelPricingEditorPanel = forwardRef<
                     )}
                   />
                 )}
+
+                <FormField
+                  control={form.control}
+                  name='modelDiscount'
+                  render={({ field }) => {
+                    const discount = Number(field.value)
+                    const percent = Number.isFinite(discount)
+                      ? Math.round(discount * 10000) / 100
+                      : 0
+                    return (
+                      <FormItem>
+                        <FormLabel>{t('Model discount')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type='number'
+                            inputMode='decimal'
+                            min='0.000001'
+                            max='1'
+                            step='0.01'
+                            placeholder='1'
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          {t(
+                            'Model charge multiplier: {{value}} ({{percent}}% of base price)',
+                            {
+                              value: field.value || '-',
+                              percent,
+                            }
+                          )}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )
+                  }}
+                />
 
                 <PricingCurrencySelector siteCurrency={siteCurrency} />
 
