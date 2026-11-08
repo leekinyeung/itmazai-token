@@ -52,7 +52,7 @@ import type {
   PublicContentKind,
 } from './content-schema'
 
-function ContentStructuredData(props: { values: string[] }) {
+export function ContentStructuredData(props: { values: string[] }) {
   useEffect(() => {
     document
       .querySelectorAll('script[data-public-content-jsonld]')
@@ -88,6 +88,7 @@ function relatedLabel(path: string): string {
   const page = getPublicContentPage(path)
   if (page) return page.subject || page.title
   const labels: Record<string, string> = {
+    '/blog': 'Blog',
     '/compare': 'AI gateway comparisons',
     '/integrations': 'Integrations',
     '/keys': 'API keys',
@@ -103,6 +104,8 @@ function ContentBreadcrumb(props: { page: GeneratedPublicContentPage }) {
     parent = { path: '/compare', label: 'AI gateway comparisons' }
   } else if (page.kind === 'integration') {
     parent = { path: '/integrations', label: 'Integrations' }
+  } else if (page.kind === 'blog') {
+    parent = { path: '/blog', label: 'Blog' }
   }
   return (
     <Breadcrumb>
@@ -129,8 +132,8 @@ function ContentBreadcrumb(props: { page: GeneratedPublicContentPage }) {
   )
 }
 
-function PublicContentCta(props: {
-  kind: PublicContentKind | 'comparison-hub'
+export function PublicContentCta(props: {
+  kind: PublicContentKind | 'comparison-hub' | 'blog-hub'
   slug: string
 }) {
   const { t } = useTranslation()

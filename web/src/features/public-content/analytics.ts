@@ -19,7 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import type { PublicContentKind } from './content-schema'
 
 type PublicContentEvent = {
-  kind: PublicContentKind | 'comparison-hub'
+  kind: PublicContentKind | 'comparison-hub' | 'blog-hub'
   slug: string
   placement: string
   target: string

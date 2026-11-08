@@ -16,6 +16,7 @@ type publicPageMetadata struct {
 	Description    string   `json:"description"`
 	Language       string   `json:"language"`
 	OGType         string   `json:"ogType"`
+	Image          string   `json:"image"`
 	PublishedAt    string   `json:"publishedAt"`
 	UpdatedAt      string   `json:"updatedAt"`
 	StructuredData []string `json:"structuredData"`
@@ -113,6 +114,7 @@ func (renderer *publicPageMetadataRenderer) render(escapedPath string) []byte {
 	return renderPageHTMLWithOptions(renderer.index, title, description, renderer.SiteName, canonical, false, publicPageRenderOptions{
 		Language:       page.Language,
 		OGType:         page.OGType,
+		Image:          page.Image,
 		PublishedAt:    page.PublishedAt,
 		UpdatedAt:      page.UpdatedAt,
 		StructuredData: page.StructuredData,
@@ -156,6 +158,7 @@ func renderPageHTML(index []byte, title, description, siteName, canonical string
 type publicPageRenderOptions struct {
 	Language       string
 	OGType         string
+	Image          string
 	PublishedAt    string
 	UpdatedAt      string
 	StructuredData []string
@@ -208,6 +211,12 @@ func renderPageHTMLWithOptions(index []byte, title, description, siteName, canon
 	if options.OGType != "" {
 		fields = append(fields, struct{ kind, key, value string }{"property", "og:type", options.OGType})
 	}
+	if options.Image != "" {
+		fields = append(fields,
+			struct{ kind, key, value string }{"property", "og:image", options.Image},
+			struct{ kind, key, value string }{"name", "twitter:image", options.Image},
+		)
+	}
 	if options.PublishedAt != "" {
 		fields = append(fields, struct{ kind, key, value string }{"property", "article:published_time", options.PublishedAt})
 	}
@@ -239,6 +248,15 @@ func renderPageHTMLWithOptions(index []byte, title, description, siteName, canon
 				continue
 			}
 			if attributes["property"] == "og:url" && canonical == "" {
+				head.RemoveChild(node)
+				node = next
+				continue
+			}
+			// The static og:image:type/width/height tags describe the default
+			// social card; drop them when a page supplies its own image.
+			if options.Image != "" && (attributes["property"] == "og:image:type" ||
+				attributes["property"] == "og:image:width" ||
+				attributes["property"] == "og:image:height") {
 				head.RemoveChild(node)
 				node = next
 				continue

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>TaoDock Blog</title>
+  <link>https://taodock.com/blog</link>
+  <description>Guides on choosing, operating, and optimizing an AI gateway: routing strategies, cost controls, reliability practices, and model provider comparisons.</description>
+  <language>en</language>
+  <atom:link href="https://taodock.com/feed.xml" rel="self" type="application/rss+xml" />
+  <item>
+    <title>How to Choose an AI Gateway in 2026: A Practical Checklist</title>
+    <link>https://taodock.com/blog/how-to-choose-ai-gateway</link>
+    <guid isPermaLink="true">https://taodock.com/blog/how-to-choose-ai-gateway</guid>
+    <pubDate>Sun, 08 Nov 2026 00:00:00 GMT</pubDate>
+    <description>A practical checklist for evaluating AI gateways, from model coverage, routing, and fallbacks to cost controls, observability, and migration effort.</description>
+  </item>
+</channel>
+</rss>

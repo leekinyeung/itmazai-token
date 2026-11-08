@@ -86,9 +86,24 @@ func TestHeaderNavModuleAuthAllowsDefaultPublicAccess(t *testing.T) {
 	withHeaderNavModules(t, "")
 
 	assert.True(t, HeaderNavModuleIsPublic("pricing"))
+	assert.True(t, HeaderNavModuleIsPublic("blog"))
 	recorder := performHeaderNavRequest(t, HeaderNavModuleAuth("pricing"), false)
 
 	require.Equal(t, http.StatusOK, recorder.Code)
+}
+
+func TestHeaderNavModuleBlogFollowsSwitch(t *testing.T) {
+	withHeaderNavModules(t, `{"blog":false}`)
+	assert.False(t, HeaderNavModuleIsPublic("blog"))
+
+	withHeaderNavModules(t, `{"blog":{"enabled":false,"requireAuth":false}}`)
+	assert.False(t, HeaderNavModuleIsPublic("blog"))
+
+	withHeaderNavModules(t, `{"blog":{"enabled":true,"requireAuth":true}}`)
+	assert.False(t, HeaderNavModuleIsPublic("blog"))
+
+	withHeaderNavModules(t, `{"blog":true}`)
+	assert.True(t, HeaderNavModuleIsPublic("blog"))
 }
 
 func TestHeaderNavModuleAuthRejectsDisabledPricing(t *testing.T) {

@@ -30,6 +30,7 @@ import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as AuthenticatedChat2linkRouteImport } from './routes/_authenticated/chat2link'
 import { Route as AuthenticatedSystemSettingsRouteRouteImport } from './routes/_authenticated/system-settings/route'
 import { Route as AboutIndexRouteImport } from './routes/about/index'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as CompareIndexRouteImport } from './routes/compare/index'
 import { Route as CompareSlugRouteImport } from './routes/compare/$slug'
@@ -185,6 +186,11 @@ const AuthenticatedSystemSettingsRouteRoute =
 const AboutIndexRoute = AboutIndexRouteImport.update({
   id: '/about/',
   path: '/about/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
@@ -507,6 +513,7 @@ export interface FileRoutesByFullPath {
   '/oauth/$provider': typeof OauthProviderRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/about/': typeof AboutIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/compare/': typeof CompareIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/model-evaluation/': typeof ModelEvaluationIndexRoute
@@ -579,6 +586,7 @@ export interface FileRoutesByTo {
   '/oauth/$provider': typeof OauthProviderRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/about': typeof AboutIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/compare': typeof CompareIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
   '/model-evaluation': typeof ModelEvaluationIndexRoute
@@ -655,6 +663,7 @@ export interface FileRoutesById {
   '/oauth/$provider': typeof OauthProviderRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/about/': typeof AboutIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/compare/': typeof CompareIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/model-evaluation/': typeof ModelEvaluationIndexRoute
@@ -730,6 +739,7 @@ export interface FileRouteTypes {
     | '/oauth/$provider'
     | '/use-cases/$slug'
     | '/about/'
+    | '/blog/'
     | '/compare/'
     | '/integrations/'
     | '/model-evaluation/'
@@ -802,6 +812,7 @@ export interface FileRouteTypes {
     | '/oauth/$provider'
     | '/use-cases/$slug'
     | '/about'
+    | '/blog'
     | '/compare'
     | '/integrations'
     | '/model-evaluation'
@@ -877,6 +888,7 @@ export interface FileRouteTypes {
     | '/oauth/$provider'
     | '/use-cases/$slug'
     | '/about/'
+    | '/blog/'
     | '/compare/'
     | '/integrations/'
     | '/model-evaluation/'
@@ -944,6 +956,7 @@ export interface RootRouteChildren {
   OauthProviderRoute: typeof OauthProviderRoute
   UseCasesSlugRoute: typeof UseCasesSlugRoute
   AboutIndexRoute: typeof AboutIndexRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   CompareIndexRoute: typeof CompareIndexRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   ModelEvaluationIndexRoute: typeof ModelEvaluationIndexRoute
@@ -1102,6 +1115,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about/'
       preLoaderRoute: typeof AboutIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/$slug': {
@@ -1633,6 +1653,7 @@ const rootRouteChildren: RootRouteChildren = {
   OauthProviderRoute: OauthProviderRoute,
   UseCasesSlugRoute: UseCasesSlugRoute,
   AboutIndexRoute: AboutIndexRoute,
+  BlogIndexRoute: BlogIndexRoute,
   CompareIndexRoute: CompareIndexRoute,
   IntegrationsIndexRoute: IntegrationsIndexRoute,
   ModelEvaluationIndexRoute: ModelEvaluationIndexRoute,

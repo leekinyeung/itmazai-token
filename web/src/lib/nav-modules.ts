@@ -39,6 +39,7 @@ const DEFAULT_HEADER_NAV_MODULES: HeaderNavModules = {
   console: true,
   pricing: { enabled: true, requireAuth: false },
   rankings: { enabled: true, requireAuth: false },
+  blog: true,
   docs: true,
   about: true,
 }

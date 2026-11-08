@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { readdir, readFile, writeFile } from 'node:fs/promises'
+import { access, readdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -25,6 +25,8 @@ import {
   validatePublicContentCollection,
   type GeneratedPublicContentPage,
   type PublicContentFaqItem,
+  type PublicContentHubManifest,
+  type PublicContentKind,
   type PublicContentManifest,
   type PublicContentPage,
 } from '../src/features/public-content/content-schema'
@@ -58,9 +60,15 @@ async function markdownFiles(directory: string): Promise<string[]> {
 }
 
 function breadcrumbData(page: PublicContentPage) {
-  const parent = page.kind === 'comparison' ? '/compare' : '/integrations'
-  const parentName =
-    page.kind === 'comparison' ? 'AI gateway comparisons' : 'Integrations'
+  const hubByKind: Partial<
+    Record<PublicContentKind, { path: string; name: string }>
+  > = {
+    comparison: { path: '/compare', name: 'AI gateway comparisons' },
+    integration: { path: '/integrations', name: 'Integrations' },
+    blog: { path: '/blog', name: 'Blog' },
+    'use-case': { path: '/use-cases', name: 'Use cases' },
+  }
+  const hub = hubByKind[page.kind]
   return {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -68,10 +76,10 @@ function breadcrumbData(page: PublicContentPage) {
       {
         '@type': 'ListItem',
         position: 2,
-        name: page.kind === 'faq' ? 'FAQ' : parentName,
-        item: `${origin}${page.kind === 'faq' ? '/faq' : parent}`,
+        name: page.kind === 'faq' ? 'FAQ' : hub?.name,
+        item: `${origin}${page.kind === 'faq' ? '/faq' : hub?.path}`,
       },
-      ...(page.kind === 'faq'
+      ...(page.kind === 'faq' || !hub
         ? []
         : [
             {
@@ -94,6 +102,7 @@ function articleData(page: PublicContentPage) {
     dateModified: page.updatedAt,
     inLanguage: 'en',
     mainEntityOfPage: `${origin}${page.path}`,
+    ...(page.coverImage ? { image: [`${origin}${page.coverImage}`] } : {}),
     author: { '@type': 'Organization', name: 'TaoDock' },
     publisher: { '@type': 'Organization', name: 'TaoDock', url: origin },
   }
@@ -174,6 +183,44 @@ function compareHubStructuredData(pages: PublicContentPage[]): string[] {
   ].map((value) => JSON.stringify(value).replaceAll('<', '\\u003c'))
 }
 
+function blogHubStructuredData(
+  posts: PublicContentPage[],
+  title: string,
+  description: string
+): string[] {
+  const newestFirst = [...posts].sort((left, right) =>
+    right.publishedAt.localeCompare(left.publishedAt)
+  )
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: title,
+      description,
+      url: `${origin}/blog`,
+      inLanguage: 'en',
+      hasPart: newestFirst.map((page) => ({
+        '@type': 'Article',
+        name: page.title,
+        url: `${origin}${page.path}`,
+      })),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Blog',
+          item: `${origin}/blog`,
+        },
+      ],
+    },
+  ].map((value) => JSON.stringify(value).replaceAll('<', '\\u003c'))
+}
+
 function metadataFor(page: PublicContentPage) {
   return {
     title: page.title,
@@ -182,6 +229,7 @@ function metadataFor(page: PublicContentPage) {
     ogType: page.kind === 'faq' ? 'website' : 'article',
     publishedAt: page.publishedAt,
     updatedAt: page.updatedAt,
+    ...(page.coverImage ? { image: `${origin}${page.coverImage}` } : {}),
     structuredData: structuredData(page),
   }
 }
@@ -193,6 +241,24 @@ function xmlEscape(value: string): string {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&apos;')
+}
+
+function feedXml(
+  posts: PublicContentPage[],
+  title: string,
+  description: string
+): string {
+  const newestFirst = [...posts]
+    .sort((left, right) => right.publishedAt.localeCompare(left.publishedAt))
+    .slice(0, 20)
+  const items = newestFirst
+    .map((page) => {
+      const link = `${origin}${page.path}`
+      const pubDate = new Date(`${page.publishedAt}T00:00:00Z`).toUTCString()
+      return `  <item>\n    <title>${xmlEscape(page.title)}</title>\n    <link>${xmlEscape(link)}</link>\n    <guid isPermaLink="true">${xmlEscape(link)}</guid>\n    <pubDate>${pubDate}</pubDate>\n    <description>${xmlEscape(page.description)}</description>\n  </item>`
+    })
+    .join('\n')
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n<channel>\n  <title>${xmlEscape(title)}</title>\n  <link>${origin}/blog</link>\n  <description>${xmlEscape(description)}</description>\n  <language>en</language>\n  <atom:link href="${origin}/feed.xml" rel="self" type="application/rss+xml" />\n${items}\n</channel>\n</rss>\n`
 }
 
 const files = await markdownFiles(contentDirectory)
@@ -215,6 +281,37 @@ const compareUpdatedAt = comparisonPages
   .sort()
   .at(-1) as string
 const compareStructuredData = compareHubStructuredData(comparisonPages)
+const BLOG_HUB_FALLBACK_UPDATED_AT = '2026-11-10'
+const BLOG_HUB_TITLE = 'TaoDock Blog'
+const BLOG_HUB_DESCRIPTION =
+  'Guides on choosing, operating, and optimizing an AI gateway: routing strategies, cost controls, reliability practices, and model provider comparisons.'
+const blogPages = pages.filter((page) => page.kind === 'blog')
+const blogUpdatedAt =
+  blogPages
+    .map((page) => page.updatedAt)
+    .sort()
+    .at(-1) ?? BLOG_HUB_FALLBACK_UPDATED_AT
+const blogHub: PublicContentHubManifest = {
+  path: '/blog',
+  title: BLOG_HUB_TITLE,
+  description: BLOG_HUB_DESCRIPTION,
+  updatedAt: blogUpdatedAt,
+  structuredData: blogHubStructuredData(
+    blogPages,
+    BLOG_HUB_TITLE,
+    BLOG_HUB_DESCRIPTION
+  ),
+}
+for (const page of pages) {
+  if (!page.coverImage) continue
+  try {
+    await access(resolve(publicDirectory, page.coverImage.slice(1)))
+  } catch {
+    throw new Error(
+      `${page.sourceFile}: coverImage ${page.coverImage} not found under web/public`
+    )
+  }
+}
 const generatedPages: GeneratedPublicContentPage[] = pages.map((page) => ({
   kind: page.kind,
   slug: page.slug,
@@ -227,6 +324,8 @@ const generatedPages: GeneratedPublicContentPage[] = pages.map((page) => ({
   publishedAt: page.publishedAt,
   updatedAt: page.updatedAt,
   reviewedAt: page.reviewedAt,
+  tags: page.tags,
+  coverImage: page.coverImage,
   sources: page.sources,
   related: page.related,
   steps: page.steps,
@@ -247,6 +346,7 @@ const manifest: PublicContentManifest = {
     updatedAt: compareUpdatedAt,
     structuredData: compareStructuredData,
   },
+  blogHub,
   pages: generatedPages,
 }
 const baseMetadata = JSON.parse(
@@ -265,11 +365,20 @@ baseMetadata.pages['/compare'] = {
   updatedAt: compareUpdatedAt,
   structuredData: compareStructuredData,
 }
+baseMetadata.pages['/blog'] = {
+  title: blogHub.title,
+  description: blogHub.description,
+  language: 'en',
+  ogType: 'website',
+  updatedAt: blogUpdatedAt,
+  structuredData: blogHub.structuredData,
+}
 for (const page of pages) baseMetadata.pages[page.path] = metadataFor(page)
 
 const sitemapEntries = [
   ...Object.entries(baseLastModified),
   ['/compare', compareUpdatedAt] as const,
+  ['/blog', blogUpdatedAt] as const,
   ...pages.map((page) => [page.path, page.updatedAt] as const),
 ].sort(([left], [right]) => left.localeCompare(right))
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries
@@ -291,4 +400,8 @@ await Promise.all([
     serialize(baseMetadata)
   ),
   writeFile(resolve(publicDirectory, 'sitemap.xml'), sitemap),
+  writeFile(
+    resolve(publicDirectory, 'feed.xml'),
+    feedXml(blogPages, BLOG_HUB_TITLE, BLOG_HUB_DESCRIPTION)
+  ),
 ])

@@ -41,6 +41,8 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 		{path: "/user-agreement", title: "User Agreement | TaoDock", canonical: "https://taodock.com/user-agreement"},
 		{path: "/models/vendor%2fmodel", title: "vendor/model API Pricing and Capabilities | TaoDock", canonical: "https://taodock.com/models/vendor%2Fmodel"},
 		{path: "/compare", title: "AI API Gateway Comparisons | TaoDock", canonical: "https://taodock.com/compare"},
+		{path: "/blog", title: "TaoDock Blog | TaoDock", canonical: "https://taodock.com/blog"},
+		{path: "/blog/how-to-choose-ai-gateway", title: "How to Choose an AI Gateway in 2026: A Practical Checklist | TaoDock", canonical: "https://taodock.com/blog/how-to-choose-ai-gateway"},
 		{path: "/compare/taodock-vs-openrouter", title: "TaoDock vs OpenRouter: Choosing a Unified AI API Gateway | TaoDock", canonical: "https://taodock.com/compare/taodock-vs-openrouter"},
 		{path: "/integrations/openai-sdk", title: "Use the OpenAI SDK with TaoDock's Compatible API | TaoDock", canonical: "https://taodock.com/integrations/openai-sdk"},
 		{path: "/faq", title: "TaoDock AI API Frequently Asked Questions | TaoDock", canonical: "https://taodock.com/faq"},
@@ -80,7 +82,7 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 		})
 	}
 
-	for _, path := range []string{"/compare", "/compare/taodock-vs-openrouter", "/integrations/openai-sdk", "/faq"} {
+	for _, path := range []string{"/compare", "/blog", "/blog/how-to-choose-ai-gateway", "/compare/taodock-vs-openrouter", "/integrations/openai-sdk", "/faq"} {
 		t.Run("structured data "+path, func(t *testing.T) {
 			page, _, _, _, ok := renderer.publicPage(path)
 			require.True(t, ok)
@@ -147,6 +149,42 @@ func TestPublicPageMetadataFiltersUnsafeStructuredData(t *testing.T) {
 	}
 }
 
+func TestPublicPageMetadataInjectsArticleImage(t *testing.T) {
+	index, err := os.ReadFile("../web/index.html")
+	require.NoError(t, err)
+	renderer := &publicPageMetadataRenderer{
+		Origin:   "https://taodock.com",
+		SiteName: "TaoDock",
+		Pages: map[string]publicPageMetadata{
+			"/blog/with-image": {
+				Title:       "Post with image",
+				Description: "A post that carries its own cover image.",
+				Image:       "https://taodock.com/images/blog/with-image.webp",
+			},
+			"/blog/without-image": {
+				Title:       "Post without image",
+				Description: "A post that falls back to the default social card.",
+			},
+		},
+		index: index,
+	}
+
+	withImage := string(renderer.render("/blog/with-image"))
+	require.NotEmpty(t, withImage)
+	assert.Equal(t, 1, strings.Count(withImage, `property="og:image" content="https://taodock.com/images/blog/with-image.webp"`))
+	assert.Equal(t, 1, strings.Count(withImage, `name="twitter:image" content="https://taodock.com/images/blog/with-image.webp"`))
+	assert.NotContains(t, withImage, "og:image:width")
+	assert.NotContains(t, withImage, "og:image:height")
+	assert.NotContains(t, withImage, "og:image:type")
+	assert.NotContains(t, withImage, "social-card.png")
+
+	withoutImage := string(renderer.render("/blog/without-image"))
+	require.NotEmpty(t, withoutImage)
+	assert.Contains(t, withoutImage, `property="og:image" content="https://taodock.com/social-card.png"`)
+	assert.Contains(t, withoutImage, `name="twitter:image" content="https://taodock.com/social-card.png"`)
+	assert.Contains(t, withoutImage, `property="og:image:width" content="1200"`)
+}
+
 func TestPublicPageRouteClassification(t *testing.T) {
 	index, err := os.ReadFile("../web/index.html")
 	require.NoError(t, err)
@@ -179,11 +217,16 @@ func TestGeneratedPublicContentAssetsStayIndexableAndSafe(t *testing.T) {
 	renderer := newPublicPageMetadataRenderer([]byte("<html><head></head><body><div id=\"root\"></div></body></html>"), manifest)
 	require.NotNil(t, renderer)
 
-	for _, path := range []string{
-		"/compare", "/faq",
+	// Indexable public content paths: hubs plus every published content page.
+	// The sitemap URL count below derives from this list, so new content only
+	// needs a new entry here.
+	indexableContentPaths := []string{
+		"/compare", "/blog", "/faq",
+		"/blog/how-to-choose-ai-gateway",
 		"/compare/taodock-vs-openrouter", "/compare/taodock-vs-litellm", "/compare/taodock-vs-portkey", "/compare/taodock-vs-requesty", "/compare/taodock-vs-siliconflow",
 		"/integrations/cherry-studio", "/integrations/workbuddy", "/integrations/open-webui", "/integrations/aionui", "/integrations/deepchat", "/integrations/openai-sdk",
-	} {
+	}
+	for _, path := range indexableContentPaths {
 		page, ok := renderer.Pages[path]
 		require.True(t, ok, path)
 		require.NotEmpty(t, page.StructuredData, path)
@@ -198,17 +241,20 @@ func TestGeneratedPublicContentAssetsStayIndexableAndSafe(t *testing.T) {
 	sitemap, err := os.ReadFile("../web/public/sitemap.xml")
 	require.NoError(t, err)
 	body := string(sitemap)
-	for _, path := range []string{
-		"/compare", "/faq",
-		"/compare/taodock-vs-openrouter", "/compare/taodock-vs-litellm", "/compare/taodock-vs-portkey", "/compare/taodock-vs-requesty", "/compare/taodock-vs-siliconflow",
-		"/integrations/cherry-studio", "/integrations/workbuddy", "/integrations/open-webui", "/integrations/aionui", "/integrations/deepchat", "/integrations/openai-sdk",
-	} {
+	for _, path := range indexableContentPaths {
 		assert.Contains(t, body, "<loc>https://taodock.com"+path+"</loc>")
 	}
 	assert.NotContains(t, body, "/dashboard")
-	assert.NotContains(t, body, "/blog/")
 	assert.NotContains(t, body, "/use-cases/")
-	assert.Equal(t, 21, strings.Count(body, "<url>"))
+	// 8 base pages (baseLastModified) plus every indexable content path.
+	assert.Equal(t, 8+len(indexableContentPaths), strings.Count(body, "<url>"))
+
+	feed, err := os.ReadFile("../web/public/feed.xml")
+	require.NoError(t, err)
+	feedBody := string(feed)
+	assert.Contains(t, feedBody, `<rss version="2.0"`)
+	assert.Contains(t, feedBody, `<atom:link href="https://taodock.com/feed.xml" rel="self"`)
+	assert.Contains(t, feedBody, "<link>https://taodock.com/blog</link>")
 }
 
 func TestPublicModelRedirectsAvailabilityAndSitemap(t *testing.T) {

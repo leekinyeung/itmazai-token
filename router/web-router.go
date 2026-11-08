@@ -88,14 +88,18 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 					publicPage = publicModelExists(controller.GetAnonymousPricingData(), modelName)
 				}
 			}
-			modelsRestricted := publicPage && isModelsPagePath(path) && !middleware.HeaderNavModuleIsPublic("pricing")
-			rankingsRestricted := publicPage && path == "/rankings" && !middleware.HeaderNavModuleIsPublic("rankings")
-			if modelsRestricted {
-				publicPage = false
-			}
-			if rankingsRestricted {
-				publicPage = false
-			}
+		modelsRestricted := publicPage && isModelsPagePath(path) && !middleware.HeaderNavModuleIsPublic("pricing")
+		rankingsRestricted := publicPage && path == "/rankings" && !middleware.HeaderNavModuleIsPublic("rankings")
+		blogRestricted := publicPage && isBlogPagePath(path) && !middleware.HeaderNavModuleIsPublic("blog")
+		if modelsRestricted {
+			publicPage = false
+		}
+		if rankingsRestricted {
+			publicPage = false
+		}
+		if blogRestricted {
+			publicPage = false
+		}
 
 			if publicPage {
 				c.Header("Cache-Control", "no-cache")
@@ -103,13 +107,16 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 				return
 			}
 
-			validNoIndexRoute := pageMetadata != nil && pageMetadata.isNoIndexRoute(escapedPath)
-			if modelsRestricted {
-				validNoIndexRoute = true
-			}
-			if rankingsRestricted {
-				validNoIndexRoute = true
-			}
+		validNoIndexRoute := pageMetadata != nil && pageMetadata.isNoIndexRoute(escapedPath)
+		if modelsRestricted {
+			validNoIndexRoute = true
+		}
+		if rankingsRestricted {
+			validNoIndexRoute = true
+		}
+		if blogRestricted {
+			validNoIndexRoute = true
+		}
 			if validNoIndexRoute {
 				c.Header("Cache-Control", "private, no-store")
 				c.Header("X-Robots-Tag", "noindex, nofollow")
@@ -165,6 +172,10 @@ func permanentPageRedirect(path, rawQuery string) (string, bool) {
 
 func isModelsPagePath(path string) bool {
 	return path == "/models" || strings.HasPrefix(path, "/models/")
+}
+
+func isBlogPagePath(path string) bool {
+	return path == "/blog" || strings.HasPrefix(path, "/blog/")
 }
 
 func publicModelExists(data controller.PublicPricingData, name string) bool {

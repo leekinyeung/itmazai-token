@@ -83,6 +83,9 @@ export function FooterNavigation(props: { columns?: FooterColumn[] }) {
     { text: 'AI gateway comparisons', href: '/compare' },
     { text: 'Frequently asked questions', href: '/faq' },
   ]
+  if (modules.blog !== false) {
+    documentation.unshift({ text: 'Blog', href: '/blog' })
+  }
   if (modules.docs) {
     if (customDocs) {
       documentation.push({ text: 'Developer documentation', href: customDocs })

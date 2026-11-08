@@ -26,10 +26,12 @@ import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
+import { BlogHub } from '@/features/public-content/blog-hub'
 import {
   getPublicContentPage,
   getPublicContentPages,
 } from '@/features/public-content/content-registry'
+import type { GeneratedPublicContentPage } from '@/features/public-content/content-schema'
 import {
   CompareHub,
   PublicContentPage,
@@ -141,4 +143,63 @@ test('the hub lists every comparison while unknown and unpublished slugs stay ab
   expect(
     getPublicContentPage('/use-cases/not-published', 'use-case')
   ).toBeNull()
+})
+
+function blogPageFixture(): GeneratedPublicContentPage {
+  return {
+    kind: 'blog',
+    slug: 'fixture-post',
+    path: '/blog/fixture-post',
+    title: 'A Practical Checklist for Choosing an AI Gateway',
+    description:
+      'Evaluate routing, observability, cost controls, and reliability before sending production traffic through a gateway.',
+    primaryKeyword: 'how to choose an AI gateway',
+    cluster: 'Gateway selection',
+    publishedAt: '2026-11-10',
+    updatedAt: '2026-11-10',
+    reviewedAt: '2026-11-10',
+    tags: ['ai-gateway'],
+    sources: [],
+    related: ['/blog'],
+    steps: [],
+    faqItems: [],
+    draft: false,
+    body: '## Why a gateway\n\nA gateway centralizes routing and usage records.',
+    structuredData: ['{"@context":"https://schema.org","@type":"Article"}'],
+  }
+}
+
+test('renders blog articles with a breadcrumb back to the blog hub', async () => {
+  const page = blogPageFixture()
+  await renderComponent(<PublicContentPage page={page} />)
+
+  const breadcrumb = screen.getByRole('navigation', { name: 'breadcrumb' })
+  expect(breadcrumb).toBeVisible()
+  const hubLink = screen.getByRole('link', { name: 'Blog' })
+  expect(hubLink).toHaveAttribute('href', '/blog')
+  expect(screen.getByRole('button', { name: 'Blog' })).toBeVisible()
+})
+
+test('the blog hub lists published articles newest first', async () => {
+  await renderComponent(<BlogHub />)
+
+  expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+    'TaoDock Blog'
+  )
+  const cards = screen.getAllByRole('heading', { level: 3 })
+  expect(cards).toHaveLength(getPublicContentPages('blog').length)
+  expect(cards[0]).toHaveTextContent(
+    'How to Choose an AI Gateway in 2026: A Practical Checklist'
+  )
+  expect(screen.getByText('Published 2026-11-08')).toBeVisible()
+  expect(
+    screen.getByRole('button', { name: 'Read article' })
+  ).toHaveAttribute('href', '/blog/how-to-choose-ai-gateway')
+  expect(
+    screen.getByRole('button', { name: /create an account/i })
+  ).toBeVisible()
+  expect(
+    document.querySelectorAll('script[data-public-content-jsonld]').length
+  ).toBeGreaterThan(0)
 })

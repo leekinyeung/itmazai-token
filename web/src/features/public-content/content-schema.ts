@@ -56,6 +56,8 @@ export type PublicContentPage = {
   publishedAt: string
   updatedAt: string
   reviewedAt?: string
+  tags: string[]
+  coverImage?: string
   sources: PublicContentSource[]
   related: string[]
   steps: PublicContentStep[]
@@ -73,16 +75,19 @@ export type GeneratedPublicContentPage = Omit<
   structuredData: string[]
 }
 
+export type PublicContentHubManifest = {
+  path: string
+  title: string
+  description: string
+  updatedAt: string
+  structuredData: string[]
+}
+
 export type PublicContentManifest = {
   version: 1
   origin: string
-  compareHub: {
-    path: '/compare'
-    title: string
-    description: string
-    updatedAt: string
-    structuredData: string[]
-  }
+  compareHub: PublicContentHubManifest
+  blogHub: PublicContentHubManifest
   pages: GeneratedPublicContentPage[]
 }
 
@@ -136,6 +141,14 @@ const frontmatterSchema = z
     publishedAt: dateSchema,
     updatedAt: dateSchema,
     reviewedAt: dateSchema.optional(),
+    tags: z
+      .array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/))
+      .max(8)
+      .default([]),
+    coverImage: z
+      .string()
+      .regex(/^\/images\/blog\/[a-z0-9][a-z0-9/-]*\.(?:png|webp|jpe?g)$/)
+      .optional(),
     sources: z.array(sourceSchema).default([]),
     related: z.array(z.string().regex(/^\/[a-z0-9][a-z0-9/-]*$/)).default([]),
     steps: z.array(stepSchema).default([]),
@@ -218,11 +231,19 @@ const frontmatterSchema = z
         message: 'must include FAQ entries',
       })
     }
+    if (value.kind === 'blog' && !value.reviewedAt) {
+      context.addIssue({
+        code: 'custom',
+        path: ['reviewedAt'],
+        message: 'is required for blog posts',
+      })
+    }
   })
 
 const allowedExistingPublicPaths = new Set([
   '/',
   '/about',
+  '/blog',
   '/dashboard',
   '/keys',
   '/integrations',
