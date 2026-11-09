@@ -88,4 +88,5 @@ After a green deploy, run from the repository root:
 - `references/deploy-and-gsc.md` — deploy pipeline operations (push-to-deploy, watching, failure triage) and the one-time GSC service-account setup.
 - `scripts/new-post.sh` — scaffolds a new article file from the template with slug and today's date filled in.
 - `scripts/verify-live.sh` — post-deploy production checks for the hub and article SEO wiring.
-- `scripts/gsc-submit.sh` — submits sitemap.xml and feed.xml to Google Search Console via the API.
+- `scripts/gsc-submit.sh` — submits sitemap.xml and feed.xml to Google Search Console via the API (service account or OAuth refresh token, auto-detected).
+- `scripts/gsc-auth.py` — one-time OAuth consent flow that stores the refresh token used by `gsc-submit.sh` when service account keys are blocked by org policy.

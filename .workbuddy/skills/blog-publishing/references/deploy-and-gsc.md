@@ -34,7 +34,9 @@ CI 的 quality-gate 跑**全量**前端测试（`bun run test`，230+ 个测试�
 
 ## GSC 一次性配置（约 10 分钟）
 
-Search Console API 需要一个服务账号，并把它加为 GSC 媒体资源的用户：
+Search Console API 需要凭证。有两条路径，`gsc-submit.sh` 会按文件是否存在自动选择（优先服务账号）：
+
+### 方案 A：服务账号（默认；组织策略允许时用）
 
 1. 打开 [Google Cloud Console](https://console.cloud.google.com/) → 创建或选一个项目（如 `taodock-seo`）。
 2. 「API 和服务」→「库」→ 启用 **Google Search Console API**。
@@ -42,7 +44,27 @@ Search Console API 需要一个服务账号，并把它加为 GSC 媒体资源�
 4. 进入该服务账号 →「密钥」→「添加密钥」→「JSON」，下载得到密钥文件。
 5. 把密钥存到 `~/.config/taodock/gsc-service-account.json`（`chmod 600`，**不要提交进仓库**）。
 6. 打开 [Google Search Console](https://search.google.com/search-console) → 选择 `taodock.com` 媒体资源 →「设置」→「用户和权限」→「添加用户」→ 填服务账号的 `client_email`（形如 `...@....iam.gserviceaccount.com`），权限选「所有者」或「完整」。
-7. 验证：`GSC_SA_KEY=~/.config/taodock/gsc-service-account.json .workbuddy/skills/blog-publishing/scripts/gsc-submit.sh` 输出两行 `ok` 即配置成功。
+7. 验证：`.workbuddy/skills/blog-publishing/scripts/gsc-submit.sh` 输出两行 `ok` 即配置成功。
+
+### 方案 B：OAuth 用户授权（组织策略 `iam.disableServiceAccountKeyCreation` 禁用 SA 密钥时用此路径）
+
+原理：不再使用服务账号，而是创建「桌面应用」类型的 OAuth 客户端，用**你自己的 Google 账号**（GSC 媒体资源的所有者）授权一次，脚本保存 refresh token，之后每次运行时自动换访问令牌。rclone 等工具同款模式，不涉及任何服务账号密钥，不受该组织策略限制。
+
+1. 同方案 A 的步骤 1–2（建项目、启用 Search Console API）。
+2. 「API 和服务」→「OAuth 同意屏幕」：用户类型选「外部」，填应用名（如 `taodock-gsc-submit`）和你的邮箱；「范围」页添加 `https://www.googleapis.com/auth/webmasters`；「测试用户」页把**自己的 Gmail** 加进去。
+3. **关键**：回到「OAuth 同意屏幕」概要页，把发布状态从「测试」改为「**正式版（In production）**」——测试状态下 refresh token 只有 7 天有效期。改为正式版不需要走 Google 审核（只有你自己一个用户，授权时会看到「未验证应用」警告，点「继续」即可）。
+4. 「凭据」→「创建凭据」→「OAuth 客户端 ID」→ 应用类型选「**桌面应用（Desktop app）**」，创建后记下 client_id 和 client_secret。
+5. 运行一次性授权（会自动打开浏览器，用拥有 GSC 权限的 Google 账号登录并同意）：
+
+   ```bash
+   .workbuddy/skills/blog-publishing/scripts/gsc-auth.py \
+     --client-id 'XXX.apps.googleusercontent.com' \
+     --client-secret 'GOCSPX-...'
+   ```
+
+   成功后凭证保存在 `~/.config/taodock/gsc-oauth.json`（权限 600，**不要提交进仓库**）。
+6. 该 Google 账号必须已经在 GSC 里拥有 `taodock.com` 媒体资源的权限（你是站点所有者，默认就有）。
+7. 验证：`.workbuddy/skills/blog-publishing/scripts/gsc-submit.sh` 输出两行 `ok` 即配置成功。
 
 脚本提交 `sitemap.xml` 与 `feed.xml` 两个地址。GSC 已收录的 sitemap 重复提交无副作用（等同刷新）。
 
