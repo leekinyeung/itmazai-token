@@ -172,6 +172,10 @@ test('disabled modules retain public content and integration guide links', async
   )
   expect(footer.queryByRole('heading', { name: 'Products' })).toBeNull()
   expect(footer.getByRole('heading', { name: 'Documentation' })).toBeVisible()
+  expect(footer.getByRole('link', { name: 'Blog' })).toHaveAttribute(
+    'href',
+    '/blog'
+  )
   expect(
     footer.getByRole('link', { name: 'AI gateway comparisons' })
   ).toHaveAttribute('href', '/compare')
@@ -186,7 +190,21 @@ test('disabled modules retain public content and integration guide links', async
   expect(
     footer.getByRole('navigation', { name: 'Footer navigation' })
   ).toBeVisible()
-  expect(footer.getAllByRole('link')).toHaveLength(6)
+  expect(footer.getAllByRole('link')).toHaveLength(7)
+})
+
+test('a disabled blog module removes the blog link from the footer', async () => {
+  const footer = within(
+    await renderFooter({
+      status: {
+        HeaderNavModules: { blog: false },
+      },
+    })
+  )
+  expect(footer.queryByRole('link', { name: 'Blog' })).toBeNull()
+  expect(
+    footer.getByRole('link', { name: 'AI gateway comparisons' })
+  ).toHaveAttribute('href', '/compare')
 })
 
 test('a custom documentation address replaces the handbook links without guessing paths', async () => {
