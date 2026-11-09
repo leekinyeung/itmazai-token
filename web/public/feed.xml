@@ -7,6 +7,13 @@
   <language>en</language>
   <atom:link href="https://taodock.com/feed.xml" rel="self" type="application/rss+xml" />
   <item>
+    <title>How to Reduce OpenAI API Costs in 2026: A Practical Playbook</title>
+    <link>https://taodock.com/blog/reduce-openai-api-costs</link>
+    <guid isPermaLink="true">https://taodock.com/blog/reduce-openai-api-costs</guid>
+    <pubDate>Mon, 09 Nov 2026 00:00:00 GMT</pubDate>
+    <description>A practical playbook for cutting AI API spend with smart routing, token hygiene, caching, and per-key budgets — with verification steps for each tactic.</description>
+  </item>
+  <item>
     <title>How to Choose an AI Gateway in 2026: A Practical Checklist</title>
     <link>https://taodock.com/blog/how-to-choose-ai-gateway</link>
     <guid isPermaLink="true">https://taodock.com/blog/how-to-choose-ai-gateway</guid>

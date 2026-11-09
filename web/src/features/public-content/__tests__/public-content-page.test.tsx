@@ -190,12 +190,15 @@ test('the blog hub lists published articles newest first', async () => {
   const cards = screen.getAllByRole('heading', { level: 3 })
   expect(cards).toHaveLength(getPublicContentPages('blog').length)
   expect(cards[0]).toHaveTextContent(
+    'How to Reduce OpenAI API Costs in 2026: A Practical Playbook'
+  )
+  expect(cards[1]).toHaveTextContent(
     'How to Choose an AI Gateway in 2026: A Practical Checklist'
   )
+  expect(screen.getByText('Published 2026-11-09')).toBeVisible()
   expect(screen.getByText('Published 2026-11-08')).toBeVisible()
-  expect(
-    screen.getByRole('button', { name: 'Read article' })
-  ).toHaveAttribute('href', '/blog/how-to-choose-ai-gateway')
+  const readButtons = screen.getAllByRole('button', { name: 'Read article' })
+  expect(readButtons[0]).toHaveAttribute('href', '/blog/reduce-openai-api-costs')
   expect(
     screen.getByRole('button', { name: /create an account/i })
   ).toBeVisible()

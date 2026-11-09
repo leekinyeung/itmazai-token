@@ -180,11 +180,11 @@ describe('public content validation', () => {
 })
 
 test('the generated manifest publishes exactly the launch set and valid JSON-LD', () => {
-  expect(PUBLIC_CONTENT.pages).toHaveLength(13)
+  expect(PUBLIC_CONTENT.pages).toHaveLength(14)
   expect(getPublicContentPages('comparison')).toHaveLength(5)
   expect(getPublicContentPages('integration')).toHaveLength(6)
   expect(getPublicContentPages('faq')).toHaveLength(1)
-  expect(getPublicContentPages('blog')).toHaveLength(1)
+  expect(getPublicContentPages('blog')).toHaveLength(2)
   expect(getPublicContentPage('/blog/not-published')).toBeNull()
   expect(PUBLIC_CONTENT.blogHub.path).toBe('/blog')
   expect(PUBLIC_CONTENT.blogHub.title).toBeTruthy()
