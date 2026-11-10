@@ -38,6 +38,12 @@ const defaultSiteSettings: SiteSettings = {
   'general_setting.docs_link': '',
   'legal.user_agreement': '',
   'legal.privacy_policy': '',
+  'contact.email': '',
+  'contact.facebook': '',
+  'contact.youtube': '',
+  'contact.instagram': '',
+  'contact.telegram': '',
+  'contact.x': '',
   HeaderNavModules: '',
   SidebarModulesAdmin: '',
 }

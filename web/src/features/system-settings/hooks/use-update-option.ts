@@ -50,6 +50,12 @@ const STATUS_RELATED_KEYS = new Set([
   'QuotaRemindEnabled',
   'QuotaRemindThreshold',
   'GroupDisplayNames',
+  'contact.email',
+  'contact.facebook',
+  'contact.youtube',
+  'contact.instagram',
+  'contact.telegram',
+  'contact.x',
 ])
 
 export function useUpdateOption() {

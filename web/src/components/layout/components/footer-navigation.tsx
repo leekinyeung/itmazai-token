@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
+import type { ContactStatus, SystemStatus } from '@/features/auth/types'
 import { getIntegrationDocUrl } from '@/features/integrations/catalog'
 import { FEATURED_INTEGRATION_GUIDES } from '@/features/integrations/featured-guides'
 import { useStatus } from '@/hooks/use-status'
@@ -26,13 +27,130 @@ import { normalizeInterfaceLanguage } from '@/i18n/languages'
 import { parseHeaderNavModulesFromStatus } from '@/lib/nav-modules'
 import { cn } from '@/lib/utils'
 
+export interface FooterLink {
+  text: string
+  href: string
+  /** External http(s) links open in a new tab; mailto: links stay in place. */
+  external?: boolean
+}
+
 export interface FooterColumn {
   title: string
-  links: { text: string; href: string }[]
+  links: FooterLink[]
 }
 
 export const footerLinkClassName =
   'inline-flex min-h-11 max-w-full items-center rounded-sm py-2 text-start wrap-anywhere transition-colors duration-200 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+
+type ContactKind = 'email' | 'url'
+
+const EMAIL_PATTERN = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/
+
+const CONTACT_ITEMS: ReadonlyArray<{
+  key: keyof ContactStatus
+  label: string
+  kind: ContactKind
+}> = [
+  { key: 'email', label: 'Email', kind: 'email' },
+  { key: 'facebook', label: 'Facebook', kind: 'url' },
+  { key: 'youtube', label: 'YouTube', kind: 'url' },
+  { key: 'instagram', label: 'Instagram', kind: 'url' },
+  { key: 'telegram', label: 'Telegram', kind: 'url' },
+  { key: 'x', label: 'X', kind: 'url' },
+]
+
+/**
+ * Turn an administrator supplied contact value into a safe href.
+ * Anything that is not a plain email address or an http(s) URL is rejected,
+ * so `javascript:` / `data:` / protocol-relative values never reach an anchor.
+ */
+function normalizeContactHref(
+  value: unknown,
+  kind: ContactKind
+): string | null {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  if (kind === 'email') {
+    return EMAIL_PATTERN.test(trimmed) ? `mailto:${trimmed}` : null
+  }
+  try {
+    const url = new URL(trimmed)
+    if (!['http:', 'https:'].includes(url.protocol) || !url.host) return null
+    return url.toString()
+  } catch {
+    return null
+  }
+}
+
+function getContactColumn(status: SystemStatus | null): FooterColumn | null {
+  const contact = status?.contact
+  if (!contact) return null
+  const links: FooterLink[] = []
+  for (const item of CONTACT_ITEMS) {
+    const href = normalizeContactHref(contact[item.key], item.kind)
+    if (!href) continue
+    links.push({ text: item.label, href, external: item.kind === 'url' })
+  }
+  return links.length > 0 ? { title: 'Contact', links } : null
+}
+
+function FooterLinkAnchor(props: { link: FooterLink }) {
+  const { t } = useTranslation()
+  const { link } = props
+  if (link.external ?? /^https?:\/\//i.test(link.href)) {
+    return (
+      <a
+        href={link.href}
+        target='_blank'
+        rel='noopener noreferrer'
+        className={footerLinkClassName}
+      >
+        {t(link.text)}
+      </a>
+    )
+  }
+  if (link.href.startsWith('mailto:')) {
+    return (
+      <a href={link.href} className={footerLinkClassName}>
+        {t(link.text)}
+      </a>
+    )
+  }
+  return (
+    <Link to={link.href} className={footerLinkClassName}>
+      {t(link.text)}
+    </Link>
+  )
+}
+
+/**
+ * Contact block rendered outside the default navigation, e.g. under a
+ * custom HTML footer where the column layout is replaced.
+ */
+export function ContactLinks(props: { className?: string }) {
+  const { t } = useTranslation()
+  const { status } = useStatus()
+  const column = getContactColumn(status)
+  if (!column) return null
+  return (
+    <div className={cn('min-w-0', props.className)}>
+      <h2 className='mb-2 text-sm leading-6 font-semibold wrap-anywhere'>
+        {t(column.title)}
+      </h2>
+      <ul>
+        {column.links.map((link) => (
+          <li
+            key={`${link.href}:${link.text}`}
+            className='text-muted-foreground text-sm leading-6'
+          >
+            <FooterLinkAnchor link={link} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 
 export function FooterNavigation(props: { columns?: FooterColumn[] }) {
   const { t, i18n } = useTranslation()
@@ -110,6 +228,8 @@ export function FooterNavigation(props: { columns?: FooterColumn[] }) {
     { title: 'Integration guides', links: integrationGuides },
     { title: 'About', links: about },
   ]
+  const contactColumn = getContactColumn(status)
+  if (contactColumn) defaultColumns.push(contactColumn)
   const columns = (props.columns ?? defaultColumns).filter(
     (column) => column.links.length > 0
   )
@@ -122,9 +242,10 @@ export function FooterNavigation(props: { columns?: FooterColumn[] }) {
         'grid min-w-0 grid-cols-2 gap-x-12 gap-y-8 lg:basis-0',
         columns.length === 1 && 'grid-cols-1',
         columns.length === 3 && 'lg:grid-cols-3',
-        columns.length >= 4 && 'lg:grid-cols-4'
+        columns.length === 4 && 'lg:grid-cols-4',
+        columns.length >= 5 && 'lg:grid-cols-5'
       )}
-      style={{ flexGrow: Math.min(columns.length, 4) }}
+      style={{ flexGrow: Math.min(columns.length, 5) }}
     >
       {columns.map((column) => (
         <div key={column.title} className='min-w-0'>
@@ -137,20 +258,7 @@ export function FooterNavigation(props: { columns?: FooterColumn[] }) {
                 key={`${link.href}:${link.text}`}
                 className='text-muted-foreground text-sm leading-6'
               >
-                {/^https?:\/\//.test(link.href) ? (
-                  <a
-                    href={link.href}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className={footerLinkClassName}
-                  >
-                    {t(link.text)}
-                  </a>
-                ) : (
-                  <Link to={link.href} className={footerLinkClassName}>
-                    {t(link.text)}
-                  </Link>
-                )}
+                <FooterLinkAnchor link={link} />
               </li>
             ))}
           </ul>

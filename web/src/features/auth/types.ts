@@ -87,6 +87,15 @@ export interface ApiResponse<T = unknown> {
 // System Status
 // ============================================================================
 
+export interface ContactStatus {
+  email?: string
+  facebook?: string
+  youtube?: string
+  instagram?: string
+  telegram?: string
+  x?: string
+}
+
 export interface SystemStatus {
   success?: boolean
   message?: string
@@ -136,6 +145,7 @@ export interface SystemStatus {
     password_register_enabled?: boolean
     group_display_names?: Record<string, Record<string, string>>
     custom_oauth_providers?: CustomOAuthProviderInfo[]
+    contact?: ContactStatus
     [key: string]: unknown
   }
   // Allow direct access to common properties
@@ -190,6 +200,7 @@ export interface SystemStatus {
   /** Site default low balance reminder threshold, in quota units */
   quota_remind_threshold?: number
   model_evaluation_enabled?: boolean
+  contact?: ContactStatus
   [key: string]: unknown
 }
 

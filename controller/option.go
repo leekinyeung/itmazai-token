@@ -186,6 +186,14 @@ func UpdateOption(c *gin.Context) {
 		common.ApiErrorT(c, "Invalid parameters")
 		return
 	}
+	if strings.HasPrefix(option.Key, "contact.") {
+		value := strings.TrimSpace(option.Value.(string))
+		if err := system_setting.ValidateContactSetting(option.Key, value); err != nil {
+			common.ApiError(c, err)
+			return
+		}
+		option.Value = value
+	}
 	if option.Key == "TaskPublicAddress" && option.Value.(string) != "" {
 		if err := service.ValidateTaskArtifactBaseURL(option.Value.(string)); err != nil {
 			common.ApiError(c, err)

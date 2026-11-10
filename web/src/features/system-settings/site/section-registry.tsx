@@ -51,6 +51,14 @@ const SITE_SECTIONS = [
             user_agreement: settings['legal.user_agreement'],
             privacy_policy: settings['legal.privacy_policy'],
           },
+          contact: {
+            email: settings['contact.email'],
+            facebook: settings['contact.facebook'],
+            youtube: settings['contact.youtube'],
+            instagram: settings['contact.instagram'],
+            telegram: settings['contact.telegram'],
+            x: settings['contact.x'],
+          },
         }}
       />
     ),

@@ -27,6 +27,7 @@ import { DEFAULT_SYSTEM_NAME } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 import {
+  ContactLinks,
   FooterNavigation,
   footerLinkClassName,
   type FooterColumn,
@@ -114,6 +115,7 @@ export function Footer(props: FooterProps) {
             prose={false}
             inlineSanitizeOptions={FOOTER_HTML_OPTIONS}
           />
+          <ContactLinks className='mt-6' />
           <div className='border-border text-muted-foreground mt-6 flex flex-col items-start justify-between gap-x-8 gap-y-2 border-t pt-4 text-xs leading-5 lg:flex-row'>
             <div className='flex flex-wrap items-center gap-x-3'>
               <LegalLinks />

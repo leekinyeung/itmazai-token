@@ -407,6 +407,167 @@ test('footer layout supports two mobile columns, four wide columns and accessibl
   }
 })
 
+const CONTACT_STATUS = {
+  contact: {
+    email: 'hi@example.test',
+    facebook: 'https://www.facebook.com/your-page',
+    youtube: 'https://www.youtube.com/@your-channel',
+    instagram: 'https://www.instagram.com/your-profile',
+    telegram: 'https://t.me/your-channel',
+    x: 'https://x.com/your-handle',
+  },
+}
+
+const CONTACT_LINKS = [
+  ['Facebook', 'https://www.facebook.com/your-page'],
+  ['YouTube', 'https://www.youtube.com/@your-channel'],
+  ['Instagram', 'https://www.instagram.com/your-profile'],
+  ['Telegram', 'https://t.me/your-channel'],
+  ['X', 'https://x.com/your-handle'],
+] as const
+
+test('configured contact information renders as a fifth column with safe links', async () => {
+  const footer = within(await renderFooter({ status: CONTACT_STATUS }))
+  expect(footer.getByRole('heading', { name: 'Contact' })).toBeVisible()
+  expect(footer.getAllByRole('heading')).toHaveLength(5)
+  const navigation = footer.getByRole('navigation', {
+    name: 'Footer navigation',
+  })
+  expect(navigation).toHaveClass('lg:grid-cols-5')
+  expect(navigation).not.toHaveClass('lg:grid-cols-4')
+
+  const email = footer.getByRole('link', { name: 'Email' })
+  expect(email).toHaveAttribute('href', 'mailto:hi@example.test')
+  expect(email).not.toHaveAttribute('target')
+
+  for (const [name, href] of CONTACT_LINKS) {
+    const link = footer.getByRole('link', { name })
+    expect(link).toHaveAttribute('href', href)
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  }
+})
+
+const EMPTY_CONTACT_STATUSES: Array<[string, Record<string, unknown> | null]> =
+  [
+    ['no status data', {}],
+    ['empty contact object', { contact: {} }],
+    [
+      'blank contact values',
+      {
+        contact: {
+          email: '',
+          facebook: '',
+          youtube: '',
+          instagram: '',
+          telegram: '',
+          x: '',
+        },
+      },
+    ],
+    ['unavailable status', null],
+  ]
+
+test.each(EMPTY_CONTACT_STATUSES)(
+  'hides the whole contact area when %s',
+  async (_label, status) => {
+    const footer = within(await renderFooter({ status }))
+    expect(footer.queryByRole('heading', { name: 'Contact' })).toBeNull()
+    expect(footer.queryByRole('link', { name: 'Email' })).toBeNull()
+    expect(footer.getAllByRole('heading')).toHaveLength(4)
+    expect(
+      footer.getByRole('navigation', { name: 'Footer navigation' })
+    ).toHaveClass('lg:grid-cols-4')
+  }
+)
+
+test('only configured contact entries are rendered', async () => {
+  const footer = within(
+    await renderFooter({ status: { contact: { email: 'hi@example.test' } } })
+  )
+  expect(footer.getByRole('heading', { name: 'Contact' })).toBeVisible()
+  expect(footer.getAllByRole('heading')).toHaveLength(5)
+  expect(footer.getByRole('link', { name: 'Email' })).toHaveAttribute(
+    'href',
+    'mailto:hi@example.test'
+  )
+  for (const [name] of CONTACT_LINKS) {
+    expect(footer.queryByRole('link', { name })).toBeNull()
+  }
+})
+
+test('unsafe contact values from status are ignored before they reach an anchor', async () => {
+  const footer = within(
+    await renderFooter({
+      status: {
+        contact: {
+          email: 'not-an-email',
+          facebook: 'javascript:alert(1)',
+          youtube: '//evil.example.test',
+          instagram: 'data:text/html,<script>alert(1)</script>',
+          telegram: 'ftp://evil.example.test',
+        },
+      },
+    })
+  )
+  expect(footer.queryByRole('heading', { name: 'Contact' })).toBeNull()
+  expect(footer.getAllByRole('heading')).toHaveLength(4)
+  for (const link of footer.getAllByRole('link')) {
+    expect(link.getAttribute('href')).not.toMatch(/^(javascript:|data:|ftp:)/)
+  }
+})
+
+test('a safe contact value still renders when its siblings are unsafe', async () => {
+  const footer = within(
+    await renderFooter({
+      status: {
+        contact: {
+          email: 'hi@example.test',
+          facebook: 'javascript:alert(1)',
+        },
+      },
+    })
+  )
+  expect(footer.getByRole('link', { name: 'Email' })).toHaveAttribute(
+    'href',
+    'mailto:hi@example.test'
+  )
+  expect(footer.queryByRole('link', { name: 'Facebook' })).toBeNull()
+})
+
+test('custom HTML footer still shows configured contact links', async () => {
+  const footer = await renderFooter({ status: CONTACT_STATUS })
+  act(() => {
+    useSystemConfigStore.getState().setConfig({
+      footerHtml: '<p>Custom footer</p>',
+    })
+  })
+  const footerArea = within(footer)
+  expect(await footerArea.findByText('Custom footer')).toBeVisible()
+  expect(footerArea.queryByRole('heading', { name: 'Products' })).toBeNull()
+  expect(footerArea.getByRole('heading', { name: 'Contact' })).toBeVisible()
+  expect(footerArea.getByRole('link', { name: 'Email' })).toHaveAttribute(
+    'href',
+    'mailto:hi@example.test'
+  )
+  expect(footerArea.getByRole('link', { name: 'Facebook' })).toHaveAttribute(
+    'target',
+    '_blank'
+  )
+  expect(footerArea.getByRole('link', { name: 'New API' })).toBeVisible()
+})
+
+test('compact footer keeps its single-line layout without contact links', async () => {
+  const footer = within(
+    await renderFooter({
+      status: CONTACT_STATUS,
+      footerProps: { variant: 'compact' },
+    })
+  )
+  expect(footer.queryByRole('heading', { name: 'Contact' })).toBeNull()
+  expect(footer.queryByRole('link', { name: 'Email' })).toBeNull()
+})
+
 test('administrator branding remains complete when its name is long', async () => {
   const footer = await renderFooter()
   const name =

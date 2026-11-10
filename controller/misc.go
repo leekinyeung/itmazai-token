@@ -46,6 +46,7 @@ func GetStatus(c *gin.Context) {
 	defer common.OptionMapRWMutex.RUnlock()
 
 	legalSetting := system_setting.GetLegalSettings()
+	contactSetting := system_setting.GetContactSettings()
 
 	data := gin.H{
 		"version":                     common.Version,
@@ -65,13 +66,21 @@ func GetStatus(c *gin.Context) {
 		"system_name":                 common.SystemName,
 		"logo":                        common.Logo,
 		"footer_html":                 common.Footer,
-		"wechat_qrcode":               common.WeChatAccountQRCodeImageURL,
-		"wechat_login":                common.WeChatAuthEnabled,
-		"server_address":              system_setting.ServerAddress,
-		"turnstile_check":             common.TurnstileCheckEnabled,
-		"turnstile_site_key":          common.TurnstileSiteKey,
-		"docs_link":                   operation_setting.GetGeneralSetting().DocsLink,
-		"quota_per_unit":              common.QuotaPerUnit,
+		"contact": gin.H{
+			"email":     contactSetting.Email,
+			"facebook":  contactSetting.Facebook,
+			"youtube":   contactSetting.YouTube,
+			"instagram": contactSetting.Instagram,
+			"telegram":  contactSetting.Telegram,
+			"x":         contactSetting.X,
+		},
+		"wechat_qrcode":      common.WeChatAccountQRCodeImageURL,
+		"wechat_login":       common.WeChatAuthEnabled,
+		"server_address":     system_setting.ServerAddress,
+		"turnstile_check":    common.TurnstileCheckEnabled,
+		"turnstile_site_key": common.TurnstileSiteKey,
+		"docs_link":          operation_setting.GetGeneralSetting().DocsLink,
+		"quota_per_unit":     common.QuotaPerUnit,
 		// 兼容旧前端：保留 display_in_currency，同时提供新的 quota_display_type
 		"display_in_currency":           operation_setting.IsCurrencyDisplay(),
 		"quota_display_type":            operation_setting.GetQuotaDisplayType(),

@@ -141,6 +141,12 @@ export type SiteSettings = {
   'general_setting.docs_link': string
   'legal.user_agreement': string
   'legal.privacy_policy': string
+  'contact.email': string
+  'contact.facebook': string
+  'contact.youtube': string
+  'contact.instagram': string
+  'contact.telegram': string
+  'contact.x': string
   HeaderNavModules: string
   SidebarModulesAdmin: string
 }

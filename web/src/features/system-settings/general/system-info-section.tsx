@@ -62,6 +62,14 @@ const _systemInfoSchema = z.object({
     user_agreement: z.string().optional(),
     privacy_policy: z.string().optional(),
   }),
+  contact: z.object({
+    email: z.string(),
+    facebook: z.string(),
+    youtube: z.string(),
+    instagram: z.string(),
+    telegram: z.string(),
+    x: z.string(),
+  }),
 })
 
 type SystemInfoFormValues = z.infer<typeof _systemInfoSchema>
@@ -94,6 +102,14 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
       user_agreement: normalizeValue(defaultValues.legal?.user_agreement),
       privacy_policy: normalizeValue(defaultValues.legal?.privacy_policy),
     },
+    contact: {
+      email: normalizeValue(defaultValues.contact?.email),
+      facebook: normalizeValue(defaultValues.contact?.facebook),
+      youtube: normalizeValue(defaultValues.contact?.youtube),
+      instagram: normalizeValue(defaultValues.contact?.instagram),
+      telegram: normalizeValue(defaultValues.contact?.telegram),
+      x: normalizeValue(defaultValues.contact?.x),
+    },
   }
 
   const systemInfoSchemaWithI18n = z.object({
@@ -117,6 +133,14 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     legal: z.object({
       user_agreement: z.string().optional(),
       privacy_policy: z.string().optional(),
+    }),
+    contact: z.object({
+      email: z.string(),
+      facebook: z.string(),
+      youtube: z.string(),
+      instagram: z.string(),
+      telegram: z.string(),
+      x: z.string(),
     }),
   })
 
@@ -272,6 +296,140 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                     </FormControl>
                     <FormDescription>
                       {t('Footer text displayed at the bottom of pages')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='contact.email'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Email')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t('contact@example.com')}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'Contact email address shown in the footer. Leave empty to hide it.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='contact.facebook'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Facebook')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t('https://www.facebook.com/your-page')}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'Full https:// URL of your social profile shown in the footer. Leave empty to hide it.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='contact.youtube'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('YouTube')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t('https://www.youtube.com/@your-channel')}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'Full https:// URL of your social profile shown in the footer. Leave empty to hide it.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='contact.instagram'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Instagram')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t(
+                          'https://www.instagram.com/your-profile'
+                        )}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'Full https:// URL of your social profile shown in the footer. Leave empty to hide it.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='contact.x'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('X')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t('https://x.com/your-handle')}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'Full https:// URL of your social profile shown in the footer. Leave empty to hide it.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='contact.telegram'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Telegram')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t('https://t.me/your-channel')}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'Full https:// URL of your social profile shown in the footer. Leave empty to hide it.'
+                      )}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
