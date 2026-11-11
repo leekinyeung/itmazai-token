@@ -2561,6 +2561,7 @@
     "Explore {{provider}} models": "Khám phá mô hình {{provider}}",
     "Explore available AI models, supported API endpoints and current pricing on {{systemName}}.": "Khám phá các mô hình AI khả dụng, điểm cuối API được hỗ trợ và giá hiện tại trên {{systemName}}.",
     "Explore integrations": "Khám phá tích hợp",
+    "Explore model popularity and vendor trends on the platform.": "Khám phá mức độ phổ biến của mô hình và xu hướng nhà cung cấp trên nền tảng.",
     "Explore models": "Khám phá mô hình",
     "Export": "Xuất",
     "Export logs": "Xuất nhật ký",
@@ -3538,6 +3539,7 @@
     "JSON map of group → description exposed when users create API keys.": "Ánh xạ JSON của nhóm → mô tả được hiển thị khi người dùng tạo khóa API.",
     "JSON map of group → ratio applied when the user selects the group explicitly.": "Bản đồ JSON của nhóm → tỷ lệ được áp dụng khi người dùng chọn nhóm đó một cách rõ ràng.",
     "JSON map of group identifiers to display names for each interface language.": "Ánh xạ JSON từ mã định danh nhóm đến tên hiển thị cho từng ngôn ngữ giao diện.",
+    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "Ánh xạ JSON từ mô hình → hệ số giảm giá. Giá trị phải là các số hữu hạn không âm.",
     "JSON map of model → multiplier applied to quota billing.": "Bản đồ JSON của mô hình → hệ số nhân áp dụng cho thanh toán hạn mức.",
     "JSON map of model → USD cost per request. Takes precedence over ratio based billing.": "Ánh xạ JSON của mô hình → chi phí USD mỗi yêu cầu. Ưu tiên hơn thanh toán dựa trên tỷ lệ.",
     "JSON mode": "Chế độ JSON",
@@ -3924,6 +3926,7 @@
     "Model details": "Chi tiết mô hình",
     "Model disabled successfully": "Model đã được vô hiệu hóa thành công",
     "Model discount": "Chiết khấu mô hình",
+    "Model discount must be a finite, non-negative number": "Mức giảm giá mô hình phải là một số hữu hạn không âm",
     "Model discount: {{coefficient}} / {{percent}}%": "Giảm giá mô hình: {{coefficient}} / {{percent}}%",
     "Model discovery uses the first key; other keys are not tested.": "Mô hình được lấy bằng khóa đầu tiên; các khóa khác chưa được kiểm tra.",
     "Model discovery uses the saved channel connection settings.": "Việc lấy mô hình sử dụng cài đặt kết nối đã lưu của kênh.",
@@ -5072,6 +5075,7 @@
     "Price estimation description": "Sau khi hoàn thành loại phần cứng, vị trí triển khai, số lượng bản sao, v.v., giá sẽ được tính toán tự động.",
     "Price examples": "Ví dụ giá",
     "Price ID": "Mã giá",
+    "Price increase {{percent}}%": "Giá tăng {{percent}}%",
     "Price mode (USD per 1M tokens)": "Chế độ giá (USD mỗi 1 triệu token)",
     "Price per image": "Giá mỗi ảnh",
     "Price per request": "Giá mỗi yêu cầu",
@@ -7685,9 +7689,6 @@
     "Zhipu": "Zhipu",
     "Zhipu GLM": "Zhipu GLM",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom",
-    "Model discount must be a finite, non-negative number": "Mức giảm giá mô hình phải là một số hữu hạn không âm",
-    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "Ánh xạ JSON từ mô hình → hệ số giảm giá. Giá trị phải là các số hữu hạn không âm.",
-    "Price increase {{percent}}%": "Giá tăng {{percent}}%"
+    "Zoom": "Zoom"
   }
 }

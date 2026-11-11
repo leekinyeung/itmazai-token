@@ -27,8 +27,13 @@ type RankingsResponse = {
 }
 
 export async function getRankings(
-  period: RankingPeriod
+  period: RankingPeriod,
+  signal?: AbortSignal
 ): Promise<RankingsResponse> {
-  const res = await api.get('/api/rankings', { params: { period } })
+  const res = await api.get('/api/rankings', {
+    params: { period },
+    signal,
+    disableDuplicate: true,
+  })
   return res.data
 }

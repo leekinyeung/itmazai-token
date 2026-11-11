@@ -2561,6 +2561,7 @@
     "Explore {{provider}} models": "Модели {{provider}}",
     "Explore available AI models, supported API endpoints and current pricing on {{systemName}}.": "Изучайте доступные модели ИИ, поддерживаемые конечные точки API и текущие цены на {{systemName}}.",
     "Explore integrations": "Посмотреть интеграции",
+    "Explore model popularity and vendor trends on the platform.": "Узнайте о популярности моделей и тенденциях поставщиков на платформе.",
     "Explore models": "Смотреть модели",
     "Export": "Экспорт",
     "Export logs": "Экспорт журналов",
@@ -3538,6 +3539,7 @@
     "JSON map of group → description exposed when users create API keys.": "JSON-карта группы → описание, отображаемое при создании пользователями ключей API.",
     "JSON map of group → ratio applied when the user selects the group explicitly.": "JSON-карта группы → соотношение, применяемое, когда пользователь явно выбирает группу.",
     "JSON map of group identifiers to display names for each interface language.": "JSON-объект, сопоставляющий идентификаторы групп с названиями для каждого языка интерфейса.",
+    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "JSON-объект соответствий «модель → коэффициент скидки». Значения должны быть конечными неотрицательными числами.",
     "JSON map of model → multiplier applied to quota billing.": "JSON-карта модели → множитель, применяемый к тарификации по квоте.",
     "JSON map of model → USD cost per request. Takes precedence over ratio based billing.": "JSON-карта модели → стоимость в долларах США за запрос. Имеет приоритет над тарификацией на основе соотношения.",
     "JSON mode": "Режим JSON",
@@ -3924,6 +3926,7 @@
     "Model details": "Сведения о модели",
     "Model disabled successfully": "Модель успешно отключена",
     "Model discount": "Скидка модели",
+    "Model discount must be a finite, non-negative number": "Скидка модели должна быть конечным неотрицательным числом",
     "Model discount: {{coefficient}} / {{percent}}%": "Скидка модели: {{coefficient}} / {{percent}}%",
     "Model discovery uses the first key; other keys are not tested.": "Модели запрашиваются с первым ключом; остальные ключи не проверяются.",
     "Model discovery uses the saved channel connection settings.": "Для получения моделей используются сохранённые настройки подключения канала.",
@@ -5072,6 +5075,7 @@
     "Price estimation description": "После настройки типа оборудования, места размещения, количества реплик и т.д. стоимость будет рассчитана автоматически.",
     "Price examples": "Примеры цен",
     "Price ID": "ID цены",
+    "Price increase {{percent}}%": "Повышение цены на {{percent}}%",
     "Price mode (USD per 1M tokens)": "Режим ценообразования (USD за 1 млн токенов)",
     "Price per image": "Цена за изображение",
     "Price per request": "Цена за запрос",
@@ -7685,9 +7689,6 @@
     "Zhipu": "Zhipu",
     "Zhipu GLM": "Zhipu GLM",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom",
-    "Model discount must be a finite, non-negative number": "Скидка модели должна быть конечным неотрицательным числом",
-    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "JSON-объект соответствий «модель → коэффициент скидки». Значения должны быть конечными неотрицательными числами.",
-    "Price increase {{percent}}%": "Повышение цены на {{percent}}%"
+    "Zoom": "Zoom"
   }
 }

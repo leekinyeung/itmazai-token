@@ -20,7 +20,7 @@ For commercial licensing, please contact support@quantumnous.com
 // Rankings types
 // ----------------------------------------------------------------------------
 //
-// Shape of the real data shown on the /rankings page.
+// Shared shape of the public simulation and administrator usage data.
 
 export type RankingPeriod = 'today' | 'week' | 'month' | 'year'
 

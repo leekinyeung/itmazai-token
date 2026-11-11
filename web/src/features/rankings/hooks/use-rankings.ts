@@ -18,15 +18,19 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
 
+import { usePerformanceViewer } from '@/features/performance-metrics/hooks'
 import { requireServerSuccess } from '@/lib/server-error-message'
 
 import { getRankings } from '../api'
 import type { RankingPeriod } from '../types'
 
 export function useRankings(period: RankingPeriod) {
+  const viewer = usePerformanceViewer()
   return useQuery({
-    queryKey: ['rankings', period],
-    queryFn: async () => requireServerSuccess(await getRankings(period)),
+    queryKey: ['rankings', viewer, period],
+    queryFn: async ({ signal }) =>
+      requireServerSuccess(await getRankings(period, signal)),
     staleTime: 5 * 60 * 1000,
+    gcTime: 0,
   })
 }

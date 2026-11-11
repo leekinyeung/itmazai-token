@@ -2561,6 +2561,7 @@
     "Explore {{provider}} models": "Explorer les modèles {{provider}}",
     "Explore available AI models, supported API endpoints and current pricing on {{systemName}}.": "Découvrez les modèles IA disponibles, les points de terminaison API pris en charge et les tarifs actuels sur {{systemName}}.",
     "Explore integrations": "Explorer les intégrations",
+    "Explore model popularity and vendor trends on the platform.": "Découvrez la popularité des modèles et les tendances des fournisseurs sur la plateforme.",
     "Explore models": "Explorer les modèles",
     "Export": "Exporter",
     "Export logs": "Exporter les journaux",
@@ -3538,6 +3539,7 @@
     "JSON map of group → description exposed when users create API keys.": "Carte JSON de groupe → description exposée lorsque les utilisateurs créent des clés API.",
     "JSON map of group → ratio applied when the user selects the group explicitly.": "Carte JSON de groupe → ratio appliqué lorsque l'utilisateur sélectionne explicitement le groupe.",
     "JSON map of group identifiers to display names for each interface language.": "Objet JSON associant les identifiants de groupe aux noms affichés dans chaque langue de l’interface.",
+    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "Objet JSON associant chaque modèle à un coefficient de remise. Les valeurs doivent être des nombres finis non négatifs.",
     "JSON map of model → multiplier applied to quota billing.": "Carte JSON de modèle → multiplicateur appliqué à la facturation par quota.",
     "JSON map of model → USD cost per request. Takes precedence over ratio based billing.": "Carte JSON de modèle → coût en USD par requête. Prend le pas sur la facturation basée sur le ratio.",
     "JSON mode": "Mode JSON",
@@ -3924,6 +3926,7 @@
     "Model details": "Détails du modèle",
     "Model disabled successfully": "Modèle désactivé avec succès",
     "Model discount": "Remise du modèle",
+    "Model discount must be a finite, non-negative number": "La remise du modèle doit être un nombre fini non négatif",
     "Model discount: {{coefficient}} / {{percent}}%": "Remise du modèle : {{coefficient}} / {{percent}} %",
     "Model discovery uses the first key; other keys are not tested.": "Les modèles sont récupérés avec la première clé ; les autres clés ne sont pas testées.",
     "Model discovery uses the saved channel connection settings.": "La recherche de modèles utilise les paramètres de connexion enregistrés du canal.",
@@ -5072,6 +5075,7 @@
     "Price estimation description": "Après avoir configuré le type de matériel, l'emplacement de déploiement, le nombre de réplicas, etc., le prix sera calculé automatiquement.",
     "Price examples": "Exemples de prix",
     "Price ID": "ID du prix",
+    "Price increase {{percent}}%": "Hausse de prix de {{percent}} %",
     "Price mode (USD per 1M tokens)": "Mode de tarification (USD par 1M de jetons)",
     "Price per image": "Prix par image",
     "Price per request": "Prix par requête",
@@ -7685,9 +7689,6 @@
     "Zhipu": "Zhipu",
     "Zhipu GLM": "Zhipu GLM",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom",
-    "Model discount must be a finite, non-negative number": "La remise du modèle doit être un nombre fini non négatif",
-    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "Objet JSON associant chaque modèle à un coefficient de remise. Les valeurs doivent être des nombres finis non négatifs.",
-    "Price increase {{percent}}%": "Hausse de prix de {{percent}} %"
+    "Zoom": "Zoom"
   }
 }

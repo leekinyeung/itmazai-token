@@ -2561,6 +2561,7 @@
     "Explore {{provider}} models": "浏览 {{provider}} 模型",
     "Explore available AI models, supported API endpoints and current pricing on {{systemName}}.": "查看 {{systemName}} 的可用 AI 模型、支持的 API 接口和当前价格。",
     "Explore integrations": "浏览集成",
+    "Explore model popularity and vendor trends on the platform.": "了解平台模型热度与厂商趋势。",
     "Explore models": "探索模型广场",
     "Export": "导出",
     "Export logs": "导出日志",
@@ -3538,6 +3539,7 @@
     "JSON map of group → description exposed when users create API keys.": "分组 → 描述的 JSON 映射，在用户创建 API 密钥时公开。",
     "JSON map of group → ratio applied when the user selects the group explicitly.": "分组 → 比率的 JSON 映射，当用户明确选择该分组时应用此比率。",
     "JSON map of group identifiers to display names for each interface language.": "分组标识到各界面语言显示名称的 JSON 映射。",
+    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "模型 → 折扣系数的 JSON 映射。值必须是有限的非负数。",
     "JSON map of model → multiplier applied to quota billing.": "模型 → 应用于配额计费的乘数的 JSON 映射。",
     "JSON map of model → USD cost per request. Takes precedence over ratio based billing.": "模型 → 每请求美元成本的 JSON 映射。优先于基于比率的计费。",
     "JSON mode": "JSON 模式",
@@ -3924,6 +3926,7 @@
     "Model details": "模型详情",
     "Model disabled successfully": "模型禁用成功",
     "Model discount": "模型折扣",
+    "Model discount must be a finite, non-negative number": "模型折扣必须是有限的非负数",
     "Model discount: {{coefficient}} / {{percent}}%": "模型折扣：{{coefficient}} / {{percent}}%",
     "Model discovery uses the first key; other keys are not tested.": "使用第一条密钥获取模型，其他密钥未测试。",
     "Model discovery uses the saved channel connection settings.": "获取模型时使用渠道已保存的连接配置。",
@@ -5072,6 +5075,7 @@
     "Price estimation description": "完成硬件类型、部署位置、副本数量等设置后，价格将自动计算。",
     "Price examples": "价格示例",
     "Price ID": "价格 ID",
+    "Price increase {{percent}}%": "价格上调 {{percent}}%",
     "Price mode (USD per 1M tokens)": "价格模式（每 100 万个 token 的美元价格）",
     "Price per image": "每张图片价格",
     "Price per request": "每次请求价格",
@@ -7685,9 +7689,6 @@
     "Zhipu": "智谱",
     "Zhipu GLM": "智谱GLM",
     "Zhipu V4": "智谱 V4",
-    "Zoom": "缩放",
-    "Model discount must be a finite, non-negative number": "模型折扣必须是有限的非负数",
-    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "模型 → 折扣系数的 JSON 映射。值必须是有限的非负数。",
-    "Price increase {{percent}}%": "价格上调 {{percent}}%"
+    "Zoom": "缩放"
   }
 }

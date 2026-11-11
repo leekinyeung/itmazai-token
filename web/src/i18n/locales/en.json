@@ -2561,6 +2561,7 @@
     "Explore {{provider}} models": "Explore {{provider}} models",
     "Explore available AI models, supported API endpoints and current pricing on {{systemName}}.": "Explore available AI models, supported API endpoints and current pricing on {{systemName}}.",
     "Explore integrations": "Explore integrations",
+    "Explore model popularity and vendor trends on the platform.": "Explore model popularity and vendor trends on the platform.",
     "Explore models": "Explore models",
     "Export": "Export",
     "Export logs": "Export logs",
@@ -3538,6 +3539,7 @@
     "JSON map of group → description exposed when users create API keys.": "JSON map of group → description exposed when users create API keys.",
     "JSON map of group → ratio applied when the user selects the group explicitly.": "JSON map of group → ratio applied when the user selects the group explicitly.",
     "JSON map of group identifiers to display names for each interface language.": "JSON map of group identifiers to display names for each interface language.",
+    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.",
     "JSON map of model → multiplier applied to quota billing.": "JSON map of model → multiplier applied to quota billing.",
     "JSON map of model → USD cost per request. Takes precedence over ratio based billing.": "JSON map of model → USD cost per request. Takes precedence over ratio based billing.",
     "JSON mode": "JSON mode",
@@ -3924,6 +3926,7 @@
     "Model details": "Model details",
     "Model disabled successfully": "Model disabled successfully",
     "Model discount": "Model discount",
+    "Model discount must be a finite, non-negative number": "Model discount must be a finite, non-negative number",
     "Model discount: {{coefficient}} / {{percent}}%": "Model discount: {{coefficient}} / {{percent}}%",
     "Model discovery uses the first key; other keys are not tested.": "Model discovery uses the first key; other keys are not tested.",
     "Model discovery uses the saved channel connection settings.": "Model discovery uses the saved channel connection settings.",
@@ -5072,6 +5075,7 @@
     "Price estimation description": "After completing the hardware type, deployment location, replica count, etc., the price will be automatically calculated.",
     "Price examples": "Price examples",
     "Price ID": "Price ID",
+    "Price increase {{percent}}%": "Price increase {{percent}}%",
     "Price mode (USD per 1M tokens)": "Price mode (USD per 1M tokens)",
     "Price per image": "Price per image",
     "Price per request": "Price per request",
@@ -7685,9 +7689,6 @@
     "Zhipu": "Zhipu",
     "Zhipu GLM": "Zhipu GLM",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom",
-    "Model discount must be a finite, non-negative number": "Model discount must be a finite, non-negative number",
-    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.",
-    "Price increase {{percent}}%": "Price increase {{percent}}%"
+    "Zoom": "Zoom"
   }
 }

@@ -2561,6 +2561,7 @@
     "Explore {{provider}} models": "{{provider}} のモデルを見る",
     "Explore available AI models, supported API endpoints and current pricing on {{systemName}}.": "{{systemName}} で利用可能な AI モデル、対応 API エンドポイント、現在の料金を確認できます。",
     "Explore integrations": "連携を確認",
+    "Explore model popularity and vendor trends on the platform.": "プラットフォーム上のモデルの人気度とプロバイダーの動向を確認できます。",
     "Explore models": "モデルを探す",
     "Export": "エクスポート",
     "Export logs": "ログをエクスポート",
@@ -3538,6 +3539,7 @@
     "JSON map of group → description exposed when users create API keys.": "ユーザーがAPIキーを作成する際に公開される、グループ → 説明のJSONマップ。",
     "JSON map of group → ratio applied when the user selects the group explicitly.": "ユーザーがグループを明示的に選択したときに適用される、グループ → 比率のJSONマップ。",
     "JSON map of group identifiers to display names for each interface language.": "グループ識別子と各インターフェース言語の表示名を対応付ける JSON マップです。",
+    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "モデル → 割引係数の JSON マップ。値は有限の非負数である必要があります。",
     "JSON map of model → multiplier applied to quota billing.": "モデル → クォータ請求に適用される乗数のJSONマップ。",
     "JSON map of model → USD cost per request. Takes precedence over ratio based billing.": "モデル → リクエストあたりのUSDコストのJSONマップ。比率ベースの請求よりも優先されます。",
     "JSON mode": "JSON モード",
@@ -3924,6 +3926,7 @@
     "Model details": "モデル詳細",
     "Model disabled successfully": "モデルが正常に無効化されました",
     "Model discount": "モデル割引",
+    "Model discount must be a finite, non-negative number": "モデル割引は有限の非負数である必要があります",
     "Model discount: {{coefficient}} / {{percent}}%": "モデル割引：{{coefficient}} / {{percent}}%",
     "Model discovery uses the first key; other keys are not tested.": "最初のキーでモデルを取得します。他のキーはテストされません。",
     "Model discovery uses the saved channel connection settings.": "モデルの取得には、チャネルに保存済みの接続設定を使用します。",
@@ -5072,6 +5075,7 @@
     "Price estimation description": "ハードウェアタイプ、デプロイ場所、レプリカ数などを設定すると、料金が自動的に計算されます。",
     "Price examples": "価格例",
     "Price ID": "価格 ID",
+    "Price increase {{percent}}%": "価格が{{percent}}%上昇",
     "Price mode (USD per 1M tokens)": "価格モード (100万トークンあたりのUSD)",
     "Price per image": "画像1枚あたりの料金",
     "Price per request": "リクエスト単価",
@@ -7685,9 +7689,6 @@
     "Zhipu": "Zhipu",
     "Zhipu GLM": "Zhipu GLM",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム",
-    "Model discount must be a finite, non-negative number": "モデル割引は有限の非負数である必要があります",
-    "JSON map of model → discount coefficient. Values must be finite, non-negative numbers.": "モデル → 割引係数の JSON マップ。値は有限の非負数である必要があります。",
-    "Price increase {{percent}}%": "価格が{{percent}}%上昇"
+    "Zoom": "ズーム"
   }
 }

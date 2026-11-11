@@ -52,9 +52,13 @@ export function usePerformanceViewer(): string {
         if (performanceViewer(state) === oldViewer) return
         const filters = {
           predicate: (query: { queryKey: readonly unknown[] }) =>
-            ['perf-metrics', 'perf-metrics-summary', 'uptime-status'].includes(
-              String(query.queryKey[0])
-            ) && query.queryKey[1] === oldViewer,
+            [
+              'perf-metrics',
+              'perf-metrics-summary',
+              'uptime-status',
+              'rankings',
+            ].includes(String(query.queryKey[0])) &&
+            query.queryKey[1] === oldViewer,
         }
         void client.cancelQueries(filters)
         client.removeQueries(filters)

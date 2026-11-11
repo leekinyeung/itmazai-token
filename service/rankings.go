@@ -199,7 +199,11 @@ func buildRankingsSnapshot(config rankingPeriodConfig, now time.Time) (*Rankings
 		}
 	}
 
-	meta := buildRankingModelMeta()
+	meta := buildRankingModelMeta(model.GetPricing(), model.GetVendors())
+	return buildRankingsResponse(currentTotals, currentBuckets, previousTotals, meta, config), nil
+}
+
+func buildRankingsResponse(currentTotals []model.RankingQuotaTotal, currentBuckets []model.RankingQuotaBucket, previousTotals []model.RankingQuotaTotal, meta map[string]rankingModelMeta, config rankingPeriodConfig) *RankingsResponse {
 	totalTokens := sumRankingTokens(currentTotals)
 	previousRankByModel := rankingRankMap(previousTotals)
 	previousTokensByModel := rankingTokenMap(previousTotals)
@@ -217,7 +221,7 @@ func buildRankingsSnapshot(config rankingPeriodConfig, now time.Time) (*Rankings
 		TopDroppers:        droppers,
 		ModelsHistory:      modelHistory,
 		VendorShareHistory: vendorHistory,
-	}, nil
+	}
 }
 
 func rankingTimeRange(config rankingPeriodConfig, now time.Time) (int64, int64) {
@@ -234,14 +238,14 @@ func previousRankingTimeRange(config rankingPeriodConfig, currentStart int64) (i
 	return previousStart, previousEnd
 }
 
-func buildRankingModelMeta() map[string]rankingModelMeta {
+func buildRankingModelMeta(catalog []model.Pricing, vendors []model.PricingVendor) map[string]rankingModelMeta {
 	vendorByID := make(map[int]model.PricingVendor)
-	for _, vendor := range model.GetVendors() {
+	for _, vendor := range vendors {
 		vendorByID[vendor.ID] = vendor
 	}
 
 	meta := make(map[string]rankingModelMeta)
-	for _, pricing := range model.GetPricing() {
+	for _, pricing := range catalog {
 		item := rankingModelMeta{vendor: rankingUnknownVendor}
 		if vendor, ok := vendorByID[pricing.VendorID]; ok {
 			item.vendor = vendor.Name

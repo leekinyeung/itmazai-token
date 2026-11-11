@@ -48,9 +48,7 @@ export function RankingsHero(props: RankingsHeroProps) {
           {t('Rankings')}
         </h1>
         <p className='text-muted-foreground/80 max-w-2xl text-sm'>
-          {t(
-            'Discover the most-used models and rising vendors on the platform, updated from live usage data.'
-          )}
+          {t('Explore model popularity and vendor trends on the platform.')}
         </p>
       </div>
 
