@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { StrictMode, Suspense, use } from 'react'
+import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 
 import { installBuildMetadata } from '@/lib/build-metadata'
@@ -27,12 +27,12 @@ import '@/lib/dayjs'
 import { createAppQueryClient } from '@/lib/query-client'
 import { readCachedStatus, statusQueryOptions } from '@/lib/status-query'
 
-import { Skeleton } from './components/ui/skeleton'
+import { AppLoadingBoundary, RouteLoading } from './components/app-loading'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { GroupDisplayNameProvider } from './context/group-display-name-provider'
 import { ThemeProvider } from './context/theme-provider'
-import i18n, { i18nReady } from './i18n/config'
+import { i18nReady } from './i18n/config'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 
@@ -53,6 +53,8 @@ const router = createRouter({
   context: { queryClient },
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
+  defaultPendingComponent: RouteLoading,
+  defaultPendingMinMs: 0,
 })
 
 // Register the router instance for type safety
@@ -93,14 +95,15 @@ if (!rootElement) {
   }
 })()
 export function App() {
-  use(i18nReady)
   return (
     <QueryClientProvider client={queryClient}>
       <GroupDisplayNameProvider>
         <ThemeProvider>
           <FontProvider>
             <DirectionProvider>
-              <RouterProvider router={router} />
+              <AppLoadingBoundary ready={i18nReady} location={window.location}>
+                <RouterProvider router={router} />
+              </AppLoadingBoundary>
             </DirectionProvider>
           </FontProvider>
         </ThemeProvider>
@@ -112,20 +115,6 @@ export function App() {
 const root = ReactDOM.createRoot(rootElement)
 root.render(
   <StrictMode>
-    <Suspense
-      fallback={
-        <main
-          aria-busy='true'
-          aria-label={i18n.t('Loading...', { lng: 'en' })}
-          className='mx-auto flex min-h-svh max-w-6xl flex-col gap-8 px-6 py-24'
-        >
-          <Skeleton className='h-10 w-40' />
-          <Skeleton className='h-40 w-full max-w-xl' />
-          <Skeleton className='h-12 w-64' />
-        </main>
-      }
-    >
-      <App />
-    </Suspense>
+    <App />
   </StrictMode>
 )

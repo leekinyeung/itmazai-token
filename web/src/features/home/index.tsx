@@ -21,13 +21,13 @@ import { useTranslation } from 'react-i18next'
 
 import { ErrorState } from '@/components/error-state'
 import { PublicLayout } from '@/components/layout/components/public-layout'
-import { LoadingState } from '@/components/loading-state'
 import { RichContent } from '@/components/rich-content'
 import { useTheme } from '@/context/theme-provider'
 import { isLikelyHtml } from '@/lib/content-format'
 import { useAuthStore } from '@/stores/auth-store'
 
 import { HomeLanding } from './components/home-landing'
+import { HomeLoadingSkeleton } from './components/home-loading-skeleton'
 import { useHomePageContent } from './hooks'
 
 export function Home() {
@@ -61,18 +61,20 @@ export function Home() {
   if (status === 'unknown' || status === 'error') {
     return (
       <PublicLayout showMainContainer={false}>
-        <main className='flex flex-1 items-center justify-center pt-20 pb-8'>
-          {status === 'error' ? (
+        {status === 'error' ? (
+          <main className='flex flex-1 items-center justify-center pt-20 pb-8'>
             <ErrorState
               title={t('Failed to load home page content')}
               onRetry={() => {
                 void retry()
               }}
             />
-          ) : (
-            <LoadingState />
-          )}
-        </main>
+          </main>
+        ) : (
+          <div className='home-page'>
+            <HomeLoadingSkeleton />
+          </div>
+        )}
       </PublicLayout>
     )
   }

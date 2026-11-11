@@ -16,6 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useTranslation } from 'react-i18next'
+
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -26,8 +28,10 @@ export interface LoadingSkeletonProps {
 }
 
 export function LoadingSkeleton(props: LoadingSkeletonProps) {
+  const { t } = useTranslation(undefined, { useSuspense: false })
+
   return (
-    <div aria-busy='true'>
+    <div role='status' aria-busy='true' aria-label={t('Loading...')}>
       <div className='grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]'>
         <div className='hidden self-start rounded-xl border p-3 xl:block'>
           <Skeleton className='mb-4 h-5 w-24' />

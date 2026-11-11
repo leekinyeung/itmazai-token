@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import type { TopNavLink } from '../types'
 import { Footer } from './footer'
 import { PublicHeader, type PublicHeaderProps } from './public-header'
+import { PublicLayoutFrame } from './public-layout-frame'
 
 type PublicLayoutProps = {
   children: React.ReactNode
@@ -35,26 +36,23 @@ type PublicLayoutProps = {
 
 export function PublicLayout(props: PublicLayoutProps) {
   return (
-    <div className='bg-background text-foreground relative flex min-h-svh flex-col overflow-x-clip'>
-      <PublicHeader
-        navContent={props.navContent}
-        navLinks={props.navLinks}
-        showThemeSwitch={props.showThemeSwitch}
-        showAuthButtons={props.showAuthButtons}
-        showNotifications={props.showNotifications}
-        logo={props.logo}
-        siteName={props.siteName}
-        {...props.headerProps}
-      />
-
-      {props.showMainContainer !== false ? (
-        <main className='container min-w-0 flex-1 px-4 py-6 pt-20 md:px-4'>
-          {props.children}
-        </main>
-      ) : (
-        <div className='flex min-w-0 flex-1 flex-col'>{props.children}</div>
-      )}
-      <Footer />
-    </div>
+    <PublicLayoutFrame
+      showMainContainer={props.showMainContainer}
+      header={
+        <PublicHeader
+          navContent={props.navContent}
+          navLinks={props.navLinks}
+          showThemeSwitch={props.showThemeSwitch}
+          showAuthButtons={props.showAuthButtons}
+          showNotifications={props.showNotifications}
+          logo={props.logo}
+          siteName={props.siteName}
+          {...props.headerProps}
+        />
+      }
+      footer={<Footer />}
+    >
+      {props.children}
+    </PublicLayoutFrame>
   )
 }
