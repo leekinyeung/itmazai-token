@@ -15,17 +15,22 @@ func GetUserUsableGroups(userGroup string) map[string]string {
 		if b {
 			// 处理特殊可用分组
 			for specialGroup, desc := range specialSettings {
-				if after, ok := strings.CutPrefix(specialGroup, "-:"); ok {
-					// 移除分组
-					groupToRemove := after
-					delete(groupsCopy, groupToRemove)
-				} else if after, ok := strings.CutPrefix(specialGroup, "+:"); ok {
+				if strings.HasPrefix(specialGroup, "-:") {
+					continue
+				}
+				if after, ok := strings.CutPrefix(specialGroup, "+:"); ok {
 					// 添加分组
 					groupToAdd := after
 					groupsCopy[groupToAdd] = desc
 				} else {
 					// 直接添加分组
 					groupsCopy[specialGroup] = desc
+				}
+			}
+			// Apply removals last so conflicting rules never depend on map order.
+			for specialGroup := range specialSettings {
+				if group, remove := strings.CutPrefix(specialGroup, "-:"); remove {
+					delete(groupsCopy, group)
 				}
 			}
 		}

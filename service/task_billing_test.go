@@ -170,6 +170,16 @@ func makeTask(userId, channelId, quota, tokenId int, billingSource string, subsc
 
 func TestPriceDataOtherRatiosFilterAndSnapshot(t *testing.T) {
 	priceData := types.PriceData{}
+	assert.Equal(t, 1.0, priceData.NormalizedModelDiscount(), "legacy zero-valued snapshots keep their original price")
+	priceData.ModelDiscountSet = true
+	assert.Zero(t, priceData.NormalizedModelDiscount(), "an explicitly frozen zero discount remains free")
+
+	persisted, err := common.Marshal(&model.TaskBillingContext{ModelDiscount: 0, ModelDiscountSet: true})
+	require.NoError(t, err)
+	var restored model.TaskBillingContext
+	require.NoError(t, common.Unmarshal(persisted, &restored))
+	assert.True(t, restored.ModelDiscountSet)
+	assert.Zero(t, restored.NormalizedModelDiscount())
 
 	priceData.AddOtherRatio("zero", 0)
 	priceData.AddOtherRatio("negative", -0.5)
@@ -1761,6 +1771,7 @@ func TestSettle_TokenRecalcFallsBackToCompletionTokens(t *testing.T) {
 		totalTokens      int
 		completionTokens int
 		modelDiscount    float64
+		modelDiscountSet bool
 		wantSettled      bool
 		wantQuota        int
 	}{
@@ -1786,6 +1797,13 @@ func TestSettle_TokenRecalcFallsBackToCompletionTokens(t *testing.T) {
 			wantQuota:     40,
 		},
 		{
+			name:             "accepted zero model discount survives asynchronous settlement",
+			totalTokens:      80,
+			modelDiscountSet: true,
+			wantSettled:      true,
+			wantQuota:        0,
+		},
+		{
 			name:        "neither token count skips recalc",
 			wantSettled: false,
 			wantQuota:   50,
@@ -1803,6 +1821,7 @@ func TestSettle_TokenRecalcFallsBackToCompletionTokens(t *testing.T) {
 
 			task := makeTask(userID, channelID, preConsumed, tokenID, BillingSourceWallet, 0)
 			task.PrivateData.BillingContext.ModelDiscount = testCase.modelDiscount
+			task.PrivateData.BillingContext.ModelDiscountSet = testCase.modelDiscountSet
 			settled := settleTaskBillingOnComplete(
 				context.Background(),
 				&mockAdaptor{},

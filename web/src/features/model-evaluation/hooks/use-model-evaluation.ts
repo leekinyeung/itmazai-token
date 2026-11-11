@@ -43,6 +43,7 @@ type ServerMessage = {
   requestId?: string
   prompt?: string
   score?: number
+  threshold?: number
   passed?: boolean
   reason?: string
   metrics?: EvaluationMetricState[]
@@ -245,6 +246,7 @@ export function useModelEvaluation() {
                 metrics: updateMetric(current.metrics, metric, {
                   status: message.passed ? 'passed' : 'failed',
                   score: message.score,
+                  threshold: message.threshold,
                   reason: message.reason || '',
                 }),
               }))

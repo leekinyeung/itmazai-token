@@ -26,6 +26,7 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useTranslation } from 'react-i18next'
 
+import { LoadingState } from '@/components/loading-state'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -68,6 +69,14 @@ function MetricStatusIcon(props: { metric: EvaluationMetricState }) {
 
 function MetricRow(props: { metric: EvaluationMetricState; locale?: string }) {
   const { t } = useTranslation()
+  const score = props.metric.score
+  const hasScore =
+    (props.metric.status === 'passed' || props.metric.status === 'failed') &&
+    typeof score === 'number' &&
+    Number.isFinite(score) &&
+    score >= 0 &&
+    score <= 1
+  const threshold = props.metric.threshold
   let statusLabel = t('Pending')
   let badgeVariant: 'secondary' | 'destructive' | 'default' | 'outline' =
     'outline'
@@ -91,14 +100,17 @@ function MetricRow(props: { metric: EvaluationMetricState; locale?: string }) {
   }
 
   return (
-    <div className='flex gap-3 py-4'>
+    <article
+      aria-label={t(metricLabelKeys[props.metric.name])}
+      className='flex gap-3 py-4'
+    >
       <MetricStatusIcon metric={props.metric} />
       <div className='min-w-0 flex-1 space-y-1.5'>
         <div className='flex flex-wrap items-center gap-2'>
           <h3 className='font-semibold'>
             {t(metricLabelKeys[props.metric.name])}
           </h3>
-          {typeof props.metric.score === 'number' && (
+          {hasScore && (
             <span
               className={cn(
                 'ms-auto font-semibold tabular-nums',
@@ -107,30 +119,52 @@ function MetricRow(props: { metric: EvaluationMetricState; locale?: string }) {
                   : 'text-destructive'
               )}
             >
-              {formatNumber(props.metric.score, props.locale)}
+              {formatNumber(score * 100, props.locale)}%
             </span>
           )}
           <Badge variant={badgeVariant}>{statusLabel}</Badge>
         </div>
+        {typeof threshold === 'number' && Number.isFinite(threshold) && (
+          <p className='text-muted-foreground text-xs'>
+            {t('Passing threshold: {{threshold}}%', {
+              threshold: formatNumber(threshold * 100, props.locale),
+            })}
+          </p>
+        )}
         {detail && (
-          <p className='text-muted-foreground text-sm leading-6 break-words'>
+          <p className='text-muted-foreground text-sm leading-6 break-words whitespace-pre-wrap'>
             {detail}
           </p>
         )}
       </div>
-    </div>
+    </article>
   )
 }
 
 export function ResultsPanel(props: { state: EvaluationRunState }) {
   const { i18n, t } = useTranslation()
   const locale = toIntlLocale(i18n.resolvedLanguage || i18n.language)
+  const generating = props.state.status === 'generating'
   const executedMetrics = props.state.metrics.filter(
     (metric) => metric.status !== 'skipped'
   )
   const completedMetrics = executedMetrics.filter(
     (metric) => metric.status === 'passed' || metric.status === 'failed'
   ).length
+  const scoredMetrics = executedMetrics.filter(
+    (metric): metric is EvaluationMetricState & { score: number } =>
+      (metric.status === 'passed' || metric.status === 'failed') &&
+      typeof metric.score === 'number' &&
+      Number.isFinite(metric.score) &&
+      metric.score >= 0 &&
+      metric.score <= 1
+  )
+  const overallScore =
+    executedMetrics.length > 0 &&
+    scoredMetrics.length === executedMetrics.length
+      ? scoredMetrics.reduce((total, metric) => total + metric.score, 0) /
+        scoredMetrics.length
+      : undefined
   const hasRunningMetric = executedMetrics.some(
     (metric) => metric.status === 'running'
   )
@@ -144,7 +178,7 @@ export function ResultsPanel(props: { state: EvaluationRunState }) {
       : 0
 
   let progressLabel = t('Ready to evaluate')
-  if (props.state.status === 'generating') {
+  if (generating) {
     progressLabel = t('Generating target model response')
   } else if (props.state.status === 'evaluating') {
     progressLabel = t('Evaluating {{current}} / {{total}}', {
@@ -161,20 +195,51 @@ export function ResultsPanel(props: { state: EvaluationRunState }) {
 
   return (
     <EvaluationPanel
-      title={t('Evaluation progress')}
-      icon={Activity01Icon}
-      action={
-        <span className='text-muted-foreground text-sm font-medium'>
-          {t('Threshold 0.5')}
-        </span>
+      title={
+        props.state.status === 'completed'
+          ? t('Evaluation results')
+          : t('Evaluation progress')
       }
+      icon={Activity01Icon}
     >
       <div className='flex flex-1 flex-col'>
         <div className='space-y-3'>
-          <p className='text-base font-semibold'>{progressLabel}</p>
-          <Progress
-            value={props.state.status === 'completed' ? 100 : progress}
-          />
+          <p
+            role={generating ? 'status' : undefined}
+            aria-label={generating ? progressLabel : undefined}
+            className='flex items-center gap-2 text-base font-semibold'
+          >
+            {generating && (
+              <LoadingState inline size='sm' className='text-primary' />
+            )}
+            {progressLabel}
+          </p>
+          {props.state.status === 'completed' ? (
+            <section
+              aria-label={t('Overall score')}
+              className='border-border/80 bg-muted/30 space-y-2 rounded-lg border p-4'
+            >
+              <h3 className='text-muted-foreground text-sm font-medium'>
+                {t('Overall score')}
+              </h3>
+              {overallScore === undefined ? (
+                <p className='text-muted-foreground'>
+                  {t('Overall score unavailable')}
+                </p>
+              ) : (
+                <p className='text-4xl font-semibold tracking-tight tabular-nums sm:text-5xl'>
+                  {formatNumber(overallScore * 100, locale)}%
+                </p>
+              )}
+              <p className='text-muted-foreground text-sm leading-6'>
+                {t(
+                  'Equal-weight average for this test case; each metric must pass its own threshold'
+                )}
+              </p>
+            </section>
+          ) : (
+            <Progress value={progress} aria-label={t('Evaluation progress')} />
+          )}
         </div>
 
         {props.state.errorKey && (
@@ -190,26 +255,6 @@ export function ResultsPanel(props: { state: EvaluationRunState }) {
             </AlertDescription>
           </Alert>
         )}
-
-        <section
-          className='mt-5 space-y-2'
-          aria-labelledby='model-output-title'
-        >
-          <h3 id='model-output-title' className='font-semibold'>
-            {t('Model response')}
-          </h3>
-          <div
-            role='region'
-            aria-label={t('Model response')}
-            className='border-border/80 bg-muted/30 max-h-52 min-h-32 overflow-y-auto rounded-lg border p-4 text-sm leading-6 break-words whitespace-pre-wrap'
-          >
-            {props.state.actualOutput || (
-              <span className='text-muted-foreground'>
-                {t('The target model response will appear here')}
-              </span>
-            )}
-          </div>
-        </section>
 
         {props.state.metrics.length > 0 && (
           <section className='mt-4' aria-label={t('Metric results')}>

@@ -44,21 +44,29 @@ func TestFixedPriceBranches(t *testing.T) {
 func TestTieredSettlementAppliesModelDiscountOnce(t *testing.T) {
 	const expression = `tier("base", p)`
 	for _, tc := range []struct {
-		name     string
-		discount float64
-		want     int
+		name        string
+		discount    float64
+		discountSet bool
+		want        int
 	}{
 		{name: "legacy snapshot defaults to one", discount: 0, want: 90},
+		{name: "explicit zero makes model usage free", discount: 0, discountSet: true, want: 0},
 		{name: "model and group discounts", discount: 0.8, want: 72},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			snapshot := &billingexpr.BillingSnapshot{
-				ExprString:    expression,
-				ExprHash:      billingexpr.ExprHashString(expression),
-				ModelDiscount: tc.discount,
-				GroupRatio:    0.9,
-				QuotaPerUnit:  500_000,
+				ExprString:       expression,
+				ExprHash:         billingexpr.ExprHashString(expression),
+				ModelDiscount:    tc.discount,
+				ModelDiscountSet: tc.discountSet,
+				GroupRatio:       0.9,
+				QuotaPerUnit:     500_000,
 			}
+			persisted, err := common.Marshal(snapshot)
+			require.NoError(t, err)
+			var restored billingexpr.BillingSnapshot
+			require.NoError(t, common.Unmarshal(persisted, &restored))
+			snapshot = &restored
 			result, err := billingexpr.ComputeTieredQuota(snapshot, billingexpr.TokenParams{P: 200})
 			require.NoError(t, err)
 			assert.Equal(t, tc.want, result.ActualQuotaAfterGroup)

@@ -52,6 +52,7 @@ import type { ModelEvaluationFormValues } from '../types'
 
 const values: ModelEvaluationFormValues = {
   ...modelEvaluationDefaultValues,
+  baseUrl: 'https://models.example/v1',
   apiKey: 'sk-browser-only',
   targetModel: 'target-model',
   judgeModel: 'judge-model',
@@ -126,6 +127,16 @@ describe('built-in benchmark panel', () => {
       )
     )
   }
+
+  it('starts with an empty Base URL and disables autocomplete like the API key', () => {
+    render(createElement(ConnectionPanelHarness))
+
+    const baseUrl = screen.getByRole('textbox', { name: /^Base URL/ })
+    expect(baseUrl).toHaveValue('')
+    expect(baseUrl).toHaveAttribute('autocomplete', 'off')
+    expect(baseUrl).toHaveAttribute('placeholder', 'https://api.openai.com/v1')
+    expect(screen.getByLabelText(/^API Key/)).toHaveValue('')
+  })
 
   it('keeps the built-in case hidden and exposes the run action with connection settings', () => {
     render(createElement(ConnectionPanelHarness))
@@ -340,6 +351,85 @@ describe('evaluation lifecycle', () => {
       )
     }
   }
+
+  it('keeps each worker score, threshold, and reason when evaluation completes', async () => {
+    const sockets: MockWebSocket[] = []
+    const WebSocketFactory = vi.fn(function () {
+      const socket = new MockWebSocket()
+      sockets.push(socket)
+      return socket
+    })
+    Object.assign(WebSocketFactory, { OPEN: MockWebSocket.OPEN })
+    vi.stubGlobal('WebSocket', WebSocketFactory)
+    vi.spyOn(modelEvaluationApi, 'generateOpenAICompletion').mockResolvedValue(
+      'Target output'
+    )
+    const hook = renderHook(useModelEvaluation)
+    let runPromise: Promise<void> | undefined
+
+    act(() => {
+      runPromise = hook.result.current.run(values)
+    })
+    await waitFor(() => expect(sockets).toHaveLength(1))
+    const metrics = [
+      {
+        metric: 'answer_relevancy',
+        score: 0.9,
+        threshold: 0.5,
+        passed: true,
+        reason: 'Relevant',
+      },
+      {
+        metric: 'correctness',
+        score: 0.4,
+        threshold: 0.6,
+        passed: false,
+        reason: 'Missing detail',
+      },
+      {
+        metric: 'faithfulness',
+        score: 1,
+        threshold: 0.5,
+        passed: true,
+        reason: 'Grounded',
+      },
+    ]
+    await act(async () => {
+      for (const metric of metrics) {
+        sockets[0].receive({ type: 'metric_completed', ...metric })
+      }
+      sockets[0].receive({ type: 'completed', passed: false, metrics })
+      await runPromise
+    })
+
+    expect(hook.result.current.state).toMatchObject({
+      status: 'completed',
+      overallPassed: false,
+    })
+    expect(hook.result.current.state.metrics).toEqual([
+      {
+        name: 'answer_relevancy',
+        status: 'passed',
+        score: 0.9,
+        threshold: 0.5,
+        reason: 'Relevant',
+      },
+      {
+        name: 'correctness',
+        status: 'failed',
+        score: 0.4,
+        threshold: 0.6,
+        reason: 'Missing detail',
+      },
+      {
+        name: 'faithfulness',
+        status: 'passed',
+        score: 1,
+        threshold: 0.5,
+        reason: 'Grounded',
+      },
+    ])
+  })
 
   it('preserves a judge endpoint detail after the worker reports failure', async () => {
     const sockets: MockWebSocket[] = []

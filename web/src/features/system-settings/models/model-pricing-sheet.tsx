@@ -927,8 +927,7 @@ export const ModelPricingEditorPanel = forwardRef<
                             {...field}
                             type='number'
                             inputMode='decimal'
-                            min='0.000001'
-                            max='1'
+                            min='0'
                             step='0.01'
                             placeholder='1'
                           />

@@ -387,8 +387,8 @@ func UpdateModelDiscountByJSONString(jsonStr string) error {
 		return err
 	}
 	for modelName, discount := range discounts {
-		if math.IsNaN(discount) || math.IsInf(discount, 0) || discount <= 0 || discount > 1 {
-			return fmt.Errorf("ModelDiscount for %s must be greater than 0 and no greater than 1", modelName)
+		if math.IsNaN(discount) || math.IsInf(discount, 0) || discount < 0 {
+			return fmt.Errorf("ModelDiscount for %s must be a finite, non-negative number", modelName)
 		}
 	}
 	return types.LoadFromJsonStringWithCallback(modelDiscountMap, jsonStr, InvalidateExposedDataCache)

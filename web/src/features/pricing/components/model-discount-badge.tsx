@@ -43,26 +43,38 @@ export function ModelDiscountBadge(props: ModelDiscountBadgeProps) {
   const discount = getModelDiscount(props.model)
   const coefficient = formatNumber(discount, locale)
   const percent = formatNumber(discount * 100, locale)
-  const savingsPercent = formatNumber((1 - discount) * 100, locale)
+  const adjustmentPercent = formatNumber(Math.abs(1 - discount) * 100, locale)
   const accessibleLabel = t('Model discount: {{coefficient}} / {{percent}}%', {
     coefficient,
     percent,
   })
 
-  if (discount >= 1 && props.appearance !== 'full') {
+  if (discount === 1 && props.appearance !== 'full') {
     return props.appearance === 'savings' ? (
       <span className='text-muted-foreground/50 text-xs'>—</span>
     ) : null
   }
 
-  const savingsLabel = t('Save {{percent}}%', { percent: savingsPercent })
-  const showsSavings = props.appearance !== 'full'
-  const visibleLabel = showsSavings
-    ? `-${savingsPercent}%`
+  const adjustmentLabel =
+    discount < 1
+      ? t('Save {{percent}}%', { percent: adjustmentPercent })
+      : t('Price increase {{percent}}%', { percent: adjustmentPercent })
+  const showsAdjustment = props.appearance !== 'full'
+  const visibleLabel = showsAdjustment
+    ? `${discount < 1 ? '-' : '+'}${adjustmentPercent}%`
     : `${coefficient} / ${percent}%`
-  const triggerLabel = showsSavings
-    ? `${savingsLabel}. ${accessibleLabel}`
+  const triggerLabel = showsAdjustment
+    ? `${adjustmentLabel}. ${accessibleLabel}`
     : accessibleLabel
+  let badgeVariant: 'success' | 'warning' | 'neutral' = 'neutral'
+  let badgeBackground = 'bg-muted'
+  if (discount < 1) {
+    badgeVariant = 'success'
+    badgeBackground = 'bg-success/10'
+  } else if (discount > 1) {
+    badgeVariant = 'warning'
+    badgeBackground = 'bg-warning/10'
+  }
 
   return (
     <Tooltip>
@@ -77,12 +89,12 @@ export function ModelDiscountBadge(props: ModelDiscountBadgeProps) {
       >
         <StatusBadge
           label={visibleLabel}
-          variant={discount < 1 ? 'success' : 'neutral'}
+          variant={badgeVariant}
           copyable={false}
           size='sm'
           className={cn(
             'px-2 text-xs tabular-nums',
-            discount < 1 ? 'bg-success/10' : 'bg-muted',
+            badgeBackground,
             props.className
           )}
         />
@@ -90,9 +102,9 @@ export function ModelDiscountBadge(props: ModelDiscountBadgeProps) {
       <TooltipContent className='max-w-xs text-left'>
         <div className='space-y-1'>
           <p className='font-medium'>
-            {showsSavings ? savingsLabel : accessibleLabel}
+            {showsAdjustment ? adjustmentLabel : accessibleLabel}
           </p>
-          {showsSavings ? <p>{accessibleLabel}</p> : null}
+          {showsAdjustment ? <p>{accessibleLabel}</p> : null}
           <p>
             {t(
               'Prices shown already include this model discount. Applicable group pricing is applied separately.'

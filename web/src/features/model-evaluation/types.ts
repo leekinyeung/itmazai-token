@@ -39,6 +39,7 @@ export type EvaluationMetricState = {
   name: EvaluationMetricName
   status: EvaluationMetricStatus
   score?: number
+  threshold?: number
   reason?: string
 }
 

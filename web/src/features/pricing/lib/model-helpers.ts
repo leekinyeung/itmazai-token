@@ -55,8 +55,7 @@ export function getModelDiscount(model: PricingModel): number {
   const discount = model.model_discount
   return typeof discount === 'number' &&
     Number.isFinite(discount) &&
-    discount > 0 &&
-    discount <= 1
+    discount >= 0
     ? discount
     : 1
 }

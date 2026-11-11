@@ -1,7 +1,7 @@
 # TaoDock 插件仓库矩阵进度
 
 > **文档用途**：TaoDock GitHub 插件矩阵的唯一进度总表（Single Source of Truth）。
-> **最后核对时间**：2026-11-10 10:12（GMT+8）
+> **最后核对时间**：2026-11-11 20:20（GMT+8）
 > **GitHub 组织**：<https://github.com/taodock-api>
 > **本地工作目录**：`output/taodock-repos/`
 
@@ -12,12 +12,12 @@
 | [`taodock-wordpress`](https://github.com/taodock-api/taodock-wordpress) | ✅ 完成 | ⏳ WordPress.org 待提交 | ✅ Verify 全绿 | **提审包已就绪** | 用 WordPress.org 账号上传 ZIP |
 | [`taodock-n8n-nodes`](https://github.com/taodock-api/taodock-n8n-nodes) | ✅ 完成 | ✅ npm 0.1.1；⏳ n8n Verified | ⚠️ CI 正常；OIDC 首次发布未完成 | **等待修复 npm Trusted Publisher** | 让 OIDC 发布 0.1.2，再提交 n8n Creator Portal |
 | [`taodock-ai-sdk`](https://github.com/taodock-api/taodock-ai-sdk) | ✅ 完成 | ✅ npm 0.1.0 | ⚠️ CI 正常；OIDC 尚未实发验证 | **已上线，自动发布待最终验证** | 配置 Trusted Publisher，OIDC 发布 0.1.1 |
-| [`taodock-astrbot-plugin`](https://github.com/taodock-api/taodock-astrbot-plugin) | ✅ 完成 | ⏳ AstrBot 市场待提交 | ✅ Validate 全绿 | **提审材料已就绪** | 用 AstrBot Cloud 账号提交插件市场 |
-| [`taodock-dify-tools`](https://github.com/taodock-api/taodock-dify-tools) | ⏳ 待完善 | ⏳ Dify Marketplace 待提交 | ✅ Validate 全绿 | **待处理** | 重写 README、补元数据、准备 Marketplace 材料 |
-| [`taodock-mcp`](https://github.com/taodock-api/taodock-mcp) | ⏳ 待完善 | ⏳ MCP 注册表待提交 | ⚠️ 有 registry 工作流，未核实发布状态 | **待处理** | 重写 README、补元数据、核对 Smithery/PulseMCP 发布 |
+| [`taodock-astrbot-plugin`](https://github.com/taodock-api/taodock-astrbot-plugin) | ✅ 完成 | ⏳ AstrBot 市场已提交，等待审核 | ✅ Validate 全绿 | **市场审核中** | 跟进审核反馈；通过后补市场页链接与徽章 |
+| [`taodock-dify-tools`](https://github.com/taodock-api/taodock-dify-tools) | ✅ 完成 | ⏳ Dify Marketplace PR [#3728](https://github.com/langgenius/dify-plugins/pull/3728) 审核中 | ✅ Validate 全绿 | **v0.2.0 已提交市场审核** | 跟进自动检查和人工审核；通过后补市场页链接与徽章 |
+| [`taodock-mcp`](https://github.com/taodock-api/taodock-mcp) | ✅ 完成 | ✅ npm 0.2.0 + 官方 MCP Registry | ✅ Validate / npm / Registry | **首次正式发布完成** | 补 GitHub Release 与 MCPB，并向下游目录扩散 |
 | [`dify-plugins`](https://github.com/taodock-api/dify-plugins) | — | — | — | **参考仓库，不纳入改造任务** | 仅作为 Dify 插件结构参考 |
 
-**任务完成度：4 / 6 个业务仓库已完成基础包装（67%）。**
+**任务完成度：6 / 6 个业务仓库已完成基础包装（100%）。**
 “完成基础包装”指 README、GitHub description、topics 和必要的发布说明已处理；不代表官方市场提审已经完成。
 
 ---
@@ -181,57 +181,75 @@ npm trust list n8n-nodes-taodock
 - 市场 ZIP 约 91.4 KiB，远低于 16 MiB 上限。
 - GitHub Actions Validate run `42740906037` 成功。
 - 提审材料：`output/astrbot-plugin-市场提审清单-20261110.md`。
+- **2026-11-11：已提交 AstrBot 插件市场，当前等待官方审核。**
 
 #### 待办 / 阻塞
 
-- **P0**：用 AstrBot Cloud 账号从 AstrBot 插件市场的“提交我的插件”入口提交仓库：
-  <https://github.com/taodock-api/taodock-astrbot-plugin>
-- **P1**：准备限额审核 API Key，至少开放一个低成本图片模型；若审核要求，再开放一个视频模型。
-- 审核通过后补市场徽章、市场页链接，并建设 TaoDock 官网 `/integrations/astrbot` 落地页。
+- **P0**：关注 AstrBot 市场审核结果，并及时处理审核反馈。
+- **P1**：准备限额审核 API Key，至少开放一个低成本图片模型；若审核方索要测试凭据，再按最小权限提供并在审核结束后撤销。
+- 审核通过后记录正式市场页链接，补市场徽章，并建设 TaoDock 官网 `/integrations/astrbot` 落地页。
 
 ---
 
 ### 2.5 taodock-dify-tools
 
-**定位**：Dify 的 TaoDock 媒体工具插件。
+**定位**：Dify 的 TaoDock AI 图片与视频工具插件，支持授权模型发现、图片生成、异步视频生成、任务查询和视频下载。
 
-#### 当前线上状态
+#### 已完成
 
-- README 存在，约 1.7 kB，内容偏短，尚未按统一模板完善。
-- GitHub description 为空。
-- topics 为空。
-- 有 `validate.yml`，最近 Validate run `42017339266` 成功。
-- 最新提交：`3e35703`（publish independent TaoDock Dify media plugin）。
+- 重写英文主 README：品牌区、徽章、安装、Quick Start、5 个工具、两类工作流示例、数据流、权限边界、兼容性、故障排查和兄弟仓库链接。
+- 中文说明扩展至 `readme/README_zh_Hans.md`；英文主 README 已验证不含 CJK 字符。
+- Marketplace 展示名优化为 **TaoDock AI Image & Video**，manifest 与 Provider 元数据已同步。
+- 扩充 `PRIVACY.md`：明确发送字段、用途、插件/Dify 两侧留存边界、固定出站域名和安全边界。
+- GitHub description 已设置。
+- 已设置 10 个 topics：`dify`、`dify-plugin`、`image-generation`、`video-generation`、`workflow-automation`、`ai-agent` 等。
+- 强化 `validate.yml`：锁定依赖安装、10 个单测、Python 编译、Marketplace 元数据、英文 README、隐私披露、包内容和大小检查。
+- 本地验证：10/10 单测通过，Python 编译通过，manifest/README 校验通过。
+- 固定出站域名仅为 `taodock.com`；无任意 URL、命令/代码执行、SQL、浏览器自动化或主机文件操作。
+- 预打包检查：29 个运行文件、约 1.0 MiB，无凭据、虚拟环境、测试或缓存文件。
+- 最新 Validate run `42976659098` 成功。
+- 提审材料：`output/dify-marketplace-提审清单-20261111.md`。
+- 已确认旧版 `0.1.2` 曾通过 PR [#3649](https://github.com/langgenius/dify-plugins/pull/3649) 合并，因此本次按 **Version update** 提交。
+- 使用官方 Dify Plugin CLI `v0.6.15` 构建正式包：`output/taodock_media-0.2.0.difypkg`。
+- 正式包：30 个运行文件，必需文件齐全，无测试、缓存、虚拟环境、`.env` 或可执行二进制；最终 SHA-256：`40e7c0e28aae843d608794526a5699be32516b41702de4a973a19343964bac9a`。
+- 已向 `langgenius/dify-plugins` 提交版本更新 PR [#3728](https://github.com/langgenius/dify-plugins/pull/3728)：新增 `taodock_media-0.2.0.difypkg`，并按上游最新规则移除仓库中的旧版 `0.1.2` 包。
+- PR 风险级别选择 **Medium risk**。首次治理检查提示 manifest 缺少受控 `tags`，已在源码及包中补充 `image`、`videos`；随后按治理提示移除旧版包。最终 4 项自动检查全部通过，等待人工审核。
 
-#### 待办
+#### 待办 / 阻塞
 
-- **P0**：核对 manifest、工具清单、输入输出、凭据设置和 Dify 兼容版本。
-- **P0**：重写 README，补使用截图/示例和隐私说明。
-- **P0**：补 description 和 topics。
-- **P1**：准备 Dify Marketplace 上架材料并提交。
-- **P1**：上架后在 TaoDock 官网建立 `/integrations/dify` 落地页并互链。
+- **P0**：跟进 PR [#3728](https://github.com/langgenius/dify-plugins/pull/3728) 自动检查和人工审核反馈，在原 PR 上修复。
+- **P1**：审核通过后补 Marketplace 徽章与正式页面链接，并在 TaoDock 官网建立 `/integrations/dify` 落地页互链。
 
 ---
 
 ### 2.6 taodock-mcp
 
-**定位**：TaoDock MCP Server。
+**定位**：本地 stdio MCP Server，让 Claude Desktop、Cursor、VS Code、Gemini CLI 等客户端发现授权模型并完成图片生成、异步视频生成、状态查询和媒体下载。
 
-#### 当前线上状态
+#### 已完成
 
-- README 存在，约 2.9 kB，尚未按统一模板完善。
-- GitHub description 为空。
-- topics 为空。
-- 有 `publish-registry.yml`，但尚未核实已发布到哪些 MCP 注册表。
-- 最新提交：`374df20`（publish independently implemented TaoDock MCP server）。
+- 全面重写 README：徽章、Requirements、Quick Start、Claude Desktop / Cursor / VS Code / Gemini CLI 配置、环境变量、5 个工具、计费与本地文件副作用、源码运行、安全隐私、故障排查和兄弟仓库链接。
+- npm 包名统一为 `@taodock-ai/mcp-server`，与现有 npm 组织 scope 一致；`server.json` 同步更新。
+- `package.json` 增加 keywords、`publishConfig`、`prepack`、`validate`、`start`，确保干净 checkout 发布前自动 typecheck、测试和构建。
+- 新增 `validate.yml`：Node 20.11 / 22 矩阵、typecheck、9 个单测、build、npm pack 和版本一致性检查。
+- 新增 `publish-npm.yml`：支持 dry-run 与 tag 发布、OIDC provenance、tag/version 校验。
+- 强化 `publish-registry.yml`：发布前回读 npm 版本，只有 npm 包存在才发布 MCP Registry 元数据。
+- MCPB 构建补充 `TAODOCK_LOCALE`；`server.json` 补充完整环境变量说明。
+- 安全边界强化：自定义 API 地址只允许 HTTPS 且禁止内嵌凭据；图片 URL 只允许 HTTPS、拒绝重定向、校验 image MIME、限制 25 MiB；移除未经验证的图片编辑声明。
+- 扩充 `PRIVACY.md`：披露自定义端点、公共目录请求、媒体主机网络元数据、本地绝对路径、内联 base64 和文件不自动删除。
+- 本地验证：typecheck 通过，9/9 单测通过，npm audit 0 漏洞；npm tarball 仅 5 个文件、约 12.8 kB；MCPB schema 验证通过，产物约 316.9 kB。
+- GitHub description 与 10 个 topics 已设置。
+- 主分支最新远程提交：`73afe70`；Validate run `42995321123` 的 Node 20.11 / 22 两个任务均通过。
+- npm 首次发布完成：[`@taodock-ai/mcp-server@0.2.0`](https://www.npmjs.com/package/@taodock-ai/mcp-server)，`latest` 指向 0.2.0。
+- 首次 OIDC 发布因工作流使用 Node 22 自带 npm 10 而报 `ENEEDAUTH`；已把工作流升级为 Node 22.14 + npm >=11.5.1，并清理可能遮蔽 OIDC 的 registry 凭据。由于 npm 不允许为不存在的包保存首次 Trusted Publisher，0.2.0 先用现有维护者凭据完成首发，后续版本可验证 OIDC provenance。
+- 官方 MCP Registry 发布成功：[`io.github.taodock-api/mcp-server` 0.2.0](https://registry.modelcontextprotocol.io/v0/servers/io.github.taodock-api%2Fmcp-server/versions/0.2.0)，状态 `active` 且 `isLatest=true`；工作流 run `43018001559` 已通过。
+- 已创建 [GitHub Release v0.2.0](https://github.com/taodock-api/taodock-mcp/releases/tag/v0.2.0)，附带 Claude Desktop 安装包 `taodock-mcp-0.2.0.mcpb`（324,544 bytes，SHA-256 `607dd20a01fade046316a6fe229836c1ea830e97f19aad26c67e107e733181a6`）。
+- README 已改为直接链接最新 Release；MCPB manifest 同步移除未经验证的“图片编辑”表述。远程 main 最新提交 `9e4e6fa`，Validate run `43019482299` 通过。
 
-#### 待办
+#### 待办 / 阻塞
 
-- **P0**：检查 transport、工具列表、环境变量、客户端配置示例和安全边界。
-- **P0**：重写 README，至少覆盖 Claude Desktop / Cursor / VS Code 等客户端配置。
-- **P0**：补 description 和 topics（`mcp`、`model-context-protocol`、`ai-tools`、`api-gateway` 等）。
-- **P1**：核对 `publish-registry.yml` 是否已成功发布。
-- **P1**：提交 Smithery、PulseMCP 等 MCP 目录，并在目录页回链 TaoDock。
+- **P1**：再次确认 npm 包设置中的 Trusted Publisher 已保存；下个版本用修复后的工作流验证 OIDC provenance。
+- **P1**：向 Smithery、PulseMCP、Glama 等下游目录提交，并在目录页回链 TaoDock。
 
 ---
 
@@ -242,8 +260,9 @@ npm trust list n8n-nodes-taodock
 1. 修复 `n8n-nodes-taodock` 的 npm Trusted Publisher 记录，发布 0.1.2。
 2. 提交 n8n Verified Node（0.1.2 上线并验证 provenance 后）。
 3. 上传 WordPress 插件 ZIP 到 WordPress.org。
-4. 提交 `taodock-astrbot-plugin` 到 AstrBot 插件市场。
-5. 按顺序完善剩余仓库：`taodock-dify-tools` → `taodock-mcp`。
+4. 跟进 `taodock-astrbot-plugin` 的 AstrBot 市场审核反馈。
+5. 跟进 `taodock-dify-tools` 的 Dify Marketplace PR [#3728](https://github.com/langgenius/dify-plugins/pull/3728) 审核。
+6. 确认 `@taodock-ai/mcp-server` Trusted Publisher 在首发后已保存，为下个版本验证 OIDC provenance。
 
 ### P1：随后处理
 
@@ -274,7 +293,7 @@ npm trust list n8n-nodes-taodock
 - WordPress.org 插件页（最高优先级）。
 - n8n Verified Community Node 目录与 n8n Cloud 安装入口。
 - Dify Marketplace。
-- AstrBot 插件市场。
+- AstrBot 插件市场（已提交，等待审核；通过后补正式市场页链接）。
 - Smithery / PulseMCP 等 MCP 注册表。
 - TaoDock 官网 `/integrations/wordpress`、`/integrations/n8n`、`/integrations/ai-sdk`、`/integrations/dify`、`/integrations/astrbot`、`/integrations/mcp` 页面。
 
@@ -298,6 +317,7 @@ npm trust list n8n-nodes-taodock
 | `output/n8n-verified-node-提审包-20261106.md` | n8n Verified Node 表单填写与合规材料 |
 | `output/npm-trusted-publishing-配置清单.md` | npm Trusted Publishing 配置说明 |
 | `output/astrbot-plugin-市场提审清单-20261110.md` | AstrBot 市场表单文案、检查结果和审核测试步骤 |
+| `output/dify-marketplace-提审清单-20261111.md` | Dify Marketplace PR 文案、风险披露、构建与提交步骤 |
 | `output/taodock-repos/` | 各仓库本地工作副本 |
 | `docs/taodock-repository-progress.md` | 本进度总表 |
 

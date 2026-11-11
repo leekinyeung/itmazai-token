@@ -875,8 +875,8 @@ export function parseTaskResult() { return {}; }
 				before, err := model.GetModelPricingSnapshot([]string{"matrix-priced", "matrix-other"})
 				require.NoError(t, err)
 				changes := []model.ModelPricingChange{
-					{ModelName: "matrix-priced", ExpectedVersion: before.EmptyVersion, Pricing: model.PricingValues{"ModelPrice": float64(0), "ModelDiscount": float64(0.8), "billing_setting.billing_mode": "ratio"}},
-					{ModelName: "matrix-other", ExpectedVersion: before.EmptyVersion, Pricing: model.PricingValues{"ModelRatio": float64(1), "CreateCacheRatio": 1.25}},
+					{ModelName: "matrix-priced", ExpectedVersion: before.EmptyVersion, Pricing: model.PricingValues{"ModelPrice": float64(0), "ModelDiscount": float64(0), "billing_setting.billing_mode": "ratio"}},
+					{ModelName: "matrix-other", ExpectedVersion: before.EmptyVersion, Pricing: model.PricingValues{"ModelRatio": float64(1), "ModelDiscount": float64(1.2), "CreateCacheRatio": 1.25}},
 				}
 				require.NoError(t, model.UpdateModelPricing(changes))
 				loaded, err := model.GetModelPricingSnapshot([]string{"matrix-priced"})
@@ -889,8 +889,9 @@ export function parseTaskResult() { return {}; }
 				loaded, err = model.GetModelPricingSnapshot([]string{"matrix-priced", "matrix-other"})
 				require.NoError(t, err)
 				assert.Equal(t, 1.25, loaded.Entries[0].Configured["CreateCacheRatio"])
+				assert.Equal(t, 1.2, loaded.Entries[0].Configured["ModelDiscount"])
 				assert.Equal(t, "tiered_expr", loaded.Entries[1].Effective["billing_setting.billing_mode"])
-				assert.Equal(t, 0.8, loaded.Entries[1].Configured["ModelDiscount"], "omitting the field must preserve the existing discount")
+				assert.Equal(t, float64(0), loaded.Entries[1].Configured["ModelDiscount"], "omitting the field must preserve the existing discount")
 				_, oldFixed := loaded.Entries[1].Configured["ModelPrice"]
 				assert.False(t, oldFixed)
 				other := model.ModelPricingChange{ModelName: "matrix-other", ExpectedVersion: loaded.Entries[0].Version, Pricing: model.PricingValues{"ModelRatio": float64(9)}}
@@ -902,7 +903,7 @@ export function parseTaskResult() { return {}; }
 				invalid := other
 				invalid.Pricing = model.PricingValues{"ModelPrice": float64(-1)}
 				assert.Error(t, model.UpdateModelPricing([]model.ModelPricingChange{invalid}))
-				for _, discount := range []float64{0, -0.1, 1.1, math.NaN(), math.Inf(1)} {
+				for _, discount := range []float64{-0.1, math.NaN(), math.Inf(1)} {
 					invalid.Pricing = model.PricingValues{"ModelRatio": float64(1), "ModelDiscount": discount}
 					assert.Error(t, model.UpdateModelPricing([]model.ModelPricingChange{invalid}), discount)
 				}

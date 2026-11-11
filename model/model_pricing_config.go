@@ -468,10 +468,10 @@ func validateModelPricing(name string, values, previous PricingValues) error {
 		}
 		number, ok := value.(float64)
 		if !ok || math.IsNaN(number) || math.IsInf(number, 0) || number < 0 {
+			if key == "ModelDiscount" {
+				return errors.New("Model discount must be a finite, non-negative number")
+			}
 			return fmt.Errorf("%s must be a finite, non-negative number", key)
-		}
-		if key == "ModelDiscount" && (number <= 0 || number > 1) {
-			return errors.New("ModelDiscount must be greater than 0 and no greater than 1")
 		}
 	}
 	if values["billing_setting.billing_mode"] == "tiered_expr" {

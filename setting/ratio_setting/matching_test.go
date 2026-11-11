@@ -13,14 +13,14 @@ func TestModelDiscountDefaultsValidatesAndMatchesAliases(t *testing.T) {
 	t.Cleanup(func() { require.NoError(t, UpdateModelDiscountByJSONString(original)) })
 
 	assert.Equal(t, 1.0, GetModelDiscount("discount-missing"))
-	require.NoError(t, UpdateModelDiscountByJSONString(`{"discount-exact":0.8,"gpt-4-gizmo-*":0.7}`))
+	require.NoError(t, UpdateModelDiscountByJSONString(`{"discount-free":0,"discount-exact":0.8,"discount-premium":1.2,"gpt-4-gizmo-*":0.7}`))
+	assert.Equal(t, 0.0, GetModelDiscount("discount-free"))
 	assert.Equal(t, 0.8, GetModelDiscount("discount-exact"))
+	assert.Equal(t, 1.2, GetModelDiscount("discount-premium"))
 	assert.Equal(t, 0.7, GetModelDiscount("gpt-4-gizmo-customer"))
 
 	for _, invalid := range []string{
-		`{"discount-invalid":0}`,
 		`{"discount-invalid":-0.1}`,
-		`{"discount-invalid":1.1}`,
 		`{"discount-invalid":"0.8"}`,
 		`{"discount-invalid":NaN}`,
 		`{"discount-invalid":1e999}`,

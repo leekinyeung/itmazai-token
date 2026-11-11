@@ -11,7 +11,7 @@
   "dependencies": {
     "@opentelemetry/api": "1.9.0",
     "@sentry/node": "11.10.0",
-    "deepeval": "0.9.24",
+    "deepeval": "0.9.25",
     "zod": "4.4.3"
   },
   "devDependencies": {

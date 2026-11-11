@@ -82,8 +82,25 @@ describe('shared model pricing', () => {
     expect(JSON.parse(synced.ModelDiscount)).toEqual({ example: 0.8 })
   })
 
-  it('rejects invalid model discounts', () => {
-    for (const modelDiscount of ['0', '-0.1', '1.1', 'NaN', 'Infinity']) {
+  it('accepts non-negative model discounts and rejects invalid values', () => {
+    expect(
+      pricingFromDraft({
+        name: 'free-model',
+        billingMode: 'per-token',
+        ratio: '1',
+        modelDiscount: '0',
+      })
+    ).toMatchObject({ ModelDiscount: 0 })
+    expect(
+      pricingFromDraft({
+        name: 'premium-model',
+        billingMode: 'per-token',
+        ratio: '1',
+        modelDiscount: '1.2',
+      })
+    ).toMatchObject({ ModelDiscount: 1.2 })
+
+    for (const modelDiscount of ['-0.1', 'NaN', 'Infinity']) {
       expect(() =>
         pricingFromDraft({
           name: 'example',
@@ -91,7 +108,7 @@ describe('shared model pricing', () => {
           ratio: '1',
           modelDiscount,
         })
-      ).toThrow('Model discount must be greater than 0 and no greater than 1')
+      ).toThrow('Model discount must be a finite, non-negative number')
     }
   })
 

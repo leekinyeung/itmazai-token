@@ -152,11 +152,7 @@ func taskBillingOther(task *model.Task) *model.LogOther {
 	other.SetPublic("is_task", true)
 	if bc := task.PrivateData.BillingContext; bc != nil {
 		other.SetPublic("model_price", bc.ModelPrice)
-		modelDiscount := bc.ModelDiscount
-		if modelDiscount == 0 {
-			modelDiscount = 1
-		}
-		other.SetAdmin("model_discount", modelDiscount)
+		other.SetAdmin("model_discount", bc.NormalizedModelDiscount())
 		if bc.ModelRatio > 0 {
 			other.SetPublic("model_ratio", bc.ModelRatio)
 		}
@@ -423,10 +419,7 @@ func RecalculateTaskQuotaByTokens(ctx context.Context, task *model.Task, totalTo
 
 	// 计算 OtherRatios 乘积（视频折扣、时长等）
 	otherMultiplier := 1.0
-	modelDiscount := 1.0
-	if billingContext := task.PrivateData.BillingContext; billingContext != nil && billingContext.ModelDiscount != 0 {
-		modelDiscount = billingContext.ModelDiscount
-	}
+	modelDiscount := task.PrivateData.BillingContext.NormalizedModelDiscount()
 	if priceData := taskBillingContextPriceData(task.PrivateData.BillingContext); priceData != nil {
 		otherMultiplier = priceData.OtherRatioMultiplier()
 	}

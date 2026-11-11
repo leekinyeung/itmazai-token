@@ -215,13 +215,8 @@ export function pricingFromDraft(data: ModelRatioData): PricingValues {
     const value = data[field as keyof typeof pricingFieldMap]
     if (value === undefined || value === '') continue
     const number = Number(value)
-    if (
-      key === 'ModelDiscount' &&
-      (!Number.isFinite(number) || number <= 0 || number > 1)
-    ) {
-      throw new Error(
-        t('Model discount must be greater than 0 and no greater than 1')
-      )
+    if (key === 'ModelDiscount' && (!Number.isFinite(number) || number < 0)) {
+      throw new Error(t('Model discount must be a finite, non-negative number'))
     }
     if (!Number.isFinite(number) || number < 0) {
       throw new Error(t('Enter a finite, non-negative price'))

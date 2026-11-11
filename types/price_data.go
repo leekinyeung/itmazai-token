@@ -24,6 +24,7 @@ type GroupRatioInfo struct {
 type PriceData struct {
 	FreeModel             bool
 	ModelDiscount         float64
+	ModelDiscountSet      bool
 	ModelPrice            float64
 	ModelRatio            float64
 	CompletionRatio       float64
@@ -43,13 +44,13 @@ type PriceData struct {
 }
 
 // NormalizedModelDiscount returns the discount frozen when the request was
-// accepted. Zero only occurs on legacy snapshots that predate this field.
+// accepted. Legacy zero-valued PriceData without the presence marker predates
+// model discounts and therefore retains the original multiplier of one.
 func (p *PriceData) NormalizedModelDiscount() float64 {
-	discount := p.ModelDiscount
-	if discount == 0 {
-		discount = 1
+	if p == nil || (!p.ModelDiscountSet && p.ModelDiscount == 0) {
+		return 1
 	}
-	return discount
+	return p.ModelDiscount
 }
 
 func (p *PriceData) ApplyModelDiscountToFloat(value float64) float64 {

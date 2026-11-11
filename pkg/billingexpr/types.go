@@ -69,6 +69,7 @@ type BillingSnapshot struct {
 	ExprString                string         `json:"expr_string"`
 	ExprHash                  string         `json:"expr_hash"`
 	ModelDiscount             float64        `json:"model_discount,omitempty"`
+	ModelDiscountSet          bool           `json:"model_discount_set,omitempty"`
 	GroupRatio                float64        `json:"group_ratio"`
 	EstimatedPromptTokens     int            `json:"estimated_prompt_tokens"`
 	EstimatedCompletionTokens int            `json:"estimated_completion_tokens"`
@@ -87,7 +88,7 @@ type BillingSnapshot struct {
 // NormalizedModelDiscount keeps persisted snapshots from older versions at
 // their original price while treating every new snapshot as explicit.
 func (s *BillingSnapshot) NormalizedModelDiscount() float64 {
-	if s == nil || s.ModelDiscount == 0 {
+	if s == nil || (!s.ModelDiscountSet && s.ModelDiscount == 0) {
 		return 1
 	}
 	return s.ModelDiscount

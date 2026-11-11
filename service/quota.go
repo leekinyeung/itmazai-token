@@ -48,9 +48,6 @@ func hasCustomModelRatio(modelName string, currentRatio float64) bool {
 
 func calculateAudioQuota(info QuotaInfo) (int, *common.QuotaClamp) {
 	modelDiscount := decimal.NewFromFloat(info.ModelDiscount)
-	if modelDiscount.IsZero() {
-		modelDiscount = decimal.NewFromInt(1)
-	}
 	if info.UsePrice {
 		modelPrice := decimal.NewFromFloat(info.ModelPrice)
 		quotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)

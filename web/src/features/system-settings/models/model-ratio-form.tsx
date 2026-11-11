@@ -107,7 +107,7 @@ const modelJsonFields: Array<{
     name: 'ModelDiscount',
     labelKey: 'Model discount',
     descriptionKey:
-      'JSON map of model → discount coefficient. Values must be greater than 0 and no greater than 1.',
+      'JSON map of model → discount coefficient. Values must be finite, non-negative numbers.',
   },
   {
     name: 'CacheRatio',

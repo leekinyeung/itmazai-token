@@ -128,6 +128,30 @@ describe('model cards', () => {
     expect(screen.queryByText(/Official price/)).not.toBeInTheDocument()
   })
 
+  it('shows zero and above-one model multipliers accurately', () => {
+    const { rerender } = render(
+      <ModelCard model={pricingModel({ model_discount: 0 })} tokenUnit='M' />
+    )
+
+    expect(
+      screen.getByLabelText('Save 100%. Model discount: 0 / 0%')
+    ).toBeVisible()
+    expect(screen.getByText('Input').parentElement).toHaveTextContent(
+      /\$0\s*\/\s*1M/
+    )
+
+    rerender(
+      <ModelCard model={pricingModel({ model_discount: 1.2 })} tokenUnit='M' />
+    )
+
+    expect(
+      screen.getByLabelText('Price increase 20%. Model discount: 1.2 / 120%')
+    ).toBeVisible()
+    expect(screen.getByText('Input').parentElement).toHaveTextContent(
+      /\$2.4\s*\/\s*1M/
+    )
+  })
+
   it('labels personalized catalog prices for signed-in users', () => {
     useAuthStore.getState().auth.setUser({
       id: 7,

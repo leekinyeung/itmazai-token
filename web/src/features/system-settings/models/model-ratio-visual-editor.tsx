@@ -660,10 +660,8 @@ const ModelRatioVisualEditorComponent = forwardRef<
 
   const handleBatchSetDiscount = useCallback(async () => {
     const discount = Number(batchDiscount)
-    if (!Number.isFinite(discount) || discount <= 0 || discount > 1) {
-      toast.error(
-        t('Model discount must be greater than 0 and no greater than 1')
-      )
+    if (!Number.isFinite(discount) || discount < 0) {
+      toast.error(t('Model discount must be a finite, non-negative number'))
       return
     }
     const names = table
@@ -865,8 +863,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
             className='h-8 w-24'
             type='number'
             inputMode='decimal'
-            min='0.000001'
-            max='1'
+            min='0'
             step='0.01'
             value={batchDiscount}
             onChange={(event) => setBatchDiscount(event.target.value)}

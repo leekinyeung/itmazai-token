@@ -73,6 +73,23 @@ describe('expression price summaries', () => {
       group_ratio: { default: 0.9 },
     })
     expect(formatRequestPrice(requestModel, false, 1, 1, 'default')).toBe('$72')
+    const freeModel = pricingModel({
+      quota_type: 1,
+      model_price: 100,
+      model_discount: 0,
+      group_ratio: { default: 0.9 },
+    })
+    expect(formatRequestPrice(freeModel, false, 1, 1, 'default')).toBe('$0')
+    expect(calculateTokenPrice(freeModel, 'input', 0.9)).toBe(0)
+    const premiumModel = pricingModel({
+      quota_type: 1,
+      model_price: 100,
+      model_discount: 1.2,
+      group_ratio: { default: 0.9 },
+    })
+    expect(formatRequestPrice(premiumModel, false, 1, 1, 'default')).toBe(
+      '$108'
+    )
     expect(
       calculateTokenPrice(pricingModel({ model_ratio: 50 }), 'input', 0.9)
     ).toBe(90)

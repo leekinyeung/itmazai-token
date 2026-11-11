@@ -100,7 +100,7 @@ func TestCalculateAudioQuotaAppliesModelDiscount(t *testing.T) {
 		value float64
 		want  int
 	}{
-		{name: "legacy discount defaults to one", value: 0, want: 45_000_000},
+		{name: "zero discount makes model usage free", value: 0, want: 0},
 		{name: "model and group discounts", value: 0.8, want: 36_000_000},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -132,7 +132,8 @@ func runFixedPriceAccountingCases(t *testing.T, db, logDB *gorm.DB) {
 		usage                                     *dto.Usage
 		audio, stream, refund, insufficient, tool bool
 		realtime, reserveInsufficient             bool
-		wallet, outboundImages                    int
+		wallet, outboundImages, retryReservation  int
+		tokenQuota                                int
 		groupRatio, modelDiscount                 float64
 		want                                      int
 		unit                                      billingexpr.BillingUnit
@@ -162,6 +163,10 @@ func runFixedPriceAccountingCases(t *testing.T, db, logDB *gorm.DB) {
 		{name: "image quantity exceeds one-image wallet before submission", expression: `tier("image", fixed(0.04)) * image_count`, requestedImages: 4, wallet: 20000, insufficient: true},
 		{name: "image override reserves extra quantity", expression: `tier("image", fixed(0.04)) * image_count`, requestedImages: 1, outboundImages: 4, want: 80000, unit: billingexpr.BillingUnitRequest},
 		{name: "image override cannot exceed remaining wallet", expression: `tier("image", fixed(0.04)) * image_count`, requestedImages: 1, outboundImages: 4, wallet: 40000, reserveInsufficient: true, refund: true},
+		{name: "task retry holds a pricier channel and refunds all of it", expression: flat, retryReservation: 40000, refund: true},
+		{name: "task retry cannot exceed remaining wallet", expression: flat, retryReservation: 40000, wallet: 20000, reserveInsufficient: true, refund: true},
+		{name: "task retry rolls back funding when the API token cannot cover it", expression: flat, retryReservation: 40000, tokenQuota: 20000, reserveInsufficient: true, refund: true},
+		{name: "task retry settles the discounted actual price exactly once", expression: flat, retryReservation: 40000, modelDiscount: 0.8, want: 4000, unit: billingexpr.BillingUnitRequest},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			quota := startingQuota
@@ -173,7 +178,11 @@ func runFixedPriceAccountingCases(t *testing.T, db, logDB *gorm.DB) {
 			}
 			user := model.User{Username: fmt.Sprintf("fixed_billing_%d", index), Quota: quota, Status: common.UserStatusEnabled}
 			require.NoError(t, db.Create(&user).Error)
-			token := model.Token{UserId: user.Id, Key: fmt.Sprintf("fixed-billing-test-%d", index), Name: "fixed-billing", RemainQuota: startingQuota, Status: common.TokenStatusEnabled}
+			tokenQuota := startingQuota
+			if tc.tokenQuota > 0 {
+				tokenQuota = tc.tokenQuota
+			}
+			token := model.Token{UserId: user.Id, Key: fmt.Sprintf("fixed-billing-test-%d", index), Name: "fixed-billing", RemainQuota: tokenQuota, Status: common.TokenStatusEnabled}
 			require.NoError(t, db.Create(&token).Error)
 			channel := model.Channel{Name: "fixed-billing", Key: "unused", Status: common.ChannelStatusEnabled}
 			require.NoError(t, db.Create(&channel).Error)
@@ -227,6 +236,21 @@ func runFixedPriceAccountingCases(t *testing.T, db, logDB *gorm.DB) {
 					} else {
 						require.Nil(t, reserveErr)
 						assert.Equal(t, tc.want, info.Billing.GetPreConsumedQuota())
+					}
+				}
+				if tc.retryReservation > 0 {
+					retryErr := PreConsumeBilling(ctx, tc.retryReservation, info)
+					if tc.reserveInsufficient {
+						require.NotNil(t, retryErr)
+						wantCode := types.ErrorCodeInsufficientUserQuota
+						if tc.tokenQuota > 0 {
+							wantCode = types.ErrorCodePreConsumeTokenQuotaFailed
+						}
+						assert.Equal(t, wantCode, retryErr.GetErrorCode())
+						assert.Equal(t, reservation, info.Billing.GetPreConsumedQuota())
+					} else {
+						require.Nil(t, retryErr)
+						assert.Equal(t, tc.retryReservation, info.Billing.GetPreConsumedQuota())
 					}
 				}
 				if tc.refund {
@@ -313,7 +337,7 @@ func runFixedPriceAccountingCases(t *testing.T, db, logDB *gorm.DB) {
 			require.NoError(t, db.First(&user, user.Id).Error)
 			require.NoError(t, db.First(&token, token.Id).Error)
 			assert.Equal(t, quota-tc.want, user.Quota)
-			assert.Equal(t, startingQuota-tc.want, token.RemainQuota)
+			assert.Equal(t, tokenQuota-tc.want, token.RemainQuota)
 			assert.Equal(t, tc.want, user.UsedQuota)
 			assert.Equal(t, tc.want, token.UsedQuota)
 			if !tc.refund && !tc.insufficient {

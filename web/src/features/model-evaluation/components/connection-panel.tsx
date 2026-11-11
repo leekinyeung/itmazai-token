@@ -71,7 +71,7 @@ export function ConnectionPanel(props: ConnectionPanelProps) {
                   {...field}
                   type='url'
                   autoCapitalize='none'
-                  autoComplete='url'
+                  autoComplete='off'
                   spellCheck={false}
                   disabled={props.disabled}
                   placeholder='https://api.openai.com/v1'

@@ -162,14 +162,24 @@ type TaskPluginAuthorSnapshot struct {
 
 // TaskBillingContext 记录任务提交时的计费参数，以便轮询阶段可以重新计算额度。
 type TaskBillingContext struct {
-	ModelPrice      float64                      `json:"model_price,omitempty"`       // 模型单价
-	ModelDiscount   float64                      `json:"model_discount,omitempty"`    // 请求提交时冻结的模型折扣；旧记录的 0 按 1 解释
-	GroupRatio      float64                      `json:"group_ratio,omitempty"`       // 分组倍率
-	ModelRatio      float64                      `json:"model_ratio,omitempty"`       // 模型倍率
-	OtherRatios     map[string]float64           `json:"other_ratios,omitempty"`      // 附加倍率（时长、分辨率等）
-	OriginModelName string                       `json:"origin_model_name,omitempty"` // 模型名称，必须为OriginModelName
-	PerCallBilling  bool                         `json:"per_call_billing,omitempty"`  // 按次计费：跳过轮询阶段的差额结算
-	TieredSnapshot  *billingexpr.BillingSnapshot `json:"tiered_snapshot,omitempty"`
+	ModelPrice       float64                      `json:"model_price,omitempty"`        // 模型单价
+	ModelDiscount    float64                      `json:"model_discount,omitempty"`     // 请求提交时冻结的模型折扣
+	ModelDiscountSet bool                         `json:"model_discount_set,omitempty"` // 区分显式 0 与旧记录缺失值
+	GroupRatio       float64                      `json:"group_ratio,omitempty"`        // 分组倍率
+	ModelRatio       float64                      `json:"model_ratio,omitempty"`        // 模型倍率
+	OtherRatios      map[string]float64           `json:"other_ratios,omitempty"`       // 附加倍率（时长、分辨率等）
+	OriginModelName  string                       `json:"origin_model_name,omitempty"`  // 模型名称，必须为OriginModelName
+	PerCallBilling   bool                         `json:"per_call_billing,omitempty"`   // 按次计费：跳过轮询阶段的差额结算
+	TieredSnapshot   *billingexpr.BillingSnapshot `json:"tiered_snapshot,omitempty"`
+}
+
+// NormalizedModelDiscount preserves old task records that predate model
+// discounts while allowing new records to freeze an explicit zero multiplier.
+func (c *TaskBillingContext) NormalizedModelDiscount() float64 {
+	if c == nil || (!c.ModelDiscountSet && c.ModelDiscount == 0) {
+		return 1
+	}
+	return c.ModelDiscount
 }
 
 // ResultRetrievable reports whether retrieval surfaces (native query routes,

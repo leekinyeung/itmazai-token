@@ -39,7 +39,7 @@ export const modelEvaluationFormSchema = z.object({
 })
 
 export const modelEvaluationDefaultValues = {
-  baseUrl: 'https://api.openai.com/v1',
+  baseUrl: '',
   apiKey: '',
   targetModel: '',
   judgeModel: '',

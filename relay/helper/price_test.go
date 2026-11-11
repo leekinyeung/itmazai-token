@@ -109,6 +109,18 @@ func TestModelPriceHelperUsesAccountGroupForPricing(t *testing.T) {
 	assert.Equal(t, 0.6, refreshedGroup.GroupRatio)
 	assert.Equal(t, "vip", info.UsingGroup)
 	assert.Equal(t, 0.5, price.ModelDiscount, "the accepted request keeps its frozen discount")
+
+	require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString(`{"discount-price-model":0}`))
+	freeInfo := &relaycommon.RelayInfo{
+		OriginModelName: "discount-price-model",
+		UserGroup:       "vip",
+		UsingGroup:      "billing-a",
+	}
+	freePrice, err := ModelPriceHelper(ctx, freeInfo, 100, &types.TokenCountMeta{})
+	require.NoError(t, err)
+	assert.True(t, freePrice.ModelDiscountSet)
+	assert.Zero(t, freePrice.NormalizedModelDiscount())
+	assert.Zero(t, freePrice.QuotaToPreConsume)
 }
 
 func TestFixedPricePreConsumeAndRealtimeRejection(t *testing.T) {
@@ -843,3 +855,5 @@ func (s *priceTestReservation) Refund(*gin.Context)      {}
 func (s *priceTestReservation) NeedsRefund() bool        { return false }
 func (s *priceTestReservation) GetPreConsumedQuota() int { return s.held }
 func (s *priceTestReservation) Reserve(quota int) error  { s.held = max(s.held, quota); return nil }
+
+func (s *priceTestReservation) ReserveBeforeSubmit(quota int) error { return s.Reserve(quota) }

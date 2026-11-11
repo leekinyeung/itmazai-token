@@ -153,6 +153,7 @@ func ModelPriceHelper(c *gin.Context, info *relaycommon.RelayInfo, promptTokens 
 	priceData := hosttypes.PriceData{
 		FreeModel:             freeModel,
 		ModelDiscount:         modelDiscount,
+		ModelDiscountSet:      true,
 		ModelPrice:            modelPrice,
 		ModelRatio:            modelRatio,
 		CompletionRatio:       completionRatio,
@@ -265,13 +266,14 @@ func ModelPriceHelperPerCall(c *gin.Context, info *relaycommon.RelayInfo) (hostt
 	}
 
 	priceData := hosttypes.PriceData{
-		FreeModel:      freeModel,
-		ModelDiscount:  modelDiscount,
-		ModelPrice:     modelPrice,
-		ModelRatio:     modelRatio,
-		UsePrice:       usePrice,
-		Quota:          quota,
-		GroupRatioInfo: groupRatioInfo,
+		FreeModel:        freeModel,
+		ModelDiscount:    modelDiscount,
+		ModelDiscountSet: true,
+		ModelPrice:       modelPrice,
+		ModelRatio:       modelRatio,
+		UsePrice:         usePrice,
+		Quota:            quota,
+		GroupRatioInfo:   groupRatioInfo,
 	}
 	return priceData, nil
 }
@@ -401,6 +403,7 @@ func modelPriceHelperTiered(c *gin.Context, info *relaycommon.RelayInfo, billing
 		ExprString:                exprStr,
 		ExprHash:                  exprHash,
 		ModelDiscount:             modelDiscount,
+		ModelDiscountSet:          true,
 		GroupRatio:                groupRatioInfo.GroupRatio,
 		EstimatedPromptTokens:     promptTokens,
 		EstimatedCompletionTokens: 0,
@@ -419,6 +422,7 @@ func modelPriceHelperTiered(c *gin.Context, info *relaycommon.RelayInfo, billing
 	priceData := hosttypes.PriceData{
 		FreeModel:         freeModel,
 		ModelDiscount:     modelDiscount,
+		ModelDiscountSet:  true,
 		GroupRatioInfo:    groupRatioInfo,
 		QuotaToPreConsume: preConsumedQuota,
 	}

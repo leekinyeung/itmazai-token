@@ -41,8 +41,8 @@ export const createModelPricingSchema = (t: (key: string) => string) =>
     name: z.string().min(1, t('Model name is required')),
     modelDiscount: z.string().refine((value) => {
       const discount = Number(value)
-      return Number.isFinite(discount) && discount > 0 && discount <= 1
-    }, t('Model discount must be greater than 0 and no greater than 1')),
+      return Number.isFinite(discount) && discount >= 0
+    }, t('Model discount must be a finite, non-negative number')),
     price: z.string().optional(),
     ratio: z.string().optional(),
     cacheRatio: z.string().optional(),

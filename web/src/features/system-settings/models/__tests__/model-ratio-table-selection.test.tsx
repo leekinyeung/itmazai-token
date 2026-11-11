@@ -161,3 +161,19 @@ it('batch sets and restores the selected model discount', async () => {
     screen.getByRole('spinbutton', { name: 'Model discount' })
   ).toHaveValue(1)
 })
+
+it('batch sets a selected model discount to zero', async () => {
+  const { onBatchDiscountSave } = await renderEditor()
+  const row = await screen.findByRole('row', { name: /gpt-4\.1-mini/ })
+
+  fireEvent.click(within(row).getByRole('checkbox', { name: 'Select row' }))
+  const discount = await screen.findByPlaceholderText('0.8')
+  fireEvent.change(discount, { target: { value: '0' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+
+  await waitFor(() =>
+    expect(onBatchDiscountSave).toHaveBeenCalledWith(
+      JSON.stringify({ 'gpt-4.1-mini': 0 }, null, 2)
+    )
+  )
+})

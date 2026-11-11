@@ -11,12 +11,43 @@ import (
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/setting"
+	"github.com/QuantumNous/new-api/setting/ratio_setting"
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
+
+func TestUserUsableGroupRemovalsOverrideAdditions(t *testing.T) {
+	originalGroups := setting.UserUsableGroups2JSONString()
+	specialGroups := ratio_setting.GetGroupRatioSetting().GroupSpecialUsableGroup
+	originalSpecialGroups := specialGroups.ReadAll()
+	t.Cleanup(func() {
+		require.NoError(t, setting.UpdateUserUsableGroupsByJSONString(originalGroups))
+		specialGroups.Clear()
+		specialGroups.AddAll(originalSpecialGroups)
+	})
+	require.NoError(t, setting.UpdateUserUsableGroupsByJSONString(`{"default":"Default"}`))
+
+	for _, tc := range []struct {
+		name  string
+		rules map[string]string
+		want  map[string]string
+	}{
+		{name: "addition remains available", rules: map[string]string{"+:vip": "VIP"}, want: map[string]string{"default": "Default", "vip": "VIP"}},
+		{name: "removal overrides prefixed addition", rules: map[string]string{"+:vip": "VIP", "-:vip": ""}, want: map[string]string{"default": "Default"}},
+		{name: "removal overrides direct addition", rules: map[string]string{"vip": "VIP", "-:vip": ""}, want: map[string]string{"default": "Default"}},
+		{name: "account group remains available", rules: map[string]string{"-:default": ""}, want: map[string]string{"default": "User group"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			specialGroups.Clear()
+			specialGroups.Set("default", tc.rules)
+			assert.Equal(t, tc.want, GetUserUsableGroups("default"))
+		})
+	}
+}
 
 func setupAccountGroupChannelTest(t *testing.T) *gorm.DB {
 	t.Helper()

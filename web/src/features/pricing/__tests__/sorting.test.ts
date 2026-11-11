@@ -130,7 +130,7 @@ describe('model discount filtering', () => {
     pricingModel('discounted', { model_discount: 0.8 }),
     pricingModel('standard', { model_discount: 1 }),
     pricingModel('legacy', {}),
-    pricingModel('invalid', { model_discount: 0 }),
+    pricingModel('free', { model_discount: 0 }),
   ]
 
   test('separates discounted models from standard and legacy models', () => {
@@ -139,12 +139,12 @@ describe('model discount filtering', () => {
         discountModels,
         MODEL_DISCOUNT_FILTERS.DISCOUNTED
       ).map((model) => model.model_name)
-    ).toEqual(['discounted'])
+    ).toEqual(['discounted', 'free'])
     expect(
       filterByModelDiscount(
         discountModels,
         MODEL_DISCOUNT_FILTERS.STANDARD
       ).map((model) => model.model_name)
-    ).toEqual(['standard', 'legacy', 'invalid'])
+    ).toEqual(['standard', 'legacy'])
   })
 })

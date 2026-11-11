@@ -21,6 +21,23 @@ import { expect, test } from 'vitest'
 
 import { Markdown } from '../markdown'
 
+test('removes executable HTML while preserving safe Markdown content', () => {
+  const view = render(
+    <Markdown>
+      {
+        '<script>alert(1)</script><img src="x" onerror="alert(1)"><a href="javascript:alert(1)">unsafe link</a>\n\n**Safe content**'
+      }
+    </Markdown>
+  )
+
+  expect(view.container.querySelector('script')).toBeNull()
+  expect(view.container.querySelector('[onerror]')).toBeNull()
+  expect(view.container.querySelector('a')).not.toHaveAttribute('href')
+  expect(view.container.querySelector('strong')).toHaveTextContent(
+    'Safe content'
+  )
+})
+
 test.each([
   ['inline', 'Formula: $$\\frac{1}{2}$$.'],
   ['display', '$$\n\\frac{1}{2}\n$$'],
