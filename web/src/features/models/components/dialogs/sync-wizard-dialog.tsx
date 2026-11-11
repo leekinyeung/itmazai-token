@@ -56,6 +56,7 @@ const FIELD_LABELS: Record<MetadataSyncField, string> = {
   tags: 'Tags',
   vendor: 'Vendor',
   endpoints: 'Custom endpoints',
+  capabilities: 'Model capabilities',
   name_rule: 'Match Type',
   status: 'Model square visibility',
 }

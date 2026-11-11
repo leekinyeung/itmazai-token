@@ -36,6 +36,7 @@ import { ErrorState } from '@/components/error-state'
 import { JsonEditor } from '@/components/json-editor'
 import { LoadingState } from '@/components/loading-state'
 import { LobeIconField } from '@/components/lobe-icon-field'
+import { MultiSelect } from '@/components/multi-select'
 import { TagInput } from '@/components/tag-input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -79,7 +80,11 @@ import {
   transformFormDataToModelPayload,
   type ModelFormValues,
 } from '../../lib/model-form'
-import type { Model } from '../../types'
+import {
+  MODEL_CAPABILITIES,
+  MODEL_CAPABILITY_LABELS,
+  type Model,
+} from '../../types'
 import { ModelConnections } from '../model-connections'
 
 export function ModelMutateDrawer(props: {
@@ -478,6 +483,42 @@ export function ModelMutateDrawer(props: {
                             <FormDescription>
                               {t(
                                 'Matching rules apply to metadata. Pricing is configured for each concrete model.'
+                              )}
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </SideDrawerSection>
+
+                    <SideDrawerSection>
+                      <h3 className='text-sm font-semibold'>
+                        {t('Model capabilities')}
+                      </h3>
+                      <FormField
+                        control={form.control}
+                        name='capabilities'
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('Supported capabilities')}</FormLabel>
+                            <FormControl>
+                              <MultiSelect
+                                options={MODEL_CAPABILITIES.map(
+                                  (capability) => ({
+                                    value: capability,
+                                    label: t(
+                                      MODEL_CAPABILITY_LABELS[capability]
+                                    ),
+                                  })
+                                )}
+                                selected={field.value ?? []}
+                                onChange={field.onChange}
+                                placeholder={t('Select model capabilities')}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              {t(
+                                'Fallback routing requires complete capability metadata and never guesses from the model name.'
                               )}
                             </FormDescription>
                             <FormMessage />

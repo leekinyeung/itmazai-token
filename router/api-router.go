@@ -279,6 +279,7 @@ func SetApiRouter(router *gin.Engine) {
 		handlePermissionRoute(apiRouter.Group("", middleware.AdminAuth()), http.MethodGet, "/task_plugin_options", authz.TaskPluginBind, controller.GetTaskPluginOptions)
 		registerChannelRoutes(apiRouter)
 		registerAuthzRoutes(apiRouter)
+		registerFallbackRouter(apiRouter)
 		tokenRoute := apiRouter.Group("/token")
 		tokenRoute.Use(middleware.UserAuth())
 		tokenRoute.Use(middleware.TokenOperationAudit())

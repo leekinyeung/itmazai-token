@@ -157,6 +157,9 @@ func TestSetUserPermissionsStoresOnlyOverrides(t *testing.T) {
 		ResourceTaskPlugin: {
 			ActionBind: false,
 		},
+		ResourceFallbackPolicy: {
+			ActionRead: true, ActionWrite: true,
+		},
 		ResourceAudit: {ActionRead: false},
 	}, ExplicitUserPermissions(42))
 	assert.Equal(t, PermissionsMap{
@@ -188,6 +191,9 @@ func TestSetUserPermissionsStoresOnlyOverrides(t *testing.T) {
 		},
 		ResourceTaskPlugin: {
 			ActionBind: false,
+		},
+		ResourceFallbackPolicy: {
+			ActionRead: true, ActionWrite: true,
 		},
 		ResourceAudit: {ActionRead: false},
 	}, ExplicitUserPermissions(42))

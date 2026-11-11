@@ -36,11 +36,13 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { api } from '@/lib/api'
+import { ROLE } from '@/lib/roles'
 import { Route as ModelsRoute } from '@/routes/_authenticated/system-settings/models/$section'
 import { Route as OperationsRoute } from '@/routes/_authenticated/system-settings/operations/$section'
 import { Route as PoliciesRoute } from '@/routes/_authenticated/system-settings/request-policies/$section'
 import { Route as PolicyIndexRoute } from '@/routes/_authenticated/system-settings/request-policies/index'
 import { Route as SecurityRoute } from '@/routes/_authenticated/system-settings/security/$section'
+import { useAuthStore } from '@/stores/auth-store'
 
 import { RequestPolicies } from '..'
 import {
@@ -184,6 +186,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup()
   queryClient.clear()
+  useAuthStore.getState().auth.setUser(null)
 })
 
 describe('request policy settings', () => {
@@ -327,6 +330,95 @@ describe('request policy settings', () => {
       screen.getByRole('switch', { name: 'Re-enable on success' })
     ).toBeChecked()
     expect(api.put).not.toHaveBeenCalled()
+  })
+
+  it('configures an ordered exact fallback target pool without group routing', async () => {
+    useAuthStore.getState().auth.setUser({
+      id: 1,
+      username: 'root',
+      role: ROLE.SUPER_ADMIN,
+    })
+    vi.mocked(api.get).mockImplementation(async (url) => {
+      if (url === '/api/option/') return { data: optionsResponse() }
+      if (url === '/api/fallback/config') {
+        return {
+          data: {
+            success: true,
+            data: {
+              revision: 1,
+              schema_version: 6,
+              document: {
+                settings: { enabled: false },
+                targets: [{ channel_id: 17, model: 'fallback-chat' }],
+              },
+              updated_at: 100,
+            },
+          },
+        }
+      }
+      if (url === '/api/fallback/channels') {
+        return {
+          data: {
+            success: true,
+            data: [
+              {
+                channel_id: 17,
+                channel_name: 'fallback-provider',
+                channel_type: 1,
+                model_count: 1,
+                enabled: true,
+              },
+            ],
+          },
+        }
+      }
+      if (url === '/api/fallback/channels/17/models') {
+        return {
+          data: {
+            success: true,
+            data: [
+              {
+                model_name: 'fallback-chat',
+                upstream_model: 'provider-chat',
+                capabilities: ['streaming', 'tool_calling'],
+                capability_metadata_status: 'complete',
+                eligible: true,
+              },
+            ],
+          },
+        }
+      }
+      return { data: { success: true, data: [] } }
+    })
+
+    await renderPolicies('/system-settings/request-policies/fallback')
+    await waitFor(() =>
+      expect(api.get).toHaveBeenCalledWith('/api/fallback/channels')
+    )
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole('combobox', { name: 'Exact channel' })
+      ).toHaveValue('fallback-provider (#17)')
+    )
+    expect(
+      screen.getByRole('combobox', { name: 'Fallback model' })
+    ).toHaveValue('fallback-chat')
+    expect(await screen.findByText('provider-chat')).toBeVisible()
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Add fallback target' })
+    )
+    expect(
+      screen.getAllByRole('combobox', { name: 'Exact channel' })
+    ).toHaveLength(2)
+    expect(
+      screen.getAllByRole('button', { name: 'Move fallback target up' })[1]
+    ).toBeEnabled()
+    expect(
+      screen.getAllByRole('button', { name: 'Remove fallback target' })
+    ).toHaveLength(2)
+    expect(screen.getAllByText('Exact channel')).toHaveLength(2)
+    expect(screen.getByText('Final upstream model')).toBeVisible()
   })
 
   it('the affinity cache section opens with the keyboard and keeps the existing values', async () => {

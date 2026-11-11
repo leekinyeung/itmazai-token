@@ -17,6 +17,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var commonGroupCol string
@@ -371,6 +372,8 @@ func migrateDB() error {
 		&CustomOAuthProvider{},
 		&UserOAuthBinding{},
 		&PerfMetric{},
+		&FallbackConfigVersion{},
+		&FallbackConfigState{},
 		&SystemInstance{},
 		&SystemTask{},
 		&SystemTaskLock{},
@@ -379,6 +382,9 @@ func migrateDB() error {
 		&UserAccessToken{},
 	)
 	if err != nil {
+		return err
+	}
+	if err := DB.Clauses(clause.OnConflict{DoNothing: true}).Create(&FallbackConfigState{ID: 1}).Error; err != nil {
 		return err
 	}
 	if err := InitializeUserAuthVersions(); err != nil {

@@ -2,6 +2,8 @@ package model
 
 import (
 	"errors"
+	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -18,6 +20,34 @@ const (
 	NameRuleSuffix
 )
 
+const (
+	ModelCapabilityStreaming         = "streaming"
+	ModelCapabilityToolCalling       = "tool_calling"
+	ModelCapabilityJSONObject        = "json_object"
+	ModelCapabilityJSONSchema        = "json_schema"
+	ModelCapabilityImageInput        = "image_input"
+	ModelCapabilityReasoning         = "reasoning"
+	ModelCapabilityMultiImage        = "multi_image"
+	ModelCapabilityImageSize         = "image_size"
+	ModelCapabilityImageQuality      = "image_quality"
+	ModelCapabilityImageOutputFormat = "image_output_format"
+	ModelCapabilityImageMask         = "image_mask"
+)
+
+var ModelCapabilities = []string{
+	ModelCapabilityStreaming,
+	ModelCapabilityToolCalling,
+	ModelCapabilityJSONObject,
+	ModelCapabilityJSONSchema,
+	ModelCapabilityImageInput,
+	ModelCapabilityReasoning,
+	ModelCapabilityMultiImage,
+	ModelCapabilityImageSize,
+	ModelCapabilityImageQuality,
+	ModelCapabilityImageOutputFormat,
+	ModelCapabilityImageMask,
+}
+
 type ModelSquareState string
 
 const (
@@ -33,19 +63,21 @@ type BoundChannel struct {
 }
 
 type Model struct {
-	Id                 int            `json:"id"`
-	ModelName          string         `json:"model_name" gorm:"size:128;not null;uniqueIndex:uk_model_name_delete_at,priority:1"`
-	Description        string         `json:"description,omitempty" gorm:"type:text"`
-	Icon               string         `json:"icon,omitempty" gorm:"type:varchar(128)"`
-	Tags               string         `json:"tags,omitempty" gorm:"type:varchar(255)"`
-	VendorID           int            `json:"vendor_id,omitempty" gorm:"index"`
-	Endpoints          string         `json:"endpoints,omitempty" gorm:"type:text"`
-	SupportedEndpoints []string       `json:"supported_endpoints,omitempty" gorm:"-"`
-	Status             int            `json:"status" gorm:"default:1"`
-	SyncOfficial       int            `json:"sync_official" gorm:"default:1"`
-	CreatedTime        int64          `json:"created_time" gorm:"bigint"`
-	UpdatedTime        int64          `json:"updated_time" gorm:"bigint"`
-	DeletedAt          gorm.DeletedAt `json:"-" gorm:"index;uniqueIndex:uk_model_name_delete_at,priority:2"`
+	Id                    int            `json:"id"`
+	ModelName             string         `json:"model_name" gorm:"size:128;not null;uniqueIndex:uk_model_name_delete_at,priority:1"`
+	Description           string         `json:"description,omitempty" gorm:"type:text"`
+	Icon                  string         `json:"icon,omitempty" gorm:"type:varchar(128)"`
+	Tags                  string         `json:"tags,omitempty" gorm:"type:varchar(255)"`
+	VendorID              int            `json:"vendor_id,omitempty" gorm:"index"`
+	Endpoints             string         `json:"endpoints,omitempty" gorm:"type:text"`
+	Capabilities          string         `json:"capabilities,omitempty" gorm:"type:text"`
+	SupportedEndpoints    []string       `json:"supported_endpoints,omitempty" gorm:"-"`
+	SupportedCapabilities []string       `json:"supported_capabilities,omitempty" gorm:"-"`
+	Status                int            `json:"status" gorm:"default:1"`
+	SyncOfficial          int            `json:"sync_official" gorm:"default:1"`
+	CreatedTime           int64          `json:"created_time" gorm:"bigint"`
+	UpdatedTime           int64          `json:"updated_time" gorm:"bigint"`
+	DeletedAt             gorm.DeletedAt `json:"-" gorm:"index;uniqueIndex:uk_model_name_delete_at,priority:2"`
 
 	BoundChannels []BoundChannel `json:"bound_channels,omitempty" gorm:"-"`
 	EnableGroups  []string       `json:"enable_groups,omitempty" gorm:"-"`
@@ -74,12 +106,31 @@ func (mi *Model) MatchesName(name string) bool {
 	}
 }
 
+const (
+	ModelCapabilityMetadataComplete = "complete"
+	ModelCapabilityMetadataMissing  = "missing"
+	ModelCapabilityMetadataInvalid  = "invalid"
+	ModelCapabilityMetadataDisabled = "disabled"
+)
+
+type ModelCapabilityMetadata struct {
+	Capabilities []string
+	Status       string
+}
+
 // resolveModelMetadata preserves catalog precedence: exact, prefix, suffix,
 // then contains. The first matching record within a rule type wins.
 func resolveModelMetadata(records []Model, names []string) map[string]*Model {
 	resolved := make(map[string]*Model)
+	requested := make(map[string]struct{}, len(names))
+	for _, name := range names {
+		requested[name] = struct{}{}
+	}
 	for i := range records {
 		if records[i].NameRule == NameRuleExact {
+			if _, exists := requested[records[i].ModelName]; !exists {
+				continue
+			}
 			resolved[records[i].ModelName] = &records[i]
 		}
 	}
@@ -97,6 +148,81 @@ func resolveModelMetadata(records []Model, names []string) map[string]*Model {
 		}
 	}
 	return resolved
+}
+
+// ParseModelCapabilities validates and normalizes the fixed capability enum.
+// Empty metadata is valid for general catalog use but is deliberately
+// ineligible for capability-based fallback routing.
+func ParseModelCapabilities(raw string) ([]string, error) {
+	if strings.TrimSpace(raw) == "" {
+		return nil, nil
+	}
+	var values []string
+	if err := common.UnmarshalJsonStr(raw, &values); err != nil {
+		return nil, fmt.Errorf("invalid model capabilities: %w", err)
+	}
+	normalized := make([]string, 0, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if !slices.Contains(ModelCapabilities, value) {
+			return nil, fmt.Errorf("unknown model capability %q", value)
+		}
+		if !slices.Contains(normalized, value) {
+			normalized = append(normalized, value)
+		}
+	}
+	slices.Sort(normalized)
+	return normalized, nil
+}
+
+// ResolveModelCapabilityMetadata applies the same metadata precedence used by
+// the model catalog. An explicit JSON [] is complete metadata with no optional
+// capabilities; a blank value means the metadata is missing.
+func ResolveModelCapabilityMetadata(names []string) (map[string]ModelCapabilityMetadata, error) {
+	result := make(map[string]ModelCapabilityMetadata, len(names))
+	if len(names) == 0 {
+		return result, nil
+	}
+	var records []Model
+	if err := DB.Order("id").Find(&records).Error; err != nil {
+		return nil, err
+	}
+	for name, metadata := range resolveModelMetadata(records, names) {
+		if metadata.Status != 1 {
+			result[name] = ModelCapabilityMetadata{Status: ModelCapabilityMetadataDisabled}
+			continue
+		}
+		if strings.TrimSpace(metadata.Capabilities) == "" {
+			result[name] = ModelCapabilityMetadata{Status: ModelCapabilityMetadataMissing}
+			continue
+		}
+		capabilities, err := ParseModelCapabilities(metadata.Capabilities)
+		if err != nil {
+			result[name] = ModelCapabilityMetadata{Status: ModelCapabilityMetadataInvalid}
+			continue
+		}
+		result[name] = ModelCapabilityMetadata{Capabilities: capabilities, Status: ModelCapabilityMetadataComplete}
+	}
+	for _, name := range names {
+		if _, exists := result[name]; !exists {
+			result[name] = ModelCapabilityMetadata{Status: ModelCapabilityMetadataMissing}
+		}
+	}
+	return result, nil
+}
+
+func ResolveModelCapabilities(names []string) (map[string][]string, error) {
+	metadata, err := ResolveModelCapabilityMetadata(names)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[string][]string)
+	for name, item := range metadata {
+		if item.Status == ModelCapabilityMetadataComplete {
+			result[name] = slices.Clone(item.Capabilities)
+		}
+	}
+	return result, nil
 }
 
 // FillModelSquareStates applies the same metadata policy as the public catalog
@@ -265,7 +391,7 @@ func (mi *Model) Update() error {
 		}
 		mi.UpdatedTime = common.GetTimestamp()
 		return tx.Model(&Model{}).Where("id = ?", mi.Id).
-			Select("model_name", "description", "icon", "tags", "vendor_id", "endpoints", "status", "sync_official", "name_rule", "updated_time").Updates(mi).Error
+			Select("model_name", "description", "icon", "tags", "vendor_id", "endpoints", "capabilities", "status", "sync_official", "name_rule", "updated_time").Updates(mi).Error
 	})
 }
 

@@ -1,4 +1,9 @@
-export const POLICY_SECTION_IDS = ['filtering', 'routing', 'health'] as const
+export const POLICY_SECTION_IDS = [
+  'filtering',
+  'routing',
+  'health',
+  'fallback',
+] as const
 
 export type PolicySectionId = (typeof POLICY_SECTION_IDS)[number]
 

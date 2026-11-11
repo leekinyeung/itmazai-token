@@ -18,6 +18,36 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { z } from 'zod'
 
+export const MODEL_CAPABILITIES = [
+  'streaming',
+  'tool_calling',
+  'json_object',
+  'json_schema',
+  'image_input',
+  'reasoning',
+  'multi_image',
+  'image_size',
+  'image_quality',
+  'image_output_format',
+  'image_mask',
+] as const
+
+export type ModelCapability = (typeof MODEL_CAPABILITIES)[number]
+
+export const MODEL_CAPABILITY_LABELS: Record<ModelCapability, string> = {
+  streaming: 'Streaming',
+  tool_calling: 'Tool calling',
+  json_object: 'JSON object output',
+  json_schema: 'JSON Schema output',
+  image_input: 'Image input',
+  reasoning: 'Reasoning',
+  multi_image: 'Multiple images',
+  image_size: 'Image size control',
+  image_quality: 'Image quality control',
+  image_output_format: 'Image output format',
+  image_mask: 'Image mask editing',
+}
+
 // ============================================================================
 // Model Types
 // ============================================================================
@@ -47,6 +77,8 @@ export interface Model {
   vendor_id?: number
   endpoints?: string
   supported_endpoints?: string[]
+  capabilities?: string
+  supported_capabilities?: ModelCapability[]
   status: number
   sync_official: number
   created_time: number
@@ -173,6 +205,7 @@ export type MetadataSyncField =
   | 'tags'
   | 'vendor'
   | 'endpoints'
+  | 'capabilities'
   | 'name_rule'
   | 'status'
 export type MetadataSyncValues = {
@@ -181,6 +214,7 @@ export type MetadataSyncValues = {
   tags: string
   vendor: string
   endpoints: string
+  capabilities: string
   name_rule: number
   status: number
 }
@@ -273,6 +307,7 @@ export const modelFormSchema = z.object({
   tags: z.array(z.string()).default([]),
   vendor_id: z.number().optional(),
   endpoints: z.string().default(''),
+  capabilities: z.array(z.enum(MODEL_CAPABILITIES)).default([]),
   name_rule: z.number().min(0).max(3).default(0),
   status: z.boolean().default(true),
   sync_official: z.boolean().default(true),

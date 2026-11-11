@@ -98,6 +98,9 @@ func AppendRelayLogAdminInfo(ctx *gin.Context, relayInfo *relaycommon.RelayInfo,
 	}
 
 	AppendChannelAffinityAdminInfo(ctx, other)
+	if fallback := FallbackAuditSnapshot(ctx); fallback != nil {
+		other.SetAdmin("fallback", fallback)
+	}
 	if events := RequestPolicy(ctx).Events(); len(events) > 0 {
 		other.SetAdmin("request_policy", events)
 	}

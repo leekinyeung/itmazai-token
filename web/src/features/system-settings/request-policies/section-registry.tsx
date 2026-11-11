@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { createSectionRegistry } from '../utils/section-registry'
 import { ChannelHealthSection } from './channel-health-section'
 import type { RequestPolicySettings } from './defaults'
+import { FallbackSection } from './fallback-section'
 import { RequestChecksSection } from './request-checks-section'
 import { POLICY_DEFAULT_SECTION, type PolicySectionId } from './route-constants'
 import { RoutingPolicySection } from './routing-section'
@@ -48,6 +49,11 @@ const POLICY_SECTIONS = [
     build: (settings: RequestPolicySettings) => (
       <ChannelHealthSection defaultValues={settings} />
     ),
+  },
+  {
+    id: 'fallback',
+    titleKey: 'Failure fallback',
+    build: () => <FallbackSection />,
   },
 ] as const
 

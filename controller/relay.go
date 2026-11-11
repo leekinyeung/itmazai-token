@@ -127,6 +127,11 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		newAPIError = types.NewError(err, types.ErrorCodeGenRelayInfoFailed)
 		return
 	}
+	if err := service.PrepareFallbackExecution(c, relayInfo); err != nil {
+		newAPIError = types.NewError(err, types.ErrorCodeGenRelayInfoFailed, types.ErrOptionWithSkipRetry())
+		return
+	}
+	defer service.FinalizeFallbackExecution(c)
 
 	defer func() {
 		recovered := recover()
@@ -145,9 +150,11 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 	if newAPIError = relay.PrepareRequestBilling(c, relayInfo); newAPIError != nil {
 		return
 	}
+	service.FreezeFallbackBilling(c, relayInfo)
 	defer func() {
 		newAPIError = relay.RefundFailedRequestBilling(c, relayInfo, newAPIError)
 	}()
+	defer service.RestoreFallbackBilling(c, relayInfo)
 
 	retryParam := &service.RetryParam{
 		Ctx:         c,
@@ -158,6 +165,7 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 	}
 	relayInfo.RetryIndex = 0
 	relayInfo.LastError = nil
+	fallbackAfterRetries := false
 
 	for ; retryParam.GetRetry() <= common.RetryTimes; retryParam.IncreaseRetry() {
 		relayInfo.StreamStatus = nil
@@ -186,18 +194,15 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 			}
 			break
 		}
-		c.Request.Body = io.NopCloser(bodyStorage)
-
-		switch relayFormat {
-		case types.RelayFormatOpenAIRealtime:
-			newAPIError = relay.WssHelper(c, relayInfo)
-		case types.RelayFormatClaude:
-			newAPIError = relay.ClaudeHelper(c, relayInfo)
-		case types.RelayFormatGemini:
-			newAPIError = geminiRelayHandler(c, relayInfo)
-		default:
-			newAPIError = relayHandler(c, relayInfo)
+		attemptBody, bodyErr := bodyStorage.NewReader()
+		if bodyErr != nil {
+			newAPIError = types.NewErrorWithStatusCode(bodyErr, types.ErrorCodeReadRequestBodyFailed, http.StatusBadRequest, types.ErrOptionWithSkipRetry())
+			break
 		}
+		c.Request.Body = attemptBody
+
+		newAPIError = executeRelayAttempt(c, relayInfo, relayFormat)
+		_ = attemptBody.Close()
 
 		if newAPIError == nil {
 			service.MarkRequestPolicySuccess(c, relayInfo.StreamStatus)
@@ -209,6 +214,9 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		relayInfo.LastError = newAPIError
 
 		decision := service.DecideRelayRetry(c, newAPIError, common.RetryTimes-retryParam.GetRetry())
+		if service.ShouldAttemptFallbackAfterRetry(decision, retryParam.GetRetry(), common.RetryTimes) {
+			fallbackAfterRetries = true
+		}
 		service.RecordPolicyFailure(c, channel.Id, newAPIError, decision)
 		processChannelError(c, *types.NewChannelError(channel.Id, channel.Type, channel.Name, channel.ChannelInfo.IsMultiKey, common.GetContextKeyString(c, constant.ContextKeyChannelKey), channel.GetAutoBan()), newAPIError, relayInfo)
 
@@ -217,11 +225,90 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		}
 	}
 
+	if fallbackAfterRetries && service.CanAttemptFallback(c, relayInfo, newAPIError) {
+		if fallbackErr, attempted := executeRelayFallbackOnce(c, relayInfo, relayFormat); attempted && fallbackErr == nil {
+			newAPIError = nil
+			return
+		} else if attempted && fallbackErr != nil {
+			newAPIError = fallbackErr
+		}
+	}
+
 	useChannel := c.GetStringSlice("use_channel")
 	if len(useChannel) > 1 {
 		retryLogStr := common.LogText("retry: %s", strings.Trim(strings.Join(strings.Fields(fmt.Sprint(useChannel)), "->"), "[]"))
 		logger.LogInfo(c, retryLogStr)
 	}
+}
+
+func executeRelayAttempt(c *gin.Context, info *relaycommon.RelayInfo, relayFormat types.RelayFormat) *types.NewAPIError {
+	switch relayFormat {
+	case types.RelayFormatOpenAIRealtime:
+		return relay.WssHelper(c, info)
+	case types.RelayFormatClaude:
+		return relay.ClaudeHelper(c, info)
+	case types.RelayFormatGemini:
+		return geminiRelayHandler(c, info)
+	default:
+		return relayHandler(c, info)
+	}
+}
+
+func executeRelayFallbackOnce(c *gin.Context, info *relaycommon.RelayInfo, relayFormat types.RelayFormat) (*types.NewAPIError, bool) {
+	targets := service.FallbackTargetsForRequest(c)
+	if len(targets) == 0 {
+		return nil, false
+	}
+	bodyStorage, err := common.GetBodyStorage(c)
+	if err != nil {
+		return types.NewError(err, types.ErrorCodeReadRequestBodyFailed, types.ErrOptionWithSkipRetry()), false
+	}
+
+	for _, target := range targets {
+		channel, loadErr := model.CacheGetChannel(target.ChannelID)
+		if loadErr != nil || channel == nil || channel.Status != common.ChannelStatusEnabled {
+			service.RecordFallbackTargetSkip(c, target, "channel_unavailable")
+			continue
+		}
+		service.ApplyFallbackExecutionIdentity(c, info, target.Model)
+		if setupErr := middleware.SetupContextForSelectedChannel(c, channel, target.Model); setupErr != nil {
+			service.RecordFallbackTargetSkip(c, target, "channel_setup_failed")
+			continue
+		}
+		if !service.BeginFallbackAttempt(c, target, channel) {
+			service.RestoreFallbackBilling(c, info)
+			return nil, false
+		}
+		service.RequestPolicy(c).BeginAttempt(channel, info.UsingGroup)
+		bodyReader, readerErr := bodyStorage.NewReader()
+		if readerErr != nil {
+			fallbackErr := types.NewError(readerErr, types.ErrorCodeReadRequestBodyFailed, types.ErrOptionWithSkipRetry())
+			service.RecordFallbackResult(c, info, fallbackErr)
+			return fallbackErr, true
+		}
+		service.AppendUsedChannel(c, channel.Id)
+		c.Request.Body = bodyReader
+		info.StreamStatus = nil
+		info.PerformanceBusinessRejection = false
+		info.PerformanceOutputTokens = 0
+		info.RetryIndex = common.RetryTimes + 1
+		fallbackErr := executeRelayAttempt(c, info, relayFormat)
+		_ = bodyReader.Close()
+		service.RecordFallbackResult(c, info, fallbackErr)
+		if fallbackErr == nil {
+			service.MarkRequestPolicySuccess(c, info.StreamStatus)
+			info.LastError = nil
+			return nil, true
+		}
+		fallbackErr = service.NormalizeViolationFeeError(fallbackErr)
+		info.LastError = fallbackErr
+		decision := service.PolicyDecision{Action: "stop", Reason: "fallback_attempt_failed", Source: "fallback"}
+		service.RecordPolicyFailure(c, channel.Id, fallbackErr, decision)
+		processChannelError(c, *types.NewChannelError(channel.Id, channel.Type, channel.Name, channel.ChannelInfo.IsMultiKey, common.GetContextKeyString(c, constant.ContextKeyChannelKey), channel.GetAutoBan()), fallbackErr, info)
+		return fallbackErr, true
+	}
+	service.RestoreFallbackBilling(c, info)
+	return nil, false
 }
 
 // CountClaudeTokens implements Anthropic's token-counting utility endpoint.

@@ -23,7 +23,7 @@ import { EmptyState } from '@/components/empty-state'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge } from '@/components/status-badge'
 
-import type { Model } from '../types'
+import { MODEL_CAPABILITY_LABELS, type Model } from '../types'
 import { ModelSquareStatus } from './model-square-status'
 
 export function ModelConnections(props: { model: Model }) {
@@ -80,6 +80,24 @@ export function ModelConnections(props: { model: Model }) {
           {!props.model.supported_endpoints?.length && (
             <span className='text-muted-foreground text-sm'>
               {t('No endpoints inferred from channels')}
+            </span>
+          )}
+        </div>
+      </section>
+      <section className='space-y-3'>
+        <h3 className='font-medium'>{t('Model capabilities')}</h3>
+        <div className='flex flex-wrap gap-2'>
+          {props.model.supported_capabilities?.map((capability) => (
+            <StatusBadge
+              key={capability}
+              variant='neutral'
+              label={t(MODEL_CAPABILITY_LABELS[capability])}
+              copyable={false}
+            />
+          ))}
+          {!props.model.supported_capabilities?.length && (
+            <span className='text-muted-foreground text-sm'>
+              {t('No capability metadata')}
             </span>
           )}
         </div>

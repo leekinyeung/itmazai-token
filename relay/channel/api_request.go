@@ -325,6 +325,9 @@ func DoApiRequest(a Adaptor, c *gin.Context, info *common.RelayInfo, requestBody
 		return nil, fmt.Errorf("new request failed: %w", err)
 	}
 	ApplyUpstreamBodyMetadata(req, requestBody)
+	if service.IsFallbackAttempt(c) {
+		req.GetBody = nil
+	}
 	headers := req.Header
 	err = a.SetupRequestHeader(c, &headers, info)
 	if err != nil {
@@ -357,6 +360,9 @@ func DoFormRequest(a Adaptor, c *gin.Context, info *common.RelayInfo, requestBod
 		return nil, fmt.Errorf("new request failed: %w", err)
 	}
 	ApplyUpstreamBodyMetadata(req, requestBody)
+	if service.IsFallbackAttempt(c) {
+		req.GetBody = nil
+	}
 	// set form data
 	req.Header.Set("Content-Type", c.Request.Header.Get("Content-Type"))
 	headers := req.Header

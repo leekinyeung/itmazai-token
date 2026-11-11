@@ -842,6 +842,13 @@ func AddChannel(c *gin.Context) {
 
 func DeleteChannel(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
+	if referenced, err := service.FallbackConfigReferencesAnyChannel([]int{id}); err != nil {
+		common.ApiError(c, err)
+		return
+	} else if referenced {
+		common.ApiErrorStatus(c, http.StatusConflict, errors.New("channel is referenced by the active fallback configuration"))
+		return
+	}
 	channelName := ""
 	channelProxy := ""
 	channelLookupFailed := false
@@ -881,6 +888,13 @@ func DeleteDisabledChannel(c *gin.Context) {
 		Where("status = ? or status = ?", common.ChannelStatusAutoDisabled, common.ChannelStatusManuallyDisabled).
 		Pluck("id", &ids).Error; err != nil {
 		common.ApiError(c, err)
+		return
+	}
+	if referenced, err := service.FallbackConfigReferencesAnyChannel(ids); err != nil {
+		common.ApiError(c, err)
+		return
+	} else if referenced {
+		common.ApiErrorStatus(c, http.StatusConflict, errors.New("one or more disabled channels are referenced by the active fallback configuration"))
 		return
 	}
 	rows, err := model.DeleteDisabledChannel()
@@ -1027,6 +1041,13 @@ func DeleteChannelBatch(c *gin.Context) {
 	err := c.ShouldBindJSON(&channelBatch)
 	if err != nil || len(channelBatch.Ids) == 0 {
 		common.ApiErrorT(c, "Invalid parameters")
+		return
+	}
+	if referenced, err := service.FallbackConfigReferencesAnyChannel(channelBatch.Ids); err != nil {
+		common.ApiError(c, err)
+		return
+	} else if referenced {
+		common.ApiErrorStatus(c, http.StatusConflict, errors.New("one or more channels are referenced by the active fallback configuration"))
 		return
 	}
 	deletedCount, err := model.BatchDeleteChannels(channelBatch.Ids)

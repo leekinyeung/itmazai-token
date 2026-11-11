@@ -612,6 +612,7 @@ func SetupContextForSelectedChannel(c *gin.Context, channel *model.Channel, mode
 	}
 	common.SetContextKey(c, constant.ContextKeyChannelParamOverride, paramOverride)
 	common.SetContextKey(c, constant.ContextKeyChannelHeaderOverride, headerOverride)
+	common.SetContextKey(c, constant.ContextKeyChannelOrganization, "")
 	if nil != channel.OpenAIOrganization && *channel.OpenAIOrganization != "" {
 		common.SetContextKey(c, constant.ContextKeyChannelOrganization, *channel.OpenAIOrganization)
 	}
@@ -629,6 +630,7 @@ func SetupContextForSelectedChannel(c *gin.Context, channel *model.Channel, mode
 	} else {
 		// 必须设置为 false，否则在重试到单个 key 的时候会导致日志显示错误
 		common.SetContextKey(c, constant.ContextKeyChannelIsMultiKey, false)
+		common.SetContextKey(c, constant.ContextKeyChannelMultiKeyIndex, 0)
 	}
 	// c.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", key))
 	common.SetContextKey(c, constant.ContextKeyChannelKey, key)
@@ -637,6 +639,10 @@ func SetupContextForSelectedChannel(c *gin.Context, channel *model.Channel, mode
 	common.SetContextKey(c, constant.ContextKeySystemPromptOverride, false)
 
 	// TODO: api_version统一
+	c.Set("api_version", "")
+	c.Set("region", "")
+	c.Set("plugin", "")
+	c.Set("bot_id", "")
 	switch channel.Type {
 	case constant.ChannelTypeAzure:
 		c.Set("api_version", channel.Other)

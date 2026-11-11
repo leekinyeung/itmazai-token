@@ -37,16 +37,17 @@ func lockMetadataMutation(tx *gorm.DB) error {
 
 var ErrMetadataSyncConflict = errors.New("metadata changed; preview again before applying")
 
-var MetadataSyncFields = []string{"description", "icon", "tags", "vendor", "endpoints", "name_rule", "status"}
+var MetadataSyncFields = []string{"description", "icon", "tags", "vendor", "endpoints", "capabilities", "name_rule", "status"}
 
 type MetadataValues struct {
-	Description string `json:"description"`
-	Icon        string `json:"icon"`
-	Tags        string `json:"tags"`
-	Vendor      string `json:"vendor"`
-	Endpoints   string `json:"endpoints"`
-	NameRule    int    `json:"name_rule"`
-	Status      int    `json:"status"`
+	Description  string `json:"description"`
+	Icon         string `json:"icon"`
+	Tags         string `json:"tags"`
+	Vendor       string `json:"vendor"`
+	Endpoints    string `json:"endpoints"`
+	Capabilities string `json:"capabilities"`
+	NameRule     int    `json:"name_rule"`
+	Status       int    `json:"status"`
 }
 
 type MetadataSyncSelection struct {
@@ -99,7 +100,11 @@ func ValidateMetadataValues(values MetadataValues) error {
 	if values.Status != 0 && values.Status != 1 {
 		return errors.New("invalid catalog visibility")
 	}
-	return ValidateModelEndpoints(values.Endpoints)
+	if err := ValidateModelEndpoints(values.Endpoints); err != nil {
+		return err
+	}
+	_, err := ParseModelCapabilities(values.Capabilities)
+	return err
 }
 
 // ValidateModelEndpoints accepts the existing map form (custom paths) and
@@ -223,6 +228,8 @@ func ApplyMetadataSync(updates []MetadataSyncUpdate, upstreamVendors map[string]
 					fields[field] = update.Values.Tags
 				case "endpoints":
 					fields[field] = update.Values.Endpoints
+				case "capabilities":
+					fields[field] = update.Values.Capabilities
 				case "name_rule":
 					fields[field] = update.Values.NameRule
 				case "status":
