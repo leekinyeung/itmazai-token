@@ -20,7 +20,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
-import { expect, test, vi } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
 
 import { api } from '@/lib/api'
 
@@ -63,6 +63,13 @@ function Fixture() {
             CreemWebhookSecret: '',
             CreemTestMode: false,
             CreemProducts: '[]',
+            DodoApiKey: '',
+            DodoWebhookKey: '',
+            DodoProductId: '',
+            DodoTestMode: false,
+            DodoCurrency: 'USD',
+            DodoUnitPrice: 1,
+            DodoMinTopUp: 1,
           }}
           waffoDefaultValues={{
             WaffoEnabled: false,
@@ -120,4 +127,34 @@ test('payment settings can be edited and saved without compliance confirmation',
     })
   )
   expect(post).not.toHaveBeenCalled()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+test('saves the Dodo product ID from the Dodo tab', async () => {
+  const user = userEvent.setup()
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
+  vi.spyOn(api, 'put').mockResolvedValue({ data: { success: true } })
+  render(
+    <QueryClientProvider client={client}>
+      <Fixture />
+    </QueryClientProvider>
+  )
+
+  await user.click(screen.getByRole('tab', { name: 'Dodo' }))
+  await user.type(
+    screen.getByPlaceholderText('Enter Dodo product ID'),
+    'pdt_123'
+  )
+  await user.click(screen.getByRole('button', { name: 'Save all settings' }))
+  await waitFor(() =>
+    expect(api.put).toHaveBeenCalledWith('/api/option/', {
+      key: 'DodoProductId',
+      value: 'pdt_123',
+    })
+  )
 })

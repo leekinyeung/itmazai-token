@@ -1,15 +1,11 @@
 package service
 
 import (
-	"slices"
 	"strings"
 
-	"github.com/QuantumNous/new-api/common"
-	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/setting"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
-	"github.com/gin-gonic/gin"
 )
 
 func GetUserUsableGroups(userGroup string) map[string]string {
@@ -71,43 +67,6 @@ func GetUserAutoGroup(userGroup string) []string {
 	return autoGroups
 }
 
-// FilterUserTokenAutoGroups applies current permissions before the current
-// per-token limit. It intentionally does not fall back to the global Auto list.
-func FilterUserTokenAutoGroups(userGroup string, groups []string) []string {
-	maxCount := setting.GetMaxTokenAutoGroups()
-	filtered := make([]string, 0, min(len(groups), maxCount))
-	seen := make(map[string]struct{})
-	for _, group := range groups {
-		if !IsUserSelectableGroup(userGroup, group) {
-			continue
-		}
-		if _, ok := seen[group]; ok {
-			continue
-		}
-		seen[group] = struct{}{}
-		filtered = append(filtered, group)
-		if len(filtered) == maxCount {
-			break
-		}
-	}
-	return filtered
-}
-
-// GetRequestAutoGroups resolves the ordered Auto groups for the current token.
-// The absence of the context value means that the token inherits the complete
-// global Auto list; a present (even empty) value is an explicit token snapshot.
-func GetRequestAutoGroups(c *gin.Context, userGroup string) []string {
-	value, ok := common.GetContextKey(c, constant.ContextKeyTokenAutoGroups)
-	if !ok {
-		return GetUserAutoGroup(userGroup)
-	}
-	groups, ok := value.([]string)
-	if !ok {
-		return []string{}
-	}
-	return FilterUserTokenAutoGroups(userGroup, groups)
-}
-
 // GetGroupsEnabledModels 按 groups 顺序获取各分组启用的模型并去重
 func GetGroupsEnabledModels(groups []string) []string {
 	seen := make(map[string]struct{})
@@ -121,49 +80,6 @@ func GetGroupsEnabledModels(groups []string) []string {
 		}
 	}
 	return models
-}
-
-// GetDefaultKeyModelFallbackGroups returns the platform routing groups for a
-// model only when an unrestricted API key has no preferred group that serves
-// it. Global Auto groups keep their configured order; the remaining enabled
-// groups use stable lexical order.
-func GetDefaultKeyModelFallbackGroups(c *gin.Context, preferred []string, modelName string) []string {
-	modelLimitEnabled, tokenContext := common.GetContextKey(c, constant.ContextKeyTokenModelLimitEnabled)
-	if !tokenContext {
-		return nil
-	}
-	if enabled, ok := modelLimitEnabled.(bool); !ok || enabled {
-		return nil
-	}
-
-	enabledGroups := model.GetModelEnableGroups(modelName)
-	if len(enabledGroups) == 0 {
-		return nil
-	}
-	enabledSet := make(map[string]struct{}, len(enabledGroups))
-	for _, group := range enabledGroups {
-		enabledSet[group] = struct{}{}
-	}
-	for _, group := range preferred {
-		if _, ok := enabledSet[group]; ok {
-			return nil
-		}
-	}
-
-	ordered := make([]string, 0, len(enabledGroups))
-	for _, group := range setting.GetAutoGroups() {
-		if _, ok := enabledSet[group]; !ok {
-			continue
-		}
-		ordered = append(ordered, group)
-		delete(enabledSet, group)
-	}
-	remaining := make([]string, 0, len(enabledSet))
-	for group := range enabledSet {
-		remaining = append(remaining, group)
-	}
-	slices.Sort(remaining)
-	return append(ordered, remaining...)
 }
 
 // GetUserGroupRatio 获取用户使用某个分组的倍率

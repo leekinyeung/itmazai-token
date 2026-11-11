@@ -29,12 +29,12 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createJSONStorage } from 'zustand/middleware'
 
-import { GroupDisplayNameProvider } from '@/context/group-display-name-provider'
 import {
   performanceQueryKeys,
   performanceViewer,
 } from '@/features/performance-metrics/hooks'
 import { api } from '@/lib/api'
+import { useAuthStore } from '@/stores/auth-store'
 import {
   DEFAULT_CURRENCY_CONFIG,
   useSystemConfigStore,
@@ -43,6 +43,7 @@ import {
 import { CachedPriceCell } from '../components/cached-price-cell'
 import { ModelCard } from '../components/model-card'
 import { ModelCardGrid } from '../components/model-card-grid'
+import { PricingTable } from '../components/pricing-table'
 import type { PricingModel } from '../types'
 
 function pricingModel(overrides: Partial<PricingModel> = {}): PricingModel {
@@ -61,6 +62,7 @@ function pricingModel(overrides: Partial<PricingModel> = {}): PricingModel {
 let queryClient: QueryClient
 const originalStorage = useSystemConfigStore.persist.getOptions().storage
 beforeEach(() => {
+  useAuthStore.getState().auth.setUser(null)
   const storage = new Map<string, string>()
   vi.stubGlobal('localStorage', {
     getItem: (key: string) => storage.get(key) ?? null,
@@ -83,6 +85,7 @@ beforeEach(() => {
   })
 })
 afterEach(() => {
+  useAuthStore.getState().auth.setUser(null)
   queryClient.clear()
   useSystemConfigStore
     .getState()
@@ -93,6 +96,93 @@ afterEach(() => {
 })
 
 describe('model cards', () => {
+  it('shows only discounted prices in the original compact layout', () => {
+    render(
+      <ModelCard
+        model={pricingModel({ model_discount: 0.8, cache_ratio: 0.1 })}
+        tokenUnit='M'
+      />
+    )
+
+    expect(screen.getByText('Visitor starting price')).toBeVisible()
+    expect(
+      screen.getByLabelText('Save 20%. Model discount: 0.8 / 80%')
+    ).toBeVisible()
+    const inputPrice = screen.getByText('Input').parentElement
+    if (!inputPrice) throw new Error('Expected input price')
+    expect(inputPrice.parentElement).toHaveAttribute(
+      'data-slot',
+      'model-card-price-grid'
+    )
+    expect(inputPrice.parentElement).toHaveClass(
+      'grid-cols-[repeat(auto-fit,minmax(88px,1fr))]'
+    )
+    expect(inputPrice).toHaveTextContent(/\$1.6\s*\/\s*1M/)
+    expect(screen.getByText('Output').parentElement).toHaveTextContent(
+      /\$4.8\s*\/\s*1M/
+    )
+    expect(screen.getByText('Cached').parentElement).toHaveTextContent(
+      /\$0.16\s*\/\s*1M/
+    )
+    expect(document.querySelector('del')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Official price/)).not.toBeInTheDocument()
+  })
+
+  it('labels personalized catalog prices for signed-in users', () => {
+    useAuthStore.getState().auth.setUser({
+      id: 7,
+      username: 'pricing-user',
+      role: 1,
+    })
+
+    render(<ModelCard model={pricingModel()} />)
+
+    expect(screen.getByText('Your starting price')).toBeVisible()
+    expect(screen.queryByText('Visitor starting price')).not.toBeInTheDocument()
+    expect(document.querySelector('del')).not.toBeInTheDocument()
+    expect(screen.queryByText('-0%')).not.toBeInTheDocument()
+  })
+
+  it('shows pricing metadata without a groups column in table view', () => {
+    render(
+      <PricingTable
+        models={[
+          pricingModel({
+            model_discount: 0.8,
+            supported_endpoint_types: ['openai'],
+          }),
+          pricingModel({ id: 2, model_name: 'standard-model' }),
+        ]}
+      />
+    )
+
+    expect(screen.getByRole('columnheader', { name: 'Model' })).toBeVisible()
+    expect(screen.getByRole('columnheader', { name: 'Price' })).toBeVisible()
+    expect(
+      screen.getByRole('columnheader', { name: 'Model discount' })
+    ).toBeVisible()
+    expect(
+      screen.getByRole('columnheader', { name: 'Endpoints' })
+    ).toBeVisible()
+    expect(
+      screen.queryByRole('columnheader', { name: 'Groups' })
+    ).not.toBeInTheDocument()
+    expect(screen.getByText('openai')).toBeVisible()
+    expect(
+      screen.getByLabelText('Save 20%. Model discount: 0.8 / 80%')
+    ).toBeVisible()
+    const discountedRow = screen
+      .getByRole('link', { name: 'example-model' })
+      .closest('tr')
+    if (!discountedRow) throw new Error('Expected discounted model row')
+    expect(within(discountedRow).getByText('1.6')).toBeVisible()
+    expect(within(discountedRow).queryByText('2')).not.toBeInTheDocument()
+    expect(discountedRow.querySelector('del')).not.toBeInTheDocument()
+    expect(
+      screen.queryByLabelText(/Model discount: 1 \/ 100%/)
+    ).not.toBeInTheDocument()
+  })
+
   it('shows a complete green status strip and populated simulated metrics for an idle model', async () => {
     vi.spyOn(api, 'get').mockResolvedValue({
       data: {
@@ -134,16 +224,20 @@ describe('model cards', () => {
           billing_mode: 'tiered_expr',
           billing_expr:
             'tier("standard", p * 5 + cr * 1.25 + img * 8 + img_cr * 0 + c * 30)',
+          model_discount: 0.8,
         })}
         options={{ tokenUnit: 'M' }}
       />
     )
-    expect(screen.getByText('Cache Read').parentElement).toHaveTextContent(
-      '$1.25'
-    )
-    expect(screen.getByText('Image Cache').parentElement).toHaveTextContent(
-      '$0'
-    )
+    const cachePrice = screen.getByText('Cache Read').parentElement
+    const freeImageCache = screen.getByText('Image Cache').parentElement
+    if (!cachePrice || !freeImageCache) {
+      throw new Error('Expected cache price rows')
+    }
+    expect(cachePrice).toHaveTextContent('$1')
+    expect(within(cachePrice).queryByText('$1.25')).not.toBeInTheDocument()
+    expect(freeImageCache).toHaveTextContent('$0')
+    expect(freeImageCache.querySelector('del')).not.toBeInTheDocument()
   })
   it('shows fixed prices per request in both token display units', () => {
     const model = pricingModel({
@@ -295,7 +389,7 @@ describe('model cards', () => {
     expect(within(idle).getByText('—t/s')).toBeVisible()
   })
 
-  it('keeps group, endpoint and tag overflow counts with their own metadata', () => {
+  it('hides groups while keeping endpoint and tag metadata', () => {
     const groups = ['default-with-a-long-group-name', 'premium', 'internal']
     const endpoints = ['openai-response', 'openai', 'claude', 'gemini', 'jina']
     const tags = [
@@ -316,17 +410,15 @@ describe('model cards', () => {
       />
     )
 
-    const groupField = screen.getByText('Groups').parentElement
     const endpointField = screen.getByText('Endpoints').parentElement
-    if (!groupField || !endpointField) {
-      throw new Error('Expected labeled group and endpoint fields')
+    if (!endpointField) {
+      throw new Error('Expected labeled endpoint field')
     }
     const tagField = screen.getByRole('group', { name: 'Tags' })
-    expect(within(groupField).getByText(groups[0])).toBeVisible()
-    expect(within(groupField).getByText('+2')).toHaveAttribute(
-      'title',
-      groups.slice(1).join(', ')
-    )
+    expect(screen.queryByText('Groups')).not.toBeInTheDocument()
+    for (const group of groups) {
+      expect(screen.queryByText(group)).not.toBeInTheDocument()
+    }
     expect(
       within(endpointField).getByText('openai-response, openai')
     ).toHaveAttribute('title', endpoints.join(', '))
@@ -340,44 +432,11 @@ describe('model cards', () => {
         'Token-based'
       )
     ).toBeVisible()
+    expect(screen.getByRole('link', { name: 'Details' })).toBeVisible()
   })
 
-  it('shows localized group names in card metadata while keeping group values unchanged', () => {
-    queryClient.setQueryData(['status'], {
-      group_display_names: {
-        Anthropic官方特惠: { en: 'Anthropic Official Offer' },
-        premium: { en: 'Premium' },
-      },
-    })
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <GroupDisplayNameProvider>
-          <ModelCard
-            model={pricingModel({
-              enable_groups: ['Anthropic官方特惠', 'premium'],
-            })}
-            onClick={vi.fn()}
-          />
-        </GroupDisplayNameProvider>
-      </QueryClientProvider>
-    )
-
-    const groupField = screen.getByText('Groups').parentElement
-    if (!groupField) throw new Error('Expected labeled group field')
-    expect(
-      within(groupField).getByText('Anthropic Official Offer')
-    ).toHaveAttribute('title', 'Anthropic Official Offer, Premium')
-    expect(within(groupField).getByText('+1')).toHaveAttribute(
-      'title',
-      'Premium'
-    )
-    expect(screen.queryByText('Anthropic官方特惠')).not.toBeInTheDocument()
-  })
-
-  it('omits metadata fields when the model has no groups, endpoints or tags', () => {
+  it('omits endpoint and tag metadata when both are unavailable', () => {
     render(<ModelCard model={pricingModel({ enable_groups: [] })} />)
-    expect(screen.queryByText('Groups')).not.toBeInTheDocument()
     expect(screen.queryByText('Endpoints')).not.toBeInTheDocument()
     expect(
       screen.queryByRole('group', { name: 'Tags' })
@@ -408,50 +467,50 @@ describe('model cards', () => {
     }
   )
 
-  it('keeps group and recharge pricing correct when changing the token unit, including a free cache price', () => {
+  it('uses all-mode minimum visible pricing when changing the token unit, including a free cache price', () => {
     const props = {
       model: pricingModel({ cache_ratio: 0 }),
       onClick: vi.fn(),
-      selectedGroup: 'premium',
       showRechargePrice: true,
       priceRate: 3,
       usdExchangeRate: 6,
     }
     const { rerender } = render(<ModelCard {...props} tokenUnit='M' />)
     expect(screen.getByText('Input').parentElement).toHaveTextContent(
-      /\$3\s*\/\s*1M/
+      /\$1\s*\/\s*1M/
     )
     expect(screen.getByText('Output').parentElement).toHaveTextContent(
-      /\$9\s*\/\s*1M/
+      /\$3\s*\/\s*1M/
     )
     expect(screen.getByText('Cached').parentElement).toHaveTextContent(
       /\$0\s*\/\s*1M/
     )
     rerender(<ModelCard {...props} tokenUnit='K' />)
     expect(screen.getByText('Input').parentElement).toHaveTextContent(
-      /\$0.003\s*\/\s*1K/
+      /\$0.001\s*\/\s*1K/
     )
     expect(screen.getByText('Output').parentElement).toHaveTextContent(
-      /\$0.009\s*\/\s*1K/
+      /\$0.003\s*\/\s*1K/
     )
     expect(screen.getByText('Cached').parentElement).toHaveTextContent(
       /\$0\s*\/\s*1K/
     )
   })
 
-  it('shows a per-request price with the selected group and recharge multiplier without a token unit', () => {
+  it('shows an all-mode per-request price with the recharge multiplier without a token unit', () => {
     render(
       <ModelCard
         model={pricingModel({ quota_type: 1, model_price: 0.4 })}
         onClick={vi.fn()}
-        selectedGroup='premium'
         showRechargePrice
         priceRate={3}
         usdExchangeRate={6}
         tokenUnit='K'
       />
     )
-    expect(screen.getByText(/\$0.6/)).toHaveTextContent(/\$0.6\s*\/\s*request/)
+    expect(screen.getByText(/\$0.2/).parentElement).toHaveTextContent(
+      /\$0.2\s*\/\s*request/
+    )
     expect(screen.queryByText(/1K|1M/)).not.toBeInTheDocument()
     expect(screen.getAllByText('Per Request')).toHaveLength(1)
     expect(screen.queryByText('Per-request')).not.toBeInTheDocument()
@@ -466,18 +525,41 @@ describe('model cards', () => {
         })}
         onClick={vi.fn()}
         tokenUnit='K'
-        selectedGroup='premium'
         showRechargePrice
         priceRate={3}
         usdExchangeRate={6}
       />
     )
     expect(screen.getByText('Input').parentElement).toHaveTextContent(
-      /\$0.0045\s*\/\s*1K/
+      /\$0.0015\s*\/\s*1K/
     )
     expect(screen.getByText('Output').parentElement).toHaveTextContent(
-      /\$0.0225\s*\/\s*1K/
+      /\$0.0075\s*\/\s*1K/
     )
+  })
+
+  it('shows only discounted dynamic prices from the visible group ratio', () => {
+    render(
+      <ModelCard
+        model={pricingModel({
+          billing_mode: 'tiered_expr',
+          billing_expr: 'tier("base", p * 2 + c * 8)',
+          model_discount: 0.8,
+          group_ratio: { default: 0.9, premium: 3 },
+        })}
+        tokenUnit='M'
+      />
+    )
+
+    const inputPrice = screen.getByText('Input').parentElement
+    const outputPrice = screen.getByText('Output').parentElement
+    if (!inputPrice || !outputPrice) {
+      throw new Error('Expected dynamic input and output prices')
+    }
+    expect(inputPrice).toHaveTextContent(/\$1.44\s*\/\s*1M/)
+    expect(outputPrice).toHaveTextContent(/\$5.76\s*\/\s*1M/)
+    expect(screen.queryByText('$1.8')).not.toBeInTheDocument()
+    expect(screen.queryByText('$7.2')).not.toBeInTheDocument()
   })
 
   it('shows the cache read price of an expression model after its input and output prices', () => {
@@ -489,7 +571,6 @@ describe('model cards', () => {
         })}
         onClick={vi.fn()}
         tokenUnit='M'
-        selectedGroup='default'
       />
     )
     expect(screen.getByText('Input').parentElement).toHaveTextContent(
@@ -519,7 +600,6 @@ describe('model cards', () => {
         })}
         onClick={vi.fn()}
         tokenUnit='M'
-        selectedGroup='default'
       />
     )
     expect(screen.getAllByText('Cache Read')).toHaveLength(1)
@@ -534,7 +614,6 @@ describe('model cards', () => {
         })}
         onClick={vi.fn()}
         tokenUnit='M'
-        selectedGroup='default'
       />
     )
     expect(screen.getByText('Cache Read').parentElement).toHaveTextContent(

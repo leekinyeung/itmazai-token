@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/model"
 	perfmetrics "github.com/QuantumNous/new-api/pkg/perf_metrics"
 	"github.com/QuantumNous/new-api/service"
@@ -97,7 +98,11 @@ func GetPerfMetrics(c *gin.Context) {
 // Use the model square's catalog and group policy, never traffic-derived model
 // names or group membership, to build the public performance view.
 func visiblePerformanceModels(c *gin.Context) map[string][]string {
-	usable := service.GetUserUsableGroups(c.GetString("group"))
+	group := common.GetContextKeyString(c, constant.ContextKeyUserGroup)
+	if group == "" {
+		group = "default"
+	}
+	usable := service.GetUserUsableGroups(group)
 	active := ratio_setting.GetGroupRatioCopy()
 	models := map[string][]string{}
 	for _, item := range filterPricingByUsableGroups(model.GetPricing(), usable) {

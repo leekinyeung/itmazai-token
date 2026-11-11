@@ -94,6 +94,13 @@ export function isStripePayment(paymentType: string): boolean {
 }
 
 /**
+ * Check if payment method is Dodo Payments
+ */
+export function isDodoPayment(paymentType: string): boolean {
+  return paymentType === PAYMENT_TYPES.DODO
+}
+
+/**
  * Check if payment method is Waffo
  */
 export function isWaffoPayment(paymentType: string): boolean {
@@ -179,6 +186,10 @@ export function getMinTopupAmount(topupInfo: TopupInfo | null): number {
 
   if (topupInfo.enable_stripe_topup) {
     return topupInfo.stripe_min_topup
+  }
+
+  if (topupInfo.enable_dodo_topup) {
+    return topupInfo.dodo_min_topup || DEFAULT_MIN_TOPUP
   }
 
   if (topupInfo.enable_waffo_topup) {

@@ -7,6 +7,13 @@
   <language>en</language>
   <atom:link href="https://taodock.com/feed.xml" rel="self" type="application/rss+xml" />
   <item>
+    <title>How to Handle OpenAI Rate Limits in 2026: A Production Runbook</title>
+    <link>https://taodock.com/blog/handle-openai-rate-limits</link>
+    <guid isPermaLink="true">https://taodock.com/blog/handle-openai-rate-limits</guid>
+    <pubDate>Tue, 10 Nov 2026 00:00:00 GMT</pubDate>
+    <description>A production runbook for OpenAI rate limits: read the right limit, retry with backoff and jitter, pace your traffic, and fail over without paying twice.</description>
+  </item>
+  <item>
     <title>How to Reduce OpenAI API Costs in 2026: A Practical Playbook</title>
     <link>https://taodock.com/blog/reduce-openai-api-costs</link>
     <guid isPermaLink="true">https://taodock.com/blog/reduce-openai-api-costs</guid>

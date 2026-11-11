@@ -12,7 +12,7 @@ description: "了解众妙之门 TaoDock 控制台的常用入口，查看模型
 | 页面 | 直接打开 | 用途 |
 | --- | --- | --- |
 | 概览 | [控制台概览](https://taodock.com/dashboard/overview) | 查看账户和近期使用情况 |
-| 模型广场 | [查看模型](https://taodock.com/pricing) | 查询模型 ID、接口、分组和价格 |
+| 模型广场 | [查看模型](https://taodock.com/pricing) | 查询账户可查看的模型 ID、接口、分组和价格 |
 | API 密钥 | [管理密钥](https://taodock.com/keys) | 创建、复制、限制、停用和接入客户端 |
 | 钱包 | [查看钱包](https://taodock.com/wallet) | 查看额度、充值或兑换入口和账户记录 |
 | 体验中心 | [打开体验中心](https://taodock.com/playground) | 在网页内尝试模型对话 |
@@ -28,6 +28,8 @@ description: "了解众妙之门 TaoDock 控制台的常用入口，查看模型
 打开[体验中心](https://taodock.com/playground)，选择账号可用的模型，输入简短问题并发送。网页内成功后，再将相同模型接入客户端，更容易区分模型权限与客户端配置问题。
 
 体验中心的生成请求同样会消耗模型额度，不能当作免费测试工具。
+
+模型广场中的目录可见不等于某把密钥一定可调用；密钥还可能受模型白名单限制。以该密钥请求 `/v1/models` 得到的列表为实际可调用集合。
 
 ## 查找一次 API 请求 {#logs}
 

@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"slices"
 	"strings"
 	"time"
 
@@ -181,15 +180,12 @@ func buildOpenAIModel(modelName string, ownerByModel map[string]string) dto.Open
 }
 
 type modelListGroups struct {
-	userGroup   string
-	tokenGroup  string
 	ownerGroups []string
 }
 
 func getModelListGroups(c *gin.Context) (modelListGroups, error) {
-	tokenGroup := common.GetContextKeyString(c, constant.ContextKeyTokenGroup)
 	userGroup := common.GetContextKeyString(c, constant.ContextKeyUserGroup)
-	if userGroup == "" && (tokenGroup == "" || tokenGroup == "auto") {
+	if userGroup == "" {
 		var err error
 		userGroup, err = model.GetUserGroup(c.GetInt("id"), false)
 		if err != nil {
@@ -197,23 +193,7 @@ func getModelListGroups(c *gin.Context) (modelListGroups, error) {
 		}
 	}
 
-	if tokenGroup == "auto" {
-		return modelListGroups{
-			userGroup:   userGroup,
-			tokenGroup:  tokenGroup,
-			ownerGroups: service.GetRequestAutoGroups(c, userGroup),
-		}, nil
-	}
-
-	group := userGroup
-	if tokenGroup != "" {
-		group = tokenGroup
-	}
-	return modelListGroups{
-		userGroup:   userGroup,
-		tokenGroup:  tokenGroup,
-		ownerGroups: []string{group},
-	}, nil
+	return modelListGroups{ownerGroups: []string{userGroup}}, nil
 }
 
 func ListModels(c *gin.Context, modelType int) {
@@ -238,7 +218,7 @@ func ListModels(c *gin.Context, modelType int) {
 		return
 	}
 	ownerGroups := groups.ownerGroups
-	modelLimitValue, tokenContext := common.GetContextKey(c, constant.ContextKeyTokenModelLimitEnabled)
+	modelLimitValue, _ := common.GetContextKey(c, constant.ContextKeyTokenModelLimitEnabled)
 	modelLimitEnable, _ := modelLimitValue.(bool)
 	var tokenModelLimit map[string]bool
 	if modelLimitEnable {
@@ -251,21 +231,6 @@ func ListModels(c *gin.Context, modelType int) {
 		}
 	}
 	models := service.GetGroupsEnabledModels(ownerGroups)
-	if tokenContext && !modelLimitEnable {
-		models = make([]string, 0)
-		ownerGroupSet := make(map[string]struct{})
-		for _, pricing := range model.GetPricing() {
-			models = append(models, pricing.ModelName)
-			for _, group := range pricing.EnableGroup {
-				ownerGroupSet[group] = struct{}{}
-			}
-		}
-		ownerGroups = make([]string, 0, len(ownerGroupSet))
-		for group := range ownerGroupSet {
-			ownerGroups = append(ownerGroups, group)
-		}
-		slices.Sort(ownerGroups)
-	}
 	for _, modelName := range models {
 		if modelLimitEnable {
 			matchingName := ratio_setting.RoutingMatchModelName(modelName)
@@ -364,7 +329,33 @@ func EnabledListModels(c *gin.Context) {
 
 func RetrieveModel(c *gin.Context, modelType int) {
 	modelId := c.Param("model")
-	if aiModel, ok := openAIModelsMap[modelId]; ok {
+	groups, err := getModelListGroups(c)
+	allowed := false
+	if err == nil {
+		for _, enabledModel := range service.GetGroupsEnabledModels(groups.ownerGroups) {
+			if enabledModel == modelId {
+				allowed = true
+				break
+			}
+		}
+	}
+	if allowed && common.GetContextKeyBool(c, constant.ContextKeyTokenModelLimitEnabled) {
+		allowed = false
+		if value, ok := common.GetContextKey(c, constant.ContextKeyTokenModelLimit); ok {
+			if limits, ok := value.(map[string]bool); ok {
+				allowed = limits[modelId] || limits[ratio_setting.FormatMatchingModelName(modelId)] || limits[ratio_setting.RoutingMatchModelName(modelId)]
+			}
+		}
+	}
+	if allowed && !operation_setting.SelfUseModeEnabled {
+		acceptUnsetRatioModel := false
+		if userSettings, settingsErr := model.GetUserSetting(c.GetInt("id"), false); settingsErr == nil {
+			acceptUnsetRatioModel = userSettings.AcceptUnsetRatioModel
+		}
+		allowed = acceptUnsetRatioModel || helper.HasModelBillingConfig(modelId)
+	}
+	if allowed {
+		aiModel := buildOpenAIModel(modelId, getPreferredModelOwners([]string{modelId}, groups.ownerGroups))
 		switch modelType {
 		case constant.ChannelTypeAnthropic:
 			c.JSON(200, dto.AnthropicModel{

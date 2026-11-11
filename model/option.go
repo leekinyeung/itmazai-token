@@ -102,6 +102,13 @@ func InitOptionMap() {
 	common.OptionMap["CreemProducts"] = setting.CreemProducts
 	common.OptionMap["CreemTestMode"] = strconv.FormatBool(setting.CreemTestMode)
 	common.OptionMap["CreemWebhookSecret"] = setting.CreemWebhookSecret
+	common.OptionMap["DodoApiKey"] = setting.DodoApiKey
+	common.OptionMap["DodoWebhookKey"] = setting.DodoWebhookKey
+	common.OptionMap["DodoProductId"] = setting.DodoProductId
+	common.OptionMap["DodoTestMode"] = strconv.FormatBool(setting.DodoTestMode)
+	common.OptionMap["DodoCurrency"] = setting.DodoCurrency
+	common.OptionMap["DodoUnitPrice"] = strconv.FormatFloat(setting.DodoUnitPrice, 'f', -1, 64)
+	common.OptionMap["DodoMinTopUp"] = strconv.Itoa(setting.DodoMinTopUp)
 	common.OptionMap["WaffoEnabled"] = strconv.FormatBool(setting.WaffoEnabled)
 	common.OptionMap["WaffoApiKey"] = setting.WaffoApiKey
 	common.OptionMap["WaffoPrivateKey"] = setting.WaffoPrivateKey
@@ -545,6 +552,24 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.CreemTestMode = value == "true"
 	case "CreemWebhookSecret":
 		setting.CreemWebhookSecret = value
+	case "DodoApiKey":
+		setting.DodoApiKey = value
+	case "DodoWebhookKey":
+		setting.DodoWebhookKey = value
+	case "DodoProductId":
+		setting.DodoProductId = value
+	case "DodoTestMode":
+		setting.DodoTestMode = value == "true"
+	case "DodoCurrency":
+		setting.DodoCurrency = value
+	case "DodoUnitPrice":
+		if parsed, parseErr := strconv.ParseFloat(value, 64); parseErr == nil {
+			setting.DodoUnitPrice = parsed
+		}
+	case "DodoMinTopUp":
+		if parsed, parseErr := strconv.Atoi(value); parseErr == nil && parsed > 0 {
+			setting.DodoMinTopUp = parsed
+		}
 	case "WaffoEnabled":
 		setting.WaffoEnabled = value == "true"
 	case "WaffoApiKey":

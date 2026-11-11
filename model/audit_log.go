@@ -101,6 +101,10 @@ func RecordAuditLog(c *gin.Context, entry AuditLog) {
 	}
 	switch entry.ActorRole {
 	case common.RoleCommonUser, common.RoleAdminUser, common.RoleRootUser:
+	case 0:
+		if entry.UserId != 0 || entry.Username != "system" {
+			logger.LogError(ctx, common.LogText("audit actor role unavailable (request_id=%s, actor_role=%d)", entry.RequestId, entry.ActorRole))
+		}
 	default:
 		logger.LogError(ctx, common.LogText("audit actor role unavailable (request_id=%s, actor_role=%d)", entry.RequestId, entry.ActorRole))
 		entry.ActorRole = 0 // Unknown actors remain visible to root only.

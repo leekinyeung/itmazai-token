@@ -36,6 +36,20 @@ func isCreemWebhookEnabled() bool {
 	return isCreemTopUpEnabled() && isCreemWebhookConfigured()
 }
 
+func isDodoTopUpEnabled() bool {
+	return strings.TrimSpace(setting.DodoApiKey) != "" &&
+		strings.TrimSpace(setting.DodoWebhookKey) != "" &&
+		strings.TrimSpace(setting.DodoProductId) != ""
+}
+
+func isDodoWebhookConfigured() bool {
+	return strings.TrimSpace(setting.DodoWebhookKey) != ""
+}
+
+func isDodoWebhookEnabled() bool {
+	return isDodoTopUpEnabled() && isDodoWebhookConfigured()
+}
+
 func isWaffoTopUpEnabled() bool {
 	if !setting.WaffoEnabled {
 		return false

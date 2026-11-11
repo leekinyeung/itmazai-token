@@ -470,6 +470,10 @@ func TestFirstTopUpInviterRewardDatabaseMatrix(t *testing.T) {
 				{"epay", PaymentProviderEpay, func(tradeNo string) error { _, err := RechargeEpay(tradeNo, "alipay", ""); return err }},
 				{"stripe", PaymentProviderStripe, func(tradeNo string) error { return Recharge(tradeNo, "customer", "") }},
 				{"creem", PaymentProviderCreem, func(tradeNo string) error { return RechargeCreem(tradeNo, "customer@example.com", "", "") }},
+				{"dodo", PaymentProviderDodo, func(tradeNo string) error {
+					_, err := RechargeDodo(tradeNo, "pay_test", "buyer@example.com", "")
+					return err
+				}},
 				{"waffo", PaymentProviderWaffo, func(tradeNo string) error { return RechargeWaffo(tradeNo, "") }},
 				{"waffo pancake", PaymentProviderWaffoPancake, RechargeWaffoPancake},
 				{"manual completion", PaymentProviderEpay, func(tradeNo string) error { return ManualCompleteTopUp(tradeNo, "") }},
@@ -616,4 +620,82 @@ func TestFirstTopUpInviterRewardConfigurationAndCache(t *testing.T) {
 	cached, err = cacheGetUserBase(101)
 	require.NoError(t, err)
 	assert.Equal(t, 1_250_007, cached.Quota)
+}
+
+func createDodoTestOrder(t *testing.T, userId int, tradeNo string, provider string, status string) TopUp {
+	t.Helper()
+	topUp := TopUp{
+		UserId:          userId,
+		Amount:          2,
+		Money:           9.99,
+		TradeNo:         tradeNo,
+		PaymentMethod:   PaymentMethodDodo,
+		PaymentProvider: provider,
+		CreateTime:      common.GetTimestamp(),
+		Status:          status,
+	}
+	require.NoError(t, DB.Create(&topUp).Error)
+	return topUp
+}
+
+func TestRechargeDodoCreditsQuotaExactlyOnce(t *testing.T) {
+	truncateTables(t)
+
+	oldQuotaPerUnit := common.QuotaPerUnit
+	common.QuotaPerUnit = 500000
+	t.Cleanup(func() { common.QuotaPerUnit = oldQuotaPerUnit })
+
+	user := insertUserForPaymentGuardTest(t, 601, 0)
+	order := createDodoTestOrder(t, user.Id, "DODOTESTONCE", PaymentProviderDodo, common.TopUpStatusPending)
+
+	alreadyDone, err := RechargeDodo(order.TradeNo, "pay_123", "buyer@example.com", "127.0.0.1")
+	require.NoError(t, err)
+	assert.False(t, alreadyDone)
+	assert.Equal(t, 2*500000, getUserQuotaForPaymentGuardTest(t, user.Id))
+
+	reloaded := GetTopUpByTradeNo(order.TradeNo)
+	require.NotNil(t, reloaded)
+	assert.Equal(t, common.TopUpStatusSuccess, reloaded.Status)
+	assert.NotZero(t, reloaded.CompleteTime)
+
+	alreadyDone, err = RechargeDodo(order.TradeNo, "pay_123", "buyer@example.com", "127.0.0.1")
+	require.NoError(t, err)
+	assert.True(t, alreadyDone)
+	assert.Equal(t, 2*500000, getUserQuotaForPaymentGuardTest(t, user.Id))
+}
+
+func TestRechargeDodoRejectsForeignProvider(t *testing.T) {
+	truncateTables(t)
+
+	oldQuotaPerUnit := common.QuotaPerUnit
+	common.QuotaPerUnit = 500000
+	t.Cleanup(func() { common.QuotaPerUnit = oldQuotaPerUnit })
+
+	user := insertUserForPaymentGuardTest(t, 602, 7)
+	order := createDodoTestOrder(t, user.Id, "DODOTESTFOREIGN", PaymentProviderCreem, common.TopUpStatusPending)
+
+	_, err := RechargeDodo(order.TradeNo, "pay_456", "buyer@example.com", "127.0.0.1")
+	require.ErrorIs(t, err, ErrPaymentMethodMismatch)
+	assert.Equal(t, 7, getUserQuotaForPaymentGuardTest(t, user.Id))
+	assert.Equal(t, common.TopUpStatusPending, getTopUpStatusForPaymentGuardTest(t, order.TradeNo))
+}
+
+func TestRechargeDodoRejectsNonPendingOrder(t *testing.T) {
+	truncateTables(t)
+
+	oldQuotaPerUnit := common.QuotaPerUnit
+	common.QuotaPerUnit = 500000
+	t.Cleanup(func() { common.QuotaPerUnit = oldQuotaPerUnit })
+
+	user := insertUserForPaymentGuardTest(t, 603, 3)
+	order := createDodoTestOrder(t, user.Id, "DODOTESTEXPIRED", PaymentProviderDodo, common.TopUpStatusExpired)
+
+	_, err := RechargeDodo(order.TradeNo, "pay_789", "buyer@example.com", "127.0.0.1")
+	require.ErrorIs(t, err, ErrTopUpStatusInvalid)
+	assert.Equal(t, 3, getUserQuotaForPaymentGuardTest(t, user.Id))
+}
+
+func TestRechargeDodoRequiresTradeNo(t *testing.T) {
+	_, err := RechargeDodo("", "pay_000", "buyer@example.com", "127.0.0.1")
+	require.Error(t, err)
 }

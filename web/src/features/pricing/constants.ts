@@ -52,6 +52,16 @@ export function getSortLabels(t: TFunction): Record<SortOption, string> {
 /** Filter values */
 export const FILTER_ALL = 'all'
 
+/** Model discount filter options */
+export const MODEL_DISCOUNT_FILTERS = {
+  ALL: FILTER_ALL,
+  DISCOUNTED: 'discounted',
+  STANDARD: 'standard',
+} as const
+
+export type ModelDiscountFilter =
+  (typeof MODEL_DISCOUNT_FILTERS)[keyof typeof MODEL_DISCOUNT_FILTERS]
+
 /** Quota type options */
 export const QUOTA_TYPES = {
   ALL: 'all',
@@ -110,9 +120,9 @@ export function getEndpointTypeLabels(
 /** Filter section keys */
 export const FILTER_SECTIONS = {
   PRICING_TYPE: 'pricingType',
+  MODEL_DISCOUNT: 'modelDiscount',
   ENDPOINT_TYPE: 'endpointType',
   VENDOR: 'vendor',
-  GROUP: 'group',
   TAG: 'tag',
 } as const
 

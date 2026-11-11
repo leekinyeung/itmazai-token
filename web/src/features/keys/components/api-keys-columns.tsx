@@ -16,23 +16,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useQuery } from '@tanstack/react-query'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { StatusBadge } from '@/components/status-badge'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useMediaQuery } from '@/hooks'
 import { toIntlLocale } from '@/i18n/languages'
-import { getUserGroups } from '@/lib/api'
 import { getCurrencyDisplay } from '@/lib/currency'
-import { requireServerSuccess } from '@/lib/server-error-message'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
 import { API_KEY_STATUSES } from '../constants'
 import type { ApiKey } from '../types'
-import { ApiKeyGroupCell } from './api-key-group-cell'
 import { ApiKeyQuotaCell } from './api-key-quota-cell'
 import {
   ApiKeyActivityCell,
@@ -45,35 +40,11 @@ import {
 } from './api-keys-cells'
 import { DataTableRowActions } from './data-table-row-actions'
 
-const EMPTY_GROUP_RATIOS: Record<string, number | string> = {}
-
-function useGroupRatios(): Record<string, number | string> {
-  const { data } = useQuery({
-    queryKey: ['user-groups'],
-    queryFn: async () => requireServerSuccess(await getUserGroups()),
-    staleTime: 0,
-    select: (res) => {
-      if (!res.success || !res.data) return {}
-      const ratios: Record<string, number | string> = {}
-      for (const [group, info] of Object.entries(res.data)) {
-        if (typeof info.ratio === 'number' || typeof info.ratio === 'string') {
-          ratios[group] = info.ratio
-        }
-      }
-      return ratios
-    },
-  })
-
-  return data ?? EMPTY_GROUP_RATIOS
-}
-
 export function useApiKeysColumns(now: number): ColumnDef<ApiKey>[] {
   const { t, i18n } = useTranslation()
   useSystemConfigStore((state) => state.config.currency)
   const { meta: currency } = getCurrencyDisplay()
   const quotaUnit = currency.kind === 'tokens' ? t('Tokens') : currency.symbol
-  const groupRatios = useGroupRatios()
-  const shouldReduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const locale = toIntlLocale(i18n.resolvedLanguage || i18n.language)
   const justNowLabel = t('Just now')
   return useMemo<ColumnDef<ApiKey>[]>(
@@ -149,24 +120,6 @@ export function useApiKeysColumns(now: number): ColumnDef<ApiKey>[] {
         minSize: 260,
       },
       {
-        accessorKey: 'group',
-        header: t('Group'),
-        cell: ({ row }) => {
-          const apiKey = row.original
-          const group = row.getValue('group') as string
-          return (
-            <ApiKeyGroupCell
-              group={group}
-              ratio={groupRatios[group]}
-              crossGroupRetry={apiKey.cross_group_retry}
-              shouldReduceMotion={shouldReduceMotion}
-            />
-          )
-        },
-        size: 220,
-        meta: { mobileHidden: true },
-      },
-      {
         id: 'model_limits',
         accessorKey: 'model_limits',
         header: t('Models'),
@@ -233,6 +186,6 @@ export function useApiKeysColumns(now: number): ColumnDef<ApiKey>[] {
         meta: { pinned: 'right' as const },
       },
     ],
-    [t, quotaUnit, now, groupRatios, shouldReduceMotion, locale, justNowLabel]
+    [t, quotaUnit, now, locale, justNowLabel]
   )
 }

@@ -18,8 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { describe, expect, test } from 'vitest'
 
-import { SORT_OPTIONS } from '../constants'
-import { sortModels } from '../lib/filters'
+import { MODEL_DISCOUNT_FILTERS, SORT_OPTIONS } from '../constants'
+import { filterByModelDiscount, sortModels } from '../lib/filters'
 import type { PricingModel } from '../types'
 
 function pricingModel(
@@ -123,4 +123,28 @@ describe('price sorting', () => {
       )
     }
   )
+})
+
+describe('model discount filtering', () => {
+  const discountModels = [
+    pricingModel('discounted', { model_discount: 0.8 }),
+    pricingModel('standard', { model_discount: 1 }),
+    pricingModel('legacy', {}),
+    pricingModel('invalid', { model_discount: 0 }),
+  ]
+
+  test('separates discounted models from standard and legacy models', () => {
+    expect(
+      filterByModelDiscount(
+        discountModels,
+        MODEL_DISCOUNT_FILTERS.DISCOUNTED
+      ).map((model) => model.model_name)
+    ).toEqual(['discounted'])
+    expect(
+      filterByModelDiscount(
+        discountModels,
+        MODEL_DISCOUNT_FILTERS.STANDARD
+      ).map((model) => model.model_name)
+    ).toEqual(['standard', 'legacy', 'invalid'])
+  })
 })

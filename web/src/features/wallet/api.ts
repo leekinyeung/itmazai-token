@@ -35,6 +35,8 @@ import type {
   CompleteOrderRequest,
   CreemPaymentRequest,
   CreemPaymentResponse,
+  DodoPaymentRequest,
+  DodoPaymentResponse,
   WaffoPaymentRequest,
   WaffoPaymentResponse,
   WaffoPancakePaymentRequest,
@@ -140,6 +142,30 @@ export async function requestCreemPayment(
   request: CreemPaymentRequest
 ): Promise<CreemPaymentResponse> {
   const res = await api.post('/api/user/creem/pay', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Calculate payment amount for Dodo Payments
+ */
+export async function calculateDodoAmount(
+  request: AmountRequest
+): Promise<AmountResponse> {
+  const res = await api.post('/api/user/dodo/amount', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Request Dodo Payments checkout
+ */
+export async function requestDodoPayment(
+  request: DodoPaymentRequest
+): Promise<DodoPaymentResponse> {
+  const res = await api.post('/api/user/dodo/pay', request, {
     skipBusinessError: true,
   } as Record<string, unknown>)
   return res.data

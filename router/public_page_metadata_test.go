@@ -44,6 +44,7 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 		{path: "/blog", title: "TaoDock Blog | TaoDock", canonical: "https://taodock.com/blog"},
 		{path: "/blog/how-to-choose-ai-gateway", title: "How to Choose an AI Gateway in 2026: A Practical Checklist | TaoDock", canonical: "https://taodock.com/blog/how-to-choose-ai-gateway"},
 		{path: "/blog/reduce-openai-api-costs", title: "How to Reduce OpenAI API Costs in 2026: A Practical Playbook | TaoDock", canonical: "https://taodock.com/blog/reduce-openai-api-costs"},
+		{path: "/blog/handle-openai-rate-limits", title: "How to Handle OpenAI Rate Limits in 2026: A Production Runbook | TaoDock", canonical: "https://taodock.com/blog/handle-openai-rate-limits"},
 		{path: "/compare/taodock-vs-openrouter", title: "TaoDock vs OpenRouter: Choosing a Unified AI API Gateway | TaoDock", canonical: "https://taodock.com/compare/taodock-vs-openrouter"},
 		{path: "/integrations/openai-sdk", title: "Use the OpenAI SDK with TaoDock's Compatible API | TaoDock", canonical: "https://taodock.com/integrations/openai-sdk"},
 		{path: "/faq", title: "TaoDock AI API Frequently Asked Questions | TaoDock", canonical: "https://taodock.com/faq"},
@@ -83,7 +84,7 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 		})
 	}
 
-	for _, path := range []string{"/compare", "/blog", "/blog/how-to-choose-ai-gateway", "/blog/reduce-openai-api-costs", "/compare/taodock-vs-openrouter", "/integrations/openai-sdk", "/faq"} {
+	for _, path := range []string{"/compare", "/blog", "/blog/how-to-choose-ai-gateway", "/blog/reduce-openai-api-costs", "/blog/handle-openai-rate-limits", "/compare/taodock-vs-openrouter", "/integrations/openai-sdk", "/faq"} {
 		t.Run("structured data "+path, func(t *testing.T) {
 			page, _, _, _, ok := renderer.publicPage(path)
 			require.True(t, ok)
@@ -223,7 +224,7 @@ func TestGeneratedPublicContentAssetsStayIndexableAndSafe(t *testing.T) {
 	// needs a new entry here.
 	indexableContentPaths := []string{
 		"/compare", "/blog", "/faq",
-		"/blog/how-to-choose-ai-gateway", "/blog/reduce-openai-api-costs",
+		"/blog/how-to-choose-ai-gateway", "/blog/reduce-openai-api-costs", "/blog/handle-openai-rate-limits",
 		"/compare/taodock-vs-openrouter", "/compare/taodock-vs-litellm", "/compare/taodock-vs-portkey", "/compare/taodock-vs-requesty", "/compare/taodock-vs-siliconflow",
 		"/integrations/cherry-studio", "/integrations/workbuddy", "/integrations/open-webui", "/integrations/aionui", "/integrations/deepchat", "/integrations/openai-sdk",
 	}

@@ -38,7 +38,6 @@ export interface PricingTableProps {
   usdExchangeRate?: number
   tokenUnit?: TokenUnit
   showRechargePrice?: boolean
-  selectedGroup?: string
 }
 
 export function PricingTable(props: PricingTableProps) {
@@ -50,7 +49,6 @@ export function PricingTable(props: PricingTableProps) {
     usdExchangeRate = 1,
     tokenUnit = DEFAULT_TOKEN_UNIT,
     showRechargePrice = false,
-    selectedGroup,
   } = props
 
   const [pagination, setPagination] = useState<PaginationState>({
@@ -63,7 +61,6 @@ export function PricingTable(props: PricingTableProps) {
     priceRate,
     usdExchangeRate,
     showRechargePrice,
-    selectedGroup,
   })
 
   const { table } = useDataTable({

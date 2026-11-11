@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/QuantumNous/new-api/common"
-	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
@@ -72,7 +71,7 @@ func TestModelPriceHelperTieredUsesPreloadedRequestInput(t *testing.T) {
 	require.Equal(t, common.QuotaPerUnit, info.TieredBillingSnapshot.QuotaPerUnit)
 }
 
-func TestModelPriceHelperAppliesFrozenDiscountAfterGroupOverride(t *testing.T) {
+func TestModelPriceHelperUsesAccountGroupForPricing(t *testing.T) {
 	originalPrices := ratio_setting.ModelPrice2JSONString()
 	originalDiscounts := ratio_setting.ModelDiscount2JSONString()
 	originalGroups := ratio_setting.GroupRatio2JSONString()
@@ -86,8 +85,8 @@ func TestModelPriceHelperAppliesFrozenDiscountAfterGroupOverride(t *testing.T) {
 
 	require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(`{"discount-price-model":100}`))
 	require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString(`{"discount-price-model":0.5}`))
-	require.NoError(t, ratio_setting.UpdateGroupRatioByJSONString(`{"billing-a":0.8,"billing-b":0.7}`))
-	require.NoError(t, ratio_setting.UpdateGroupGroupRatioByJSONString(`{"vip":{"billing-a":0.6}}`))
+	require.NoError(t, ratio_setting.UpdateGroupRatioByJSONString(`{"vip":0.8,"billing-a":0.7}`))
+	require.NoError(t, ratio_setting.UpdateGroupGroupRatioByJSONString(`{"vip":{"vip":0.6}}`))
 
 	ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
 	ctx.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", nil)
@@ -102,12 +101,14 @@ func TestModelPriceHelperAppliesFrozenDiscountAfterGroupOverride(t *testing.T) {
 	assert.Equal(t, 0.5, price.ModelDiscount)
 	assert.Equal(t, 0.6, price.GroupRatioInfo.GroupRatio)
 	assert.Equal(t, 15_000_000, price.QuotaToPreConsume, "100 × 0.5 × the 0.6 override must not also multiply the base group ratio")
+	assert.Equal(t, "vip", info.UsingGroup)
 
 	require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString(`{"discount-price-model":0.9}`))
-	ctx.Set(string(constant.ContextKeyAutoGroup), "billing-b")
+	info.UsingGroup = "billing-a"
 	refreshedGroup := HandleGroupRatio(ctx, info)
-	assert.Equal(t, 0.7, refreshedGroup.GroupRatio)
-	assert.Equal(t, 0.5, price.ModelDiscount, "the request keeps its accepted discount while group routing remains dynamic")
+	assert.Equal(t, 0.6, refreshedGroup.GroupRatio)
+	assert.Equal(t, "vip", info.UsingGroup)
+	assert.Equal(t, 0.5, price.ModelDiscount, "the accepted request keeps its frozen discount")
 }
 
 func TestFixedPricePreConsumeAndRealtimeRejection(t *testing.T) {

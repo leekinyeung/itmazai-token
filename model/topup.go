@@ -28,6 +28,7 @@ type TopUp struct {
 const (
 	PaymentMethodStripe       = "stripe"
 	PaymentMethodCreem        = "creem"
+	PaymentMethodDodo         = "dodo"
 	PaymentMethodWaffo        = "waffo"
 	PaymentMethodWaffoPancake = "waffo_pancake"
 	PaymentMethodBalance      = "balance"
@@ -37,6 +38,7 @@ const (
 	PaymentProviderEpay         = "epay"
 	PaymentProviderStripe       = "stripe"
 	PaymentProviderCreem        = "creem"
+	PaymentProviderDodo         = "dodo"
 	PaymentProviderWaffo        = "waffo"
 	PaymentProviderWaffoPancake = "waffo_pancake"
 	PaymentProviderBalance      = "balance"
@@ -233,6 +235,66 @@ func RechargeEpay(tradeNo string, actualPaymentMethod string, callerIp string) (
 
 	common.SysLog(common.LogText("Epay top-up succeeded trade_no=%s user_id=%d quota_to_add=%d money=%.2f", topUp.TradeNo, topUp.UserId, quotaToAdd, topUp.Money))
 	RecordTopupLog(topUp.UserId, common.NewMessage("Online top-up succeeded, amount added: {{quota}}, payment amount: {{amount}}", map[string]any{"quota": logger.FormatQuota(quotaToAdd), "amount": fmt.Sprintf("%f", topUp.Money)}), callerIp, topUp.PaymentMethod, PaymentProviderEpay)
+	return false, nil
+}
+
+// RechargeDodo atomically completes a Dodo Payments top-up. The credited quota
+// is derived from the locally stored order amount with the shared wallet
+// conversion helper; the webhook's paid amount is never used as a multiplier.
+// alreadyDone=true means the order was already fulfilled (retried webhook).
+func RechargeDodo(tradeNo string, paymentId string, customerEmail string, callerIp string) (alreadyDone bool, err error) {
+	if tradeNo == "" {
+		return false, errors.New("payment order number not provided")
+	}
+
+	refCol := "`trade_no`"
+	if common.UsingMainDatabase(common.DatabaseTypePostgreSQL) {
+		refCol = `"trade_no"`
+	}
+
+	var quotaToAdd int
+	var reward *FirstTopUpReward
+	topUp := &TopUp{}
+	err = DB.Transaction(func(tx *gorm.DB) error {
+		if err := lockForUpdate(tx).Where(refCol+" = ?", tradeNo).First(topUp).Error; err != nil {
+			return ErrTopUpNotFound
+		}
+		if topUp.PaymentProvider != PaymentProviderDodo {
+			return ErrPaymentMethodMismatch
+		}
+		if topUp.Status == common.TopUpStatusSuccess {
+			alreadyDone = true
+			return nil
+		}
+		if topUp.Status != common.TopUpStatusPending {
+			return ErrTopUpStatusInvalid
+		}
+
+		quota, quotaErr := common.WalletQuotaFromDecimalStrict(
+			decimal.NewFromInt(topUp.Amount).Mul(decimal.NewFromFloat(common.QuotaPerUnit)),
+		)
+		if quotaErr != nil || quota <= 0 {
+			return ErrInvalidTopUpQuota
+		}
+		quotaToAdd = quota
+		topUp.CompleteTime = common.GetTimestamp()
+		topUp.Status = common.TopUpStatusSuccess
+		if err := tx.Save(topUp).Error; err != nil {
+			return err
+		}
+		// The fourth argument updates user columns; Dodo keeps the payment
+		// identifiers in the top-up row, so no user column changes here.
+		reward, err = creditTopUpWithInviterReward(tx, topUp, quotaToAdd, nil)
+		return err
+	})
+	if err != nil || alreadyDone {
+		return alreadyDone, err
+	}
+
+	syncCreditUserQuotaCache(topUp.UserId, quotaToAdd, common.LogText("dodo topup"))
+	finishFirstTopUpReward(reward)
+	common.SysLog(common.LogText("Dodo top-up succeeded trade_no=%s user_id=%d quota_to_add=%d money=%.2f payment_id=%s customer_email=%s", topUp.TradeNo, topUp.UserId, quotaToAdd, topUp.Money, paymentId, customerEmail))
+	RecordTopupLog(topUp.UserId, common.NewMessage("{{provider}} top-up succeeded, amount added: {{quota}}, payment amount: {{amount}}", map[string]any{"provider": "Dodo Payments", "quota": logger.FormatQuota(quotaToAdd), "amount": fmt.Sprintf("%.2f", topUp.Money)}), callerIp, topUp.PaymentMethod, PaymentMethodDodo)
 	return false, nil
 }
 

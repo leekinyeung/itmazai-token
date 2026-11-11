@@ -181,7 +181,7 @@ func decodeUserModelsResponse(t *testing.T, recorder *httptest.ResponseRecorder)
 	return payload.Data
 }
 
-func TestGetUserModelsFiltersByRequestedGroup(t *testing.T) {
+func TestGetUserModelsIgnoresRequestedGroup(t *testing.T) {
 	db := setupModelListControllerTestDB(t)
 	require.NoError(t, db.Create(&model.User{
 		Id:       1002,
@@ -212,10 +212,10 @@ func TestGetUserModelsFiltersByRequestedGroup(t *testing.T) {
 
 	GetUserModels(vipContext)
 
-	require.Empty(t, decodeUserModelsResponse(t, vipRecorder))
+	require.ElementsMatch(t, []string{"zz-default-only-model"}, decodeUserModelsResponse(t, vipRecorder))
 }
 
-func TestGetUserModelsExpandsAutoGroupsInConfiguredOrder(t *testing.T) {
+func TestGetUserModelsIgnoresLegacyGroupQuery(t *testing.T) {
 	originalAutoGroups := setting.AutoGroups2JsonString()
 	originalUsableGroups := setting.UserUsableGroups2JSONString()
 	originalSpecialGroups := ratio_setting.GetGroupRatioSetting().GroupSpecialUsableGroup.ReadAll()
@@ -260,9 +260,7 @@ func TestGetUserModelsExpandsAutoGroupsInConfiguredOrder(t *testing.T) {
 	GetUserModels(context)
 
 	models := decodeUserModelsResponse(t, recorder)
-	require.Len(t, models, 3)
-	assert.ElementsMatch(t, []string{"zz-vip-model", "zz-shared-model"}, models[:2])
-	assert.Equal(t, "zz-default-model", models[2])
+	assert.ElementsMatch(t, []string{"zz-default-model", "zz-shared-model"}, models)
 }
 
 func TestListModelsIncludesTieredBillingModel(t *testing.T) {
@@ -431,7 +429,7 @@ func TestListModelsTokenLimitIncludesTieredBillingModel(t *testing.T) {
 	require.NotContains(t, ids, "zz-token-unpriced-model")
 }
 
-func TestListModelsDefaultKeyUsesAllPublishedModelsButWhitelistKeepsGroupScope(t *testing.T) {
+func TestListModelsUnlimitedKeyStillUsesAccountGroup(t *testing.T) {
 	withSelfUseModeDisabled(t)
 	originalRatios := ratio_setting.ModelRatio2JSONString()
 	require.NoError(t, ratio_setting.UpdateModelRatioByJSONString(`{"zz-default-key-local":1,"zz-default-key-fallback":1,"zz-default-key-hidden":1}`))
@@ -465,7 +463,7 @@ func TestListModelsDefaultKeyUsesAllPublishedModelsButWhitelistKeepsGroupScope(t
 	ListModels(defaultCtx, constant.ChannelTypeOpenAI)
 	defaultIDs := decodeListModelsResponse(t, defaultRecorder)
 	assert.Contains(t, defaultIDs, "zz-default-key-local")
-	assert.Contains(t, defaultIDs, "zz-default-key-fallback")
+	assert.NotContains(t, defaultIDs, "zz-default-key-fallback")
 	assert.NotContains(t, defaultIDs, "zz-default-key-hidden")
 
 	limitedRecorder := httptest.NewRecorder()
@@ -479,7 +477,7 @@ func TestListModelsDefaultKeyUsesAllPublishedModelsButWhitelistKeepsGroupScope(t
 	assert.Empty(t, decodeListModelsResponse(t, limitedRecorder), "an explicit whitelist keeps the key's original group routing scope")
 }
 
-func TestListModelsTokenLimitUsesResolvedCustomAutoGroups(t *testing.T) {
+func TestListModelsIgnoresHistoricalTokenAutoGroups(t *testing.T) {
 	withSelfUseModeEnabled(t)
 	originalMax := setting.GetMaxTokenAutoGroups()
 	originalUsableGroups := setting.UserUsableGroups2JSONString()
@@ -515,7 +513,7 @@ func TestListModelsTokenLimitUsesResolvedCustomAutoGroups(t *testing.T) {
 
 	ListModels(ctx, constant.ChannelTypeOpenAI)
 	ids := decodeListModelsResponse(t, recorder)
-	require.Equal(t, map[string]struct{}{"zz-vip-allowed": {}}, ids)
+	require.Equal(t, map[string]struct{}{"zz-default-outside-snapshot": {}}, ids)
 
 	require.NoError(t, setting.UpdateUserUsableGroupsByJSONString(`{"default":"Default"}`))
 	emptyRecorder := httptest.NewRecorder()

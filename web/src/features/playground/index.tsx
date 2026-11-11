@@ -32,10 +32,8 @@ export function Playground() {
     messages,
     isLoadingMessages,
     models,
-    groups,
     updateMessages,
     setModels,
-    setGroups,
     updateConfig,
     updateParameterEnabled,
     clearMessages,
@@ -67,9 +65,7 @@ export function Playground() {
   }
 
   const { isLoadingModels } = usePlaygroundOptions({
-    currentGroup: config.group,
     currentModel: config.model,
-    setGroups,
     setModels,
     updateConfig,
   })
@@ -98,13 +94,10 @@ export function Playground() {
         <PlaygroundInput
           config={config}
           disabled={isGenerating}
-          groups={groups}
-          groupValue={config.group}
           isGenerating={isGenerating}
           isModelLoading={isLoadingModels}
           modelValue={config.model}
           models={models}
-          onGroupChange={(value) => updateConfig('group', value)}
           onConfigChange={updateConfig}
           onClearMessages={handleClearMessages}
           onModelChange={(value) => updateConfig('model', value)}

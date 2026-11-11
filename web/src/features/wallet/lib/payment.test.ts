@@ -19,8 +19,11 @@ For commercial licensing, please contact support@quantumnous.com
 import { describe, expect, test } from 'vitest'
 
 import { PAYMENT_TYPES } from '../constants'
+import type { TopupInfo } from '../types'
 import {
   dispatchSelectedPayment,
+  getMinTopupAmount,
+  isDodoPayment,
   isStripePayment,
   isWaffoPayment,
   isWaffoPancakePayment,
@@ -33,6 +36,25 @@ describe('payment type classification', () => {
     expect(isWaffoPancakePayment(PAYMENT_TYPES.WAFFO_PANCAKE)).toBe(true)
     expect(isWaffoPancakePayment(PAYMENT_TYPES.WAFFO)).toBe(false)
     expect(isStripePayment(PAYMENT_TYPES.STRIPE)).toBe(true)
+  })
+
+  test('classifies Dodo without routing it to another gateway flow', () => {
+    expect(isDodoPayment(PAYMENT_TYPES.DODO)).toBe(true)
+    expect(isDodoPayment(PAYMENT_TYPES.CREEM)).toBe(false)
+    expect(isWaffoPayment(PAYMENT_TYPES.DODO)).toBe(false)
+  })
+})
+
+describe('minimum top-up for Dodo Payments', () => {
+  test('uses the Dodo minimum when only Dodo is enabled', () => {
+    const topupInfo = {
+      enable_online_topup: false,
+      enable_stripe_topup: false,
+      enable_dodo_topup: true,
+      dodo_min_topup: 5,
+    } as TopupInfo
+
+    expect(getMinTopupAmount(topupInfo)).toBe(5)
   })
 })
 
@@ -61,6 +83,26 @@ describe('payment dispatch', () => {
 
     expect(success).toBe(true)
     expect(calls).toEqual(['waffo:120:3'])
+  })
+
+  test('routes Dodo through the regular confirmation flow', async () => {
+    const calls: string[] = []
+    const success = await dispatchSelectedPayment(
+      { name: 'Dodo Payments', type: PAYMENT_TYPES.DODO },
+      50,
+      null,
+      {
+        regular: async (amount, type) => {
+          calls.push(`regular:${amount}:${type}`)
+          return true
+        },
+        waffo: async () => false,
+        waffoPancake: async () => false,
+      }
+    )
+
+    expect(success).toBe(true)
+    expect(calls).toEqual(['regular:50:dodo'])
   })
 
   test('does not create a Waffo order without a selected method index', async () => {

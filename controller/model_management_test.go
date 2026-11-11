@@ -777,6 +777,100 @@ export function parseTaskResult() { return {}; }
 
 			})
 
+			t.Run("model_discount_in_listing", func(t *testing.T) {
+				previousDiscount := ratio_setting.ModelDiscount2JSONString()
+				require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString("{}"))
+				t.Cleanup(func() {
+					require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString(previousDiscount))
+				})
+
+				exact := model.Model{ModelName: "discount-exact", Status: 1}
+				unset := model.Model{ModelName: "discount-unset", Status: 1}
+				alias := model.Model{ModelName: "gpt-4-gizmo-customer", Status: 1}
+				for _, record := range []*model.Model{&exact, &unset, &alias} {
+					require.NoError(t, record.Insert())
+				}
+				channel := model.Channel{Name: "Discount listing", Type: 1, Key: "fixture", Group: "default",
+					Models: "discount-exact,discount-channel-only,gpt-4-gizmo-customer", Status: common.ChannelStatusEnabled}
+				require.NoError(t, channel.Insert())
+				t.Cleanup(func() {
+					require.NoError(t, db.Where("channel_id = ?", channel.Id).Delete(&model.Ability{}).Error)
+					require.NoError(t, db.Where("id = ?", channel.Id).Delete(&model.Channel{}).Error)
+					require.NoError(t, db.Unscoped().Where("model_name IN ?", []string{"discount-exact", "discount-unset", "gpt-4-gizmo-customer"}).Delete(&model.Model{}).Error)
+					model.RefreshPricing()
+				})
+
+				type discountResponse struct {
+					Success bool
+					Data    struct{ Items []model.Model }
+				}
+				listModels := func(handler gin.HandlerFunc, path string) map[string]model.Model {
+					var response discountResponse
+					modelManagementRequest(t, handler, http.MethodGet, path, nil, &response)
+					require.True(t, response.Success)
+					byName := make(map[string]model.Model)
+					for _, row := range response.Data.Items {
+						byName[row.ModelName] = row
+					}
+					return byName
+				}
+
+				// Unconfigured discounts default to 1 on every listing row.
+				for _, row := range listModels(GetAllModelsMeta, "/api/models/?include_channel_models=true&page_size=100") {
+					assert.Equal(t, float64(1), row.ModelDiscount, row.ModelName)
+				}
+
+				require.NoError(t, ratio_setting.UpdateModelDiscountByJSONString(`{"discount-exact":0.8,"gpt-4-gizmo-*":0.7}`))
+
+				listRows := listModels(GetAllModelsMeta, "/api/models/?include_channel_models=true&page_size=100")
+				require.Contains(t, listRows, "discount-exact")
+				assert.Equal(t, float64(0.8), listRows["discount-exact"].ModelDiscount)
+				assert.Equal(t, float64(1), listRows["discount-unset"].ModelDiscount)
+				assert.Equal(t, float64(0.7), listRows["gpt-4-gizmo-customer"].ModelDiscount, "alias wildcards resolve like relay")
+				assert.Zero(t, listRows["discount-channel-only"].Id, "channel-only rows are synthetic")
+				assert.Equal(t, float64(1), listRows["discount-channel-only"].ModelDiscount)
+
+				searchRows := listModels(SearchModelsMeta, "/api/models/search?include_channel_models=true&keyword=discount-&page_size=100")
+				assert.Equal(t, float64(0.8), searchRows["discount-exact"].ModelDiscount)
+				assert.Equal(t, float64(1), searchRows["discount-unset"].ModelDiscount)
+
+				var detail struct {
+					Success bool
+					Data    model.Model
+				}
+				modelManagementRequest(t, func(c *gin.Context) {
+					c.Params = gin.Params{{Key: "id", Value: strconv.Itoa(exact.Id)}}
+					GetModelMeta(c)
+				}, http.MethodGet, "/api/models/"+strconv.Itoa(exact.Id), nil, &detail)
+				require.True(t, detail.Success)
+				assert.Equal(t, float64(0.8), detail.Data.ModelDiscount)
+
+				// A regular admin must see the same discount as a super admin.
+				var adminResponse discountResponse
+				modelManagementRequest(t, func(c *gin.Context) {
+					c.Set("role", common.RoleAdminUser)
+					GetAllModelsMeta(c)
+				}, http.MethodGet, "/api/models/?include_channel_models=true&page_size=100", nil, &adminResponse)
+				require.True(t, adminResponse.Success)
+				adminRows := make(map[string]model.Model)
+				for _, row := range adminResponse.Data.Items {
+					adminRows[row.ModelName] = row
+				}
+				assert.Equal(t, float64(0.8), adminRows["discount-exact"].ModelDiscount)
+
+				// The listing exposes the discount only, not the full pricing config.
+				var raw struct {
+					Data struct{ Items []map[string]any }
+				}
+				modelManagementRequest(t, GetAllModelsMeta, http.MethodGet, "/api/models/?page_size=100", nil, &raw)
+				require.NotEmpty(t, raw.Data.Items)
+				for _, item := range raw.Data.Items {
+					assert.Contains(t, item, "model_discount")
+					assert.NotContains(t, item, "ModelPrice")
+					assert.NotContains(t, item, "ModelRatio")
+				}
+			})
+
 			t.Run("pricing_saves_zero_switches_modes_and_rejects_stale_batches", func(t *testing.T) {
 				before, err := model.GetModelPricingSnapshot([]string{"matrix-priced", "matrix-other"})
 				require.NoError(t, err)

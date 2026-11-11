@@ -8,6 +8,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/setting/ratio_setting"
 
 	"github.com/gin-gonic/gin"
 )
@@ -257,6 +258,7 @@ func enrichModels(models []*model.Model) error {
 			continue
 		}
 		metadata.HasMetadata = metadata.Id > 0
+		metadata.ModelDiscount = ratio_setting.GetModelDiscount(metadata.ModelName)
 		channelIDs := make(map[int]struct{})
 		for name, ids := range configured {
 			if metadata.MatchesName(name) {

@@ -85,6 +85,7 @@ export interface Model {
   updated_time: number
   name_rule: number
   // Runtime fields
+  model_discount?: number
   bound_channels?: BoundChannel[]
   enable_groups?: string[]
   quota_types?: number[]

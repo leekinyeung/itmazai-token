@@ -325,6 +325,13 @@ export type BillingSettings = {
   CreemWebhookSecret: string
   CreemTestMode: boolean
   CreemProducts: string
+  DodoApiKey: string
+  DodoWebhookKey: string
+  DodoProductId: string
+  DodoTestMode: boolean
+  DodoCurrency: string
+  DodoUnitPrice: number
+  DodoMinTopUp: number
   WaffoEnabled: boolean
   WaffoApiKey: string
   WaffoPrivateKey: string

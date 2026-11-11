@@ -1,261 +1,220 @@
 <div align="center">
 
-![new-api](/web/public/logo.png)
+![TaoDock](web/public/logo.png)
 
-# New API
+# TaoDock · 众妙之门
 
-**An AI gateway for models, applications, and agents**
+**一个入口，接入多家大模型 —— 面向应用与 AI Agent 的统一 AI API 网关**
 
 <p align="center">
-  <a href="./README.zh_CN.md">简体中文</a> |
-  <a href="./README.zh_TW.md">繁體中文</a> |
-  <strong>English</strong> |
-  <a href="./README.fr.md">Français</a> |
-  <a href="./README.ja.md">日本語</a>
+  <a href="https://taodock.com">托管服务 taodock.com</a> •
+  <a href="https://docs.taodock.com">使用手册</a> •
+  <a href="#核心能力">核心能力</a> •
+  <a href="#快速开始">快速开始</a> •
+  <a href="#自托管部署">自托管部署</a> •
+  <a href="#仓库结构">仓库结构</a>
 </p>
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/Calcium-Ion/new-api/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Calcium-Ion/new-api?color=brightgreen" alt="license">
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/badge/license-AGPL--3.0-brightgreen" alt="license">
   </a><!--
-  --><a href="https://github.com/Calcium-Ion/new-api/releases/latest">
-    <img src="https://img.shields.io/github/v/release/Calcium-Ion/new-api?color=brightgreen&include_prereleases" alt="release">
-  </a><!--
-  --><a href="https://hub.docker.com/r/CalciumIon/new-api">
-    <img src="https://img.shields.io/badge/docker-dockerHub-blue" alt="docker">
-  </a>
-  <a href="https://atomgit.com/QuantumNous/new-api" target="_blank">
-    <img alt="AtomGit G-Star" src="https://atomgit.com/QuantumNous/new-api/star/badge.svg"/>
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://trendshift.io/repositories/20180" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/20180" alt="QuantumNous%2Fnew-api | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
-  </a>
-  <br>
-  <a href="https://hellogithub.com/repository/QuantumNous/new-api" target="_blank">
-    <img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=539ac4217e69431684ad4a0bab768811&claim_uid=tbFPfKIDHpc4TzR" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" />
-  </a><!--
-  -->
-  <a href="https://atomgit.com/QuantumNous/new-api" target="_blank">
-    <img alt="AtomGit G-Star" src="https://atomgit.com/QuantumNous/new-api/star/new_badge.svg" width="250" height="55" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="#screenshots">Screenshots</a> •
-  <a href="#capabilities">Capabilities</a> •
-  <a href="#quick-start">Quick start</a> •
-  <a href="#deployment">Deployment</a> •
-  <a href="#development">Development</a> •
-  <a href="#documentation">Documentation</a>
+  --><img src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" alt="go">
+  <!--
+  --><img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="react">
+  <!--
+  --><img src="https://img.shields.io/badge/Docker-支持-2496ED?logo=docker&logoColor=white" alt="docker">
 </p>
 
 </div>
 
 ---
 
-## 📝 Project Description
+## 项目简介
 
-New API is a self-hosted AI gateway for applications, agents, and teams. Connect upstream model services, expose a consistent API to your clients, and manage routing, access, usage, and costs in one place.
+TaoDock（众妙之门）是一个自托管的 AI API 网关：把 OpenAI、Anthropic、Google Gemini、Azure OpenAI、AWS Bedrock、Vertex AI、DeepSeek、通义千问等上游模型服务接入同一个平台，对客户端统一暴露 OpenAI 兼容接口，并集中管理渠道路由、密钥访问、用量计费与日志审计。
 
-Use it to share authorized model access across a team, switch providers without configuring every client again, or operate a private multi-model service with a web console. Upstreams include OpenAI, Anthropic, Google Gemini, Azure OpenAI, AWS Bedrock, Vertex AI, DeepSeek, Qwen, and other compatible services.
+它可以用来：
+
+- 为团队或产品提供**统一的多模型 API 入口**，客户端只改一次 Base URL；
+- 在网页控制台里**管理渠道、密钥、额度与订阅**，查看用量、成本与性能指标；
+- 运营一个**公开的多模型服务平台**，自带模型广场、价格页、模型评测、排行榜等公开页面。
+
+本项目基于开源项目 [New API](https://github.com/QuantumNous/new-api)（其源头为 [One API](https://github.com/songquanpeng/one-api)）二次开发，在此基础上新增了公开产品站点、模型评测体系、性能视图、VS Code 扩展与自动化发布流水线。上游关系与差异见[下文](#与上游-new-api-的关系)。
 
 > [!IMPORTANT]
-> - This project is intended solely for lawful and authorized AI API gateway, organization-level authentication, multi-model management, usage analytics, cost accounting, and private deployment scenarios.
-> - Users must lawfully obtain upstream API keys, accounts, model services, and interface permissions, and must comply with upstream terms of service and applicable laws and regulations.
-> - Users should ensure their use complies with upstream terms of service and applicable laws and regulations.
-> - When providing generative AI services to the public, users should comply with applicable regulatory requirements and fulfill all filing, licensing, content safety, real-name verification, log retention, tax, and upstream authorization obligations required by their jurisdiction.
-
-<!-- -->
-
-> [!WARNING]
-> When operating this project as a public generative AI service or API resale service, users should first complete all required filing, licensing, content safety, real-name verification, log retention, tax, payment, and upstream authorization obligations.
+> - 本项目仅用于合法且经授权的 AI API 网关、组织级认证、多模型管理、用量分析与成本核算及私有部署场景。
+> - 使用者须合法取得上游 API 密钥、账号与模型服务权限，并遵守上游服务条款及所在地的法律法规。
+> - 以公开生成式 AI 服务或 API 转售形式运营时，请先完成所在地要求的备案、许可、内容安全、实名认证、日志留存、税务及上游授权等义务。
 
 ---
 
-<a id="screenshots"></a>
+## 界面截图
 
-## Screenshots
+以下为控制台界面示意，页面中的账号、渠道、用量与价格均为演示数据。
 
-Accounts, channels, plugin installation states, usage, prices, and costs shown below are simulated data. The marketplace displays the official plugin catalog. Click an image to view it at full size.
-
-| Usage dashboard | Plugin marketplace |
+| 数据看板 | 模型广场 |
 | --- | --- |
-| [![Usage dashboard with simulated requests, costs, and performance metrics](assets/screenshots/dashboard.en.jpg)](assets/screenshots/dashboard.en.jpg) | [![Official plugin marketplace with simulated installation status](assets/screenshots/plugin-marketplace.en.jpg)](assets/screenshots/plugin-marketplace.en.jpg) |
-| **Model square** | **Usage logs** |
-| [![Model square with simulated model pricing and availability](assets/screenshots/models.en.jpg)](assets/screenshots/models.en.jpg) | [![Usage logs with simulated tokens, costs, and response times](assets/screenshots/usage-logs.en.jpg)](assets/screenshots/usage-logs.en.jpg) |
+| [![数据看板：请求数、费用、Token、RPM/TPM 与性能健康](assets/screenshots/dashboard.zh-CN.jpg)](assets/screenshots/dashboard.zh-CN.jpg) | [![模型广场：模型可用性与定价](assets/screenshots/models.zh-CN.jpg)](assets/screenshots/models.zh-CN.jpg) |
+| **用量日志** | **任务插件市场** |
+| [![用量日志：Token、费用与响应时间](assets/screenshots/usage-logs.zh-CN.jpg)](assets/screenshots/usage-logs.zh-CN.jpg) | [![任务插件市场：图片视频等异步任务插件](assets/screenshots/plugin-marketplace.zh-CN.jpg)](assets/screenshots/plugin-marketplace.zh-CN.jpg) |
 
 ---
 
-## 🤝 Trusted Partners
+## 核心能力
 
-<p align="center">
-  <em>No particular order</em>
-</p>
-
-<p align="center">
-  <a href="https://www.cherry-ai.com/" target="_blank">
-    <img src="./docs/images/cherry-studio.png" alt="Cherry Studio" height="80" />
-  </a><!--
-  --><a href="https://github.com/iOfficeAI/AionUi/" target="_blank">
-    <img src="./docs/images/aionui.png" alt="Aion UI" height="80" />
-  </a><!--
-  --><a href="https://bda.pku.edu.cn/" target="_blank">
-    <img src="./docs/images/pku.png" alt="Peking University" height="80" />
-  </a><!--
-  --><a href="https://www.aliyun.com/" target="_blank">
-    <img src="./docs/images/aliyun.png" alt="Alibaba Cloud" height="80" />
-  </a><!--
-  --><a href="https://io.net/" target="_blank">
-    <img src="./docs/images/io-net.png" alt="IO.NET" height="80" />
-  </a>
-</p>
-
----
-
-## 🙏 Special Thanks
-
-<p align="center">
-  <a href="https://www.jetbrains.com/?from=new-api" target="_blank">
-    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo" width="120" />
-  </a>
-</p>
-
-<p align="center">
-  <strong>Thanks to <a href="https://www.jetbrains.com/?from=new-api">JetBrains</a> for providing free open-source development license for this project</strong>
-</p>
-
----
-
-<a id="capabilities"></a>
-
-## Capabilities
-
-| Area | What you can do |
+| 领域 | 能力 |
 | --- | --- |
-| Model access | Use OpenAI Chat Completions, Responses, Anthropic Messages, and Gemini APIs; stream responses and use tools, reasoning, and multimodal inputs where supported |
-| Routing | Configure model mappings, channel priorities and weights, retries, channel affinity, and multiple upstream keys |
-| Usage and costs | Manage quotas, subscriptions, usage logs, cache accounting, and expression-based pricing for different usage tiers |
-| Access control | Manage users, groups, fine-grained permissions, and API key restrictions; use OAuth/OIDC, passkeys, two-factor authentication, and login session management |
-| Asynchronous tasks | Extend image, video, and other task APIs with JavaScript plugins, including task status and output retrieval |
-| Web console | Configure channels and models, inspect usage and audit logs, and try models in the playground; available in English, Simplified Chinese, Traditional Chinese, French, Japanese, Russian, and Vietnamese |
+| 模型接入 | OpenAI Chat Completions / Responses、Anthropic Messages、Gemini 原生协议；支持流式输出、工具调用、推理与多模态输入（取决于渠道与上游模型） |
+| 渠道路由 | 模型映射、渠道优先级与权重、重试、会话亲和、多上游密钥轮转 |
+| 用量与计费 | 额度、钱包与订阅、用量日志、缓存计费、按用量分档的表达式定价 |
+| 访问控制 | 用户与分组、细粒度权限、密钥限制；支持 OAuth/OIDC、Passkey、两步验证与会话管理 |
+| 异步任务 | 通过 JavaScript 任务插件扩展图片、视频等任务接口，含任务状态与结果查询 |
+| 模型评测 | 内置评测工作器（DeepEval），对模型响应做相关性、正确性与忠实度评估 |
+| 公开站点 | 模型广场、价格页、集成指南、模型对比、用量排行、模型评测、FAQ 等公开页面，含服务端 SEO 元数据与结构化数据 |
+| Web 控制台 | 渠道与模型管理、用量与审计日志、Playground 试用；界面支持英、简中、繁中、法、日、俄、越 7 种语言 |
 
-### Protocols and endpoints
+### 协议与端点
 
-| Interface | Common endpoints |
+| 接口 | 常用端点 |
 | --- | --- |
-| OpenAI Chat / Responses | `POST /v1/chat/completions`, `POST /v1/responses` |
+| OpenAI Chat / Responses | `POST /v1/chat/completions`、`POST /v1/responses` |
 | Anthropic Messages | `POST /v1/messages` |
-| Gemini | `POST /v1beta/models/{model}:generateContent`, `POST /v1beta/models/{model}:streamGenerateContent` |
-| Realtime / Responses WebSocket | `GET /v1/realtime`, `GET /v1/responses` (WebSocket upgrade) |
-| Images / audio | `/v1/images/generations`, `/v1/images/edits`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/audio/translations` |
-| Embeddings / rerank | `POST /v1/embeddings`, `POST /v1/rerank` |
-| Task plugins | `POST /v1/tasks/{pluginKey}`, `GET /v1/tasks/{taskId}`, plus routes declared by each plugin |
+| Gemini | `POST /v1beta/models/{model}:generateContent`（及流式变体） |
+| Realtime / Responses WebSocket | `GET /v1/realtime`、`GET /v1/responses`（WebSocket 升级） |
+| 图片 / 音频 | `/v1/images/generations`、`/v1/images/edits`、`/v1/audio/speech`、`/v1/audio/transcriptions`、`/v1/audio/translations` |
+| Embeddings / Rerank | `POST /v1/embeddings`、`POST /v1/rerank` |
+| 任务插件 | `POST /v1/tasks/{pluginKey}`、`GET /v1/tasks/{taskId}`，及各插件声明路由 |
 
-[RelayKit](./relaykit/README.md) provides request, response, and streaming conversion between the four text protocols. Available features depend on the channel, upstream model, and conversion path; protocol-specific tools and fields may not map exactly. WebSocket support also requires a compatible upstream and channel configuration.
+四种文本协议之间的请求、响应与流式转换由独立 Go 模块 [RelayKit](./relaykit/README.md) 完成。具体可用特性取决于渠道、上游模型与转换路径；协议特有字段不一定能精确映射，WebSocket 还需上游与渠道配置兼容。
 
-This README describes the current source tree. Check the release notes for the version you deploy.
+---
 
-<a id="quick-start"></a>
+## 快速开始
 
-## Quick start
+### 方式一：使用托管服务
 
-### Try locally with Docker
+1. 在 [taodock.com](https://taodock.com) 注册账号，在[钱包](https://taodock.com/wallet)确认余额；
+2. 在[模型广场](https://taodock.com/models)查看可用模型与价格；
+3. 在控制台[创建 API 密钥](https://taodock.com/keys)；
+4. 把客户端 Base URL 指向 `https://taodock.com/v1`，使用平台签发的密钥调用：
 
-This starts a single instance with SQLite and binds it to localhost:
+```bash
+curl --fail-with-body https://taodock.com/v1/chat/completions \
+  -H "Authorization: Bearer ${TAODOCK_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"your-enabled-model","messages":[{"role":"user","content":"Hello!"}]}'
+```
+
+客户端接入（Cherry Studio、Open WebUI、AionUI、DeepChat、OpenAI SDK 等）见[集成指南](https://taodock.com/integrations)与[使用手册](https://docs.taodock.com)。编辑器内使用可安装 [TaoDock for VS Code](./extensions/taodock-vscode/README.md) 扩展。
+
+### 方式二：本地 Docker 单机体验
+
+单实例 + SQLite，绑定本机回环地址：
 
 ```bash
 mkdir -p data
-docker run --name new-api -d --restart unless-stopped \
+docker run --name taodock -d --restart unless-stopped \
   -p 127.0.0.1:3000:3000 \
   -e TZ=Asia/Shanghai \
   -v "$(pwd)/data:/data" \
-  calciumion/new-api:latest
+  ghcr.io/leekinyeung/itmazai-token:latest
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and complete the setup wizard to create the administrator account. The `data` directory persists the SQLite database across container replacements.
+打开 [http://localhost:3000](http://localhost:3000) 完成初始化向导创建管理员账号；`data` 目录在容器替换后保留 SQLite 数据库。
 
-### Make your first request
-
-1. Add a channel with your upstream API key, available models, and group assignment; run a channel test.
-2. Configure model pricing and ensure the user has quota or a valid subscription.
-3. Create an API key in the console with access to the same group and models.
-4. Set your client's base URL to `http://localhost:3000/v1` for OpenAI-compatible clients and use the **New API-issued key**.
-
-Set `NEW_API_KEY` in your shell to that key. List the models accessible to it:
+首次调用：在控制台添加渠道（填入上游密钥与模型分组）→ 配置模型定价 → 创建 API 密钥 → 将客户端 Base URL 设为 `http://localhost:3000/v1`。验证：
 
 ```bash
 curl --fail-with-body http://localhost:3000/v1/models \
-  -H "Authorization: Bearer ${NEW_API_KEY}"
+  -H "Authorization: Bearer ${TAODOCK_API_KEY}"
 ```
 
-Then call Responses, replacing `your-enabled-model` with an enabled model that supports this interface:
+---
 
-```bash
-curl --fail-with-body http://localhost:3000/v1/responses \
-  -H "Authorization: Bearer ${NEW_API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"your-enabled-model","input":"Hello!"}'
-```
-
-<a id="deployment"></a>
-
-## Deployment
+## 自托管部署
 
 ### Docker Compose
 
-The repository's [Compose configuration](./docker-compose.yml) starts **New API + PostgreSQL + Redis** by default. It also contains examples for MySQL and a separate ClickHouse log database.
+仓库的 [docker-compose.yml](./docker-compose.yml) 默认启动 **应用 + PostgreSQL + Redis**，并附带 MySQL 与独立 ClickHouse 日志库的示例。镜像可使用本仓库 Dockerfile 自行构建，或直接拉取 `ghcr.io/leekinyeung/itmazai-token`。
+
+启动前请编辑 `docker-compose.yml`：替换数据库与 Redis 示例密码，并设置持久化的随机 `SESSION_SECRET`（`openssl rand -hex 32` 生成）。启用 HTTPS 控制台时，配置 `SESSION_COOKIE_SECURE=true` 与精确的 `SESSION_COOKIE_TRUSTED_URL`。
 
 ```bash
-git clone https://github.com/QuantumNous/new-api.git
-cd new-api
-```
-
-Before starting, edit `docker-compose.yml`: replace the database and Redis example passwords in both the services and connection strings, and set a persistent random `SESSION_SECRET` (generate one with `openssl rand -hex 32`). For an HTTPS console, configure `SESSION_COOKIE_SECURE=true` and `SESSION_COOKIE_TRUSTED_URL` with its exact public HTTPS origin.
-
-```bash
+git clone https://github.com/leekinyeung/itmazai-token.git
+cd itmazai-token
 docker compose up -d
 docker compose logs -f new-api
 ```
 
-### Storage and configuration
+### 存储与配置
 
-| Component | Options |
+| 组件 | 选项 |
 | --- | --- |
-| Main database | SQLite, MySQL ≥ 5.7.8, or PostgreSQL ≥ 9.6 |
-| Separate log database | Configure with `LOG_SQL_DSN`; also supports ClickHouse |
-| Cache | Optional Redis plus in-memory caching; use shared Redis when application nodes need shared rate limits |
-| Container platforms | Linux amd64 / arm64 |
+| 主数据库 | SQLite、MySQL ≥ 5.7.8 或 PostgreSQL ≥ 9.6 |
+| 独立日志库 | 通过 `LOG_SQL_DSN` 配置，另支持 ClickHouse |
+| 缓存 | 可选 Redis + 内存缓存；多节点需共享限流时必须使用共享 Redis |
+| 平台 | Linux amd64 / arm64 容器 |
 
-| Variable | Purpose |
+| 变量 | 用途 |
 | --- | --- |
-| `SQL_DSN` | Main database connection; unset uses SQLite |
-| `LOG_SQL_DSN` | Optional separate log database connection |
-| `REDIS_CONN_STRING` | Redis connection string |
-| `SESSION_SECRET` | Persistent authentication secret; all nodes must use the same value |
-| `CRYPTO_SECRET` | Defaults to `SESSION_SECRET`; nodes sharing Redis must use the same effective value |
-| `SESSION_COOKIE_SECURE` | Set to `true` for an HTTPS console; enables Secure refresh cookies and strict refresh/logout origin checks |
-| `SESSION_COOKIE_TRUSTED_URL` | Required in Secure mode: comma-separated exact HTTPS origins, without paths or wildcards; leave unset for local HTTP |
-| `TRUSTED_PROXIES` | Trusted reverse-proxy IPs/CIDRs, or `none`; explicitly configure for your network |
+| `SQL_DSN` | 主数据库连接；不设置则使用 SQLite |
+| `LOG_SQL_DSN` | 可选独立日志库连接 |
+| `REDIS_CONN_STRING` | Redis 连接串 |
+| `SESSION_SECRET` | 持久化认证密钥；所有节点必须一致 |
+| `CRYPTO_SECRET` | 默认取 `SESSION_SECRET`；共享 Redis 的节点须使用相同有效值 |
+| `SESSION_COOKIE_SECURE` | HTTPS 控制台设为 `true`，启用 Secure Cookie 与严格来源校验 |
+| `SESSION_COOKIE_TRUSTED_URL` | Secure 模式必填：逗号分隔的精确 HTTPS 来源，不含路径与通配符 |
+| `TRUSTED_PROXIES` | 信任的反代 IP/CIDR，或 `none`；按网络环境显式配置 |
 
-See the [environment example](./.env.example), [environment reference](https://docs.newapi.ai/en/docs/installation/config-maintenance/environment-variables), and [authentication and session guide](./docs/authentication.md) for full configuration. Configure container variables in Compose's `environment` or `env_file`; copying `.env.example` alone does not inject variables into the container.
+完整配置见 [环境变量示例](./.env.example)、[认证与会话指南](./docs/authentication.md)。
 
-For production, put the console behind HTTPS and configure your reverse proxy for streaming and WebSocket upgrades. Persist and back up the database and mounted data. Multi-node deployments must share the main database and authentication secrets; separate Redis instances or in-memory rate limiters count limits independently per node. The session guide describes propagation behavior for each topology.
+生产环境建议：控制台置于 HTTPS 反代之后并配置流式与 WebSocket 升级；持久化并备份数据库与挂载目录；多节点部署必须共享主数据库与认证密钥。升级前从 [Releases](https://github.com/leekinyeung/itmazai-token/releases) 固定镜像版本、评估迁移影响并先备份。
 
-Pin an image version from [Releases](https://github.com/QuantumNous/new-api/releases), review its upgrade notes, and back up before upgrading. The `latest` tag follows published builds and can change; migrations and compatibility must be assessed for your existing installation.
+### CI/CD 自动发布（本仓库实践）
 
-<a id="development"></a>
+本仓库配备「合入 main 即发布、失败自动回滚」的 GitHub Actions 流水线，无需人工登录服务器：
 
-## Development and extensions
+```
+PR ──► CI 质量门禁（go vet/build/test × 3 模块 + 前端 typecheck/test）    .github/workflows/ci.yml
+main 合入 ──► Deploy production
+        1. quality-gate   复用 CI 检查
+        2. build          buildx 构建 sha-<12> 不可变镜像（含 SBOM）
+        3. smoke          SQLite 容器冒烟验证 /api/status
+        4. deploy         SSH 部署：pull → pg_dump 备份 → up → 健康检查（失败自动回滚）
+        5. promote        成功后才把 latest 指向该 sha
+线上异常 ──► Rollback production（一键回滚到指定 tag 或上一版本）          .github/workflows/rollback.yml
+```
 
-The backend uses Go and Gin. The web console uses React 19, TypeScript, Rsbuild, TanStack, and Tailwind CSS 4. Use Bun for frontend dependencies and scripts; see [go.mod](./go.mod) for the Go language baseline and [Dockerfile](./Dockerfile) for the container build toolchain.
+配置方法、服务器初始化与迁移注意事项见 [deploy/](./deploy/) 与 [CI/CD 运行手册](./docs/ci-cd.md)。
 
-Build the frontend before starting the backend, which embeds `web/dist`:
+---
+
+## 仓库结构
+
+| 位置 | 职责 |
+| --- | --- |
+| `router/`、`middleware/`、`controller/` | HTTP 路由、访问控制、API 处理器与公开页面服务端渲染 |
+| `relay/` | 上游适配与请求转发 |
+| `service/`、`model/` | 业务逻辑与持久化 |
+| [relaykit/](./relaykit/README.md) | 独立构建的 Go 模块：协议 DTO 与协议间转换 |
+| [tokenkit/](./tokenkit/README.md) | 独立构建的 Go 模块：文本与图片 Token 计数与估算 |
+| `tools/model-evaluation-worker/` | 模型评测工作器（Bun/TypeScript，对接 DeepEval），随镜像内置 |
+| [plugins/tasks/](./plugins/tasks/) | JavaScript 任务插件，运行于 `pkg/jsplugin/`；编写规范见[任务插件 API v1](./docs/plugin-api/v1.md) |
+| `web/` | React 19 + TypeScript 前端（控制台与公开站点）；约定见 [web/AGENTS.md](./web/AGENTS.md) |
+| `handbook/` | VitePress 使用手册站，部署于 [docs.taodock.com](https://docs.taodock.com)，中英双语 |
+| [extensions/taodock-vscode/](./extensions/taodock-vscode/README.md) | TaoDock VS Code 扩展：把平台模型接入编辑器聊天 |
+| `electron/` | 桌面端封装与打包 |
+| `deploy/` | 生产部署编排（应用栈 / 基础设施栈 / 部署与初始化脚本） |
+| `docs/` | 认证与安全、CI/CD、插件 API、OpenAPI 等工程文档 |
+
+技术栈：后端 Go 1.26 + Gin + GORM；前端 React 19 + TypeScript + Rsbuild + TanStack + Tailwind CSS 4；前端包管理使用 Bun。
+
+### 本地开发
+
+先构建前端（后端内嵌 `web/dist`），再启动后端：
 
 ```bash
-# Repository root
 cd web
 bun install --frozen-lockfile
 bun run build
@@ -263,99 +222,50 @@ cd ..
 go run .
 ```
 
-In a second terminal, start the frontend development server:
+另开终端启动前端开发服务器（代理 API 到 3000 端口）：
 
 ```bash
-cd web
-bun run dev -- --port 5173
+cd web && bun run dev -- --port 5173
 ```
 
-Open [http://localhost:5173](http://localhost:5173); the development server proxies API requests to the backend on port 3000. For a containerized development backend, see [docker-compose.dev.yml](./docker-compose.dev.yml) and the `make dev` target in [makefile](./makefile).
+也可使用 `make dev`（容器化后端 + 前端热更新），详见 [makefile](./makefile) 与 [docker-compose.dev.yml](./docker-compose.dev.yml)。
 
-| Location | Responsibility |
+提交前请阅读 [AGENTS.md](./AGENTS.md)，并按改动范围运行检查：Go 侧 `make test`（覆盖根模块与 relaykit、tokenkit）；前端在 `web/` 下运行 `bun run typecheck`、`bun run lint`、`bun run test`、`bun run build`；RelayKit 改动还需在 `relaykit/` 下通过 `GOWORK=off go build ./...`。
+
+---
+
+## 与上游 New API 的关系
+
+本仓库是 [QuantumNous/new-api](https://github.com/QuantumNous/new-api) 的下游发行版，持续跟进上游能力，并叠加了以下自有改动：
+
+| 方面 | 本仓库的改动 |
 | --- | --- |
-| `router/`, `middleware/`, `controller/` | HTTP routes, access checks, and API handlers |
-| `relay/` | Upstream adapters and request routing |
-| `service/`, `model/` | Business logic and persistence |
-| [relaykit/](./relaykit/README.md) | Independently buildable Go module for protocol DTOs and conversions |
-| [plugins/tasks/](./plugins/tasks/) | JavaScript task plugins; see [Task Plugin API v1](./docs/plugin-api/v1.md) for authoring and host boundaries |
-| `web/` | Web console; see [frontend conventions](./web/AGENTS.md) |
-| [electron/](./electron/README.md) | Desktop wrapper and packaging |
-
-Read [AGENTS.md](./AGENTS.md) before contributing. Run checks appropriate to your change, including `make test` for the Go modules and `bun run typecheck`, `bun run lint`, `bun run test`, and `bun run build` in `web/` for frontend changes. Changes to RelayKit must also pass `GOWORK=off go build ./...` from `relaykit/`.
-
-<a id="documentation"></a>
-
-## Documentation and community
-
-| Resource | Link |
-| --- | --- |
-| Official documentation | [Guides](https://docs.newapi.ai/en/docs) · [Installation](https://docs.newapi.ai/en/docs/installation) · [API reference](https://docs.newapi.ai/en/docs/api) |
-| Project exploration | [DeepWiki](https://deepwiki.com/QuantumNous/new-api) |
-| Questions and discussion | [FAQ](https://docs.newapi.ai/en/docs/support/faq) · [Community](https://docs.newapi.ai/en/docs/support/community-interaction) |
-| Bugs and feature requests | [GitHub Issues](https://github.com/QuantumNous/new-api/issues) |
-| Security reports | Follow the [security policy](./.github/SECURITY.md) for private reporting |
-
-For bug reports, include the version, deployment method, reproduction steps, and redacted logs. Documentation, translations, provider integrations, and focused regression tests are all welcome contributions.
+| 公开产品站点 | 服务端渲染的模型广场、价格、集成、对比、排行、评测、FAQ 等页面，含 canonical/OG/sitemap/JSON-LD 等 SEO 基础设施 |
+| 模型评测 | 内置 DeepEval 评测工作器与公开评测页，支持相关性 / 正确性 / 忠实度指标 |
+| 性能视图 | 渠道与模型的性能健康指标、可用性统计与分享视图 |
+| 品牌与计费细节 | TaoDock 品牌呈现、模型身份展示、账单口径与日志导出调整 |
+| 开发者工具 | [TaoDock VS Code 扩展](./extensions/taodock-vscode/README.md)与[中英双语使用手册](https://docs.taodock.com) |
+| 发布工程 | 不可变 `sha-<12>` 镜像、CI 质量门禁、自动备份、健康检查与一键回滚的完整流水线 |
 
 ---
 
-## 🔗 Related Projects
+## 许可与署名
 
-### Upstream Projects
+本项目基于 [New API](https://github.com/QuantumNous/new-api) 开发，采用 [GNU Affero General Public License v3.0（AGPLv3）](./LICENSE)，并适用 AGPLv3 第 7 条附加条款：
 
-| Project | Description |
-|------|------|
-| [One API](https://github.com/songquanpeng/one-api) | Original project base |
-| [Midjourney-Proxy](https://github.com/novicezk/midjourney-proxy) | Midjourney interface support |
+- 修改版本须在相应的法律声明及界面的显著位置（关于、法律、页脚或署名处）保留署名声明：`Frontend design and development by New API contributors.`；
+- 提供用户界面的修改版本须保留指向原始项目的可见链接：<https://github.com/QuantumNous/new-api>。
 
-### Supporting Tools
+本项目基于 [One API](https://github.com/songquanpeng/one-api)（MIT License）发展而来。如你的组织政策不允许使用 AGPLv3 软件，请与上游联系获取商业授权。
 
-| Project | Description |
-|------|------|
-| [new-api-key-tool](https://github.com/Calcium-Ion/new-api-key-tool) | Key quota query tool |
-| [new-api-horizon](https://github.com/Calcium-Ion/new-api-horizon) | New API high-performance optimized version |
-
----
-
-## 📜 License
-
-This project is licensed under the [GNU Affero General Public License v3.0 (AGPLv3)](./LICENSE).
-
-Additional terms under AGPLv3 Section 7 apply. Modified versions must preserve
-the author attribution notice `Frontend design and development by New API
-contributors.` in the appropriate legal notices and in any prominent about,
-legal, footer, or attribution location presented by the user interface.
-
-Modified versions that present a user interface must also preserve a visible
-link to the original project: <https://github.com/QuantumNous/new-api>.
-
-This is an open-source project developed based on [One API](https://github.com/songquanpeng/one-api) (MIT License).
-
-If your organization's policies do not permit the use of AGPLv3-licensed software, or if you wish to avoid the open-source obligations of AGPLv3, please contact us at: [support@quantumnous.com](mailto:support@quantumnous.com)
-
-See [NOTICE](./NOTICE) and [third-party licenses](./THIRD-PARTY-LICENSES.md) for attribution and dependency notices.
-
----
-
-## 🌟 Star History
-
-<div align="center">
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Calcium-Ion/new-api&type=Date)](https://star-history.com/#Calcium-Ion/new-api&Date)
-
-</div>
+第三方组件的归属与许可声明见 [NOTICE](./NOTICE) 与 [THIRD-PARTY-LICENSES.md](./THIRD-PARTY-LICENSES.md)。
 
 ---
 
 <div align="center">
 
-### 💖 Thank you for using New API
+### 🚪 众妙之门，玄之又玄
 
-If this project is helpful to you, welcome to give us a ⭐️ Star！
-
-**[Official Documentation](https://docs.newapi.ai/en/docs)** • **[Issue Feedback](https://github.com/Calcium-Ion/new-api/issues)** • **[Latest Release](https://github.com/Calcium-Ion/new-api/releases)**
-
-<sub>Built with ❤️ by QuantumNous</sub>
+**[taodock.com](https://taodock.com)** • **[使用手册](https://docs.taodock.com)** • **[VS Code 扩展](./extensions/taodock-vscode/README.md)**
 
 </div>

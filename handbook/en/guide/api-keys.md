@@ -11,7 +11,7 @@ description: "Create and name TaoDock API keys, configure expiration and access 
 
 1. Sign in and open [API Keys](https://taodock.com/keys).
 2. Select **Create API Key** and use a recognizable application name such as `Cherry Studio` or `Personal script`.
-3. Select an available group, then set quota, expiration, and access restrictions as needed.
+3. Set quota, expiration, and access restrictions as needed. The key automatically follows the account's current group; there is no separate key group selection.
 4. Save, copy the key from the list, and enter it in your application's API Key field.
 
 Separate keys make it easier to find requests or disable one application without affecting others.
@@ -20,7 +20,6 @@ Separate keys make it easier to find requests or disable one application without
 
 | Setting | Meaning and guidance |
 | --- | --- |
-| Group | Selects the model service access for the key; choose from the options offered |
 | Key quota | Limits consumption by this key without adding account balance |
 | Unlimited quota | Removes this key's own quota cap; account balance and other account rules still apply |
 | Expiration | Requests stop working after expiry; set an appropriate date for temporary use |
@@ -28,6 +27,8 @@ Separate keys make it easier to find requests or disable one application without
 | IP restrictions | Limits source IP addresses; use for fixed outbound addresses, and leave unset if the address is uncertain |
 
 Mobile, home, and proxy IP addresses can change. If access stops after setting an IP restriction, check the actual outbound address before creating more keys.
+
+An account group change applies to existing keys on their next request. Model Square is a viewable catalog; authenticated `/v1/models` returns the actually callable intersection of the account group and the key's model restrictions.
 
 ## Copy the address and connect applications {#connect}
 

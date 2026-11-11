@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -17,24 +18,44 @@ import (
 	"github.com/QuantumNous/new-api/pkg/jsplugin"
 	"github.com/QuantumNous/new-api/service"
 	"github.com/gin-gonic/gin"
-	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 )
 
 func setupOriginTaskDB(t *testing.T) {
 	t.Helper()
 	previousDB := model.DB
-	previousType := common.MainDatabaseType()
-	database, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	require.NoError(t, err)
-	require.NoError(t, database.AutoMigrate(&model.Task{}, &model.Channel{}))
-	model.DB = database
-	common.SetMainDatabaseType(common.DatabaseTypeSQLite)
+	previousLogDB := model.LOG_DB
+	previousIsMasterNode := common.IsMasterNode
+	previousRedisEnabled := common.RedisEnabled
+	previousSQLitePath := common.SQLitePath
+	previousMainType := common.MainDatabaseType()
+	previousLogType := common.LogDatabaseType()
+	previousSQLDSN, hadSQLDSN := os.LookupEnv("SQL_DSN")
+
+	common.IsMasterNode = false
+	common.RedisEnabled = false
+	common.SQLitePath = fmt.Sprintf("file:%s?mode=memory&cache=shared", strings.ReplaceAll(t.Name(), "/", "_"))
+	common.SetDatabaseTypes(common.DatabaseTypeSQLite, common.DatabaseTypeSQLite)
+	require.NoError(t, os.Setenv("SQL_DSN", "local"))
+	require.NoError(t, model.InitDB())
+	model.LOG_DB = model.DB
+	require.NoError(t, model.DB.AutoMigrate(&model.Task{}, &model.Channel{}, &model.Ability{}))
 	t.Cleanup(func() {
+		if sqlDB, err := model.DB.DB(); err == nil {
+			_ = sqlDB.Close()
+		}
 		model.DB = previousDB
-		common.SetMainDatabaseType(previousType)
+		model.LOG_DB = previousLogDB
+		common.IsMasterNode = previousIsMasterNode
+		common.RedisEnabled = previousRedisEnabled
+		common.SQLitePath = previousSQLitePath
+		common.SetDatabaseTypes(previousMainType, previousLogType)
+		if hadSQLDSN {
+			require.NoError(t, os.Setenv("SQL_DSN", previousSQLDSN))
+		} else {
+			require.NoError(t, os.Unsetenv("SQL_DSN"))
+		}
 	})
 }
 
@@ -47,6 +68,12 @@ func insertOriginTaskChannel(t *testing.T, status int) *model.Channel {
 		Type:   constant.ChannelTypeDoubaoVideo,
 	}
 	require.NoError(t, model.DB.Create(channel).Error)
+	require.NoError(t, model.DB.Create(&model.Ability{
+		Group:     "default",
+		Model:     "resolved-model",
+		ChannelId: channel.Id,
+		Enabled:   true,
+	}).Error)
 	return channel
 }
 
@@ -365,6 +392,8 @@ func TestDistributeHonorsOriginTaskChannelPin(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodPost, "/vendor/jobs", strings.NewReader(`{}`))
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Set("resolved_task_model", "resolved-model")
+	common.SetContextKey(c, constant.ContextKeyUserGroup, "default")
+	common.SetContextKey(c, constant.ContextKeyUsingGroup, "default")
 	service.GetChannelConstraints(c).AddPin(dto.ChannelPin{
 		ChannelId: channel.Id,
 		Source:    dto.PinSourceOriginTask,
@@ -398,6 +427,8 @@ func TestDistributeTokenPinBeatsOriginPin(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodPost, "/vendor/jobs", strings.NewReader(`{}`))
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Set("resolved_task_model", "resolved-model")
+	common.SetContextKey(c, constant.ContextKeyUserGroup, "default")
+	common.SetContextKey(c, constant.ContextKeyUsingGroup, "default")
 	constraints := service.GetChannelConstraints(c)
 	constraints.AddPin(dto.ChannelPin{
 		ChannelId: tokenChannel.Id,
@@ -435,6 +466,8 @@ func TestDistributePinViolatingIdentityFilterErrors(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodPost, "/vendor/jobs", strings.NewReader(`{}`))
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Set("resolved_task_model", "resolved-model")
+	common.SetContextKey(c, constant.ContextKeyUserGroup, "default")
+	common.SetContextKey(c, constant.ContextKeyUsingGroup, "default")
 	c.Set("expected_task_plugin_key", "alpha")
 	service.GetChannelConstraints(c).AddPin(dto.ChannelPin{
 		ChannelId: channel.Id,

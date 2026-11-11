@@ -51,6 +51,7 @@ import type { PricingModel } from '@/features/pricing/types'
 import fr from '@/i18n/locales/fr.json'
 import zhCN from '@/i18n/locales/zh.json'
 import { api } from '@/lib/api'
+import { ROLE } from '@/lib/roles'
 import { useAuthStore } from '@/stores/auth-store'
 import {
   DEFAULT_CURRENCY_CONFIG,
@@ -123,9 +124,14 @@ async function renderList(
     waitForPricing?: boolean
     initialUrl?: string
     total?: number
+    role?: number
   } = {}
 ) {
-  useAuthStore.getState().auth.setUser({ id: 1, username: 'admin', role: 100 })
+  useAuthStore.getState().auth.setUser({
+    id: 1,
+    username: 'admin',
+    role: options.role ?? ROLE.SUPER_ADMIN,
+  })
   const get = vi.spyOn(api, 'get').mockImplementation(async (url) => {
     if (url === '/api/models/' || url === '/api/models/search') {
       return {
@@ -188,6 +194,19 @@ async function renderList(
     await waitFor(() => expect(client.isFetching()).toBe(0))
   }
   return { ...result, get, router }
+}
+
+function cellInColumn(headerName: string, modelName: string): HTMLElement {
+  const headers = screen.getAllByRole('columnheader')
+  const columnIndex = headers.findIndex(
+    (header) => header.textContent?.trim() === headerName
+  )
+  expect(columnIndex).toBeGreaterThanOrEqual(0)
+  const row = screen.getByRole('button', { name: modelName }).closest('tr')
+  if (!row) throw new Error(`missing table row for ${modelName}`)
+  const cell = within(row).getAllByRole('cell')[columnIndex]
+  if (!cell) throw new Error(`missing ${headerName} cell for ${modelName}`)
+  return cell
 }
 
 beforeEach(() => {
@@ -855,3 +874,80 @@ it.each([
     }
   }
 )
+
+it('shows the model discount column directly after pricing by default', async () => {
+  await renderList([{ ...metadata, model_discount: 0.8 }])
+  expect(
+    screen.getByRole('columnheader', { name: 'Model discount' })
+  ).toBeVisible()
+  const headers = screen
+    .getAllByRole('columnheader')
+    .map((header) => header.textContent?.trim() ?? '')
+  expect(headers.indexOf('Model discount')).toBe(headers.indexOf('Pricing') + 1)
+  expect(headers.indexOf('Model discount')).toBeLessThan(
+    headers.indexOf('Model square visibility')
+  )
+})
+
+it('renders discounts as plain numbers with at most two decimals', async () => {
+  await renderList([
+    { ...metadata, model_discount: 0.8 },
+    {
+      ...channel,
+      model_name: 'discount-precise',
+      model_discount: 0.333333,
+    },
+    { ...channel, model_name: 'discount-default' },
+  ])
+  expect(
+    within(cellInColumn('Model discount', 'catalog-only')).getByText('0.8')
+  ).toBeVisible()
+  expect(
+    within(cellInColumn('Model discount', 'discount-precise')).getByText('0.33')
+  ).toBeVisible()
+  expect(
+    within(cellInColumn('Model discount', 'discount-default')).getByText('1')
+  ).toBeVisible()
+  expect(screen.queryByText('80%')).not.toBeInTheDocument()
+  expect(screen.queryByText('0.8 / 80%')).not.toBeInTheDocument()
+})
+
+it('shows the discount to regular admins without requesting super-admin pricing', async () => {
+  const { get } = await renderList([{ ...metadata, model_discount: 0.8 }], {
+    role: ROLE.ADMIN,
+  })
+  expect(
+    screen.getByRole('columnheader', { name: 'Model discount' })
+  ).toBeVisible()
+  const cell = cellInColumn('Model discount', 'catalog-only')
+  expect(within(cell).getByText('0.8')).toBeVisible()
+  expect(within(cell).queryByText('Super admin')).not.toBeInTheDocument()
+  expect(get).not.toHaveBeenCalledWith(
+    '/api/option/model_pricing',
+    expect.anything()
+  )
+})
+
+it('explains that rule rows take discounts from their matched models', async () => {
+  await renderList([
+    {
+      ...metadata,
+      model_name: 'discount-rule-',
+      name_rule: 1,
+      model_discount: 1,
+    },
+  ])
+  const cell = cellInColumn('Model discount', 'discount-rule-')
+  expect(within(cell).getByText('Per matched model')).toBeVisible()
+  expect(within(cell).queryByText('1')).not.toBeInTheDocument()
+})
+
+it('uses the existing translated column label', async () => {
+  await renderList([metadata])
+  await act(async () => {
+    await i18n.changeLanguage('zhCN')
+  })
+  await waitFor(() =>
+    expect(screen.getByRole('columnheader', { name: '模型折扣' })).toBeVisible()
+  )
+})

@@ -714,7 +714,7 @@ function RateLimitsSection(props: { model: PricingModel }) {
       />
       <p className='text-muted-foreground mt-2 text-[11px] leading-relaxed'>
         {t(
-          'RPM = requests per minute, TPM = tokens per minute, RPD = requests per day. Limits apply per token group.'
+          'RPM = requests per minute, TPM = tokens per minute, RPD = requests per day. Limits apply to the account group.'
         )}
       </p>
     </section>
@@ -746,7 +746,7 @@ function AuthSection() {
           </p>
           <p className='text-muted-foreground'>
             {t(
-              'Generate tokens from the Tokens page; you can scope them to specific models, groups, IPs, and rate-limits.'
+              'Generate tokens from the Tokens page. They automatically follow your account group, while model, IP, and rate-limit restrictions remain configurable.'
             )}
           </p>
         </div>

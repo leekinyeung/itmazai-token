@@ -106,6 +106,7 @@ import { DynamicPricingBreakdown } from './dynamic-pricing-breakdown'
 import { ModelBillingModeBadge } from './model-billing-mode-badge'
 import { ModelDetailsApi } from './model-details-api'
 import { ModelDetailsPerformance } from './model-details-performance'
+import { ModelDiscountBadge } from './model-discount-badge'
 
 // ----------------------------------------------------------------------------
 // Local UI helpers
@@ -620,6 +621,7 @@ function ModelHeader(props: { model: PricingModel }) {
         )}
         <span className='text-muted-foreground/30'>·</span>
         <ModelBillingModeBadge model={model} />
+        <ModelDiscountBadge model={model} appearance='full' />
       </div>
       {description && (
         <p className='text-muted-foreground mt-2 text-sm leading-relaxed'>
@@ -627,6 +629,21 @@ function ModelHeader(props: { model: PricingModel }) {
         </p>
       )}
     </header>
+  )
+}
+
+function ModelDiscountNotice(props: { model: PricingModel }) {
+  const { t } = useTranslation()
+
+  return (
+    <div className='bg-muted/20 flex flex-col gap-2 rounded-lg border px-3 py-2.5 sm:flex-row sm:items-center'>
+      <ModelDiscountBadge model={props.model} appearance='full' />
+      <p className='text-muted-foreground text-xs leading-relaxed'>
+        {t(
+          'Prices shown already include this model discount. Applicable group pricing is applied separately.'
+        )}
+      </p>
+    </div>
   )
 }
 
@@ -1510,6 +1527,7 @@ export function ModelDetailsContent(props: ModelDetailsContentProps) {
 
           <section className='bg-card/60 space-y-5 rounded-xl border p-4 shadow-sm'>
             <SectionTitle>{t('Pricing')}</SectionTitle>
+            <ModelDiscountNotice model={props.model} />
             {showBasePrices && (
               <PriceSection
                 model={props.model}

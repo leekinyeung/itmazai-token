@@ -342,6 +342,36 @@ it('shows one standard task price and a localized group price without duplicate 
   ).toHaveLength(2)
 })
 
+it('shows the model discount in details and explains that group pricing remains separate', () => {
+  vi.spyOn(api, 'get').mockResolvedValue({ data: { data: { groups: [] } } })
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
+  clients.push(client)
+
+  render(
+    <QueryClientProvider client={client}>
+      <ModelDetailsContent
+        model={{ ...model, model_discount: 0.8 }}
+        groupRatio={{ default: 2 }}
+        usableGroup={{ default: { desc: '', ratio: 2 } }}
+        endpointMap={{}}
+        autoGroups={[]}
+        priceRate={1}
+        usdExchangeRate={1}
+        tokenUnit='M'
+      />
+    </QueryClientProvider>
+  )
+
+  expect(screen.getAllByLabelText('Model discount: 0.8 / 80%')).toHaveLength(2)
+  expect(
+    screen.getByText(
+      'Prices shown already include this model discount. Applicable group pricing is applied separately.'
+    )
+  ).toBeVisible()
+})
+
 it('labels even a single task price on model cards', async () => {
   render(<ModelCard model={model} onClick={() => {}} />)
   expect(screen.getByText('Song generation unit price')).toBeVisible()

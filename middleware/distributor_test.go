@@ -189,6 +189,23 @@ func TestGetModelRequestAssignsDeepSeekToolRoutingNames(t *testing.T) {
 	}
 }
 
+func TestGetModelRequestIgnoresLegacyPlaygroundGroup(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodPost, "/pg/chat/completions", strings.NewReader(`{"model":"account-model","group":"vip"}`))
+	c.Request.Header.Set("Content-Type", "application/json")
+	common.SetContextKey(c, constant.ContextKeyUserGroup, "default")
+	common.SetContextKey(c, constant.ContextKeyUsingGroup, "default")
+
+	modelRequest, shouldSelectChannel, err := getModelRequest(c)
+
+	require.NoError(t, err)
+	assert.True(t, shouldSelectChannel)
+	assert.Equal(t, "account-model", modelRequest.Model)
+	assert.Equal(t, "default", common.GetContextKeyString(c, constant.ContextKeyUserGroup))
+	assert.Equal(t, "default", common.GetContextKeyString(c, constant.ContextKeyUsingGroup))
+}
+
 func TestTokenModelLimitAllowsExemptAtNameByFullName(t *testing.T) {
 	settings := model_setting.GetGlobalSettings()
 	original := append([]string(nil), settings.ThinkingModelBlacklist...)

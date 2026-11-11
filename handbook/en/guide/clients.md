@@ -174,7 +174,7 @@ Loading a model list confirms only model discovery. Complete verification requir
 | --- | --- |
 | HTML page or 404 | Documentation domain entered as the API URL, duplicated `/v1/v1`, or duplicated endpoint paths |
 | Invalid key / 401 | A complete TaoDock key that is active and has not expired |
-| Model unavailable | Exact ID, protocol, key model restrictions, and group |
+| Model unavailable | Query `/v1/models` with that key, then check the exact ID, protocol, and key model restrictions; the key follows the account group |
 | Insufficient quota | Both wallet balance and key quota |
 | Import does not open | Client installation and browser permission to open the application link |
 | TaoDock model missing in WorkBuddy | Save the custom model and explicitly select it in the conversation |

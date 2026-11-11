@@ -23,10 +23,10 @@ import { useTranslation } from 'react-i18next'
 import { CopyButton } from '@/components/copy-button'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { useGroupDisplayName } from '@/context/group-display-name-provider'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { modelDetailsPath } from '@/lib/model-path'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth-store'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
 import { DEFAULT_TOKEN_UNIT } from '../constants'
@@ -44,6 +44,7 @@ import { formatPrice, formatRequestPrice } from '../lib/price'
 import { taskPriceLabel, taskUsageUnitLabel } from '../lib/task-price-display'
 import type { PricingModel, PriceType, TokenUnit } from '../types'
 import { ModelBillingModeBadge } from './model-billing-mode-badge'
+import { ModelDiscountBadge } from './model-discount-badge'
 import { ModelPerfBadge, type ModelPerfBadgeData } from './model-perf-badge'
 
 export interface ModelCardProps {
@@ -53,13 +54,11 @@ export interface ModelCardProps {
   usdExchangeRate?: number
   tokenUnit?: TokenUnit
   showRechargePrice?: boolean
-  selectedGroup?: string
   perf?: ModelPerfBadgeData
 }
 
 export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   const { t, i18n } = useTranslation()
-  const displayGroupName = useGroupDisplayName()
   const tokenUnit = props.tokenUnit ?? DEFAULT_TOKEN_UNIT
   const priceRate = props.priceRate ?? 1
   const usdExchangeRate = props.usdExchangeRate ?? 1
@@ -67,14 +66,13 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   const isTokenBased = isTokenBasedModel(props.model)
   const tokenUnitLabel = tokenUnit === 'K' ? '1K' : '1M'
   const tags = parseTags(props.model.tags)
-  const groups = props.model.enable_groups || []
-  const groupLabels = groups.map((group) => displayGroupName(group))
   const endpoints = props.model.supported_endpoint_types || []
   const modelIconKey = props.model.icon || props.model.vendor_icon
   const modelIcon = modelIconKey ? getLobeIcon(modelIconKey, 28) : null
   const initial = props.model.model_name?.charAt(0).toUpperCase() || '?'
   const isUnconfiguredTaskUsage = isUnconfiguredTaskUsageModel(props.model)
   const billingTime = useBillingTime(props.model.billing_expr)
+  const isAuthenticated = useAuthStore((state) => state.auth.user !== null)
   const currency = useSystemConfigStore((state) => state.config.currency)
   const dynamicPriceOptions = useMemo(
     () => ({
@@ -83,14 +81,10 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
       showRechargePrice,
       priceRate,
       usdExchangeRate,
-      groupRatioMultiplier: getDynamicDisplayGroupRatio(
-        props.model,
-        props.selectedGroup
-      ),
+      groupRatioMultiplier: getDynamicDisplayGroupRatio(props.model),
     }),
     [
       props.model,
-      props.selectedGroup,
       billingTime,
       tokenUnit,
       showRechargePrice,
@@ -240,8 +234,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
             tokenUnit,
             showRechargePrice,
             priceRate,
-            usdExchangeRate,
-            props.selectedGroup
+            usdExchangeRate
           )}
           <span className='text-muted-foreground text-xs font-normal'>
             {' '}
@@ -258,8 +251,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
             props.model,
             showRechargePrice,
             priceRate,
-            usdExchangeRate,
-            props.selectedGroup
+            usdExchangeRate
           )}
           <span className='text-muted-foreground text-xs font-normal'>
             {' '}
@@ -334,7 +326,24 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
           aria-label={t('Pricing')}
           className='mt-auto flex min-w-0 flex-col gap-1.5'
         >
-          <ModelBillingModeBadge model={props.model} appearance='caption' />
+          <div className='flex min-w-0 flex-wrap items-center justify-between gap-2'>
+            <div className='text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs'>
+              <span className='shrink-0'>
+                {isAuthenticated
+                  ? t('Your starting price')
+                  : t('Visitor starting price')}
+              </span>
+              <span aria-hidden className='text-muted-foreground/40'>
+                ·
+              </span>
+              <ModelBillingModeBadge
+                model={props.model}
+                appearance='caption'
+                className='min-w-0 truncate'
+              />
+            </div>
+            <ModelDiscountBadge model={props.model} appearance='compact' />
+          </div>
           {dynamicSummary?.providerCount && (
             <span className='text-muted-foreground text-xs break-words'>
               {t('{{count}} providers', {
@@ -344,57 +353,33 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
                 ` · ${t('Not configured for some providers')}`}
             </span>
           )}
-          <div className='grid grid-cols-[repeat(auto-fit,minmax(88px,1fr))] gap-x-3 gap-y-2'>
+          <div
+            data-slot='model-card-price-grid'
+            className='grid grid-cols-[repeat(auto-fit,minmax(88px,1fr))] gap-x-3 gap-y-2'
+          >
             {priceSummary}
           </div>
         </div>
-        {(groups.length > 0 || endpoints.length > 0) && (
-          <dl
-            className={cn(
-              'grid min-w-0 grid-cols-2 gap-3 text-xs',
-              (groups.length === 0 || endpoints.length === 0) && 'grid-cols-1'
-            )}
-          >
-            {groups.length > 0 && (
-              <div className='flex min-w-0 items-baseline gap-1.5'>
-                <dt className='text-muted-foreground shrink-0'>
-                  {t('Groups')}
-                </dt>
-                <dd className='flex min-w-0 items-baseline gap-1'>
-                  <span className='truncate' title={groupLabels.join(', ')}>
-                    {groupLabels[0]}
+        {endpoints.length > 0 && (
+          <dl className='grid min-w-0 grid-cols-1 gap-3 text-xs'>
+            <div className='flex min-w-0 items-baseline gap-1.5'>
+              <dt className='text-muted-foreground shrink-0'>
+                {t('Endpoints')}
+              </dt>
+              <dd className='flex min-w-0 items-baseline gap-1'>
+                <span className='truncate' title={endpoints.join(', ')}>
+                  {endpoints.slice(0, 2).join(', ')}
+                </span>
+                {endpoints.length > 2 && (
+                  <span
+                    className='text-muted-foreground shrink-0'
+                    title={endpoints.slice(2).join(', ')}
+                  >
+                    +{endpoints.length - 2}
                   </span>
-                  {groups.length > 1 && (
-                    <span
-                      className='text-muted-foreground shrink-0'
-                      title={groupLabels.slice(1).join(', ')}
-                    >
-                      +{groups.length - 1}
-                    </span>
-                  )}
-                </dd>
-              </div>
-            )}
-            {endpoints.length > 0 && (
-              <div className='flex min-w-0 items-baseline gap-1.5'>
-                <dt className='text-muted-foreground shrink-0'>
-                  {t('Endpoints')}
-                </dt>
-                <dd className='flex min-w-0 items-baseline gap-1'>
-                  <span className='truncate' title={endpoints.join(', ')}>
-                    {endpoints.slice(0, 2).join(', ')}
-                  </span>
-                  {endpoints.length > 2 && (
-                    <span
-                      className='text-muted-foreground shrink-0'
-                      title={endpoints.slice(2).join(', ')}
-                    >
-                      +{endpoints.length - 2}
-                    </span>
-                  )}
-                </dd>
-              </div>
-            )}
+                )}
+              </dd>
+            </div>
           </dl>
         )}
       </CardContent>

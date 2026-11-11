@@ -137,9 +137,6 @@ function ApiKeysMobileList({
       {rows.map((row) => {
         const apiKey = row.original
         const statusConfig = API_KEY_STATUSES[apiKey.status]
-        const groupCell = row
-          .getAllCells()
-          .find((cell) => cell.column.id === 'group')
         const expiryCell = row
           .getAllCells()
           .find((cell) => cell.column.id === 'expired_time')
@@ -176,13 +173,6 @@ function ApiKeysMobileList({
             </div>
 
             <div className='min-w-0 space-y-3 py-1'>
-              <div className='min-w-0'>
-                {groupCell &&
-                  flexRender(
-                    groupCell.column.columnDef.cell,
-                    groupCell.getContext()
-                  )}
-              </div>
               <ApiKeyQuotaCell apiKey={apiKey} now={now} variant='card' />
             </div>
 

@@ -74,17 +74,19 @@ func pricingDataForGroup(group string) PublicPricingData {
 // request context so server-rendered public HTML cannot enter a shared cache
 // with account-specific pricing.
 func GetAnonymousPricingData() PublicPricingData {
-	return pricingDataForGroup("")
+	return pricingDataForGroup("default")
 }
 
 func GetPricing(c *gin.Context) {
 	userId, exists := c.Get("id")
-	var group string
+	group := "default"
 	if exists {
 		user, err := model.GetUserCache(userId.(int))
-		if err == nil {
-			group = user.Group
+		if err != nil {
+			common.ApiError(c, err)
+			return
 		}
+		group = user.Group
 	}
 	pricingData := pricingDataForGroup(group)
 

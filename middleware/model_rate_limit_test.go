@@ -186,7 +186,8 @@ func TestModelRateLimitCountsConfiguredGroupsSeparately(t *testing.T) {
 			router := gin.New()
 			router.GET("/:group", func(c *gin.Context) {
 				c.Set("id", userID)
-				common.SetContextKey(c, constant.ContextKeyTokenGroup, c.Param("group"))
+				common.SetContextKey(c, constant.ContextKeyUserGroup, c.Param("group"))
+				common.SetContextKey(c, constant.ContextKeyTokenGroup, "ignored-legacy-token-group")
 			}, ModelRequestRateLimit(), func(c *gin.Context) {
 				c.Status(http.StatusOK)
 			})

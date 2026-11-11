@@ -39,7 +39,7 @@ Programs use the `Authorization: Bearer` header. Keep the key out of public URLs
 
 ## Model not found or no available channel {#model}
 
-Copy the exact model ID from [Model Square](https://taodock.com/pricing) or `/v1/models`, and check the protocol and key group. Do not change punctuation or add provider prefixes yourself.
+Query `/v1/models` with the current key, copy the exact model ID from the result, and check the protocol and key model restrictions. Model Square visibility does not guarantee callable access; the key follows the account group. Do not change punctuation or add provider prefixes yourself.
 
 If the model and permissions are correct but the service consistently reports no available channel, report the model, time, and request ID. Repeatedly editing the client's model name usually cannot resolve service availability.
 
@@ -61,7 +61,7 @@ Keep HTTPS certificate verification enabled. Check the domain, system clock, and
 
 ## Playground works, but my client does not {#client}
 
-Playground uses account access; the client is also subject to its API key's group, model, IP, and quota restrictions. Select the same model in both and review the [client settings](./guide/clients.md#settings).
+Playground and clients both use the account's current group; the client is also subject to its API key's model, IP, and quota restrictions. Select the same model in both and review the [client settings](./guide/clients.md#settings).
 
 ## My task was submitted, but there is no result yet {#tasks}
 

@@ -17,7 +17,6 @@ import (
 	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/QuantumNous/new-api/service"
 	"github.com/QuantumNous/new-api/service/authz"
-	"github.com/QuantumNous/new-api/setting"
 
 	"github.com/QuantumNous/new-api/constant"
 
@@ -318,9 +317,6 @@ func Register(c *gin.Context) {
 			ModelLimitsEnabled: false,
 		}
 		token.AllowUserQuotaQuery = true
-		if setting.DefaultUseAutoGroup {
-			token.Group = "auto"
-		}
 		if err := token.Insert(); err != nil {
 			common.ApiErrorT(c, "Failed to create default token")
 			return
@@ -620,27 +616,10 @@ func GetUserModels(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
-	groups := service.GetUserUsableGroups(user.Group)
-	group := c.Query("group")
-	var groupsToQuery []string
-	switch {
-	case group == "":
-		for g := range groups {
-			groupsToQuery = append(groupsToQuery, g)
-		}
-	case group == "auto":
-		if _, ok := groups[group]; ok {
-			groupsToQuery = service.GetUserAutoGroup(user.Group)
-		}
-	default:
-		if _, ok := groups[group]; ok {
-			groupsToQuery = []string{group}
-		}
-	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
-		"data":    service.GetGroupsEnabledModels(groupsToQuery),
+		"data":    service.GetGroupsEnabledModels([]string{user.Group}),
 	})
 }
 

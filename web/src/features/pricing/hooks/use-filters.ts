@@ -26,6 +26,7 @@ import {
   SORT_OPTIONS,
   QUOTA_TYPES,
   ENDPOINT_TYPES,
+  MODEL_DISCOUNT_FILTERS,
   DEFAULT_TOKEN_UNIT,
   VIEW_MODES,
   type ViewMode,
@@ -37,7 +38,7 @@ type FilterState = {
   search?: string
   sort?: string
   vendor?: string
-  group?: string
+  discount?: string
   quotaType?: string
   endpointType?: string
   tag?: string
@@ -59,7 +60,7 @@ export function useFilters(models: PricingModel[]) {
     search: search.search,
     sort: search.sort,
     vendor: search.vendor,
-    group: search.group,
+    discount: search.discount,
     quotaType: search.quotaType,
     endpointType: search.endpointType,
     tag: search.tag,
@@ -72,7 +73,7 @@ export function useFilters(models: PricingModel[]) {
   const debouncedSearchInput = useDebounce(searchInput, 200)
   const sortBy = filterState.sort || SORT_OPTIONS.NAME
   const vendorFilter = filterState.vendor || FILTER_ALL
-  const groupFilter = filterState.group || FILTER_ALL
+  const discountFilter = filterState.discount || MODEL_DISCOUNT_FILTERS.ALL
   const quotaTypeFilter = filterState.quotaType || QUOTA_TYPES.ALL
   const endpointTypeFilter = filterState.endpointType || ENDPOINT_TYPES.ALL
   const tagFilter = filterState.tag || FILTER_ALL
@@ -106,8 +107,11 @@ export function useFilters(models: PricingModel[]) {
     (v: string) => updateFilters({ vendor: v === FILTER_ALL ? undefined : v }),
     [updateFilters]
   )
-  const setGroupFilter = useCallback(
-    (v: string) => updateFilters({ group: v === FILTER_ALL ? undefined : v }),
+  const setDiscountFilter = useCallback(
+    (v: string) =>
+      updateFilters({
+        discount: v === MODEL_DISCOUNT_FILTERS.ALL ? undefined : v,
+      }),
     [updateFilters]
   )
   const setQuotaTypeFilter = useCallback(
@@ -152,7 +156,7 @@ export function useFilters(models: PricingModel[]) {
     return filterAndSortModels(models, {
       search: debouncedSearchInput,
       vendor: vendorFilter,
-      group: groupFilter,
+      discount: discountFilter,
       quotaType: quotaTypeFilter,
       endpointType: endpointTypeFilter,
       tag: tagFilter,
@@ -162,7 +166,7 @@ export function useFilters(models: PricingModel[]) {
     models,
     debouncedSearchInput,
     vendorFilter,
-    groupFilter,
+    discountFilter,
     quotaTypeFilter,
     endpointTypeFilter,
     tagFilter,
@@ -172,27 +176,39 @@ export function useFilters(models: PricingModel[]) {
   const hasActiveFilters = useMemo(
     () =>
       vendorFilter !== FILTER_ALL ||
-      groupFilter !== FILTER_ALL ||
+      discountFilter !== MODEL_DISCOUNT_FILTERS.ALL ||
       quotaTypeFilter !== QUOTA_TYPES.ALL ||
       endpointTypeFilter !== ENDPOINT_TYPES.ALL ||
       tagFilter !== FILTER_ALL,
-    [vendorFilter, groupFilter, quotaTypeFilter, endpointTypeFilter, tagFilter]
+    [
+      vendorFilter,
+      discountFilter,
+      quotaTypeFilter,
+      endpointTypeFilter,
+      tagFilter,
+    ]
   )
 
   const activeFilterCount = useMemo(
     () =>
       (vendorFilter !== FILTER_ALL ? 1 : 0) +
-      (groupFilter !== FILTER_ALL ? 1 : 0) +
+      (discountFilter !== MODEL_DISCOUNT_FILTERS.ALL ? 1 : 0) +
       (quotaTypeFilter !== QUOTA_TYPES.ALL ? 1 : 0) +
       (endpointTypeFilter !== ENDPOINT_TYPES.ALL ? 1 : 0) +
       (tagFilter !== FILTER_ALL ? 1 : 0),
-    [vendorFilter, groupFilter, quotaTypeFilter, endpointTypeFilter, tagFilter]
+    [
+      vendorFilter,
+      discountFilter,
+      quotaTypeFilter,
+      endpointTypeFilter,
+      tagFilter,
+    ]
   )
 
   const clearFilters = useCallback(() => {
     updateFilters({
       vendor: undefined,
-      group: undefined,
+      discount: undefined,
       quotaType: undefined,
       endpointType: undefined,
       tag: undefined,
@@ -207,7 +223,7 @@ export function useFilters(models: PricingModel[]) {
     searchInput,
     sortBy,
     vendorFilter,
-    groupFilter,
+    discountFilter,
     quotaTypeFilter,
     endpointTypeFilter,
     tagFilter,
@@ -217,7 +233,7 @@ export function useFilters(models: PricingModel[]) {
     setSearchInput,
     setSortBy,
     setVendorFilter,
-    setGroupFilter,
+    setDiscountFilter,
     setQuotaTypeFilter,
     setEndpointTypeFilter,
     setTagFilter,

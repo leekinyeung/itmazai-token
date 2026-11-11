@@ -42,6 +42,10 @@ export type StripePaymentResponse = ApiResponse<{ pay_link: string }>
 export type AffiliateCodeResponse = ApiResponse<string>
 export type AffiliateTransferResponse = ApiResponse
 export type CreemPaymentResponse = ApiResponse<{ checkout_url: string }>
+export type DodoPaymentResponse = ApiResponse<{
+  checkout_url: string
+  order_id?: string
+}>
 export type WaffoPaymentResponse = ApiResponse<
   { payment_url?: string } | string
 >
@@ -87,6 +91,16 @@ export interface CreemPaymentRequest {
 }
 
 /**
+ * Dodo Payments checkout request
+ */
+export interface DodoPaymentRequest {
+  /** Wallet top-up amount */
+  amount: number
+  /** Payment method identifier */
+  payment_method: 'dodo'
+}
+
+/**
  * Payment method configuration
  */
 export interface PaymentMethod {
@@ -124,6 +138,10 @@ export interface TopupInfo {
   enable_online_topup: boolean
   /** Whether Stripe topup is enabled */
   enable_stripe_topup: boolean
+  /** Whether Dodo Payments topup is enabled */
+  enable_dodo_topup?: boolean
+  /** Minimum topup amount for Dodo Payments */
+  dodo_min_topup?: number
   /** Available payment methods */
   pay_methods: PaymentMethod[]
   /** Minimum topup amount for online topup */

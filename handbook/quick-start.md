@@ -27,7 +27,7 @@ description: "按照众妙之门 TaoDock 快速开始指南创建 API 密钥、�
 打开 [API 密钥](https://taodock.com/keys)，点击「创建 API 密钥」：
 
 - 名称可填写 `首次接入`，方便在列表中辨认。
-- 分组先使用页面为账号提供的默认选项。
+- 密钥会自动跟随账户当前分组，无需单独选择分组。
 - 按需要设置额度和有效期；首次接入时先不要增加不确定的 IP 或模型限制。
 - 保存后复制该密钥。客户端填写的是 众妙之门 TaoDock API 密钥，不是登录密码。
 
@@ -47,7 +47,7 @@ curl --fail-with-body --silent --show-error https://taodock.com/v1/models \
   -H "Authorization: Bearer $TAODOCK_API_KEY"
 ```
 
-成功时返回包含 `data` 列表的 JSON。列表中的 `id` 就是 API 请求和客户端需要填写的模型 ID。这一步查询模型列表，不生成模型内容。
+成功时返回包含 `data` 列表的 JSON。列表中的 `id` 就是这把密钥当前实际可调用、可填写到客户端的模型 ID；模型广场的目录可见不等于密钥一定可调用。这一步查询模型列表，不生成模型内容。
 
 Windows PowerShell 可使用：
 

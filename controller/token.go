@@ -89,46 +89,6 @@ func getTokenRequestUserGroup(c *gin.Context) (string, error) {
 	return model.GetUserGroup(c.GetInt("id"), false)
 }
 
-func setTokenAutoGroups(c *gin.Context, token *model.Token, groups []string) bool {
-	if len(groups) == 0 {
-		if err := token.SetAutoGroups(nil); err != nil {
-			common.ApiError(c, err)
-			return false
-		}
-		return true
-	}
-
-	maxCount := setting.GetMaxTokenAutoGroups()
-	if len(groups) > maxCount {
-		common.ApiErrorT(c, "A token can select at most {{max}} Auto groups", map[string]any{"max": maxCount})
-		return false
-	}
-
-	userGroup, err := getTokenRequestUserGroup(c)
-	if err != nil {
-		common.ApiError(c, err)
-		return false
-	}
-	seen := make(map[string]struct{}, len(groups))
-	for _, group := range groups {
-		if _, ok := seen[group]; ok {
-			common.ApiErrorT(c, "Auto group {{group}} is duplicated", map[string]any{"group": group})
-			return false
-		}
-		seen[group] = struct{}{}
-		if !service.IsUserSelectableGroup(userGroup, group) {
-			common.ApiErrorT(c, "Auto group {{group}} is unavailable or unauthorized", map[string]any{"group": group})
-			return false
-		}
-	}
-
-	if err := token.SetAutoGroups(groups); err != nil {
-		common.ApiError(c, err)
-		return false
-	}
-	return true
-}
-
 func GetAllTokens(c *gin.Context) {
 	userId := c.GetInt("id")
 	pageInfo := common.GetPageQuery(c)
@@ -333,14 +293,9 @@ func AddToken(c *gin.Context) {
 		common.ApiErrorT(c, "Maximum number of tokens reached ({{max}})", map[string]any{"max": maxTokens})
 		return
 	}
-	if token.Group == "auto" {
-		if !setTokenAutoGroups(c, &token, request.AutoGroups.Groups) {
-			return
-		}
-	} else {
-		token.CrossGroupRetry = false
-		_ = token.SetAutoGroups(nil)
-	}
+	token.Group = ""
+	token.CrossGroupRetry = false
+	_ = token.SetAutoGroups(nil)
 	key, err := common.GenerateKey()
 	if err != nil {
 		common.ApiErrorT(c, "Failed to generate token")
@@ -359,9 +314,9 @@ func AddToken(c *gin.Context) {
 		ModelLimitsEnabled: token.ModelLimitsEnabled,
 		ModelLimits:        token.ModelLimits,
 		AllowIps:           token.AllowIps,
-		Group:              token.Group,
-		CrossGroupRetry:    token.CrossGroupRetry,
-		AutoGroups:         token.AutoGroups,
+		Group:              "",
+		CrossGroupRetry:    false,
+		AutoGroups:         "",
 	}
 	cleanToken.AllowUserQuotaQuery = request.AllowUserQuotaQuery == nil || *request.AllowUserQuotaQuery
 	err = cleanToken.Insert()
@@ -459,16 +414,9 @@ func UpdateToken(c *gin.Context) {
 		if request.AllowUserQuotaQuery != nil {
 			cleanToken.AllowUserQuotaQuery = *request.AllowUserQuotaQuery
 		}
-		cleanToken.Group = token.Group
-		cleanToken.CrossGroupRetry = token.CrossGroupRetry
-		if token.Group != "auto" {
-			cleanToken.CrossGroupRetry = false
-			_ = cleanToken.SetAutoGroups(nil)
-		} else if request.AutoGroups.Set {
-			if !setTokenAutoGroups(c, cleanToken, request.AutoGroups.Groups) {
-				return
-			}
-		}
+		cleanToken.Group = ""
+		cleanToken.CrossGroupRetry = false
+		_ = cleanToken.SetAutoGroups(nil)
 	}
 	err = cleanToken.Update()
 	if err != nil {

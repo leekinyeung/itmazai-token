@@ -36,7 +36,8 @@ import {
 } from '@/features/model-pricing/api'
 import { modelPricingDisplay } from '@/features/model-pricing/pricing'
 import { ModelPriceCell } from '@/features/pricing/components/model-price-cell'
-import { formatTimestampToDate } from '@/lib/format'
+import { toIntlLocale } from '@/i18n/languages'
+import { formatNumber, formatTimestampToDate } from '@/lib/format'
 import { getLobeIcon } from '@/lib/lobe-icon'
 
 import { getNameRuleConfig } from '../constants'
@@ -55,7 +56,8 @@ export function useModelsColumns(
   pricing?: ModelPricingConfig,
   pricingState?: 'loading' | 'error'
 ): ColumnDef<Model>[] {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const locale = toIntlLocale(i18n.resolvedLanguage || i18n.language)
   const canPrice = useCanEditModelPricing()
   const { setCurrentRow, setOpen } = useModels()
   const vendorMap = useMemo(
@@ -199,6 +201,28 @@ export function useModelsColumns(
                 showExpression={false}
               />
             </Button>
+          )
+        },
+      },
+      {
+        accessorKey: 'model_discount',
+        header: t('Model discount'),
+        meta: { label: t('Model discount') },
+        size: 110,
+        enableSorting: false,
+        cell: ({ row }) => {
+          if (row.original.name_rule !== 0) {
+            return (
+              <span className='text-muted-foreground text-xs'>
+                {t('Per matched model')}
+              </span>
+            )
+          }
+          const discount = row.original.model_discount ?? 1
+          return (
+            <span className='font-mono text-sm tabular-nums'>
+              {formatNumber(discount, locale)}
+            </span>
           )
         },
       },
@@ -379,5 +403,14 @@ export function useModelsColumns(
         meta: { mobileHidden: true },
       },
     ]
-  }, [t, canPrice, vendorMap, priceMap, pricingState, setCurrentRow, setOpen])
+  }, [
+    t,
+    locale,
+    canPrice,
+    vendorMap,
+    priceMap,
+    pricingState,
+    setCurrentRow,
+    setOpen,
+  ])
 }

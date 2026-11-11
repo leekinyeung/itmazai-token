@@ -303,7 +303,7 @@ func (s *responsesWSSession) runCall(c *gin.Context, state *responsesWSCallState
 			return types.NewError(err, types.ErrorCodeBadResponse, types.ErrOptionWithSkipRetry())
 		}
 	} else {
-		retry := &service.RetryParam{Ctx: c, TokenGroup: common.GetContextKeyString(c, appconstant.ContextKeyUsingGroup), ModelName: modelName, RequestPath: c.Request.URL.Path, Retry: common.GetPointer(0)}
+		retry := &service.RetryParam{Ctx: c, AccountGroup: common.GetContextKeyString(c, appconstant.ContextKeyUserGroup), ModelName: modelName, RequestPath: c.Request.URL.Path, Retry: common.GetPointer(0)}
 		for ; retry.GetRetry() <= common.RetryTimes; retry.IncreaseRetry() {
 			var channel *appmodel.Channel
 			channel, apiErr = selectResponsesWSChannel(c, modelName, retry)
@@ -592,22 +592,17 @@ func (s *responsesWSSession) restoreConnectionContext(c *gin.Context, model stri
 		!reflect.DeepEqual(route.Auth, s.lockedRoute.Auth) {
 		return types.NewErrorWithStatusCode(errors.New("upstream route changed; reconnect required"), types.ErrorCodeAccessDenied, http.StatusForbidden, types.ErrOptionWithSkipRetry())
 	}
+	accountGroup := common.GetContextKeyString(c, appconstant.ContextKeyUserGroup)
+	if accountGroup == "" || s.lockedGroup != accountGroup {
+		return types.NewErrorWithStatusCode(errors.New("account group changed; reconnect required"), types.ErrorCodeAccessDenied, http.StatusForbidden, types.ErrOptionWithSkipRetry())
+	}
 	if pin, found, _ := service.GetChannelConstraints(c).ResolvedPin(); found {
 		if pin.ChannelId != s.lockedChannelID {
 			return types.NewErrorWithStatusCode(errors.New("channel pin changed; reconnect required"), types.ErrorCodeAccessDenied, http.StatusForbidden, types.ErrOptionWithSkipRetry())
 		}
-	} else {
-		group := common.GetContextKeyString(c, appconstant.ContextKeyUsingGroup)
-		if group == "auto" {
-			if !slices.Contains(service.GetRequestAutoGroups(c, common.GetContextKeyString(c, appconstant.ContextKeyUserGroup)), s.lockedGroup) {
-				return types.NewErrorWithStatusCode(errors.New("the connection group is no longer allowed"), types.ErrorCodeAccessDenied, http.StatusForbidden, types.ErrOptionWithSkipRetry())
-			}
-			group = s.lockedGroup
-			common.SetContextKey(c, appconstant.ContextKeyAutoGroup, group)
-		}
-		if !appmodel.IsChannelEnabledForGroupModel(group, model, s.lockedChannelID) {
-			return types.NewErrorWithStatusCode(errors.New("the connection channel is no longer allowed for this group and model"), types.ErrorCodeAccessDenied, http.StatusForbidden, types.ErrOptionWithSkipRetry())
-		}
+	}
+	if !appmodel.IsChannelEnabledForGroupModel(accountGroup, model, s.lockedChannelID) {
+		return types.NewErrorWithStatusCode(errors.New("the connection channel is no longer allowed for this group and model"), types.ErrorCodeAccessDenied, http.StatusForbidden, types.ErrOptionWithSkipRetry())
 	}
 	for key, value := range s.lockedContext {
 		c.Set(string(key), value)

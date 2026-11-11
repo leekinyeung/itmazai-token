@@ -1,0 +1,7 @@
+interface:
+  display_name: "DeepEval Manual Update"
+  short_description: "Manually review and release DeepEval Worker updates"
+  default_prompt: "Use $deepeval-update to check and safely update TaoDock's DeepEval Worker without deploying unless I explicitly request it."
+
+policy:
+  allow_implicit_invocation: false

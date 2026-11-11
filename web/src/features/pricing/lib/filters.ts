@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import {
   SORT_OPTIONS,
   FILTER_ALL,
+  MODEL_DISCOUNT_FILTERS,
   QUOTA_TYPES,
   QUOTA_TYPE_VALUES,
   ENDPOINT_TYPES,
@@ -31,7 +32,7 @@ import {
   hasTaskUsageSchema,
   isUnconfiguredTaskUsageModel,
 } from './dynamic-price'
-import { isTokenBasedModel } from './model-helpers'
+import { getModelDiscount, isTokenBasedModel } from './model-helpers'
 import { calculateTokenPrice } from './price'
 
 // ----------------------------------------------------------------------------
@@ -69,14 +70,19 @@ export function filterByVendor(
 }
 
 /**
- * Filter models by group
+ * Filter models by their independent model discount.
  */
-export function filterByGroup(
+export function filterByModelDiscount(
   models: PricingModel[],
-  group: string
+  discount: string
 ): PricingModel[] {
-  if (group === FILTER_ALL) return models
-  return models.filter((m) => m.enable_groups?.includes(group))
+  if (discount === MODEL_DISCOUNT_FILTERS.DISCOUNTED) {
+    return models.filter((model) => getModelDiscount(model) < 1)
+  }
+  if (discount === MODEL_DISCOUNT_FILTERS.STANDARD) {
+    return models.filter((model) => getModelDiscount(model) === 1)
+  }
+  return models
 }
 
 /**
@@ -206,7 +212,7 @@ export function filterAndSortModels(
   filters: {
     search: string
     vendor: string
-    group: string
+    discount: string
     quotaType: string
     endpointType: string
     tag: string
@@ -215,7 +221,7 @@ export function filterAndSortModels(
 ): PricingModel[] {
   let result = filterBySearch(models, filters.search)
   result = filterByVendor(result, filters.vendor)
-  result = filterByGroup(result, filters.group)
+  result = filterByModelDiscount(result, filters.discount)
   result = filterByQuotaType(result, filters.quotaType)
   result = filterByEndpointType(result, filters.endpointType)
   result = filterByTag(result, filters.tag)

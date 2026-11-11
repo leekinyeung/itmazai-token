@@ -151,6 +151,7 @@ func testChannel(ctx context.Context, channel *model.Channel, testUserID int, te
 		requestPath = strings.Replace(requestPath, ":generateContent", ":streamGenerateContent", 1)
 	}
 	c.Request = httptest.NewRequestWithContext(ctx, http.MethodPost, requestPath, nil)
+	c.Request.Header.Set("Content-Type", "application/json")
 
 	cache, err := model.GetUserCache(testUserID)
 	if err != nil {
@@ -163,7 +164,6 @@ func testChannel(ctx context.Context, channel *model.Channel, testUserID int, te
 	c.Set("id", testUserID)
 
 	//c.Request.Header.Set("Authorization", "Bearer "+channel.Key)
-	c.Request.Header.Set("Content-Type", "application/json")
 	c.Set("channel", channel.Type)
 	c.Set("base_url", channel.GetBaseURL())
 	group, _ := model.GetUserGroup(testUserID, false)
@@ -396,12 +396,17 @@ func testChannel(ctx context.Context, channel *model.Channel, testUserID int, te
 			newAPIError: types.NewError(err, types.ErrorCodeConvertRequestFailed),
 		}
 	}
-	jsonData, err := common.Marshal(convertedRequest)
-	if err != nil {
-		return testResult{
-			context:     c,
-			localErr:    err,
-			newAPIError: types.NewError(err, types.ErrorCodeJsonMarshalFailed),
+	var jsonData []byte
+	if multipartBody, ok := convertedRequest.(*bytes.Buffer); ok {
+		jsonData = multipartBody.Bytes()
+	} else {
+		jsonData, err = common.Marshal(convertedRequest)
+		if err != nil {
+			return testResult{
+				context:     c,
+				localErr:    err,
+				newAPIError: types.NewError(err, types.ErrorCodeJsonMarshalFailed),
+			}
 		}
 	}
 

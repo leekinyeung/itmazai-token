@@ -34,7 +34,6 @@ export interface ModelCardGridProps {
   usdExchangeRate?: number
   tokenUnit?: TokenUnit
   showRechargePrice?: boolean
-  selectedGroup?: string
 }
 
 export const ModelCardGrid = memo(function ModelCardGrid(
@@ -92,7 +91,6 @@ export const ModelCardGrid = memo(function ModelCardGrid(
             priceRate={props.priceRate}
             usdExchangeRate={props.usdExchangeRate}
             showRechargePrice={props.showRechargePrice}
-            selectedGroup={props.selectedGroup}
             perf={perfMap.get(model.model_name || '')}
           />
         ))}

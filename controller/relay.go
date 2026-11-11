@@ -157,11 +157,11 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 	defer service.RestoreFallbackBilling(c, relayInfo)
 
 	retryParam := &service.RetryParam{
-		Ctx:         c,
-		TokenGroup:  relayInfo.TokenGroup,
-		ModelName:   relayInfo.OriginModelName,
-		RequestPath: c.Request.URL.Path,
-		Retry:       common.GetPointer(0),
+		Ctx:          c,
+		AccountGroup: relayInfo.UserGroup,
+		ModelName:    relayInfo.OriginModelName,
+		RequestPath:  c.Request.URL.Path,
+		Retry:        common.GetPointer(0),
 	}
 	relayInfo.RetryIndex = 0
 	relayInfo.LastError = nil
@@ -585,11 +585,11 @@ func executeTaskSubmissionWith(
 	}
 
 	retryParam := &service.RetryParam{
-		Ctx:         c,
-		TokenGroup:  relayInfo.TokenGroup,
-		ModelName:   relayInfo.OriginModelName,
-		RequestPath: c.Request.URL.Path,
-		Retry:       common.GetPointer(0),
+		Ctx:          c,
+		AccountGroup: relayInfo.UserGroup,
+		ModelName:    relayInfo.OriginModelName,
+		RequestPath:  c.Request.URL.Path,
+		Retry:        common.GetPointer(0),
 	}
 
 	for ; retryParam.GetRetry() <= common.RetryTimes; retryParam.IncreaseRetry() {

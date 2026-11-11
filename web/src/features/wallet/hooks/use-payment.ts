@@ -25,14 +25,18 @@ import { handleServerError } from '@/lib/handle-server-error'
 import {
   calculateAmount,
   calculateStripeAmount,
+  calculateDodoAmount,
   calculateWaffoAmount,
   calculateWaffoPancakeAmount,
   requestPayment,
   requestStripePayment,
+  requestDodoPayment,
   isApiSuccess,
 } from '../api'
+import { PAYMENT_TYPES } from '../constants'
 import {
   isStripePayment,
+  isDodoPayment,
   isWaffoPayment,
   isWaffoPancakePayment,
   submitPaymentForm,
@@ -48,6 +52,7 @@ type AmountCalculator = (request: AmountRequest) => Promise<AmountResponse>
 export interface PaymentAmountCalculators {
   regular: AmountCalculator
   stripe: AmountCalculator
+  dodo: AmountCalculator
   waffo: AmountCalculator
   waffoPancake: AmountCalculator
 }
@@ -55,6 +60,7 @@ export interface PaymentAmountCalculators {
 const defaultPaymentAmountCalculators: PaymentAmountCalculators = {
   regular: calculateAmount,
   stripe: calculateStripeAmount,
+  dodo: calculateDodoAmount,
   waffo: calculateWaffoAmount,
   waffoPancake: calculateWaffoPancakeAmount,
 }
@@ -67,6 +73,8 @@ export async function requestPaymentAmount(
   let calculator = calculators.regular
   if (isStripePayment(paymentType)) {
     calculator = calculators.stripe
+  } else if (isDodoPayment(paymentType)) {
+    calculator = calculators.dodo
   } else if (isWaffoPayment(paymentType)) {
     calculator = calculators.waffo
   } else if (isWaffoPancakePayment(paymentType)) {
@@ -115,6 +123,20 @@ export function usePayment() {
 
         const isStripe = isStripePayment(paymentType)
         const amount = Math.floor(topupAmount)
+
+        if (isDodoPayment(paymentType)) {
+          const dodoResponse = await requestDodoPayment({
+            amount,
+            payment_method: PAYMENT_TYPES.DODO,
+          })
+          if (!isApiSuccess(dodoResponse) || !dodoResponse.data?.checkout_url) {
+            handleServerError(dodoResponse, i18next.t('Payment request failed'))
+            return false
+          }
+          window.open(dodoResponse.data.checkout_url, '_blank')
+          toast.success(i18next.t('Redirecting to Dodo Payments checkout...'))
+          return true
+        }
 
         const response = isStripe
           ? await requestStripePayment({

@@ -27,7 +27,7 @@ This guide uses `gpt-6.1-sol`, which is listed in the current TaoDock catalog. U
 Open [API Keys](https://taodock.com/keys) and select **Create API Key**:
 
 - Give it a recognizable name, such as `First integration`.
-- Start with the default group offered for your account.
+- The key automatically follows your account's current group; there is no separate group choice.
 - Set a quota and expiration as needed. Leave uncertain IP or model restrictions unset while establishing your first connection.
 - Save and copy the key. Clients use the TaoDock API key, not your sign-in password.
 
@@ -47,7 +47,7 @@ curl --fail-with-body --silent --show-error https://taodock.com/v1/models \
   -H "Authorization: Bearer $TAODOCK_API_KEY"
 ```
 
-A successful response contains a JSON `data` list. Each `id` is a model ID you can use in requests or clients. Listing models does not generate model content.
+A successful response contains a JSON `data` list. Each `id` is currently callable by this key and can be used in requests or clients. Model Square visibility alone does not guarantee key access. Listing models does not generate model content.
 
 For Windows PowerShell:
 

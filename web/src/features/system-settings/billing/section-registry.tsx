@@ -157,6 +157,13 @@ const BILLING_SECTIONS = [
           CreemWebhookSecret: settings.CreemWebhookSecret,
           CreemTestMode: settings.CreemTestMode,
           CreemProducts: settings.CreemProducts,
+          DodoApiKey: settings.DodoApiKey,
+          DodoWebhookKey: settings.DodoWebhookKey,
+          DodoProductId: settings.DodoProductId,
+          DodoTestMode: settings.DodoTestMode,
+          DodoCurrency: settings.DodoCurrency,
+          DodoUnitPrice: settings.DodoUnitPrice,
+          DodoMinTopUp: settings.DodoMinTopUp,
         }}
         waffoDefaultValues={{
           WaffoEnabled: settings.WaffoEnabled ?? false,

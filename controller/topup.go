@@ -6,6 +6,7 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"sync"
 	"time"
@@ -47,6 +48,20 @@ func GetTopUpInfo(c *gin.Context) {
 			}
 			payMethods = append(payMethods, stripeMethod)
 		}
+	}
+
+	// Dodo Payments uses the same arbitrary-amount flow as the other card
+	// gateways, so it is exposed as one entry in pay_methods.
+	enableDodo := isDodoTopUpEnabled()
+	if enableDodo && !slices.ContainsFunc(payMethods, func(method map[string]string) bool {
+		return method["type"] == model.PaymentMethodDodo
+	}) {
+		payMethods = append(payMethods, map[string]string{
+			"name":      "Dodo Payments",
+			"type":      model.PaymentMethodDodo,
+			"color":     "#FF6B4A",
+			"min_topup": strconv.Itoa(setting.DodoMinTopUp),
+		})
 	}
 
 	// Waffo Pancake is displayed above the standard Waffo gateway.
@@ -96,6 +111,7 @@ func GetTopUpInfo(c *gin.Context) {
 		"enable_online_topup":        isEpayTopUpEnabled(),
 		"enable_stripe_topup":        isStripeTopUpEnabled(),
 		"enable_creem_topup":         isCreemTopUpEnabled(),
+		"enable_dodo_topup":          enableDodo,
 		"enable_waffo_topup":         enableWaffo,
 		"enable_waffo_pancake_topup": enableWaffoPancake,
 		"enable_redemption":          true,
@@ -109,6 +125,7 @@ func GetTopUpInfo(c *gin.Context) {
 		"pay_methods":             payMethods,
 		"min_topup":               operation_setting.MinTopUp,
 		"stripe_min_topup":        setting.StripeMinTopUp,
+		"dodo_min_topup":          setting.DodoMinTopUp,
 		"waffo_min_topup":         setting.WaffoMinTopUp,
 		"waffo_pancake_min_topup": setting.WaffoPancakeMinTopUp,
 		"amount_options":          operation_setting.GetPaymentSetting().AmountOptions,

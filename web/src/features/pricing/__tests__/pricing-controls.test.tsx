@@ -29,6 +29,10 @@ import type { PricingModel } from '../types'
 
 function toolbarProps(): PricingToolbarProps {
   return {
+    searchValue: '',
+    onSearchChange: vi.fn(),
+    onClearSearch: vi.fn(),
+    searchPlaceholder: 'Search model name, provider, endpoint, or tag...',
     filteredCount: 2,
     totalCount: 2,
     sortBy: 'name',
@@ -38,7 +42,7 @@ function toolbarProps(): PricingToolbarProps {
     quotaTypeFilter: 'all',
     endpointTypeFilter: 'all',
     vendorFilter: 'all',
-    groupFilter: 'all',
+    discountFilter: 'all',
     tagFilter: 'all',
     onSortChange: vi.fn(),
     onTokenUnitChange: vi.fn(),
@@ -47,11 +51,9 @@ function toolbarProps(): PricingToolbarProps {
     onQuotaTypeChange: vi.fn(),
     onEndpointTypeChange: vi.fn(),
     onVendorChange: vi.fn(),
-    onGroupChange: vi.fn(),
+    onDiscountChange: vi.fn(),
     onTagChange: vi.fn(),
     vendors: [],
-    groups: ['default', 'premium'],
-    groupRatios: { default: 1, premium: 3 },
     tags: [],
     models: [],
     hasActiveFilters: false,
@@ -61,6 +63,29 @@ function toolbarProps(): PricingToolbarProps {
 }
 
 describe('pricing controls', () => {
+  it('keeps search and result controls in the same catalog region', async () => {
+    const props = toolbarProps()
+    const user = userEvent.setup()
+    const { rerender } = render(<PricingToolbar {...props} />)
+    const controls = screen.getByRole('region', { name: 'Search models' })
+    const search = within(controls).getByRole('search', {
+      name: 'Search models',
+    })
+    const input = within(search).getByRole('textbox', {
+      name: 'Search models',
+    })
+
+    expect(within(controls).getByText('2')).toBeVisible()
+    await user.type(input, 'g')
+    expect(props.onSearchChange).toHaveBeenCalledWith('g')
+
+    rerender(<PricingToolbar {...props} searchValue='gpt' />)
+    await user.click(
+      within(controls).getByRole('button', { name: 'Clear search' })
+    )
+    expect(props.onClearSearch).toHaveBeenCalledOnce()
+  })
+
   it('counts each model once per filter and updates counts when the catalog changes', () => {
     const props = toolbarProps()
     const base: PricingModel = {
@@ -73,6 +98,7 @@ describe('pricing controls', () => {
       enable_groups: ['default'],
       tags: 'Chat,chat',
       supported_endpoint_types: ['openai', 'openai'],
+      model_discount: 0.8,
     }
     const models: PricingModel[] = [
       base,
@@ -81,6 +107,7 @@ describe('pricing controls', () => {
         id: 2,
         model_name: 'image-model',
         quota_type: 1,
+        model_discount: 1,
         tags: 'chat,Image',
         supported_endpoint_types: ['image-generation'],
       },
@@ -89,6 +116,7 @@ describe('pricing controls', () => {
         id: 3,
         model_name: 'task-model',
         vendor_name: 'Vendor B',
+        model_discount: 0.5,
         tags: 'Video',
         supported_endpoint_types: ['openai-video'],
         billing_usage_schema: { seconds: { type: 'number', unit: 'second' } },
@@ -122,6 +150,12 @@ describe('pricing controls', () => {
     expect(
       screen.getByRole('button', { name: /^Task billing\s*1$/ })
     ).toBeVisible()
+    expect(
+      screen.getByRole('button', { name: /^Discounted models\s*2$/ })
+    ).toBeVisible()
+    expect(
+      screen.getByRole('button', { name: /^No model discount\s*1$/ })
+    ).toBeVisible()
 
     rerender(<PricingSidebar {...sidebarProps} models={[models[1]]} />)
     expect(
@@ -137,6 +171,22 @@ describe('pricing controls', () => {
     expect(
       screen.getByRole('button', { name: /^Task billing\s*0$/ })
     ).toBeVisible()
+    expect(
+      screen.getByRole('button', { name: /^Discounted models\s*0$/ })
+    ).toBeVisible()
+    expect(
+      screen.getByRole('button', { name: /^No model discount\s*1$/ })
+    ).toBeVisible()
+  })
+
+  it('selects discounted models from the existing filter sidebar', async () => {
+    const props = toolbarProps()
+    const user = userEvent.setup()
+    render(<PricingSidebar {...props} />)
+
+    await user.click(screen.getByRole('button', { name: /Discounted models/ }))
+
+    expect(props.onDiscountChange).toHaveBeenCalledWith('discounted')
   })
 
   it('changes the token unit and keeps the selected unit pressed when clicked again', async () => {
@@ -197,7 +247,7 @@ describe('pricing controls', () => {
     expect(props.onSortChange).toHaveBeenCalledWith('input-price-low')
   })
 
-  it('opens mobile filters from the left, selects a group, and restores focus on close', async () => {
+  it('opens mobile filters without a group selector and restores focus on close', async () => {
     const props = toolbarProps()
     const user = userEvent.setup()
     const { rerender } = render(<PricingToolbar {...props} />)
@@ -205,21 +255,8 @@ describe('pricing controls', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Filter' })
     expect(dialog).toHaveAttribute('data-side', 'left')
     expect(within(dialog).getByRole('button', { name: 'Reset' })).toBeDisabled()
-    await user.click(within(dialog).getByRole('button', { name: /premium/ }))
-    expect(props.onGroupChange).toHaveBeenCalledWith('premium')
-    rerender(
-      <PricingToolbar
-        {...props}
-        groupFilter='premium'
-        hasActiveFilters
-        activeFilterCount={1}
-      />
-    )
-    expect(
-      within(dialog).getByRole('button', { name: /premium/ })
-    ).toHaveAttribute('aria-pressed', 'true')
-    await user.click(within(dialog).getByRole('button', { name: 'Reset' }))
-    expect(props.onClearFilters).toHaveBeenCalledOnce()
+    expect(within(dialog).queryByText('Groups')).not.toBeInTheDocument()
+    rerender(<PricingToolbar {...props} />)
     await user.keyboard('{Escape}')
     expect(await screen.findByRole('button', { name: /Filter/ })).toHaveFocus()
   })

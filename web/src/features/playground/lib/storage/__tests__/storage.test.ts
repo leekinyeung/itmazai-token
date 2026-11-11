@@ -107,3 +107,16 @@ test('storage calls without a signed-in user do not persist shared data', () => 
   expect(loadParameterEnabled()).toEqual({})
   expect(localStorage.length).toBe(0)
 })
+
+test('stored legacy group state is discarded by the config schema', () => {
+  useAuthStore.getState().auth.setUser({ id: 1, username: 'A', role: 1 })
+  localStorage.setItem(
+    `${STORAGE_KEYS.CONFIG}:1`,
+    JSON.stringify({
+      version: 1,
+      data: { model: 'account-model', group: 'vip', temperature: 0.4 },
+    })
+  )
+
+  expect(loadConfig()).toEqual({ model: 'account-model', temperature: 0.4 })
+})

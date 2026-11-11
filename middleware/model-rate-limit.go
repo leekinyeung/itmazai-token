@@ -184,10 +184,7 @@ func ModelRequestRateLimit() func(c *gin.Context) {
 		successMaxCount := setting.ModelRequestRateLimitSuccessCount
 
 		// 获取分组
-		group := common.GetContextKeyString(c, constant.ContextKeyTokenGroup)
-		if group == "" {
-			group = common.GetContextKeyString(c, constant.ContextKeyUserGroup)
-		}
+		group := common.GetContextKeyString(c, constant.ContextKeyUserGroup)
 
 		// 获取分组的限流配置。配置了独立限流的分组按用户和分组单独计数，
 		// 其余分组共用该用户的全局计数

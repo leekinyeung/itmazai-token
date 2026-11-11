@@ -12,7 +12,7 @@ description: "Find TaoDock models, API keys, playground tools and request logs, 
 | Page | Open directly | Purpose |
 | --- | --- | --- |
 | Overview | [Console overview](https://taodock.com/dashboard/overview) | Account information and recent usage |
-| Model Square | [Browse models](https://taodock.com/pricing) | Model IDs, protocols, groups, and pricing |
+| Model Square | [Browse models](https://taodock.com/pricing) | Viewable model IDs, protocols, groups, and pricing |
 | API Keys | [Manage keys](https://taodock.com/keys) | Create, copy, restrict, disable, and connect keys |
 | Wallet | [Open Wallet](https://taodock.com/wallet) | Quota, funding or redemption options, and account records |
 | Playground | [Open Playground](https://taodock.com/playground) | Try model conversations in the browser |
@@ -28,6 +28,8 @@ Protected pages require sign-in. Regular users do not need administrative pages 
 Open [Playground](https://taodock.com/playground), select an accessible model, and send a short question. Use the same model in your client afterward to distinguish model access issues from client configuration issues.
 
 Playground generation requests also consume model quota; it is not a free testing tool.
+
+Visibility in Model Square does not guarantee that every key can call a model, because a key may also have a model allowlist. Use that key with `/v1/models` for its actually callable set.
 
 ## Find an API request {#logs}
 

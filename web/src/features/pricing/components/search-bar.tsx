@@ -50,7 +50,11 @@ export function SearchBar(props: SearchBarProps) {
   }, [])
 
   return (
-    <div className={cn('relative', props.className)}>
+    <div
+      role='search'
+      aria-label={t('Search models')}
+      className={cn('relative', props.className)}
+    >
       <Search className='text-muted-foreground/60 pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2' />
       <input
         ref={inputRef}

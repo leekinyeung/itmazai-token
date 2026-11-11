@@ -701,3 +701,73 @@ The selected footer concept and final implementation were compared in `output/ta
 - P2：无
 
 final result: passed
+
+---
+
+# Model Square Redesign QA — 2026-11-10
+
+## Source visual truth
+
+- `/Users/leekinyeung/.codex/generated_images/01a1c36c-0260-7551-9995-2d00ce5d6a1c/exec-fe81ee10-0e50-408d-9cb8-3ff3c50aef94.png`
+- Source pixels: 1586 × 992.
+
+## Rendered implementation
+
+- `http://127.0.0.1:4173/models`
+- Browser evidence: Codex in-app browser tab 1, captured in the design comparison tool output on 2026-11-10.
+- Implementation viewport and screenshot: 1440 × 900 CSS pixels at 1× density.
+- State: Chinese locale, dark theme, table view, unfiltered catalog.
+- Normalization: the source was evaluated at the implementation width, producing an approximately 1440 × 901 comparison frame; the one-pixel aspect difference was ignored.
+
+## Full-view comparison evidence
+
+- The source and implementation were emitted together in one comparison output.
+- Both show the catalog immediately below the fixed navigation, with no visible marketing hero copy.
+- Both align a 280px filter rail with a unified search/result toolbar and place results directly underneath.
+- The implementation keeps production navigation, live filters, live data, and the existing detailed table columns; those are intentional product constraints rather than design drift.
+
+## Focused region comparison evidence
+
+- The shared comparison output kept the toolbar, filter rail, table header, and first result rows readable, so separate crops were not needed.
+- Search hierarchy, result count, price controls, unit controls, sort, and view toggle were compared directly.
+
+## Required fidelity surfaces
+
+- Fonts and typography: the existing Public Sans product typography preserves the source hierarchy, weights, compact control labels, and readable table density.
+- Spacing and layout rhythm: page top spacing, 280px sidebar, 16px grid gap, compact toolbar padding, radii, and result proximity match the selected direction.
+- Colors and visual tokens: existing background, card, border, muted foreground, and primary blue tokens reproduce the source dark palette without introducing one-off colors.
+- Image quality and asset fidelity: no new raster assets were required; production vendor marks continue to use the repository's existing icon sources with no placeholders or code-drawn replacements.
+- Copy and content: the requested hero title and explanatory copy are visually removed; search, filters, live count, pricing controls, and live model data remain intact. A screen-reader-only page heading preserves document structure.
+
+## Findings
+
+- No actionable P0, P1, or P2 mismatch was found.
+- The production table carries more pricing columns and denser live data than the concept image. This is an accepted product constraint because the requested scope was the hero/search integration, not a reduction of pricing information.
+
+## Interaction and responsive checks
+
+- Search filtering changed the live result count from 19 to 4 and clearing restored 19.
+- Card/table view switching worked and exposed the selected accessible state.
+- The toolbar remained visible while scrolling on desktop.
+- Desktop was checked at 1440 × 900 and mobile at 390 × 844.
+- Mobile kept search full width, exposed the filter drawer trigger, and wrapped result controls without horizontal page overflow.
+- Browser console error check returned no errors.
+
+## Comparison history
+
+- Initial comparison: no P0/P1/P2 findings; no corrective design iteration was required.
+
+## Implementation checklist
+
+- [x] Remove the visible hero title and descriptive copy.
+- [x] Merge search into the result toolbar.
+- [x] Preserve keyboard search focus and clear behavior.
+- [x] Keep desktop filters and mobile filter drawer behavior.
+- [x] Align loading state with the compact catalog layout.
+- [x] Verify desktop, mobile, search, clearing, view switching, sticky behavior, and console output.
+
+## Follow-up polish
+
+- None required for this scope.
+
+final result: passed

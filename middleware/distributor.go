@@ -17,7 +17,6 @@ import (
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/pkg/jsplugin"
 	relayconstant "github.com/QuantumNous/new-api/relay/constant"
-	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/QuantumNous/new-api/relaykit/types"
 	"github.com/QuantumNous/new-api/service"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
@@ -28,7 +27,6 @@ import (
 
 type ModelRequest struct {
 	Model string `json:"model"`
-	Group string `json:"group,omitempty"`
 }
 
 func Distribute() func(c *gin.Context) {
@@ -73,39 +71,20 @@ func Distribute() func(c *gin.Context) {
 				}
 			}
 
-			if shouldSelectChannel {
-				if modelRequest.Model == "" {
-					abortWithOpenAiMessage(c, http.StatusBadRequest, i18n.T(c, i18n.MsgDistributorModelNameRequired))
-					return
-				}
-				// check path is /pg/chat/completions
-				if strings.HasPrefix(c.Request.URL.Path, "/pg/chat/completions") {
-					usingGroup := common.GetContextKeyString(c, constant.ContextKeyUsingGroup)
-					playgroundRequest := &dto.PlayGroundRequest{}
-					err = common.UnmarshalBodyReusable(c, playgroundRequest)
-					if err != nil {
-						abortWithOpenAiMessage(c, http.StatusBadRequest, i18n.T(c, i18n.MsgDistributorInvalidPlayground, map[string]any{"Error": err.Error()}))
-						return
-					}
-					if playgroundRequest.Group != "" {
-						if !service.GroupInUserUsableGroups(usingGroup, playgroundRequest.Group) && playgroundRequest.Group != usingGroup {
-							abortWithOpenAiMessage(c, http.StatusForbidden, i18n.T(c, i18n.MsgDistributorGroupAccessDenied))
-							return
-						}
-						common.SetContextKey(c, constant.ContextKeyUsingGroup, playgroundRequest.Group)
-					}
-				}
+			if shouldSelectChannel && modelRequest.Model == "" {
+				abortWithOpenAiMessage(c, http.StatusBadRequest, i18n.T(c, i18n.MsgDistributorModelNameRequired))
+				return
 			}
 		}
 		if pinned || shouldSelectChannel {
 			usingGroup := common.GetContextKeyString(c, constant.ContextKeyUsingGroup)
 			var selectErr *service.ChannelSelectError
 			channel, _, selectErr = service.SelectChannelForRequest(c, modelRequest.Model, &service.RetryParam{
-				Ctx:         c,
-				ModelName:   modelRequest.Model,
-				TokenGroup:  usingGroup,
-				RequestPath: c.Request.URL.Path,
-				Retry:       common.GetPointer(0),
+				Ctx:          c,
+				ModelName:    modelRequest.Model,
+				AccountGroup: usingGroup,
+				RequestPath:  c.Request.URL.Path,
+				Retry:        common.GetPointer(0),
 			})
 			if selectErr != nil {
 				if selectErr.FilterKind == taskdto.FilterTaskPluginIdentity {
@@ -263,12 +242,8 @@ func getModelFromJSONBody(c *gin.Context) (*ModelRequest, error) {
 		return nil, errors.New("model must be provided once")
 	}
 
-	values := gjson.GetManyBytes(requestBody, "model", "group")
+	values := gjson.GetManyBytes(requestBody, "model")
 	model, err := getJSONStringValue(values[0], "model")
-	if err != nil {
-		return nil, err
-	}
-	group, err := getJSONStringValue(values[1], "group")
 	if err != nil {
 		return nil, err
 	}
@@ -278,10 +253,7 @@ func getModelFromJSONBody(c *gin.Context) (*ModelRequest, error) {
 	}
 	c.Request.Body = io.NopCloser(storage)
 
-	return &ModelRequest{
-		Model: model,
-		Group: group,
-	}, nil
+	return &ModelRequest{Model: model}, nil
 }
 
 func countTopLevelJSONKey(data []byte, target string) int {
@@ -506,8 +478,6 @@ func getModelRequest(c *gin.Context) (*ModelRequest, bool, error) {
 			return nil, false, err
 		}
 		modelRequest.Model = req.Model
-		modelRequest.Group = req.Group
-		common.SetContextKey(c, constant.ContextKeyTokenGroup, modelRequest.Group)
 	}
 
 	return &modelRequest, shouldSelectChannel, nil
@@ -549,6 +519,10 @@ func getTaskOriginModelName(c *gin.Context) string {
 }
 
 func SetupContextForSelectedChannel(c *gin.Context, channel *model.Channel, modelName string) *types.NewAPIError {
+	return setupContextForSelectedChannel(c, channel, modelName)
+}
+
+func setupContextForSelectedChannel(c *gin.Context, channel *model.Channel, modelName string) *types.NewAPIError {
 	c.Set("original_model", modelName) // for retry
 	expectedPlugin := c.GetString("expected_task_plugin_key")
 	if channel == nil {

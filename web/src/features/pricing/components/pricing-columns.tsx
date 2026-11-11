@@ -24,7 +24,6 @@ import {
   BadgeListCell,
   DataTableColumnHeader,
 } from '@/components/data-table'
-import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge } from '@/components/status-badge'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { modelDetailsPath } from '@/lib/model-path'
@@ -33,13 +32,14 @@ import { parseTags } from '../lib/filters'
 import type { PricingModel } from '../types'
 import { CachedPriceCell } from './cached-price-cell'
 import { ModelBillingModeBadge } from './model-billing-mode-badge'
+import { ModelDiscountBadge } from './model-discount-badge'
 import { ModelPriceCell, type ModelPriceCellOptions } from './model-price-cell'
 
 // ----------------------------------------------------------------------------
 // Pricing Table Columns
 // ----------------------------------------------------------------------------
 
-export type PricingColumnsOptions = ModelPriceCellOptions
+export type PricingColumnsOptions = Omit<ModelPriceCellOptions, 'selectedGroup'>
 
 export function usePricingColumns(
   options: PricingColumnsOptions = {}
@@ -96,6 +96,18 @@ export function usePricingColumns(
         <ModelPriceCell model={row.original} options={options} />
       ),
       size: 180,
+      enableSorting: false,
+    },
+
+    // Model discount column
+    {
+      accessorKey: 'model_discount',
+      meta: { label: t('Model discount') },
+      header: t('Model discount'),
+      cell: ({ row }) => (
+        <ModelDiscountBadge model={row.original} appearance='savings' />
+      ),
+      size: 120,
       enableSorting: false,
     },
 
@@ -179,25 +191,6 @@ export function usePricingColumns(
                 copyable={false}
               />
             ))}
-          />
-        )
-      },
-      size: 130,
-      enableSorting: false,
-    },
-
-    // Enable Groups column
-    {
-      accessorKey: 'enable_groups',
-      header: t('Groups'),
-      cell: ({ row }) => {
-        const groups = row.original.enable_groups || []
-        return (
-          <BadgeListCell
-            items={groups.map((group) => (
-              <GroupBadge key={group} group={group} size='sm' />
-            ))}
-            tooltipClassName='max-w-[280px] p-2'
           />
         )
       },
