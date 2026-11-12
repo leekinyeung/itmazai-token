@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/setting"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/stretchr/testify/assert"
@@ -101,6 +102,25 @@ func TestDodoCurrency(t *testing.T) {
 	setting.DodoCurrency = "JPY"
 	_, err = dodoCurrency()
 	require.Error(t, err)
+}
+
+func TestDodoCheckoutRequestUsesMinimalAddressAndWeChatPay(t *testing.T) {
+	request := newDodoCheckoutRequest("DODO-test", 100, "USD", &model.User{
+		Id:       7,
+		Username: "buyer",
+		Email:    "buyer@example.com",
+	})
+
+	payload, err := common.Marshal(request)
+	require.NoError(t, err)
+
+	var encoded struct {
+		AllowedPaymentMethodTypes []string `json:"allowed_payment_method_types"`
+		MinimalAddress            bool     `json:"minimal_address"`
+	}
+	require.NoError(t, common.Unmarshal(payload, &encoded))
+	assert.Equal(t, []string{"we_chat_pay", "credit", "debit"}, encoded.AllowedPaymentMethodTypes)
+	assert.True(t, encoded.MinimalAddress)
 }
 
 func TestDodoPayMoneyAppliesUnitPriceAndGroupRatio(t *testing.T) {

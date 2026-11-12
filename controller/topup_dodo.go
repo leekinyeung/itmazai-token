@@ -244,12 +244,14 @@ type dodoCheckoutCustomer struct {
 }
 
 type dodoCheckoutRequest struct {
-	ProductCart     []dodoCheckoutProduct `json:"product_cart"`
-	Customer        dodoCheckoutCustomer  `json:"customer"`
-	ReturnURL       string                `json:"return_url"`
-	BillingCurrency string                `json:"billing_currency,omitempty"`
-	Metadata        map[string]string     `json:"metadata"`
-	FeatureFlags    map[string]bool       `json:"feature_flags,omitempty"`
+	ProductCart               []dodoCheckoutProduct `json:"product_cart"`
+	Customer                  dodoCheckoutCustomer  `json:"customer"`
+	ReturnURL                 string                `json:"return_url"`
+	BillingCurrency           string                `json:"billing_currency,omitempty"`
+	AllowedPaymentMethodTypes []string              `json:"allowed_payment_method_types,omitempty"`
+	MinimalAddress            bool                  `json:"minimal_address,omitempty"`
+	Metadata                  map[string]string     `json:"metadata"`
+	FeatureFlags              map[string]bool       `json:"feature_flags,omitempty"`
 }
 
 type dodoCheckoutResponse struct {
@@ -262,29 +264,7 @@ func createDodoCheckout(ctx context.Context, tradeNo string, amountInMinorUnits 
 	if setting.DodoTestMode {
 		apiURL = dodoTestCheckoutURL
 	}
-	requestBody := dodoCheckoutRequest{
-		ProductCart: []dodoCheckoutProduct{{
-			ProductID: strings.TrimSpace(setting.DodoProductId),
-			Quantity:  1,
-			Amount:    amountInMinorUnits,
-		}},
-		Customer: dodoCheckoutCustomer{
-			Email: dodoCustomerEmail(user),
-			Name:  user.Username,
-		},
-		ReturnURL:       paymentReturnPath("/wallet?show_history=true"),
-		BillingCurrency: currency,
-		Metadata: map[string]string{
-			"trade_no": tradeNo,
-			"user_id":  strconv.Itoa(user.Id),
-		},
-		// A customer-applied discount or a currency switch would make the paid
-		// amount diverge from the locally recorded order.
-		FeatureFlags: map[string]bool{
-			"allow_discount_code":      false,
-			"allow_currency_selection": false,
-		},
-	}
+	requestBody := newDodoCheckoutRequest(tradeNo, amountInMinorUnits, currency, user)
 	payload, err := common.Marshal(requestBody)
 	if err != nil {
 		return "", fmt.Errorf("marshal checkout request: %w", err)
@@ -317,6 +297,34 @@ func createDodoCheckout(ctx context.Context, tradeNo string, amountInMinorUnits 
 		return "", errors.New("checkout response has no checkout_url")
 	}
 	return parsed.CheckoutURL, nil
+}
+
+func newDodoCheckoutRequest(tradeNo string, amountInMinorUnits int64, currency string, user *model.User) dodoCheckoutRequest {
+	return dodoCheckoutRequest{
+		ProductCart: []dodoCheckoutProduct{{
+			ProductID: strings.TrimSpace(setting.DodoProductId),
+			Quantity:  1,
+			Amount:    amountInMinorUnits,
+		}},
+		Customer: dodoCheckoutCustomer{
+			Email: dodoCustomerEmail(user),
+			Name:  user.Username,
+		},
+		ReturnURL:                 paymentReturnPath("/wallet?show_history=true"),
+		BillingCurrency:           currency,
+		AllowedPaymentMethodTypes: []string{"we_chat_pay", "credit", "debit"},
+		MinimalAddress:            true,
+		Metadata: map[string]string{
+			"trade_no": tradeNo,
+			"user_id":  strconv.Itoa(user.Id),
+		},
+		// A customer-applied discount or a currency switch would make the paid
+		// amount diverge from the locally recorded order.
+		FeatureFlags: map[string]bool{
+			"allow_discount_code":      false,
+			"allow_currency_selection": false,
+		},
+	}
 }
 
 type dodoWebhookEvent struct {
