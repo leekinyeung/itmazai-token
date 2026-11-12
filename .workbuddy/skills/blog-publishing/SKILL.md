@@ -1,6 +1,6 @@
 ---
 name: blog-publishing
-description: This skill should be used when writing, reviewing, publishing, or deploying SEO blog articles for the TaoDock/new-api site (web/src/content/blog/), covering the full closed loop — scaffolding new posts, validating frontmatter and internal links, syncing affected test files, committing generated SEO artifacts, watching the push-to-production deploy pipeline, verifying the live page, and submitting sitemaps to Google Search Console. Triggers on requests like 写博客、发文章、新增 blog 文章、起草/评审/发布博文、博客上线.
+description: This skill should be used when writing, reviewing, publishing, or deploying SEO blog articles for the Taodock/new-api site (web/src/content/blog/), covering the full closed loop — scaffolding new posts, validating frontmatter and internal links, syncing affected test files, committing generated SEO artifacts, watching the push-to-production deploy pipeline, verifying the live page, and submitting sitemaps to Google Search Console. Triggers on requests like 写博客、发文章、新增 blog 文章、起草/评审/发布博文、博客上线.
 agent_created: true
 ---
 

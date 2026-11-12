@@ -26,17 +26,18 @@ import { I18nextProvider } from 'react-i18next'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { usePageMetadata } from '@/hooks/use-page-metadata'
+import { getSystemDisplayName } from '@/lib/system-branding'
 
 const webRoot = resolve(import.meta.dirname, '../../..')
 const html = readFileSync(resolve(webRoot, 'index.html'), 'utf8')
 const locales = [
-  ['en', 'en', 'en', 'TaoDock'],
-  ['zhCN', 'zh', 'zh-CN', '众妙之门'],
-  ['zhTW', 'zh-TW', 'zh-TW', '眾妙之門'],
-  ['fr', 'fr', 'fr', 'TaoDock'],
-  ['ja', 'ja', 'ja', 'TaoDock'],
-  ['ru', 'ru', 'ru', 'TaoDock'],
-  ['vi', 'vi', 'vi', 'TaoDock'],
+  ['en', 'en', 'en', 'Taodock'],
+  ['zhCN', 'zh', 'zh-CN', 'Taodock'],
+  ['zhTW', 'zh-TW', 'zh-TW', 'Taodock'],
+  ['fr', 'fr', 'fr', 'Taodock'],
+  ['ja', 'ja', 'ja', 'Taodock'],
+  ['ru', 'ru', 'ru', 'Taodock'],
+  ['vi', 'vi', 'vi', 'Taodock'],
 ] as const
 const resources: Record<string, { translation: Record<string, string> }> =
   Object.fromEntries(
@@ -47,7 +48,7 @@ const resources: Record<string, { translation: Record<string, string> }> =
       ),
     ])
   )
-const homepageTitle = 'Unified AI API Gateway | TaoDock'
+const homepageTitle = 'Unified AI API Gateway | Taodock'
 const descriptionKey =
   'Connect leading AI models through one familiar API, from your first prototype to your next production release.'
 let instance: i18n
@@ -86,10 +87,30 @@ afterEach(() => {
 })
 
 describe('page metadata', () => {
+  it.each(locales)(
+    'displays the canonical brand for old built-in names in %s',
+    async (language) => {
+      await instance.changeLanguage(language)
+      for (const name of [
+        'TaoDock',
+        'Taodock',
+        ' TAODOCK ',
+        '众妙之门',
+        '眾妙之門',
+      ]) {
+        expect(getSystemDisplayName(name, instance.t)).toBe('Taodock')
+      }
+      expect(getSystemDisplayName('Custom AI', instance.t)).toBe('Custom AI')
+      expect(getSystemDisplayName('My TaoDock Gateway', instance.t)).toBe(
+        'My TaoDock Gateway'
+      )
+    }
+  )
+
   it('keeps the homepage description and SEO title when system branding refreshes', () => {
     const { rerender } = renderHook(
       (props) => usePageMetadata(props.systemName, '/'),
-      { initialProps: { systemName: 'TaoDock' }, wrapper: MetadataProvider }
+      { initialProps: { systemName: 'Taodock' }, wrapper: MetadataProvider }
     )
 
     expect(document.title).toBe(homepageTitle)
@@ -118,7 +139,7 @@ describe('page metadata', () => {
   it.each(locales)(
     'updates homepage metadata when the language changes to %s',
     async (language, file, htmlLanguage, brandName) => {
-      renderHook(() => usePageMetadata('TaoDock', '/'), {
+      renderHook(() => usePageMetadata('Taodock', '/'), {
         wrapper: MetadataProvider,
       })
       await act(async () => {
@@ -183,7 +204,7 @@ describe('page metadata', () => {
 
   it('updates public page metadata on navigation and removes canonical links on private pages', () => {
     const { rerender, unmount } = renderHook(
-      (props) => usePageMetadata('TaoDock', props.pathname),
+      (props) => usePageMetadata('Taodock', props.pathname),
       { initialProps: { pathname: '/' }, wrapper: MetadataProvider }
     )
 
@@ -201,31 +222,31 @@ describe('page metadata', () => {
       'href',
       'https://taodock.com/models'
     )
-    expect(document.title).toBe('AI Models & API Pricing | TaoDock')
+    expect(document.title).toBe('AI Models & API Pricing | Taodock')
     expect(document.querySelector('meta[name="description"]')).toHaveAttribute(
       'content',
-      'Explore available AI models, supported API endpoints and current pricing on TaoDock.'
+      'Explore available AI models, supported API endpoints and current pricing on Taodock.'
     )
     rerender({ pathname: '/integrations' })
     expect(document.querySelector('link[rel="canonical"]')).toHaveAttribute(
       'href',
       'https://taodock.com/integrations'
     )
-    expect(document.title).toBe('AI Client and SDK Integrations | TaoDock')
+    expect(document.title).toBe('AI Client and SDK Integrations | Taodock')
     expect(document.querySelector('meta[name="description"]')).toHaveAttribute(
       'content',
-      'Connect Cherry Studio, WorkBuddy, Open WebUI, AionUI, DeepChat and OpenAI SDK applications to TaoDock through one OpenAI-compatible API.'
+      'Connect Cherry Studio, WorkBuddy, Open WebUI, AionUI, DeepChat and OpenAI SDK applications to Taodock through one OpenAI-compatible API.'
     )
     rerender({ pathname: '/model-evaluation' })
     expect(document.querySelector('link[rel="canonical"]')).toHaveAttribute(
       'href',
       'https://taodock.com/model-evaluation'
     )
-    expect(document.title).toBe('OpenAI-Compatible Model Evaluation | TaoDock')
+    expect(document.title).toBe('OpenAI-Compatible Model Evaluation | Taodock')
     rerender({ pathname: '/keys' })
     expect(document.querySelector('link[rel="canonical"]')).toBeNull()
     expect(document.querySelector('meta[property="og:url"]')).toBeNull()
-    expect(document.title).toBe('TaoDock')
+    expect(document.title).toBe('Taodock')
     rerender({ pathname: '/' })
     expect(document.querySelectorAll('link[rel="canonical"]')).toHaveLength(1)
     expect(document.title).toBe(homepageTitle)
@@ -240,7 +261,7 @@ describe('page metadata', () => {
     expect(canonical).not.toBeNull()
     if (!canonical) return
     canonical.href = 'https://taodock.com/models'
-    renderHook(() => usePageMetadata('TaoDock', '/models/'), {
+    renderHook(() => usePageMetadata('Taodock', '/models/'), {
       wrapper: MetadataProvider,
     })
 
@@ -252,16 +273,16 @@ describe('page metadata', () => {
   })
 
   it('gives a model detail page its own title, description and canonical URL', () => {
-    renderHook(() => usePageMetadata('TaoDock', '/models/gpt-6.1-sol/'), {
+    renderHook(() => usePageMetadata('Taodock', '/models/gpt-6.1-sol/'), {
       wrapper: MetadataProvider,
     })
 
     expect(document.title).toBe(
-      'gpt-6.1-sol API Pricing and Capabilities | TaoDock'
+      'gpt-6.1-sol API Pricing and Capabilities | Taodock'
     )
     expect(document.querySelector('meta[name="description"]')).toHaveAttribute(
       'content',
-      'View API capabilities, supported endpoints and current pricing for gpt-6.1-sol on TaoDock.'
+      'View API capabilities, supported endpoints and current pricing for gpt-6.1-sol on Taodock.'
     )
     expect(document.querySelector('link[rel="canonical"]')).toHaveAttribute(
       'href',
@@ -273,13 +294,13 @@ describe('page metadata', () => {
     await instance.changeLanguage('zhCN')
     renderHook(
       () =>
-        usePageMetadata('TaoDock', '/compare/taodock-vs-openrouter/?ref=test'),
+        usePageMetadata('Taodock', '/compare/taodock-vs-openrouter/?ref=test'),
       { wrapper: MetadataProvider }
     )
 
     expect(document.documentElement.lang).toBe('en')
     expect(document.title).toBe(
-      'TaoDock vs OpenRouter: Choosing a Unified AI API Gateway | 众妙之门'
+      'Taodock vs OpenRouter: Choosing a Unified AI API Gateway | Taodock'
     )
     expect(document.querySelector('link[rel="canonical"]')).toHaveAttribute(
       'href',
@@ -300,7 +321,7 @@ describe('page metadata', () => {
   it('canonicalizes model IDs with the shared single-segment encoding', () => {
     renderHook(
       () =>
-        usePageMetadata('TaoDock', '/models/vendor%2fmodel%20%21%27%28%29%2a'),
+        usePageMetadata('Taodock', '/models/vendor%2fmodel%20%21%27%28%29%2a'),
       { wrapper: MetadataProvider }
     )
 
@@ -311,27 +332,27 @@ describe('page metadata', () => {
   })
 
   it('localizes the pricing page title and description after switching to Chinese', async () => {
-    renderHook(() => usePageMetadata('TaoDock', '/models'), {
+    renderHook(() => usePageMetadata('Taodock', '/models'), {
       wrapper: MetadataProvider,
     })
     await act(async () => {
       await instance.changeLanguage('zhCN')
     })
 
-    expect(document.title).toBe('AI 模型与 API 价格 | 众妙之门')
+    expect(document.title).toBe('AI 模型与 API 价格 | Taodock')
     expect(document.querySelector('meta[name="description"]')).toHaveAttribute(
       'content',
-      '查看 众妙之门 的可用 AI 模型、支持的 API 接口和当前价格。'
+      '查看 Taodock 的可用 AI 模型、支持的 API 接口和当前价格。'
     )
   })
 
   it.each(['/models/%ZZ', '/models/a/b', `/models/${'a'.repeat(201)}`])(
     'keeps invalid model URL %s out of canonical metadata',
     (pathname) => {
-      renderHook(() => usePageMetadata('TaoDock', pathname), {
+      renderHook(() => usePageMetadata('Taodock', pathname), {
         wrapper: MetadataProvider,
       })
-      expect(document.title).toBe('TaoDock')
+      expect(document.title).toBe('Taodock')
       expect(document.querySelector('link[rel="canonical"]')).toBeNull()
     }
   )

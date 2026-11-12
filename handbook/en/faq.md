@@ -1,6 +1,6 @@
 ---
 title: "AI API FAQ and Connection Troubleshooting"
-description: "Troubleshoot TaoDock email verification, API addresses, key permissions, model access, quota, rate limits and client connections."
+description: "Troubleshoot Taodock email verification, API addresses, key permissions, model access, quota, rate limits and client connections."
 ---
 
 # FAQ
@@ -8,14 +8,14 @@ description: "Troubleshoot TaoDock email verification, API addresses, key permis
 ## In what order should I troubleshoot? {#troubleshoot}
 
 1. Check how the client builds URLs and confirm that the final text chat endpoint is `https://taodock.com/v1/chat/completions`.
-2. Check that the key comes from [TaoDock API Keys](https://taodock.com/keys), is enabled, and has not expired.
+2. Check that the key comes from [Taodock API Keys](https://taodock.com/keys), is enabled, and has not expired.
 3. Query `https://taodock.com/v1/models` to confirm the model ID and key access.
 4. Check both [Wallet](https://taodock.com/wallet) balance and the key's remaining quota.
 5. Find the request by time and model in [Common Logs](https://taodock.com/usage-logs/common), keeping the specific error.
 
 ## My registration verification email did not arrive {#email}
 
-TaoDock currently requires email verification for registration. Check the address, spam folder, and mail filters. Wait for the resend countdown before trying again. If messages still do not arrive, note the time and page error and use the support contact offered on TaoDock.
+Taodock currently requires email verification for registration. Check the address, spam folder, and mail filters. Wait for the resend countdown before trying again. If messages still do not arrive, note the time and page error and use the support contact offered on Taodock.
 
 Do not share email verification codes or use them as API keys.
 
@@ -33,7 +33,7 @@ Read guides at `https://docs.taodock.com`. If you receive HTML, a 404, or a dupl
 
 ## 401, invalid key, or access denied {#credentials}
 
-Copy the complete TaoDock key, removing accidental whitespace, newlines, or quotation marks. Check that it is not a password or another platform's key. Verify key status, expiration, and IP and model restrictions.
+Copy the complete Taodock key, removing accidental whitespace, newlines, or quotation marks. Check that it is not a password or another platform's key. Verify key status, expiration, and IP and model restrictions.
 
 Programs use the `Authorization: Bearer` header. Keep the key out of public URLs.
 
@@ -57,7 +57,7 @@ Reduce concurrency. Follow any retry timing in the response, and implement backo
 
 Check your network and client proxy settings, then compare a simple request using the same key and model. Check [usage logs](https://taodock.com/usage-logs/common) to see whether the request executed.
 
-Keep HTTPS certificate verification enabled. Check the domain, system clock, and proxy first. If multiple applications fail for the same model, report the error to TaoDock.
+Keep HTTPS certificate verification enabled. Check the domain, system clock, and proxy first. If multiple applications fail for the same model, report the error to Taodock.
 
 ## Playground works, but my client does not {#client}
 
@@ -71,4 +71,4 @@ Check the status and task ID in [Task Logs](https://taodock.com/usage-logs/task)
 
 Include the time and time zone, client name and version, model ID, HTTP status, error response, and any request or task ID. For funding issues, include the order ID and amount.
 
-Remove complete API keys, passwords, verification codes, and private conversations before using the contact channel actually offered on TaoDock. See the [About page](https://taodock.com/about) for platform information.
+Remove complete API keys, passwords, verification codes, and private conversations before using the contact channel actually offered on Taodock. See the [About page](https://taodock.com/about) for platform information.

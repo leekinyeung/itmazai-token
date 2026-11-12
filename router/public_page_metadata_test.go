@@ -30,24 +30,24 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 		title     string
 		canonical string
 	}{
-		{path: "/", title: "Unified AI API Gateway | TaoDock", canonical: "https://taodock.com/"},
-		{path: "/?utm_source=launch", title: "Unified AI API Gateway | TaoDock", canonical: "https://taodock.com/"},
-		{path: "/models?search=claude", title: "AI Models & API Pricing | TaoDock", canonical: "https://taodock.com/models"},
-		{path: "/models/", title: "AI Models & API Pricing | TaoDock", canonical: "https://taodock.com/models"},
-		{path: "/integrations", title: "AI Client and SDK Integrations | TaoDock", canonical: "https://taodock.com/integrations"},
-		{path: "/about", title: "About the Platform | TaoDock", canonical: "https://taodock.com/about"},
-		{path: "/rankings", title: "Usage Rankings | TaoDock", canonical: "https://taodock.com/rankings"},
-		{path: "/privacy-policy", title: "Privacy Policy | TaoDock", canonical: "https://taodock.com/privacy-policy"},
-		{path: "/user-agreement", title: "User Agreement | TaoDock", canonical: "https://taodock.com/user-agreement"},
-		{path: "/models/vendor%2fmodel", title: "vendor/model API Pricing and Capabilities | TaoDock", canonical: "https://taodock.com/models/vendor%2Fmodel"},
-		{path: "/compare", title: "AI API Gateway Comparisons | TaoDock", canonical: "https://taodock.com/compare"},
-		{path: "/blog", title: "TaoDock Blog | TaoDock", canonical: "https://taodock.com/blog"},
-		{path: "/blog/how-to-choose-ai-gateway", title: "How to Choose an AI Gateway in 2026: A Practical Checklist | TaoDock", canonical: "https://taodock.com/blog/how-to-choose-ai-gateway"},
-		{path: "/blog/reduce-openai-api-costs", title: "How to Reduce OpenAI API Costs in 2026: A Practical Playbook | TaoDock", canonical: "https://taodock.com/blog/reduce-openai-api-costs"},
-		{path: "/blog/handle-openai-rate-limits", title: "How to Handle OpenAI Rate Limits in 2026: A Production Runbook | TaoDock", canonical: "https://taodock.com/blog/handle-openai-rate-limits"},
-		{path: "/compare/taodock-vs-openrouter", title: "TaoDock vs OpenRouter: Choosing a Unified AI API Gateway | TaoDock", canonical: "https://taodock.com/compare/taodock-vs-openrouter"},
-		{path: "/integrations/openai-sdk", title: "Use the OpenAI SDK with TaoDock's Compatible API | TaoDock", canonical: "https://taodock.com/integrations/openai-sdk"},
-		{path: "/faq", title: "TaoDock AI API Frequently Asked Questions | TaoDock", canonical: "https://taodock.com/faq"},
+		{path: "/", title: "Unified AI API Gateway | Taodock", canonical: "https://taodock.com/"},
+		{path: "/?utm_source=launch", title: "Unified AI API Gateway | Taodock", canonical: "https://taodock.com/"},
+		{path: "/models?search=claude", title: "AI Models & API Pricing | Taodock", canonical: "https://taodock.com/models"},
+		{path: "/models/", title: "AI Models & API Pricing | Taodock", canonical: "https://taodock.com/models"},
+		{path: "/integrations", title: "AI Client and SDK Integrations | Taodock", canonical: "https://taodock.com/integrations"},
+		{path: "/about", title: "About the Platform | Taodock", canonical: "https://taodock.com/about"},
+		{path: "/rankings", title: "Usage Rankings | Taodock", canonical: "https://taodock.com/rankings"},
+		{path: "/privacy-policy", title: "Privacy Policy | Taodock", canonical: "https://taodock.com/privacy-policy"},
+		{path: "/user-agreement", title: "User Agreement | Taodock", canonical: "https://taodock.com/user-agreement"},
+		{path: "/models/vendor%2fmodel", title: "vendor/model API Pricing and Capabilities | Taodock", canonical: "https://taodock.com/models/vendor%2Fmodel"},
+		{path: "/compare", title: "AI API Gateway Comparisons | Taodock", canonical: "https://taodock.com/compare"},
+		{path: "/blog", title: "Taodock Blog | Taodock", canonical: "https://taodock.com/blog"},
+		{path: "/blog/how-to-choose-ai-gateway", title: "How to Choose an AI Gateway in 2026: A Practical Checklist | Taodock", canonical: "https://taodock.com/blog/how-to-choose-ai-gateway"},
+		{path: "/blog/reduce-openai-api-costs", title: "How to Reduce OpenAI API Costs in 2026: A Practical Playbook | Taodock", canonical: "https://taodock.com/blog/reduce-openai-api-costs"},
+		{path: "/blog/handle-openai-rate-limits", title: "How to Handle OpenAI Rate Limits in 2026: A Production Runbook | Taodock", canonical: "https://taodock.com/blog/handle-openai-rate-limits"},
+		{path: "/compare/taodock-vs-openrouter", title: "Taodock vs OpenRouter: Choosing a Unified AI API Gateway | Taodock", canonical: "https://taodock.com/compare/taodock-vs-openrouter"},
+		{path: "/integrations/openai-sdk", title: "Use the OpenAI SDK with Taodock's Compatible API | Taodock", canonical: "https://taodock.com/integrations/openai-sdk"},
+		{path: "/faq", title: "Taodock AI API Frequently Asked Questions | Taodock", canonical: "https://taodock.com/faq"},
 	} {
 		t.Run(tc.path, func(t *testing.T) {
 			requestPath, _, _ := strings.Cut(tc.path, "?")
@@ -57,7 +57,7 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 			assert.Contains(t, body, "<title>"+encodedTitle+"</title>")
 			assert.Contains(t, body, `property="og:title" content="`+encodedTitle+`"`)
 			assert.Contains(t, body, `name="twitter:title" content="`+encodedTitle+`"`)
-			assert.Contains(t, body, `property="og:site_name" content="TaoDock"`)
+			assert.Contains(t, body, `property="og:site_name" content="Taodock"`)
 			assert.Contains(t, body, `rel="canonical" href="`+tc.canonical+`"`)
 			assert.Equal(t, 1, strings.Count(body, `rel="canonical"`))
 			assert.Contains(t, body, `property="og:url" content="`+tc.canonical+`"`)
@@ -126,7 +126,7 @@ func TestPublicPageMetadataFiltersUnsafeStructuredData(t *testing.T) {
 	require.NoError(t, err)
 	renderer := &publicPageMetadataRenderer{
 		Origin:   "https://taodock.com",
-		SiteName: "TaoDock",
+		SiteName: "Taodock",
 		Pages: map[string]publicPageMetadata{
 			"/safe": {
 				Title:       "Safe page",
@@ -156,7 +156,7 @@ func TestPublicPageMetadataInjectsArticleImage(t *testing.T) {
 	require.NoError(t, err)
 	renderer := &publicPageMetadataRenderer{
 		Origin:   "https://taodock.com",
-		SiteName: "TaoDock",
+		SiteName: "Taodock",
 		Pages: map[string]publicPageMetadata{
 			"/blog/with-image": {
 				Title:       "Post with image",
@@ -178,13 +178,13 @@ func TestPublicPageMetadataInjectsArticleImage(t *testing.T) {
 	assert.NotContains(t, withImage, "og:image:width")
 	assert.NotContains(t, withImage, "og:image:height")
 	assert.NotContains(t, withImage, "og:image:type")
-	assert.NotContains(t, withImage, "social-card.png")
+	assert.NotContains(t, withImage, "social-card-taodock.png")
 
 	withoutImage := string(renderer.render("/blog/without-image"))
 	require.NotEmpty(t, withoutImage)
-	assert.Contains(t, withoutImage, `property="og:image" content="https://taodock.com/social-card.png"`)
-	assert.Contains(t, withoutImage, `name="twitter:image" content="https://taodock.com/social-card.png"`)
-	assert.Contains(t, withoutImage, `property="og:image:width" content="1200"`)
+	assert.Contains(t, withoutImage, `property="og:image" content="https://taodock.com/social-card-taodock.png"`)
+	assert.Contains(t, withoutImage, `name="twitter:image" content="https://taodock.com/social-card-taodock.png"`)
+	assert.Contains(t, withoutImage, `property="og:image:width" content="1731"`)
 }
 
 func TestPublicPageRouteClassification(t *testing.T) {
@@ -205,7 +205,7 @@ func TestPublicPageRouteClassification(t *testing.T) {
 		assert.False(t, renderer.isNoIndexRoute(path), path)
 	}
 
-	page := string(renderPageHTML(index, "Account and console | TaoDock", "Account page", "TaoDock", "", true))
+	page := string(renderPageHTML(index, "Account and console | Taodock", "Account page", "Taodock", "", true))
 	assert.Contains(t, page, `name="robots" content="noindex, nofollow"`)
 	assert.NotContains(t, page, `rel="canonical"`)
 	assert.NotContains(t, page, `property="og:url"`)

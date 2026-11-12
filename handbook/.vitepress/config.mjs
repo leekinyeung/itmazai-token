@@ -4,8 +4,8 @@ const docsOrigin = 'https://docs.taodock.com'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: '众妙之门 TaoDock',
-  description: '众妙之门 TaoDock 使用手册：AI API 接入、客户端配置、模型选择、密钥管理、钱包与用量排查。',
+  title: 'Taodock',
+  description: 'Taodock 使用手册：AI API 接入、客户端配置、模型选择、密钥管理、钱包与用量排查。',
   srcExclude: ['README.md'],
   sitemap: {
     hostname: docsOrigin,
@@ -32,8 +32,8 @@ export default defineConfig({
     en: {
       label: 'English',
       lang: 'en',
-      title: 'TaoDock',
-      description: 'Connect to TaoDock: account setup, API keys, models, clients, API requests, wallet, and troubleshooting.',
+      title: 'Taodock',
+      description: 'Connect to Taodock: account setup, API keys, models, clients, API requests, wallet, and troubleshooting.',
       themeConfig: {
         nav: [
           { text: 'Quick start', link: '/en/quick-start' },
@@ -89,7 +89,7 @@ export default defineConfig({
           linkText: 'Go home',
         },
         footer: {
-          message: 'TaoDock · Console and API: taodock.com · Documentation: docs.taodock.com',
+          message: 'Taodock · Console and API: taodock.com · Documentation: docs.taodock.com',
         },
       },
     },
@@ -184,7 +184,7 @@ export default defineConfig({
       linkText: '返回首页',
     },
     footer: {
-      message: '众妙之门 TaoDock · 控制台与 API：taodock.com · 使用手册：docs.taodock.com',
+      message: 'Taodock · 控制台与 API：taodock.com · 使用手册：docs.taodock.com',
     },
   },
 })

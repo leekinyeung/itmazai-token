@@ -1,30 +1,30 @@
 ---
-title: "WorkBuddy Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - TaoDock"
+title: "WorkBuddy Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - Taodock"
 titleTemplate: false
-description: "Add a TaoDock custom model to WorkBuddy desktop, configure the API URL and protocol, select the model and verify a chat request."
+description: "Add a Taodock custom model to WorkBuddy desktop, configure the API URL and protocol, select the model and verify a chat request."
 ---
 
 # WorkBuddy Custom Model Setup Guide
 
 ## Step 1: Preparation {#prepare}
 
-Before you start, prepare your [TaoDock API key](https://taodock.com/keys), sufficient account quota and an exact model ID from the [model catalog](https://taodock.com/pricing). See the [quick start](../quick-start.md) if this is your first integration.
+Before you start, prepare your [Taodock API key](https://taodock.com/keys), sufficient account quota and an exact model ID from the [model catalog](https://taodock.com/pricing). See the [quick start](../quick-start.md) if this is your first integration.
 
-Install the desktop application from the [WorkBuddy website](https://www.workbuddy.cn/) and sign in. Configure a TaoDock model inside WorkBuddy as follows.
+Install the desktop application from the [WorkBuddy website](https://www.workbuddy.cn/) and sign in. Configure a Taodock model inside WorkBuddy as follows.
 
 <IntegrationConversionCallout />
 
-## Add the TaoDock model
+## Add the Taodock model
 
 1. Open **Settings → Model → Custom Models → Add Model**. You can also open custom model configuration from the conversation's model selector.
 2. Choose **Custom** as the provider and enter the values below.
-3. Save, return to the conversation, and explicitly select the new entry in the **Custom Models** group when you want to use TaoDock.
+3. Save, return to the conversation, and explicitly select the new entry in the **Custom Models** group when you want to use Taodock.
 
 | Setting | Value |
 | --- | --- |
 | Provider | Custom |
 | URL | **`https://taodock.com/v1`** |
-| API Key | Your TaoDock API key |
+| API Key | Your Taodock API key |
 | Model name / Model ID | `gpt-6.1-sol`, or an exact chat model ID available to your key |
 | Custom protocol | Off, using default Chat Completions path completion |
 
@@ -47,7 +47,7 @@ Add and save each additional model using its exact ID. If custom model configura
 
 ## Verify a real request {#verify}
 
-Select a model under the TaoDock connection and send a short test message. Confirm that a normal response arrives and that a matching request appears in [TaoDock request logs](https://taodock.com/usage-logs/common). Loading a model list verifies model discovery; sending a message may consume quota.
+Select a model under the Taodock connection and send a short test message. Confirm that a normal response arrives and that a matching request appears in [Taodock request logs](https://taodock.com/usage-logs/common). Loading a model list verifies model discovery; sending a message may consume quota.
 
 For Agent workflows, also follow the [file tool verification](./clients.md#agent-check). A normal text reply alone does not establish tool support.
 
@@ -56,7 +56,7 @@ For Agent workflows, also follow the [file tool verification](./clients.md#agent
 | Symptom | What to check |
 | --- | --- |
 | HTML response or 404 | Use the API domain, check protocol selection and avoid duplicated version or endpoint paths |
-| 401 or invalid key | Copy your complete, active TaoDock API key |
+| 401 or invalid key | Copy your complete, active Taodock API key |
 | Missing or unavailable model | Copy the exact model ID and check key restrictions and the selected group |
 | Insufficient quota | Check both the account balance and API key quota |
 | Chat works but tools fail | Verify the protocol, model capability and the application's tool permissions |

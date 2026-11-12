@@ -1,11 +1,11 @@
 ---
 title: "API 密钥创建、限制与管理指南"
-description: "了解众妙之门 TaoDock API 密钥的创建、命名、有效期和访问限制，以及客户端接入和密钥停用的方法。"
+description: "了解Taodock API 密钥的创建、命名、有效期和访问限制，以及客户端接入和密钥停用的方法。"
 ---
 
 # API 密钥管理
 
-[API 密钥](https://taodock.com/keys)是应用访问众妙之门 TaoDock 的凭据。登录密码用于进入控制台；API 密钥用于客户端和程序，两者不能混用。
+[API 密钥](https://taodock.com/keys)是应用访问Taodock 的凭据。登录密码用于进入控制台；API 密钥用于客户端和程序，两者不能混用。
 
 ## 创建与命名 {#create}
 
@@ -32,7 +32,7 @@ description: "了解众妙之门 TaoDock API 密钥的创建、命名、有效�
 
 ## 复制地址与接入应用 {#connect}
 
-页面右上角的「API 地址」提供众妙之门 TaoDock 当前入口：`https://taodock.com`。是否在客户端的地址框中附加 `/v1`，取决于它会自动追加的路径，具体见[客户端配置速查](./clients.md#settings)。
+页面右上角的「API 地址」提供Taodock 当前入口：`https://taodock.com`。是否在客户端的地址框中附加 `/v1`，取决于它会自动追加的路径，具体见[客户端配置速查](./clients.md#settings)。
 
 密钥行的操作菜单提供复制、编辑及客户端接入操作。「聊天」子菜单可选择当前配置的客户端；安装对应客户端后使用，详细步骤见[客户端接入](./clients.md#import)。
 

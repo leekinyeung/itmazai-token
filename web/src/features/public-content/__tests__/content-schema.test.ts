@@ -32,9 +32,9 @@ function comparisonSource(): string {
   return `---
 kind: comparison
 slug: example-gateway
-title: TaoDock vs Example Gateway Decision Guide
+title: Taodock vs Example Gateway Decision Guide
 description: Compare deployment, routing, access controls, usage records, and operational trade-offs using review-dated official sources.
-primaryKeyword: TaoDock vs Example Gateway
+primaryKeyword: Taodock vs Example Gateway
 cluster: AI gateway comparisons
 subject: Example Gateway
 publishedAt: 2026-11-04

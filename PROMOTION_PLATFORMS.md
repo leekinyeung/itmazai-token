@@ -1,6 +1,6 @@
-# TaoDock 推广平台记录
+# Taodock 推广平台记录
 
-记录 TaoDock（众妙之门）的推广账号、已发布内容、引流入口和后续事项，便于继续维护及避免重复发布。
+记录 Taodock（众妙之门）的推广账号、已发布内容、引流入口和后续事项，便于继续维护及避免重复发布。
 
 更新日期：2026-10-31，时区 Asia/Shanghai。状态以对应日期的发布结果或本地回执为准。
 
@@ -8,9 +8,9 @@
 
 | 平台 | 账号或标识 | 记录日期 | 状态 | 公开入口或本地材料 | 后续事项 |
 | --- | --- | --- | --- | --- | --- |
-| Zenn | `@taodock`，显示名称 TaoDock | 2026-10-31 | 文章已发布，品牌资料已完善 | [账号主页](https://zenn.dev/taodock) · [已发布文章](https://zenn.dev/taodock/articles/cb532eed204483) | 后续文章沿用品牌资料和来源追踪规则 |
+| Zenn | `@taodock`，显示名称 Taodock | 2026-10-31 | 文章已发布，品牌资料已完善 | [账号主页](https://zenn.dev/taodock) · [已发布文章](https://zenn.dev/taodock/articles/cb532eed204483) | 后续文章沿用品牌资料和来源追踪规则 |
 | Open VSX | 发布者 `taodock`，扩展 `taodock.taodock` | 2026-10-31 | 扩展 0.1.0 已上架，命名空间所有权申请已提交 | [扩展页面](https://open-vsx.org/extension/taodock/taodock) · [发布回执](output/taodock-vscode-20261031/publication-receipt.json) | 跟进命名空间审核，随版本更新扩展说明 |
-| Hugging Face | TaoDock 账号及仓库地址待记录 | 2026-10-31 | 介绍文案已准备，发布状态待核实 | [中英文介绍草稿](output/huggingface-taodock-20261031/README.md) | 确认登录、账号和发布结果后补充公开链接 |
+| Hugging Face | Taodock 账号及仓库地址待记录 | 2026-10-31 | 介绍文案已准备，发布状态待核实 | [中英文介绍草稿](output/huggingface-taodock-20261031/README.md) | 确认登录、账号和发布结果后补充公开链接 |
 | 抖音及巨量引擎 | 账号待记录 | 2026-10-28 | 素材暂停使用，推广准入待确认 | [发布文案及暂停说明](output/douyin-taodock-20261028/publishing-copy.txt) | 按实际经营内容核实平台类目、相关权利和资质，取得相应审核结果 |
 
 ## Zenn 发布记录
@@ -21,14 +21,14 @@
 | --- | --- |
 | 主页 | https://zenn.dev/taodock |
 | 用户名 | `taodock` |
-| 显示名称 | TaoDock |
+| 显示名称 | Taodock |
 | 头像 | 沿用官网标志，源文件为 [web/public/logo.png](web/public/logo.png) |
 | 官网链接 | https://taodock.com/?utm_source=zenn&utm_medium=profile&utm_campaign=taodock |
 | 简介中的文档入口 | https://docs.taodock.com/en/ |
 
 已保存的日文简介：
 
-> TaoDock（众妙之门）は、アプリとAIエージェント向けの統合AI APIサービスです。OpenAI互換APIでのモデル接続、ストリーミング、エラー対処などの実践ガイドを発信します。接続ガイド：https://docs.taodock.com/en/
+> Taodock（众妙之门）は、アプリとAIエージェント向けの統合AI APIサービスです。OpenAI互換APIでのモデル接続、ストリーミング、エラー対処などの実践ガイドを発信します。接続ガイド：https://docs.taodock.com/en/
 
 ### 已发布文章
 
@@ -40,7 +40,7 @@
 | 发布日期 | 2026-10-31 |
 | 语言及分类 | 日文，Tech |
 | 标签 | Python、API、curl、OpenAI、llm |
-| 内容形式 | 原创技术教程，文末介绍 TaoDock 并提供接入入口 |
+| 内容形式 | 原创技术教程，文末介绍 Taodock 并提供接入入口 |
 | 主题 | Base URL、模型 ID、认证错误排查、Python 调用、SSE 流式输出 |
 | 参考文章 | https://zenn.dev/modelflare_dev/articles/da010b921b8b68 |
 
@@ -57,7 +57,7 @@
 - 已确认文章显示公开发布日期，未登录访问返回 HTTP 200。
 - 已核对公开文章中的五个代码块与发布稿一致。
 - 代码示例已完成 Bash 语法检查，以及 Python 正常响应、HTTP 错误、异常 JSON、缺失文本和超时等模拟验证；未将模拟验证描述为真实生成调用成功。
-- 已确认公开主页显示品牌头像、TaoDock 名称、完整日文简介、官网及文档链接。
+- 已确认公开主页显示品牌头像、Taodock 名称、完整日文简介、官网及文档链接。
 - 已确认文章作者栏同步显示新简介和官网链接。
 - 已确认文章链接保留来源追踪参数。参数用于标识来源，本记录尚无点击、注册或付费转化数据。
 
@@ -77,7 +77,7 @@
 
 - 已准备中英文接入介绍，材料位于 [output/huggingface-taodock-20261031/README.md](output/huggingface-taodock-20261031/README.md)。
 - 官网及文档链接采用 `utm_source=huggingface`、`utm_medium=readme`、`utm_campaign=taodock-introduction`。
-- 已有[链接检查记录](output/huggingface-taodock-20261031/link-check.json)及登录交接截图；现有材料未留存 TaoDock 公开仓库链接或发布成功回执，需补充确认。
+- 已有[链接检查记录](output/huggingface-taodock-20261031/link-check.json)及登录交接截图；现有材料未留存 Taodock 公开仓库链接或发布成功回执，需补充确认。
 
 ### 抖音及巨量引擎
 

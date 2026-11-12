@@ -42,14 +42,14 @@ You probably do not need one yet if you call a single provider from a prototype 
 
 ## The evaluation checklist at a glance
 
-| Dimension | What to check |
-| --- | --- |
-| Model coverage | Providers and models you need, behind one API |
-| Routing and failover | Automatic retries and fallback chains |
-| Cost controls | Per-key budgets, quotas, and spend records |
-| Security | Scoped keys and access management |
-| Migration effort | OpenAI compatibility and lock-in risk |
-| Operations | Self-hosted upkeep vs managed markup |
+| Dimension            | What to check                                 |
+| -------------------- | --------------------------------------------- |
+| Model coverage       | Providers and models you need, behind one API |
+| Routing and failover | Automatic retries and fallback chains         |
+| Cost controls        | Per-key budgets, quotas, and spend records    |
+| Security             | Scoped keys and access management             |
+| Migration effort     | OpenAI compatibility and lock-in risk         |
+| Operations           | Self-hosted upkeep vs managed markup          |
 
 Score every candidate against all six rows. A gateway that wins five and fails one is usually the wrong choice, because the failed row is often the one that matters at 3 a.m.
 
@@ -101,14 +101,14 @@ A good gateway speaks the OpenAI API fluently enough that migration is a configu
 
 The last decision is who operates the gateway itself.
 
-| Concern | Self-hosted | Managed |
-| --- | --- | --- |
-| Upfront cost | Free open-source software | Subscription or token markup |
-| Ongoing effort | You patch and monitor it | Vendor operates it |
-| Data control | Logs and keys stay in your infrastructure | Data transits vendor infrastructure |
-| Compliance | Easier when data cannot leave your network | Depends on vendor certifications |
+| Concern        | Self-hosted                                | Managed                             |
+| -------------- | ------------------------------------------ | ----------------------------------- |
+| Upfront cost   | Free open-source software                  | Subscription or token markup        |
+| Ongoing effort | You patch and monitor it                   | Vendor operates it                  |
+| Data control   | Logs and keys stay in your infrastructure  | Data transits vendor infrastructure |
+| Compliance     | Easier when data cannot leave your network | Depends on vendor certifications    |
 
-Self-hosted open-source gateways, TaoDock among them, keep every credential and every usage record on infrastructure you own, which is the deciding factor for teams with strict data-handling requirements. Managed gateways trade that control for zero maintenance, which is a fair trade when your team has no spare operations capacity. If you self-host, check how actively the project ships updates, because your provider coverage depends on its release cadence.
+Self-hosted open-source gateways, Taodock among them, keep every credential and every usage record on infrastructure you own, which is the deciding factor for teams with strict data-handling requirements. Managed gateways trade that control for zero maintenance, which is a fair trade when your team has no spare operations capacity. If you self-host, check how actively the project ships updates, because your provider coverage depends on its release cadence.
 
 Be honest about which resource is scarcer for you: money or engineering hours.
 
@@ -132,4 +132,4 @@ A gateway sits on your critical path. If its own reliability story is weaker tha
 
 ## Next steps
 
-Shortlist two or three candidates, then run the verification steps above against each with a test key and a real workload. When you are ready to compare a concrete self-hosted option, see our [detailed TaoDock vs OpenRouter comparison](/compare/taodock-vs-openrouter), or browse [models and pricing](/models) to see what a gateway can put behind one API.
+Shortlist two or three candidates, then run the verification steps above against each with a test key and a real workload. When you are ready to compare a concrete self-hosted option, see our [detailed Taodock vs OpenRouter comparison](/compare/taodock-vs-openrouter), or browse [models and pricing](/models) to see what a gateway can put behind one API.

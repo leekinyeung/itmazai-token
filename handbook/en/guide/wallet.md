@@ -1,11 +1,11 @@
 ---
 title: "Wallet, Quota and API Usage"
-description: "Check TaoDock wallet and key quotas, find funding options and review API usage and charges in request logs."
+description: "Check Taodock wallet and key quotas, find funding options and review API usage and charges in request logs."
 ---
 
 # Wallet and usage
 
-Open [TaoDock Wallet](https://taodock.com/wallet) to check your balance and the funding options available to your account. TaoDock currently displays quota and related amounts in **USD**.
+Open [Taodock Wallet](https://taodock.com/wallet) to check your balance and the funding options available to your account. Taodock currently displays quota and related amounts in **USD**.
 
 ## Check both quota limits {#quota}
 
@@ -32,6 +32,6 @@ Charges may vary by model, group, input and output usage, and billing method. To
 
 ## Questions about charges or funding {#questions}
 
-Prepare the time, order or request ID, model name, amount, and error details, then use the support contact offered on TaoDock. Do not share passwords, email verification codes, or complete API keys.
+Prepare the time, order or request ID, model name, amount, and error details, then use the support contact offered on Taodock. Do not share passwords, email verification codes, or complete API keys.
 
-A client error alone does not prove that a request was never executed. Check the TaoDock record and status before deciding to submit it again.
+A client error alone does not prove that a request was never executed. Check the Taodock record and status before deciding to submit it again.

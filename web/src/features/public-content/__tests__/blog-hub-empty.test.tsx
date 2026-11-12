@@ -36,11 +36,12 @@ vi.mock('@/features/public-content/content-registry', () => ({
   PUBLIC_CONTENT: {
     blogHub: {
       path: '/blog',
-      title: 'TaoDock Blog',
-      description: 'Guides on choosing, operating, and optimizing an AI gateway.',
+      title: 'Taodock Blog',
+      description:
+        'Guides on choosing, operating, and optimizing an AI gateway.',
       updatedAt: '2026-11-10',
       structuredData: [
-        '{"@context":"https://schema.org","@type":"CollectionPage","name":"TaoDock Blog"}',
+        '{"@context":"https://schema.org","@type":"CollectionPage","name":"Taodock Blog"}',
       ],
     },
   },
@@ -65,7 +66,7 @@ test('the blog hub shows an empty state when no articles are published', async (
   render(<RouterProvider router={router} />)
 
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-    'TaoDock Blog'
+    'Taodock Blog'
   )
   expect(screen.getByText(/New articles are on the way/)).toBeVisible()
   expect(screen.queryAllByRole('heading', { level: 3 })).toHaveLength(0)

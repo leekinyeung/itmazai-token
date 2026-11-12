@@ -18,13 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import type { TFunction } from 'i18next'
 
-/** Localize this deployment's brand while preserving administrator-defined names. */
+/** Display the canonical brand while preserving administrator-defined names. */
 export function getSystemDisplayName(systemName: string, t: TFunction): string {
   switch (systemName.trim().toLowerCase()) {
     case 'taodock':
     case '众妙之门':
     case '眾妙之門':
-      return t('TaoDock')
+      return t('Taodock')
     default:
       return systemName
   }

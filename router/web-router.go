@@ -88,18 +88,18 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 					publicPage = publicModelExists(controller.GetAnonymousPricingData(), modelName)
 				}
 			}
-		modelsRestricted := publicPage && isModelsPagePath(path) && !middleware.HeaderNavModuleIsPublic("pricing")
-		rankingsRestricted := publicPage && path == "/rankings" && !middleware.HeaderNavModuleIsPublic("rankings")
-		blogRestricted := publicPage && isBlogPagePath(path) && !middleware.HeaderNavModuleIsPublic("blog")
-		if modelsRestricted {
-			publicPage = false
-		}
-		if rankingsRestricted {
-			publicPage = false
-		}
-		if blogRestricted {
-			publicPage = false
-		}
+			modelsRestricted := publicPage && isModelsPagePath(path) && !middleware.HeaderNavModuleIsPublic("pricing")
+			rankingsRestricted := publicPage && path == "/rankings" && !middleware.HeaderNavModuleIsPublic("rankings")
+			blogRestricted := publicPage && isBlogPagePath(path) && !middleware.HeaderNavModuleIsPublic("blog")
+			if modelsRestricted {
+				publicPage = false
+			}
+			if rankingsRestricted {
+				publicPage = false
+			}
+			if blogRestricted {
+				publicPage = false
+			}
 
 			if publicPage {
 				c.Header("Cache-Control", "no-cache")
@@ -107,35 +107,35 @@ func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.Han
 				return
 			}
 
-		validNoIndexRoute := pageMetadata != nil && pageMetadata.isNoIndexRoute(escapedPath)
-		if modelsRestricted {
-			validNoIndexRoute = true
-		}
-		if rankingsRestricted {
-			validNoIndexRoute = true
-		}
-		if blogRestricted {
-			validNoIndexRoute = true
-		}
+			validNoIndexRoute := pageMetadata != nil && pageMetadata.isNoIndexRoute(escapedPath)
+			if modelsRestricted {
+				validNoIndexRoute = true
+			}
+			if rankingsRestricted {
+				validNoIndexRoute = true
+			}
+			if blogRestricted {
+				validNoIndexRoute = true
+			}
 			if validNoIndexRoute {
 				c.Header("Cache-Control", "private, no-store")
 				c.Header("X-Robots-Tag", "noindex, nofollow")
-				siteName := "TaoDock"
+				siteName := "Taodock"
 				if pageMetadata != nil {
 					siteName = pageMetadata.SiteName
 				}
-				page := renderPageHTML(assets.IndexPage, "Account and console | "+siteName, "Sign in to use the TaoDock account and console features.", siteName, "", true)
+				page := renderPageHTML(assets.IndexPage, "Account and console | "+siteName, "Sign in to use the Taodock account and console features.", siteName, "", true)
 				c.Data(http.StatusOK, "text/html; charset=utf-8", page)
 				return
 			}
 
 			c.Header("Cache-Control", "no-store")
 			c.Header("X-Robots-Tag", "noindex, nofollow")
-			siteName := "TaoDock"
+			siteName := "Taodock"
 			if pageMetadata != nil {
 				siteName = pageMetadata.SiteName
 			}
-			page := renderPageHTML(assets.IndexPage, "Page not found | "+siteName, "The requested TaoDock page does not exist.", siteName, "", true)
+			page := renderPageHTML(assets.IndexPage, "Page not found | "+siteName, "The requested Taodock page does not exist.", siteName, "", true)
 			c.Data(http.StatusNotFound, "text/html; charset=utf-8", page)
 		},
 	)

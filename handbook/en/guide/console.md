@@ -1,11 +1,11 @@
 ---
 title: "Console Navigation and API Request Logs"
-description: "Find TaoDock models, API keys, playground tools and request logs, and trace the result of an API call in the console."
+description: "Find Taodock models, API keys, playground tools and request logs, and trace the result of an API call in the console."
 ---
 
 # Using the console
 
-[Sign in to TaoDock](https://taodock.com/sign-in) to access the pages below. For a first integration, follow **Wallet → API Keys → Model Square → client setup → usage logs**.
+[Sign in to Taodock](https://taodock.com/sign-in) to access the pages below. For a first integration, follow **Wallet → API Keys → Model Square → client setup → usage logs**.
 
 ## Main pages {#navigation}
 

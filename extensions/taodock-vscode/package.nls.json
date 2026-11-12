@@ -1,5 +1,5 @@
 {
-  "extension.description": "Use TaoDock chat models in VS Code with your own API key. Streaming, tool calling and secure key storage.",
+  "extension.description": "Use Taodock chat models in VS Code with your own API key. Streaming, tool calling and secure key storage.",
   "command.manage": "Set or Replace API Key",
   "command.refresh": "Refresh Models",
   "command.remove": "Remove API Key from This Editor",

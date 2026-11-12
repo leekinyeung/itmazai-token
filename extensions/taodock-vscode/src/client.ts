@@ -4,7 +4,7 @@ export type FailureCode = 'http' | 'network' | 'protocol' | 'cancelled' | 'timeo
 
 export class TaoDockError extends Error {
   constructor(readonly code: FailureCode, readonly status?: number) {
-    super(status ? `TaoDock HTTP ${status}` : `TaoDock ${code}`);
+    super(status ? `Taodock HTTP ${status}` : `Taodock ${code}`);
   }
 }
 

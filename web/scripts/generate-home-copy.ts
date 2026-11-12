@@ -210,7 +210,7 @@ const keys = [
   '{{formattedCount}} compatible models',
   '{{unit}} tokens',
   'Loading...',
-  'TaoDock',
+  'Taodock',
 ] as const
 
 const resources: Record<string, Record<string, string>> = {}

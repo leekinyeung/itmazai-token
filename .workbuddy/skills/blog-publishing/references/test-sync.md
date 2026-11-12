@@ -11,10 +11,10 @@
 
 ## 2. `router/public_page_metadata_test.go` — 模式 A（TestPublicPageMetadataBeforeJavaScript）
 
-在测试用例表中加一行（标题 = frontmatter title + " | TaoDock"，canonical = origin + path）：
+在测试用例表中加一行（标题 = frontmatter title + " | Taodock"，canonical = origin + path）：
 
 ```go
-{path: "/blog/<slug>", title: "<title> | TaoDock", canonical: "https://taodock.com/blog/<slug>"},
+{path: "/blog/<slug>", title: "<title> | Taodock", canonical: "https://taodock.com/blog/<slug>"},
 ```
 
 并在「structured data」路径列表（约 83 行）中加入 `"/blog/<slug>"`。

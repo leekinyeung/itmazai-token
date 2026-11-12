@@ -25,7 +25,7 @@ check_body() { # <label> <body> <expected-substring>
 }
 
 hub_body="$(fetch "$BASE/blog")"
-check_body "hub /blog has SSR title" "$hub_body" '<title>TaoDock Blog | TaoDock</title>'
+check_body "hub /blog has SSR title" "$hub_body" '<title>Taodock Blog | Taodock</title>'
 check_body "hub /blog has canonical" "$hub_body" 'rel="canonical" href="https://taodock.com/blog"'
 
 feed_body="$(fetch "$BASE/feed.xml")"

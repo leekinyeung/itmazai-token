@@ -1,13 +1,13 @@
 ---
-title: "TaoDock Documentation | Unified AI API Guides"
-description: "Learn how to connect apps and clients to TaoDock AI APIs, choose models, manage API keys, check usage and troubleshoot integrations."
+title: "Taodock Documentation | Unified AI API Guides"
+description: "Learn how to connect apps and clients to Taodock AI APIs, choose models, manage API keys, check usage and troubleshoot integrations."
 titleTemplate: false
 layout: home
 
 hero:
-  name: TaoDock
+  name: Taodock
   text: User Guide
-  tagline: Connect clients and applications with your TaoDock API key, then manage quota and request records in the console.
+  tagline: Connect clients and applications with your Taodock API key, then manage quota and request records in the console.
   actions:
     - theme: brand
       text: Make your first API call
@@ -33,13 +33,13 @@ features:
     details: Connect Cherry Studio, WorkBuddy, AionUI, DeepChat, and Open WebUI with import steps, model selection, and tool checks.
     link: /en/guide/clients
   - title: Choose a model
-    details: Find TaoDock chat and image models, and understand model IDs, protocols, and groups.
+    details: Find Taodock chat and image models, and understand model IDs, protocols, and groups.
     link: /en/guide/models
   - title: Manage API keys
     details: Create separate application keys with quota, expiration, model, and IP restrictions.
     link: /en/guide/api-keys
   - title: Build an integration
-    details: Use TaoDock's API addresses with cURL, Python, or JavaScript.
+    details: Use Taodock's API addresses with cURL, Python, or JavaScript.
     link: /en/api/overview
   - title: Wallet and usage
     details: Check USD quota, funding options, and the usage and charges recorded for requests.

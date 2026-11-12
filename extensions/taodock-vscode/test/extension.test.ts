@@ -261,7 +261,7 @@ describe('chat protocol', () => {
     expect(await request).toBeInstanceOf(CancellationError);
     expect(activeSignal?.aborted).toBe(true);
     expect(values.has('taodock.apiKey')).toBe(false);
-    await expect(provider.provideLanguageModelChatResponse(model, [], { toolMode: 1 }, { report() {} }, token())).rejects.toThrow('Set your TaoDock API key');
+    await expect(provider.provideLanguageModelChatResponse(model, [], { toolMode: 1 }, { report() {} }, token())).rejects.toThrow('Set your Taodock API key');
     provider.dispose();
   });
 

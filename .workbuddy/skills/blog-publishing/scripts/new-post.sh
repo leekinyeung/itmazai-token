@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Scaffold a new blog article for the TaoDock/new-api static content pipeline.
+# Scaffold a new blog article for the Taodock/new-api static content pipeline.
 # Usage: scripts/new-post.sh <slug>
 # Run from the repository root. Creates web/src/content/blog/<slug>.md with
 # today's date filled in. Edit the remaining placeholders before publishing.

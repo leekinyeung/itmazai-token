@@ -15,7 +15,7 @@ Review the upstream release notes and the installed type declarations for change
 
 In `worker.ts`, preserve the `BrowserRelayModel` boundary: the Worker emits prompts and receives judge output, while the browser performs authenticated model requests. Do not add credentials to start messages, judge messages, logs, or environment variables.
 
-DeepEval may issue several judge requests for one metric. Tests and production checks must assert correlation by `requestId` and completed metrics, not a fixed request count or exact prompt prose unless that prose is part of TaoDock's own protocol.
+DeepEval may issue several judge requests for one metric. Tests and production checks must assert correlation by `requestId` and completed metrics, not a fixed request count or exact prompt prose unless that prose is part of Taodock's own protocol.
 
 ## Local Verification
 
@@ -49,7 +49,7 @@ If prompt changes break deterministic test fixtures, compare the new schema sema
 
 ## Container Gate
 
-Build the normal TaoDock image rather than copying a locally compiled Worker into production. Confirm that:
+Build the normal Taodock image rather than copying a locally compiled Worker into production. Confirm that:
 
 - `/model-evaluation-worker` exists and is executable
 - `/api/status` reports `model_evaluation_enabled=true`
@@ -58,7 +58,7 @@ Build the normal TaoDock image rather than copying a locally compiled Worker int
 
 ## Production Gate
 
-Production deployment requires explicit user authorization. Follow the existing TaoDock deployment skill to create a unique image, back up Compose and PostgreSQL, preserve the previous image, and update only `new-api`.
+Production deployment requires explicit user authorization. Follow the existing Taodock deployment skill to create a unique image, back up Compose and PostgreSQL, preserve the previous image, and update only `new-api`.
 
 After deployment, verify:
 

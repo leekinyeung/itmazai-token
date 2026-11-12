@@ -1,20 +1,20 @@
 ---
-title: "Cherry Studio Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - TaoDock"
+title: "Cherry Studio Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - Taodock"
 titleTemplate: false
-description: "Connect Cherry Studio to TaoDock using key import or New API settings, enable models, check Agent compatibility and troubleshoot requests."
+description: "Connect Cherry Studio to Taodock using key import or New API settings, enable models, check Agent compatibility and troubleshoot requests."
 ---
 
 # Cherry Studio API Setup and Import Guide
 
 ## Step 1: Preparation {#prepare}
 
-Before you start, prepare your [TaoDock API key](https://taodock.com/keys), sufficient account quota and an exact model ID from the [model catalog](https://taodock.com/pricing). See the [quick start](../quick-start.md) if this is your first integration.
+Before you start, prepare your [Taodock API key](https://taodock.com/keys), sufficient account quota and an exact model ID from the [model catalog](https://taodock.com/pricing). See the [quick start](../quick-start.md) if this is your first integration.
 
 Install the desktop application from the [Cherry Studio website](https://cherryai.com/).
 
 <IntegrationConversionCallout />
 
-## Import from TaoDock
+## Import from Taodock
 
 1. Follow [console import](./clients.md#import), choose **Cherry Studio**, and allow the browser to open it.
 2. Check the address and key in Cherry Studio's confirmation screen, then confirm.
@@ -23,8 +23,8 @@ Install the desktop application from the [Cherry Studio website](https://cherrya
 
 ## Add a provider manually
 
-1. Open **Settings → Model Provider → New API**. If this preset is unavailable, add an **OpenAI-compatible** provider named `TaoDock` for ordinary text chat.
-2. Enter your TaoDock API key and set API Host to **`https://taodock.com`**.
+1. Open **Settings → Model Provider → New API**. If this preset is unavailable, add an **OpenAI-compatible** provider named `Taodock` for ordinary text chat.
+2. Enter your Taodock API key and set API Host to **`https://taodock.com`**.
 3. Fetch or manually add models, run a connection check, and enable the provider. Cherry Studio adds the version and endpoint paths to this root address.
 
 <figure>
@@ -40,13 +40,13 @@ See [Cherry Studio's New API guide](https://cherryai.com.cn/docs/zh-cn/pre-basic
 
 ## Use Cherry Agents
 
-Open **Work / Agents** in the left navigation, choose or create an Agent, select a TaoDock model **compatible with its runtime mode**, and choose a working directory. A mode requiring Anthropic Messages needs a model and protocol supporting that endpoint; changing an OpenAI connection's model name to Claude is insufficient.
+Open **Work / Agents** in the left navigation, choose or create an Agent, select a Taodock model **compatible with its runtime mode**, and choose a working directory. A mode requiring Anthropic Messages needs a model and protocol supporting that endpoint; changing an OpenAI connection's model name to Claude is insufficient.
 
 If prompted to start the API Gateway, select **Enable and Start** or open **Settings → API Gateway**. After chat works, follow the [first Agent task](./clients.md#agent-check). See the official [Agent model configuration](https://cherryai.com.cn/docs/zh-cn/advanced-basic/agent-workspace/create-agent/) and [API Gateway guide](https://cherryai.com/docs/en/advanced-basic/developer-tools/api-gateway/).
 
 ## Verify a real request {#verify}
 
-Select a model under the TaoDock connection and send a short test message. Confirm that a normal response arrives and that a matching request appears in [TaoDock request logs](https://taodock.com/usage-logs/common). Loading a model list verifies model discovery; sending a message may consume quota.
+Select a model under the Taodock connection and send a short test message. Confirm that a normal response arrives and that a matching request appears in [Taodock request logs](https://taodock.com/usage-logs/common). Loading a model list verifies model discovery; sending a message may consume quota.
 
 For Agent workflows, also follow the [file tool verification](./clients.md#agent-check). A normal text reply alone does not establish tool support.
 
@@ -55,7 +55,7 @@ For Agent workflows, also follow the [file tool verification](./clients.md#agent
 | Symptom | What to check |
 | --- | --- |
 | HTML response or 404 | Use the API domain, check protocol selection and avoid duplicated version or endpoint paths |
-| 401 or invalid key | Copy your complete, active TaoDock API key |
+| 401 or invalid key | Copy your complete, active Taodock API key |
 | Missing or unavailable model | Copy the exact model ID and check key restrictions and the selected group |
 | Insufficient quota | Check both the account balance and API key quota |
 | Chat works but tools fail | Verify the protocol, model capability and the application's tool permissions |

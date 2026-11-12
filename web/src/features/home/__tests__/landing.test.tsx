@@ -316,21 +316,21 @@ test('the compact footer retains configured branding and legal links', async () 
   )
 })
 
-test('the default footer brand changes between TaoDock and its Chinese name with the interface language', async () => {
+test('the default footer keeps the Taodock name when the interface language changes', async () => {
   useSystemConfigStore
     .getState()
     .setConfig({ systemName: 'Taodock', logo: '/logo.png', footerHtml: '' })
   await renderLanding({ footer: true })
-  expect(await screen.findByRole('link', { name: 'TaoDock' })).toBeVisible()
+  expect(await screen.findByRole('link', { name: 'Taodock' })).toBeVisible()
   i18next.addResourceBundle('zhCN', 'translation', zh.translation, true, true)
   await act(async () => {
     await i18next.changeLanguage('zhCN')
   })
-  expect(screen.getByRole('link', { name: '众妙之门' })).toBeVisible()
+  expect(screen.getByRole('link', { name: 'Taodock' })).toBeVisible()
   await act(async () => {
     await i18next.changeLanguage('en')
   })
-  expect(screen.getByRole('link', { name: 'TaoDock' })).toBeVisible()
+  expect(screen.getByRole('link', { name: 'Taodock' })).toBeVisible()
 })
 
 test('a configured custom footer still takes precedence over the compact variant', async () => {

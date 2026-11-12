@@ -6,13 +6,13 @@ const SECRET_KEY = 'taodock.apiKey';
 
 function errorMessage(error: unknown): string {
   if (error instanceof Error && error.cause instanceof TaoDockError) error = error.cause;
-  if (!(error instanceof TaoDockError)) return vscode.l10n.t('TaoDock could not complete the request. Please try again.');
-  if (error.status === 401) return vscode.l10n.t('Your TaoDock API key is invalid, expired or disabled. Set a valid key and try again.');
-  if (error.status === 402 || error.status === 403) return vscode.l10n.t('TaoDock denied this request. Check your balance, key quota and model access in the console.');
-  if (error.status === 429) return vscode.l10n.t('TaoDock rate limit reached. Please wait before trying again.');
-  if (error.code === 'protocol') return vscode.l10n.t('TaoDock returned an incomplete or unsupported response. Check model compatibility and request logs.');
-  if (error.code === 'timeout') return vscode.l10n.t('The TaoDock request timed out. Check request logs before retrying.');
-  return vscode.l10n.t('Could not connect to TaoDock. Check your network and try again.');
+  if (!(error instanceof TaoDockError)) return vscode.l10n.t('Taodock could not complete the request. Please try again.');
+  if (error.status === 401) return vscode.l10n.t('Your Taodock API key is invalid, expired or disabled. Set a valid key and try again.');
+  if (error.status === 402 || error.status === 403) return vscode.l10n.t('Taodock denied this request. Check your balance, key quota and model access in the console.');
+  if (error.status === 429) return vscode.l10n.t('Taodock rate limit reached. Please wait before trying again.');
+  if (error.code === 'protocol') return vscode.l10n.t('Taodock returned an incomplete or unsupported response. Check model compatibility and request logs.');
+  if (error.code === 'timeout') return vscode.l10n.t('The Taodock request timed out. Check request logs before retrying.');
+  return vscode.l10n.t('Could not connect to Taodock. Check your network and try again.');
 }
 
 export function toOpenAIMessages(messages: readonly vscode.LanguageModelChatRequestMessage[]): ChatMessage[] {
@@ -95,7 +95,7 @@ export class TaoDockProvider implements vscode.LanguageModelChatProvider, vscode
 
   private async enterKey(): Promise<void> {
     const input = await vscode.window.showInputBox({
-      title: vscode.l10n.t('Connect TaoDock'),
+      title: vscode.l10n.t('Connect Taodock'),
       prompt: vscode.l10n.t('Paste an API key from taodock.com/keys. It will be stored in VS Code Secret Storage.'),
       password: true,
       ignoreFocusOut: true,
@@ -108,13 +108,13 @@ export class TaoDockProvider implements vscode.LanguageModelChatProvider, vscode
     try {
       const models = await this.request(undefined, signal => this.client.listModels(key, signal));
       if (models.length === 0) {
-        await vscode.window.showWarningMessage(vscode.l10n.t('This key has no supported chat models. Check its group and model permissions in TaoDock.'));
+        await vscode.window.showWarningMessage(vscode.l10n.t('This key has no supported chat models. Check its group and model permissions in Taodock.'));
         return;
       }
       await this.secrets.store(SECRET_KEY, key);
       this.invalidate();
       this.log.info('API key validated and saved; existing requests cancelled.');
-      await vscode.window.showInformationMessage(vscode.l10n.t('TaoDock connected. Choose a TaoDock model in the chat model picker.'));
+      await vscode.window.showInformationMessage(vscode.l10n.t('Taodock connected. Choose a Taodock model in the chat model picker.'));
     } catch (error) {
       this.log.warn(error instanceof TaoDockError ? error.message : 'Key setup failed.');
       throw error;
@@ -125,7 +125,7 @@ export class TaoDockProvider implements vscode.LanguageModelChatProvider, vscode
     await this.secrets.delete(SECRET_KEY);
     this.invalidate();
     this.log.info('Local API key removed; existing requests cancelled.');
-    await vscode.window.showInformationMessage(vscode.l10n.t('TaoDock API key removed from this editor. Revoke it in the console to disable it everywhere.'));
+    await vscode.window.showInformationMessage(vscode.l10n.t('Taodock API key removed from this editor. Revoke it in the console to disable it everywhere.'));
   }
 
   async refreshModels(): Promise<void> {
@@ -136,7 +136,7 @@ export class TaoDockProvider implements vscode.LanguageModelChatProvider, vscode
     } finally {
       source.dispose();
     }
-    await vscode.window.showInformationMessage(vscode.l10n.t('TaoDock models refreshed. Open the chat model picker to choose a model.'));
+    await vscode.window.showInformationMessage(vscode.l10n.t('Taodock models refreshed. Open the chat model picker to choose a model.'));
   }
 
   async provideLanguageModelChatInformation(options: vscode.PrepareLanguageModelChatModelOptions, token: vscode.CancellationToken): Promise<vscode.LanguageModelChatInformation[]> {
@@ -150,8 +150,8 @@ export class TaoDockProvider implements vscode.LanguageModelChatProvider, vscode
       const models = await this.request(token, signal => this.client.listModels(key, signal));
       return models.map(model => ({
         id: model.id, name: model.id, family: model.id, version: '1',
-        detail: 'TaoDock',
-        tooltip: vscode.l10n.t('Provided by TaoDock. Availability and charges follow your account and key permissions.'),
+        detail: 'Taodock',
+        tooltip: vscode.l10n.t('Provided by Taodock. Availability and charges follow your account and key permissions.'),
         // /v1/models does not expose context limits. Use a conservative editor
         // budget rather than advertise unverified model limits.
         maxInputTokens: 28_672, maxOutputTokens: 4096,
@@ -172,7 +172,7 @@ export class TaoDockProvider implements vscode.LanguageModelChatProvider, vscode
     token: vscode.CancellationToken,
   ): Promise<void> {
     const key = await this.secrets.get(SECRET_KEY);
-    if (!key) throw new Error(vscode.l10n.t('Set your TaoDock API key before sending a message.'));
+    if (!key) throw new Error(vscode.l10n.t('Set your Taodock API key before sending a message.'));
     if (token.isCancellationRequested) throw new vscode.CancellationError();
     try {
       await this.request(token, async signal => {
@@ -203,7 +203,7 @@ export class TaoDockProvider implements vscode.LanguageModelChatProvider, vscode
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-  const log = vscode.window.createOutputChannel('TaoDock', { log: true });
+  const log = vscode.window.createOutputChannel('Taodock', { log: true });
   const provider = new TaoDockProvider(context.secrets, log);
   context.subscriptions.push(log, provider,
     vscode.lm.registerLanguageModelChatProvider('taodock', provider),

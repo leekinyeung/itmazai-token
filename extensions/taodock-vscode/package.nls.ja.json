@@ -1,5 +1,5 @@
 {
-  "extension.description": "自分の API キーで VS Code から TaoDock のモデルを利用。ストリーミング、ツール呼び出し、安全なキー保存に対応。",
+  "extension.description": "自分の API キーで VS Code から Taodock のモデルを利用。ストリーミング、ツール呼び出し、安全なキー保存に対応。",
   "command.manage": "API キーを設定・変更",
   "command.refresh": "モデル一覧を更新",
   "command.remove": "このエディターから API キーを削除",

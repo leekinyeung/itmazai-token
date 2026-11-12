@@ -255,7 +255,7 @@ test('all seven interface languages update brand, navigation and handbook langua
     )
     expect(
       footer.getByRole('link', {
-        name: chinese ? /众妙之门|眾妙之門/ : 'TaoDock',
+        name: 'Taodock',
       })
     ).toBeVisible()
     const headings = footer
@@ -312,7 +312,7 @@ test('footer destinations are keyboard reachable and disabled module links are a
     await renderFooter({ status: { HeaderNavModules: { console: false } } })
   )
   await user.tab()
-  expect(footer.getByRole('link', { name: 'TaoDock' })).toHaveFocus()
+  expect(footer.getByRole('link', { name: 'Taodock' })).toHaveFocus()
   await user.tab()
   expect(footer.getByRole('link', { name: 'Model Square' })).toHaveFocus()
   await user.tab()

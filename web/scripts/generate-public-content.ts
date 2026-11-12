@@ -103,8 +103,8 @@ function articleData(page: PublicContentPage) {
     inLanguage: 'en',
     mainEntityOfPage: `${origin}${page.path}`,
     ...(page.coverImage ? { image: [`${origin}${page.coverImage}`] } : {}),
-    author: { '@type': 'Organization', name: 'TaoDock' },
-    publisher: { '@type': 'Organization', name: 'TaoDock', url: origin },
+    author: { '@type': 'Organization', name: 'Taodock' },
+    publisher: { '@type': 'Organization', name: 'Taodock', url: origin },
   }
 }
 
@@ -158,7 +158,7 @@ function compareHubStructuredData(pages: PublicContentPage[]): string[] {
       '@type': 'CollectionPage',
       name: 'AI API Gateway Comparisons',
       description:
-        'Compare TaoDock with established AI gateways and model routing platforms using sourced, review-dated decision guides.',
+        'Compare Taodock with established AI gateways and model routing platforms using sourced, review-dated decision guides.',
       url: `${origin}/compare`,
       inLanguage: 'en',
       hasPart: pages.map((page) => ({
@@ -282,7 +282,7 @@ const compareUpdatedAt = comparisonPages
   .at(-1) as string
 const compareStructuredData = compareHubStructuredData(comparisonPages)
 const BLOG_HUB_FALLBACK_UPDATED_AT = '2026-11-10'
-const BLOG_HUB_TITLE = 'TaoDock Blog'
+const BLOG_HUB_TITLE = 'Taodock Blog'
 const BLOG_HUB_DESCRIPTION =
   'Guides on choosing, operating, and optimizing an AI gateway: routing strategies, cost controls, reliability practices, and model provider comparisons.'
 const blogPages = pages.filter((page) => page.kind === 'blog')
@@ -342,7 +342,7 @@ const manifest: PublicContentManifest = {
     path: '/compare',
     title: 'AI API Gateway Comparisons',
     description:
-      'Compare TaoDock with OpenRouter, LiteLLM, Portkey, Requesty and SiliconFlow across deployment, routing, access, usage and operational trade-offs.',
+      'Compare Taodock with OpenRouter, LiteLLM, Portkey, Requesty and SiliconFlow across deployment, routing, access, usage and operational trade-offs.',
     updatedAt: compareUpdatedAt,
     structuredData: compareStructuredData,
   },

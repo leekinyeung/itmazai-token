@@ -1,11 +1,11 @@
 ---
 name: deepeval-update
-description: Manually inspect, review, test, and release DeepEval dependency updates for TaoDock's tools/model-evaluation-worker. Use only when the user explicitly invokes $deepeval-update; do not select it automatically for ordinary model-evaluation work.
+description: Manually inspect, review, test, and release DeepEval dependency updates for Taodock's tools/model-evaluation-worker. Use only when the user explicitly invokes $deepeval-update; do not select it automatically for ordinary model-evaluation work.
 ---
 
 # DeepEval Update Workflow
 
-Keep TaoDock's embedded DeepEval Worker reproducible and compatible with its browser-relayed judge protocol.
+Keep Taodock's embedded DeepEval Worker reproducible and compatible with its browser-relayed judge protocol.
 
 ## Source of Truth
 

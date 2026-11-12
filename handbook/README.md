@@ -22,7 +22,7 @@ bun run dev
 | `quick-start.md` | 新用户首次调用流程 |
 | `guide/console.md` | 控制台使用 |
 | `guide/clients.md` | Cherry Studio、WorkBuddy、AionUI、DeepChat、Open WebUI 的导入与配置 |
-| `guide/models.md` | TaoDock 模型、接口与分组选择 |
+| `guide/models.md` | Taodock 模型、接口与分组选择 |
 | `guide/api-keys.md` | 密钥的创建、限制与停用 |
 | `guide/wallet.md` | 钱包、额度与用量核对 |
 | `api/overview.md` | API 地址与基本调用说明 |
@@ -244,7 +244,7 @@ systemctl reload nginx
 ### 2026-10-26 专属手册更新记录
 
 - 发布版本：`20261026T061954Z`，来自本次手册工作区；中英文各九页。
-- 内容：统一使用 TaoDock 实际域名、入口和已核对模型 ID；新增模型、API 密钥、钱包指南，完善客户端配置、终端和程序调用、排错步骤。
+- 内容：统一使用 Taodock 实际域名、入口和已核对模型 ID；新增模型、API 密钥、钱包指南，完善客户端配置、终端和程序调用、排错步骤。
 - 发布目录：`/var/www/taodock-handbook/releases/20261026T061954Z/site`。
 - 上一版：`/var/www/taodock-handbook/releases/20261023T062617Z/site`，保留以便回退。
 - 本次备份：`/root/taodock-docs-backups/20261026T061954Z`，其中 `previous-target` 保存旧站点目标，`nginx.sha256` 保存部署前配置校验值。
@@ -310,7 +310,7 @@ mv -Tf /var/www/taodock-handbook/current.rollback.20261026T061954Z /var/www/taod
 
 ## 发布内容前
 
-公开手册使用 TaoDock 的实际域名、控制台路径和已核对的模型 ID。维护时同步更新中英文对应文章，不得重新引入占位域名、虚构密钥或未经核对的模型名称。密钥由用户自己输入，不能将测试凭据写入公开页面。
+公开手册使用 Taodock 的实际域名、控制台路径和已核对的模型 ID。维护时同步更新中英文对应文章，不得重新引入占位域名、虚构密钥或未经核对的模型名称。密钥由用户自己输入，不能将测试凭据写入公开页面。
 
 ### 客户端操作截图
 
@@ -318,10 +318,10 @@ mv -Tf /var/www/taodock-handbook/current.rollback.20261026T061954Z /var/www/taod
 
 | 图片 | 来源与范围 |
 | --- | --- |
-| `cherry-provider.jpg` | 2026-10-27 通过电脑操作工具截取本机 Cherry Studio 2.1.7 的 New API 设置；实际域名为 TaoDock，密钥由应用遮罩，未展开密钥或改动服务商配置 |
-| `workbuddy-custom.jpg` | 本机 WorkBuddy 5.8.3 添加模型表单；只填写 TaoDock 公共地址和模型 ID，密钥留空；截图后取消表单，没有保存新模型或调用测试 |
-| `aionui-platform.png` | [AionUI 官方图片](https://github.com/iOfficeAI/AionUi/blob/main/resources/llm_newapi.png)原图，用于定位 Custom 平台；图注明确来源和未填写 TaoDock 的状态，连接值以相邻表格为准 |
-| `deepchat-custom.jpg` | DeepChat 1.1.3 官方发布版的自定义服务商表单；填写 TaoDock 名称、Chat Completions 协议与公共 URL，密钥留空，未保存服务商或发起连接测试 |
+| `cherry-provider.jpg` | 2026-10-27 通过电脑操作工具截取本机 Cherry Studio 2.1.7 的 New API 设置；实际域名为 Taodock，密钥由应用遮罩，未展开密钥或改动服务商配置 |
+| `workbuddy-custom.jpg` | 本机 WorkBuddy 5.8.3 添加模型表单；只填写 Taodock 公共地址和模型 ID，密钥留空；截图后取消表单，没有保存新模型或调用测试 |
+| `aionui-platform.png` | [AionUI 官方图片](https://github.com/iOfficeAI/AionUi/blob/main/resources/llm_newapi.png)原图，用于定位 Custom 平台；图注明确来源和未填写 Taodock 的状态，连接值以相邻表格为准 |
+| `deepchat-custom.jpg` | DeepChat 1.1.3 官方发布版的自定义服务商表单；填写 Taodock 名称、Chat Completions 协议与公共 URL，密钥留空，未保存服务商或发起连接测试 |
 
 DeepChat 发布包来自官方 GitHub Release，仅解压到临时目录用于截图，未复制到 `/Applications`。下载包 SHA-256 与 GitHub 发布资产的摘要一致（`6284eadb9315724f5729b15b9eef21d1cb848909e99750d486e581186e106b03`），`codesign --verify --deep --strict` 通过。AionUI 图片保持原始文件，不修改其中界面或将其描述为本机实测。
 

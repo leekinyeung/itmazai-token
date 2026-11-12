@@ -1,8 +1,8 @@
 <div align="center">
 
-![TaoDock](web/public/logo.png)
+![Taodock](web/public/logo.png)
 
-# TaoDock · 众妙之门
+# Taodock
 
 **一个入口，接入多家大模型 —— 面向应用与 AI Agent 的统一 AI API 网关**
 
@@ -32,7 +32,7 @@
 
 ## 项目简介
 
-TaoDock（众妙之门）是一个自托管的 AI API 网关：把 OpenAI、Anthropic、Google Gemini、Azure OpenAI、AWS Bedrock、Vertex AI、DeepSeek、通义千问等上游模型服务接入同一个平台，对客户端统一暴露 OpenAI 兼容接口，并集中管理渠道路由、密钥访问、用量计费与日志审计。
+Taodock 是一个自托管的 AI API 网关：把 OpenAI、Anthropic、Google Gemini、Azure OpenAI、AWS Bedrock、Vertex AI、DeepSeek、通义千问等上游模型服务接入同一个平台，对客户端统一暴露 OpenAI 兼容接口，并集中管理渠道路由、密钥访问、用量计费与日志审计。
 
 它可以用来：
 
@@ -106,7 +106,7 @@ curl --fail-with-body https://taodock.com/v1/chat/completions \
   -d '{"model":"your-enabled-model","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-客户端接入（Cherry Studio、Open WebUI、AionUI、DeepChat、OpenAI SDK 等）见[集成指南](https://taodock.com/integrations)与[使用手册](https://docs.taodock.com)。编辑器内使用可安装 [TaoDock for VS Code](./extensions/taodock-vscode/README.md) 扩展。
+客户端接入（Cherry Studio、Open WebUI、AionUI、DeepChat、OpenAI SDK 等）见[集成指南](https://taodock.com/integrations)与[使用手册](https://docs.taodock.com)。编辑器内使用可安装 [Taodock for VS Code](./extensions/taodock-vscode/README.md) 扩展。
 
 ### 方式二：本地 Docker 单机体验
 
@@ -203,7 +203,7 @@ main 合入 ──► Deploy production
 | [plugins/tasks/](./plugins/tasks/) | JavaScript 任务插件，运行于 `pkg/jsplugin/`；编写规范见[任务插件 API v1](./docs/plugin-api/v1.md) |
 | `web/` | React 19 + TypeScript 前端（控制台与公开站点）；约定见 [web/AGENTS.md](./web/AGENTS.md) |
 | `handbook/` | VitePress 使用手册站，部署于 [docs.taodock.com](https://docs.taodock.com)，中英双语 |
-| [extensions/taodock-vscode/](./extensions/taodock-vscode/README.md) | TaoDock VS Code 扩展：把平台模型接入编辑器聊天 |
+| [extensions/taodock-vscode/](./extensions/taodock-vscode/README.md) | Taodock VS Code 扩展：把平台模型接入编辑器聊天 |
 | `electron/` | 桌面端封装与打包 |
 | `deploy/` | 生产部署编排（应用栈 / 基础设施栈 / 部署与初始化脚本） |
 | `docs/` | 认证与安全、CI/CD、插件 API、OpenAPI 等工程文档 |
@@ -243,8 +243,8 @@ cd web && bun run dev -- --port 5173
 | 公开产品站点 | 服务端渲染的模型广场、价格、集成、对比、排行、评测、FAQ 等页面，含 canonical/OG/sitemap/JSON-LD 等 SEO 基础设施 |
 | 模型评测 | 内置 DeepEval 评测工作器与公开评测页，支持相关性 / 正确性 / 忠实度指标 |
 | 性能视图 | 渠道与模型的性能健康指标、可用性统计与分享视图 |
-| 品牌与计费细节 | TaoDock 品牌呈现、模型身份展示、账单口径与日志导出调整 |
-| 开发者工具 | [TaoDock VS Code 扩展](./extensions/taodock-vscode/README.md)与[中英双语使用手册](https://docs.taodock.com) |
+| 品牌与计费细节 | Taodock 品牌呈现、模型身份展示、账单口径与日志导出调整 |
+| 开发者工具 | [Taodock VS Code 扩展](./extensions/taodock-vscode/README.md)与[中英双语使用手册](https://docs.taodock.com) |
 | 发布工程 | 不可变 `sha-<12>` 镜像、CI 质量门禁、自动备份、健康检查与一键回滚的完整流水线 |
 
 ---
@@ -264,7 +264,7 @@ cd web && bun run dev -- --port 5173
 
 <div align="center">
 
-### 🚪 众妙之门，玄之又玄
+### 🚪 Taodock，玄之又玄
 
 **[taodock.com](https://taodock.com)** • **[使用手册](https://docs.taodock.com)** • **[VS Code 扩展](./extensions/taodock-vscode/README.md)**
 

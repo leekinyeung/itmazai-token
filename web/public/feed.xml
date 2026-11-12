@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-  <title>TaoDock Blog</title>
+  <title>Taodock Blog</title>
   <link>https://taodock.com/blog</link>
   <description>Guides on choosing, operating, and optimizing an AI gateway: routing strategies, cost controls, reliability practices, and model provider comparisons.</description>
   <language>en</language>

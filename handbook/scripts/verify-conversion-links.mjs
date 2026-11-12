@@ -14,7 +14,7 @@ async function verifyPage(path, calloutCount, language) {
   assert.match(html, /rel="noopener noreferrer"/)
   if (language === 'en') {
     assert.match(html, /Get API Key \(Console\)/)
-    assert.match(html, /Need a TaoDock API key\?/)
+    assert.match(html, /Need a Taodock API key\?/)
   } else {
     assert.match(html, /获取 API Key（控制台）/)
     assert.match(html, /还没有 API Key？/)
@@ -75,27 +75,27 @@ for (const url of sitemapUrls) {
 const tutorialTitles = new Map([
   [
     'guide/cherry-studio.html',
-    'Cherry Studio 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - 众妙之门 TaoDock',
+    'Cherry Studio 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - Taodock',
   ],
   [
     'guide/workbuddy.html',
-    'WorkBuddy 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - 众妙之门 TaoDock',
+    'WorkBuddy 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - Taodock',
   ],
   [
     'guide/open-webui.html',
-    'Open WebUI 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - 众妙之门 TaoDock',
+    'Open WebUI 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - Taodock',
   ],
   [
     'en/guide/cherry-studio.html',
-    'Cherry Studio Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - TaoDock',
+    'Cherry Studio Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - Taodock',
   ],
   [
     'en/guide/workbuddy.html',
-    'WorkBuddy Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - TaoDock',
+    'WorkBuddy Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - Taodock',
   ],
   [
     'en/guide/open-webui.html',
-    'Open WebUI Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - TaoDock',
+    'Open WebUI Custom LLM API Setup Guide (Base URL Configuration and Troubleshooting) - Taodock',
   ],
 ])
 for (const [path, title] of tutorialTitles) {

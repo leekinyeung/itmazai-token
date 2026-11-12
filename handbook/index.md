@@ -1,13 +1,13 @@
 ---
-title: "众妙之门 TaoDock｜AI API 使用手册"
-description: "众妙之门 TaoDock 官方使用手册：了解多模型 AI API 接入、客户端配置、模型选择、API 密钥管理和常见问题排查。"
+title: "Taodock｜AI API 使用手册"
+description: "Taodock 官方使用手册：了解多模型 AI API 接入、客户端配置、模型选择、API 密钥管理和常见问题排查。"
 titleTemplate: false
 layout: home
 
 hero:
-  name: 众妙之门 TaoDock
+  name: Taodock
   text: 使用手册
-  tagline: 使用 众妙之门 TaoDock 密钥连接 OpenAI 兼容客户端、调用模型，并在控制台管理额度和请求记录。
+  tagline: 使用 Taodock 密钥连接 OpenAI 兼容客户端、调用模型，并在控制台管理额度和请求记录。
   actions:
     - theme: brand
       text: 完成第一次调用
@@ -33,7 +33,7 @@ features:
     details: 按步骤接入 Cherry Studio、WorkBuddy、AionUI、DeepChat 和 Open WebUI，完成导入、模型选择与工具调用检查。
     link: /guide/clients
   - title: 选择模型
-    details: 了解 众妙之门 TaoDock 的对话和图片模型，区分模型 ID、接口和分组。
+    details: 了解 Taodock 的对话和图片模型，区分模型 ID、接口和分组。
     link: /guide/models
   - title: 管理 API 密钥
     details: 为不同应用创建密钥，设置额度、有效期、模型和 IP 限制。

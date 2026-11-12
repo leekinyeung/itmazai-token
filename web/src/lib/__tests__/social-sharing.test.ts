@@ -44,7 +44,7 @@ const pageMetadata = JSON.parse(
   >
   noIndexRoutes: string[]
 }
-const homepageTitle = 'Unified AI API Gateway | TaoDock'
+const homepageTitle = 'Unified AI API Gateway | Taodock'
 const homepageDescription =
   'Connect leading AI models through one familiar API, from your first prototype to your next production release.'
 
@@ -55,10 +55,10 @@ describe('website social sharing', () => {
         'twitter:card': 'summary_large_image',
         'twitter:title': homepageTitle,
         'twitter:description': metadata.description,
-        'twitter:image': 'https://taodock.com/social-card.png',
-        'twitter:image:alt': 'TaoDock',
+        'twitter:image': 'https://taodock.com/social-card-taodock.png',
+        'twitter:image:alt': 'Taodock',
         'og:type': 'website',
-        'og:site_name': 'TaoDock',
+        'og:site_name': 'Taodock',
         'og:title': homepageTitle,
         'og:url': 'https://taodock.com/',
         'og:description': metadata.description,
@@ -91,12 +91,12 @@ describe('website social sharing', () => {
     ).toBe('https://taodock.com/')
   })
 
-  it('keeps core public page titles within 60 characters and branded with TaoDock', () => {
-    expect(pageMetadata.siteName).toBe('TaoDock')
+  it('keeps core public page titles within 60 characters and branded with Taodock', () => {
+    expect(pageMetadata.siteName).toBe('Taodock')
     for (const [path, page] of Object.entries(pageMetadata.pages)) {
       if (path.includes(':') || page.language) continue
-      const title = path === '/' ? page.title : `${page.title} | TaoDock`
-      expect(title).toMatch(/\| TaoDock$/)
+      const title = path === '/' ? page.title : `${page.title} | Taodock`
+      expect(title).toMatch(/\| Taodock$/)
       expect([...title].length).toBeLessThanOrEqual(60)
     }
   })

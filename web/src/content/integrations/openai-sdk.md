@@ -1,18 +1,18 @@
 ---
 kind: integration
 slug: openai-sdk
-title: Use the OpenAI SDK with TaoDock's Compatible API
-description: Point the OpenAI SDK at TaoDock, keep credentials in environment variables, verify models and chat responses, and handle common API errors safely.
-primaryKeyword: TaoDock OpenAI SDK integration
+title: Use the OpenAI SDK with Taodock's Compatible API
+description: Point the OpenAI SDK at Taodock, keep credentials in environment variables, verify models and chat responses, and handle common API errors safely.
+primaryKeyword: Taodock OpenAI SDK integration
 cluster: Developer API integrations
 subject: OpenAI SDK
 publishedAt: 2026-11-04
 updatedAt: 2026-11-04
 reviewedAt: 2026-11-04
 sources:
-  - label: TaoDock API integration overview
+  - label: Taodock API integration overview
     url: https://docs.taodock.com/en/api/overview.html
-  - label: TaoDock client guides
+  - label: Taodock client guides
     url: https://docs.taodock.com/en/guide/clients.html
 related:
   - /integrations/open-webui
@@ -21,33 +21,33 @@ related:
   - /models
 steps:
   - title: Create a least-privilege API key
-    description: Generate a TaoDock key for this application, restrict its models and quota, and store it in TAODOCK_API_KEY.
+    description: Generate a Taodock key for this application, restrict its models and quota, and store it in TAODOCK_API_KEY.
   - title: Configure the SDK client
     description: Initialize the OpenAI SDK with base_url or baseURL set to https://taodock.com/v1 and the environment-supplied key.
   - title: List and select a model
     description: Query the models endpoint with the same client and use an exact model ID returned for the key.
   - title: Send and reconcile a test request
-    description: Make a small completion request, preserve its non-secret request context, and verify status, model, tokens, and usage in TaoDock.
+    description: Make a small completion request, preserve its non-secret request context, and verify status, model, tokens, and usage in Taodock.
 docsUrl: https://docs.taodock.com/en/api/overview.html
 faqItems:
-  - question: Does the OpenAI SDK need a different package for TaoDock?
-    answer: No. Configure the supported OpenAI SDK with TaoDock's base URL and a TaoDock API key.
+  - question: Does the OpenAI SDK need a different package for Taodock?
+    answer: No. Configure the supported OpenAI SDK with Taodock's base URL and a Taodock API key.
   - question: What base URL should SDK code use?
     answer: Use https://taodock.com/v1 and let the SDK append resource paths.
-  - question: Is every OpenAI SDK method supported for every TaoDock model?
+  - question: Is every OpenAI SDK method supported for every Taodock model?
     answer: No. Compatibility and capabilities depend on the endpoint, selected model, channel, and fields. Test the exact methods your application uses.
 draft: false
 ---
 
 ## When to use the SDK integration
 
-An application already built around an OpenAI SDK can often connect to TaoDock by changing the base URL, API key, and model ID. TaoDock then authenticates the application key, applies its permissions and quota, routes the request through configured channels, and records usage. This is useful when an application needs access to multiple providers without embedding every upstream credential.
+An application already built around an OpenAI SDK can often connect to Taodock by changing the base URL, API key, and model ID. Taodock then authenticates the application key, applies its permissions and quota, routes the request through configured channels, and records usage. This is useful when an application needs access to multiple providers without embedding every upstream credential.
 
 OpenAI compatibility reduces client changes, but it is not a guarantee that every method, request field, model feature, or error behaves identically. Validate the precise endpoints your application uses. Streaming, tools, images, audio, files, structured output, embeddings, and response APIs should each be tested with their selected model.
 
 ## Prepare credentials and models
 
-Create a TaoDock API key specifically for the application and environment. Development, staging, and production should not share one credential. Restrict model access and set quota or expiration according to the workload. Store the secret in a managed environment variable or secret store—not in source code, browser bundles, logs, screenshots, or committed `.env` files.
+Create a Taodock API key specifically for the application and environment. Development, staging, and production should not share one credential. Restrict model access and set quota or expiration according to the workload. Store the secret in a managed environment variable or secret store—not in source code, browser bundles, logs, screenshots, or committed `.env` files.
 
 For local examples, use the variable name `TAODOCK_API_KEY`. The name makes it clear that this is a gateway credential rather than a direct upstream provider key. Load it through your runtime's normal environment mechanism.
 
@@ -55,7 +55,7 @@ Before sending a completion, use the same SDK client or a direct request to list
 
 ## Python configuration
 
-Initialize the supported Python SDK with TaoDock's API base and the environment variable:
+Initialize the supported Python SDK with Taodock's API base and the environment variable:
 
 ```python
 import os
@@ -100,11 +100,11 @@ const response = await client.chat.completions.create({
 console.log(response.choices[0]?.message.content)
 ```
 
-Run this only in a trusted server or local process. Shipping a TaoDock key in public browser JavaScript exposes it to every visitor. A browser application should call your authenticated backend, which holds and controls the gateway credential.
+Run this only in a trusted server or local process. Shipping a Taodock key in public browser JavaScript exposes it to every visitor. A browser application should call your authenticated backend, which holds and controls the gateway credential.
 
 ## Verify more than the response text
 
-After the test returns, find the matching request in TaoDock. Confirm the dedicated key, exact model, status, token usage, and charge or quota change. Preserve a non-secret request identifier if available so client and gateway records can be correlated.
+After the test returns, find the matching request in Taodock. Confirm the dedicated key, exact model, status, token usage, and charge or quota change. Preserve a non-secret request identifier if available so client and gateway records can be correlated.
 
 Test failure behavior deliberately. Use a disabled test key, a nonexistent model, and an intentionally small quota in a non-production environment. Confirm that the application distinguishes authentication failures, permission or model errors, rate limits, quota exhaustion, provider failures, and timeouts. Retry only errors that are safe for the operation; uncontrolled retries can multiply cost or duplicate side effects.
 
@@ -114,23 +114,23 @@ For streaming, consume and close the stream according to the SDK's documented li
 
 ### 401 authentication failed
 
-Confirm `TAODOCK_API_KEY` is present in the actual process environment and not only in an unopened shell or ignored file. Check for whitespace and verify that the client uses the TaoDock base URL. Revoke any key that has appeared in an exception dump or public log.
+Confirm `TAODOCK_API_KEY` is present in the actual process environment and not only in an unopened shell or ignored file. Check for whitespace and verify that the client uses the Taodock base URL. Revoke any key that has appeared in an exception dump or public log.
 
 ### 404 endpoint or model not found
 
-The base URL is `https://taodock.com/v1`; the SDK appends paths. A full operation path can be duplicated. If model listing works, use one of its exact IDs and confirm the key's permissions and TaoDock channel availability.
+The base URL is `https://taodock.com/v1`; the SDK appends paths. A full operation path can be duplicated. If model listing works, use one of its exact IDs and confirm the key's permissions and Taodock channel availability.
 
 ### 429 or quota errors
 
-Rate limits and quota are different conditions even when an SDK surfaces similar status handling. Inspect the sanitized response and TaoDock records. Use bounded exponential backoff only for retryable rate or transient failures. Increasing a key limit is an access decision, not a generic error-recovery step.
+Rate limits and quota are different conditions even when an SDK surfaces similar status handling. Inspect the sanitized response and Taodock records. Use bounded exponential backoff only for retryable rate or transient failures. Increasing a key limit is an access decision, not a generic error-recovery step.
 
 ### Timeout or upstream failure
 
-Set explicit client timeouts appropriate for the endpoint and model. Preserve error type, status, request identifier, model, and duration while excluding prompts and secrets where possible. Define whether the application or TaoDock owns retries and fallback so both layers do not independently duplicate requests.
+Set explicit client timeouts appropriate for the endpoint and model. Preserve error type, status, request identifier, model, and duration while excluding prompts and secrets where possible. Define whether the application or Taodock owns retries and fallback so both layers do not independently duplicate requests.
 
 ### Unsupported parameters
 
-Remove optional fields until the smallest request succeeds, then restore them one at a time. Optional parameters and zero values may have meaningful semantics. Consult the TaoDock API guide and the chosen model's capability rather than assuming an SDK method maps identically across providers.
+Remove optional fields until the smallest request succeeds, then restore them one at a time. Optional parameters and zero values may have meaningful semantics. Consult the Taodock API guide and the chosen model's capability rather than assuming an SDK method maps identically across providers.
 
 ## Production checklist
 

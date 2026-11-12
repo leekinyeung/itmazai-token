@@ -1,10 +1,10 @@
 {
   "name": "taodock",
-  "displayName": "TaoDock — 众妙之门 AI Models",
+  "displayName": "Taodock — AI Models",
   "description": "%extension.description%",
   "version": "0.1.0",
   "publisher": "taodock",
-  "author": "TaoDock",
+  "author": "Taodock",
   "license": "AGPL-3.0-only",
   "icon": "assets/icon.png",
   "homepage": "https://taodock.com",
@@ -17,7 +17,7 @@
     "vscode": "^1.104.0"
   },
   "categories": ["AI", "Chat"],
-  "keywords": ["taodock", "众妙之门", "byok", "gpt", "claude", "language model"],
+  "keywords": ["taodock", "byok", "gpt", "claude", "language model"],
   "main": "./dist/extension.js",
   "l10n": "./l10n",
   "extensionKind": ["workspace"],
@@ -30,7 +30,7 @@
     "languageModelChatProviders": [
       {
         "vendor": "taodock",
-        "displayName": "TaoDock",
+        "displayName": "Taodock",
         "managementCommand": "taodock.manage"
       }
     ],
@@ -38,27 +38,27 @@
       {
         "command": "taodock.manage",
         "title": "%command.manage%",
-        "category": "TaoDock"
+        "category": "Taodock"
       },
       {
         "command": "taodock.refreshModels",
         "title": "%command.refresh%",
-        "category": "TaoDock"
+        "category": "Taodock"
       },
       {
         "command": "taodock.removeKey",
         "title": "%command.remove%",
-        "category": "TaoDock"
+        "category": "Taodock"
       },
       {
         "command": "taodock.openConsole",
         "title": "%command.console%",
-        "category": "TaoDock"
+        "category": "Taodock"
       },
       {
         "command": "taodock.openDocs",
         "title": "%command.docs%",
-        "category": "TaoDock"
+        "category": "Taodock"
       }
     ]
   },

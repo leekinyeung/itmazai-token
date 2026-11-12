@@ -1,11 +1,11 @@
 ---
 title: "Creating and Managing API Keys"
-description: "Create and name TaoDock API keys, configure expiration and access restrictions, connect clients and deactivate keys when needed."
+description: "Create and name Taodock API keys, configure expiration and access restrictions, connect clients and deactivate keys when needed."
 ---
 
 # API key management
 
-[API Keys](https://taodock.com/keys) authorize applications to access TaoDock. Your password signs you into the console; your API key connects clients and programs. They are not interchangeable.
+[API Keys](https://taodock.com/keys) authorize applications to access Taodock. Your password signs you into the console; your API key connects clients and programs. They are not interchangeable.
 
 ## Create and name a key {#create}
 
@@ -32,7 +32,7 @@ An account group change applies to existing keys on their next request. Model Sq
 
 ## Copy the address and connect applications {#connect}
 
-The **API Addresses** action at the top of the page shows the TaoDock entry point: `https://taodock.com`. Whether to add `/v1` in a client's address field depends on the path it appends. See [client connection settings](./clients.md#settings).
+The **API Addresses** action at the top of the page shows the Taodock entry point: `https://taodock.com`. Whether to add `/v1` in a client's address field depends on the path it appends. See [client connection settings](./clients.md#settings).
 
 Key row actions include copying, editing, and client connections. The **Chat** submenu offers configured clients; install the client first and follow the [import guide](./clients.md#import).
 

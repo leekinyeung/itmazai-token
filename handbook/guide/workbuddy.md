@@ -1,30 +1,30 @@
 ---
-title: "WorkBuddy 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - 众妙之门 TaoDock"
+title: "WorkBuddy 接入自定义大模型 API 完整教程（附 Base URL 配置与排错） - Taodock"
 titleTemplate: false
-description: "在 WorkBuddy 桌面版添加众妙之门 TaoDock 自定义模型，正确填写 API 地址、协议与模型 ID，并验证会话中的模型选择。"
+description: "在 WorkBuddy 桌面版添加Taodock 自定义模型，正确填写 API 地址、协议与模型 ID，并验证会话中的模型选择。"
 ---
 
-# WorkBuddy 自定义模型接入众妙之门教程
+# WorkBuddy 自定义模型接入 Taodock 教程
 
 ## 第一步：准备工作 {#prepare}
 
-开始前，请准备[众妙之门 TaoDock API 密钥](https://taodock.com/keys)、足够的账户额度，并从[模型广场](https://taodock.com/pricing)复制完整模型 ID。首次使用可先完成[快速开始](../quick-start.md)。
+开始前，请准备[Taodock API 密钥](https://taodock.com/keys)、足够的账户额度，并从[模型广场](https://taodock.com/pricing)复制完整模型 ID。首次使用可先完成[快速开始](../quick-start.md)。
 
-从 [WorkBuddy 官网](https://www.workbuddy.cn/)安装桌面版并完成登录。以下是在 WorkBuddy 内使用众妙之门 TaoDock 模型的配置。
+从 [WorkBuddy 官网](https://www.workbuddy.cn/)安装桌面版并完成登录。以下是在 WorkBuddy 内使用Taodock 模型的配置。
 
 <IntegrationConversionCallout />
 
-## 添加众妙之门 TaoDock 模型
+## 添加Taodock 模型
 
 1. 打开「设置 → 模型 → 自定义模型」，点击「添加模型」；也可从对话底部模型选择器进入「配置自定义模型」。
 2. 供应商选择 **自定义 / Custom**，按下表填写。
-3. 保存后回到对话页，展开模型选择器，在「自定义模型」分组中选中刚添加的模型；需要使用众妙之门 TaoDock 时，请明确选择它。
+3. 保存后回到对话页，展开模型选择器，在「自定义模型」分组中选中刚添加的模型；需要使用Taodock 时，请明确选择它。
 
 | 配置项 | 填写内容 |
 | --- | --- |
 | 供应商 | 自定义 / Custom |
 | 接口地址 / URL | **`https://taodock.com/v1`** |
-| API Key | 自己的众妙之门 TaoDock API 密钥 |
+| API Key | 自己的Taodock API 密钥 |
 | 模型名称 / Model ID | `gpt-6.1-sol`，或从自己可用列表复制的完整对话模型 ID |
 | 自定义协议 | 关闭，使用默认的 Chat Completions 地址补全 |
 
@@ -41,13 +41,13 @@ description: "在 WorkBuddy 桌面版添加众妙之门 TaoDock 自定义模型�
 
 ## 开始使用
 
-先发送「请只回复：连接成功」，再执行[首次 Agent 任务](./clients.md#agent-check)。工具调用、图片输入等能力选项按模型和众妙之门 TaoDock 接口的实际支持情况设置，连接检测成功不代表所有能力都已验证。
+先发送「请只回复：连接成功」，再执行[首次 Agent 任务](./clients.md#agent-check)。工具调用、图片输入等能力选项按模型和Taodock 接口的实际支持情况设置，连接检测成功不代表所有能力都已验证。
 
 需要添加多个模型时，分别使用各自的准确 Model ID 配置并保存。界面没有自定义模型入口时，先核对是否使用支持该功能的桌面版；当前移动版没有添加自定义模型的入口，见[移动版模型说明](https://www.codebuddy.cn/docs/workbuddyapp/features/Model)。桌面版操作可对照 [WorkBuddy 官方模型配置](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Model)。
 
 ## 验证一次真实请求 {#verify}
 
-在客户端中选择众妙之门 TaoDock 连接下的模型，发送一条简短测试消息。确认收到正常回复，并在[普通日志](https://taodock.com/usage-logs/common)找到对应时间和模型的请求。加载模型列表只验证模型发现；发送消息可能消耗额度。
+在客户端中选择Taodock 连接下的模型，发送一条简短测试消息。确认收到正常回复，并在[普通日志](https://taodock.com/usage-logs/common)找到对应时间和模型的请求。加载模型列表只验证模型发现；发送消息可能消耗额度。
 
 需要使用智能体时，还应按[文件工具验证步骤](./clients.md#agent-check)检查实际工具调用。普通文字回复不能代替工具能力检查。
 
@@ -56,7 +56,7 @@ description: "在 WorkBuddy 桌面版添加众妙之门 TaoDock 自定义模型�
 | 现象 | 优先检查 |
 | --- | --- |
 | 返回 HTML 或 404 | API 域名、协议选择，以及是否重复追加版本号或接口路径 |
-| 401 或密钥无效 | 是否复制了完整、有效的众妙之门 TaoDock API 密钥 |
+| 401 或密钥无效 | 是否复制了完整、有效的Taodock API 密钥 |
 | 模型不存在或不可用 | 完整模型 ID、密钥模型限制与所属分组 |
 | 提示额度不足 | 账户余额和 API 密钥额度 |
 | 对话正常但工具失败 | 协议、模型能力及应用的工具权限 |

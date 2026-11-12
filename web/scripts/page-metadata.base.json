@@ -1,6 +1,6 @@
 {
   "origin": "https://taodock.com",
-  "siteName": "TaoDock",
+  "siteName": "Taodock",
   "noIndexRoutes": [
     "/forgot-password",
     "/oauth",
@@ -61,7 +61,7 @@
   ],
   "pages": {
     "/": {
-      "title": "Unified AI API Gateway | TaoDock",
+      "title": "Unified AI API Gateway | Taodock",
       "description": "Connect leading AI models through one familiar API, from your first prototype to your next production release."
     },
     "/models": {

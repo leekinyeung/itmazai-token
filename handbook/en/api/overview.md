@@ -1,11 +1,11 @@
 ---
 title: "AI API Integration: cURL, Python and JavaScript"
-description: "Use TaoDock API endpoints to list models and send chat requests with cURL, Python or JavaScript, including streaming and error handling."
+description: "Use Taodock API endpoints to list models and send chat requests with cURL, Python or JavaScript, including streaming and error handling."
 ---
 
 # API integration
 
-TaoDock's API service is **https://taodock.com**, with OpenAI-compatible Base URL **`https://taodock.com/v1`**. The code below uses TaoDock's actual addresses and reads your own key from the terminal or environment.
+Taodock's API service is **https://taodock.com**, with OpenAI-compatible Base URL **`https://taodock.com/v1`**. The code below uses Taodock's actual addresses and reads your own key from the terminal or environment.
 
 ## Addresses and endpoints {#endpoints}
 
@@ -24,10 +24,10 @@ Generation endpoints require a model supporting the corresponding protocol. See 
 
 ## Prepare your key {#credentials}
 
-Create a key on [TaoDock API Keys](https://taodock.com/keys). The cURL and JavaScript code reads `TAODOCK_API_KEY`. Set it in Bash or Zsh without putting the key directly in a script:
+Create a key on [Taodock API Keys](https://taodock.com/keys). The cURL and JavaScript code reads `TAODOCK_API_KEY`. Set it in Bash or Zsh without putting the key directly in a script:
 
 ```bash
-printf 'Enter your TaoDock API key: '
+printf 'Enter your Taodock API key: '
 read -r -s TAODOCK_API_KEY
 printf '\n'
 export TAODOCK_API_KEY
@@ -50,7 +50,7 @@ Send a text chat request:
 curl --fail-with-body --silent --show-error https://taodock.com/v1/chat/completions \
   -H "Authorization: Bearer $TAODOCK_API_KEY" \
   -H 'Content-Type: application/json' \
-  -d '{"model":"gpt-6.1-sol","messages":[{"role":"user","content":"Briefly explain how to connect to the TaoDock API."}]}'
+  -d '{"model":"gpt-6.1-sol","messages":[{"role":"user","content":"Briefly explain how to connect to the Taodock API."}]}'
 ```
 
 ## Python {#python}
@@ -64,7 +64,7 @@ import os
 import urllib.error
 import urllib.request
 
-api_key = os.environ.get("TAODOCK_API_KEY") or getpass.getpass("TaoDock API Key: ")
+api_key = os.environ.get("TAODOCK_API_KEY") or getpass.getpass("Taodock API Key: ")
 payload = {
     "model": "gpt-6.1-sol",
     "messages": [{"role": "user", "content": "Hello, please introduce yourself in one sentence."}],

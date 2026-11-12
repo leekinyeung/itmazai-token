@@ -6,9 +6,9 @@ const vscode = require('vscode');
 
 exports.run = async () => {
   const extension = vscode.extensions.getExtension('taodock.taodock');
-  assert.ok(extension, 'TaoDock manifest was discovered');
+  assert.ok(extension, 'Taodock manifest was discovered');
   await extension.activate();
-  assert.ok(extension.isActive, 'TaoDock activated in the native extension host');
+  assert.ok(extension.isActive, 'Taodock activated in the native extension host');
   const commands = await vscode.commands.getCommands(true);
   for (const command of extension.packageJSON.contributes.commands) {
     assert.ok(commands.includes(command.command), `Native command registered: ${command.command}`);

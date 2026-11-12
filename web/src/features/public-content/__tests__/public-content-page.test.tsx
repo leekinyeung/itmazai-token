@@ -185,7 +185,7 @@ test('the blog hub lists published articles newest first', async () => {
 
   expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-    'TaoDock Blog'
+    'Taodock Blog'
   )
   const cards = screen.getAllByRole('heading', { level: 3 })
   expect(cards).toHaveLength(getPublicContentPages('blog').length)

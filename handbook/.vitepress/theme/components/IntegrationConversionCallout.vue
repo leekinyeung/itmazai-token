@@ -5,12 +5,12 @@ import { useData } from 'vitepress'
 const { lang } = useData()
 const english = computed(() => lang.value.startsWith('en'))
 const title = computed(() =>
-  english.value ? 'Need a TaoDock API key?' : '还没有 API Key？'
+  english.value ? 'Need a Taodock API key?' : '还没有 API Key？'
 )
 const description = computed(() =>
   english.value
-    ? 'Create a dedicated API key in the TaoDock console, then return to finish this client setup.'
-    : '前往 TaoDock 控制台创建专用 API Key，再返回本教程完成客户端配置。'
+    ? 'Create a dedicated API key in the Taodock console, then return to finish this client setup.'
+    : '前往 Taodock 控制台创建专用 API Key，再返回本教程完成客户端配置。'
 )
 const label = computed(() =>
   english.value ? 'Get API Key (Console)' : '获取 API Key（控制台）'

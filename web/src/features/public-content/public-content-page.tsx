@@ -151,7 +151,7 @@ export function PublicContentCta(props: {
     <Card className='border-primary/20 bg-primary/[0.035]'>
       <CardHeader>
         <CardTitle>
-          <h2>{t('Start building with TaoDock')}</h2>
+          <h2>{t('Start building with Taodock')}</h2>
         </CardTitle>
       </CardHeader>
       <CardContent className='space-y-5'>
@@ -363,7 +363,7 @@ export function CompareHub() {
             AI gateway comparisons
           </p>
           <h1 className='text-4xl font-semibold tracking-tight text-balance sm:text-5xl'>
-            Compare TaoDock with other AI API gateways
+            Compare Taodock with other AI API gateways
           </h1>
           <p className='text-muted-foreground max-w-3xl text-lg leading-8'>
             Use sourced, review-dated guides to compare deployment models,

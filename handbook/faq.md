@@ -1,6 +1,6 @@
 ---
 title: "AI API 常见问题与连接错误排查"
-description: "排查众妙之门 TaoDock 的邮箱验证、API 地址、密钥权限、模型选择、额度、限流和客户端连接问题。"
+description: "排查Taodock 的邮箱验证、API 地址、密钥权限、模型选择、额度、限流和客户端连接问题。"
 ---
 
 # 常见问题
@@ -8,14 +8,14 @@ description: "排查众妙之门 TaoDock 的邮箱验证、API 地址、密钥�
 ## 按什么顺序排查接入失败？ {#troubleshoot}
 
 1. 检查客户端的地址拼接规则，确认最终文字对话请求地址为 `https://taodock.com/v1/chat/completions`。
-2. 检查 API 密钥是否来自 [众妙之门 TaoDock 密钥页面](https://taodock.com/keys)，并且已启用、未过期。
+2. 检查 API 密钥是否来自 [Taodock 密钥页面](https://taodock.com/keys)，并且已启用、未过期。
 3. 查询 `https://taodock.com/v1/models`，确认使用的模型 ID 和密钥权限。
 4. 检查[钱包余额](https://taodock.com/wallet)及密钥剩余额度。
 5. 在[普通日志](https://taodock.com/usage-logs/common)按时间与模型查找记录，保留具体错误说明。
 
 ## 注册邮箱收不到验证码 {#email}
 
-众妙之门 TaoDock 当前使用邮箱验证注册。先核对邮箱拼写，再检查垃圾邮件和邮件过滤规则。发送按钮有倒计时时，等待后再重试；始终收不到时，记录发生时间和页面错误信息，通过 众妙之门 TaoDock 页面提供的支持渠道反馈。
+Taodock 当前使用邮箱验证注册。先核对邮箱拼写，再检查垃圾邮件和邮件过滤规则。发送按钮有倒计时时，等待后再重试；始终收不到时，记录发生时间和页面错误信息，通过 Taodock 页面提供的支持渠道反馈。
 
 不要将邮箱验证码发送给他人，也不要把验证码作为客户端 API Key。
 
@@ -33,7 +33,7 @@ description: "排查众妙之门 TaoDock 的邮箱验证、API 地址、密钥�
 
 ## 401、密钥无效或没有权限 {#credentials}
 
-完整复制 众妙之门 TaoDock API 密钥，去掉粘贴时带入的空格、换行和引号。确认没有把登录密码或其他平台的密钥填到 API Key 中，并检查密钥启用状态、有效期、IP 和模型限制。
+完整复制 Taodock API 密钥，去掉粘贴时带入的空格、换行和引号。确认没有把登录密码或其他平台的密钥填到 API Key 中，并检查密钥启用状态、有效期、IP 和模型限制。
 
 程序请求使用 `Authorization: Bearer` 请求头，不要把密钥放在公开 URL 中。
 
@@ -57,7 +57,7 @@ description: "排查众妙之门 TaoDock 的邮箱验证、API 地址、密钥�
 
 检查网络和客户端代理设置，用同一密钥、同一模型进行一次简单请求对照。再到[使用日志](https://taodock.com/usage-logs/common)确认请求是否已执行。
 
-不要通过关闭 HTTPS 证书校验来解决连接问题；先核对域名、系统时间与网络代理。如果多种应用都无法使用同一模型，应把错误信息反馈给 众妙之门 TaoDock。
+不要通过关闭 HTTPS 证书校验来解决连接问题；先核对域名、系统时间与网络代理。如果多种应用都无法使用同一模型，应把错误信息反馈给 Taodock。
 
 ## 网页体验正常，但客户端不能用 {#client}
 
@@ -71,4 +71,4 @@ description: "排查众妙之门 TaoDock 的邮箱验证、API 地址、密钥�
 
 提供发生时间与时区、客户端名称与版本、模型 ID、HTTP 状态码、错误响应和可获得的请求或任务标识。涉及到账问题时增加订单号和金额。
 
-先移除完整 API 密钥、密码、验证码和私人对话内容，再通过 众妙之门 TaoDock 页面中实际提供的联系渠道反馈。众妙之门 TaoDock 的[关于页面](https://taodock.com/about)可用于核对平台信息。
+先移除完整 API 密钥、密码、验证码和私人对话内容，再通过 Taodock 页面中实际提供的联系渠道反馈。Taodock 的[关于页面](https://taodock.com/about)可用于核对平台信息。

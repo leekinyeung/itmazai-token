@@ -1,18 +1,18 @@
 ---
 kind: integration
 slug: deepchat
-title: Connect DeepChat to TaoDock's OpenAI-Compatible API
-description: Set up DeepChat with TaoDock using OpenAI Completions, validate a live request, and troubleshoot base URL, key, model, quota, and feature issues.
-primaryKeyword: TaoDock DeepChat integration
+title: Connect DeepChat to Taodock's OpenAI-Compatible API
+description: Set up DeepChat with Taodock using OpenAI Completions, validate a live request, and troubleshoot base URL, key, model, quota, and feature issues.
+primaryKeyword: Taodock DeepChat integration
 cluster: Desktop AI client integrations
 subject: DeepChat
 publishedAt: 2026-11-04
 updatedAt: 2026-11-04
 reviewedAt: 2026-11-04
 sources:
-  - label: TaoDock DeepChat client guide
+  - label: Taodock DeepChat client guide
     url: https://docs.taodock.com/en/guide/clients.html#deepchat
-  - label: TaoDock API integration overview
+  - label: Taodock API integration overview
     url: https://docs.taodock.com/en/api/overview.html
 related:
   - /integrations/aionui
@@ -21,17 +21,17 @@ related:
   - /models
 steps:
   - title: Create a key for DeepChat
-    description: Generate a TaoDock key restricted to the models and quota this DeepChat installation needs.
+    description: Generate a Taodock key restricted to the models and quota this DeepChat installation needs.
   - title: Select OpenAI Completions
     description: In DeepChat provider settings, choose the OpenAI Completions connection type.
   - title: Set the base and model values
-    description: Enter https://taodock.com/v1 as the base URL, paste the dedicated key, and select an exact TaoDock model ID.
+    description: Enter https://taodock.com/v1 as the base URL, paste the dedicated key, and select an exact Taodock model ID.
   - title: Run a verified chat
-    description: Send a deterministic prompt and confirm the matching request, model, key, status, and usage in TaoDock.
+    description: Send a deterministic prompt and confirm the matching request, model, key, status, and usage in Taodock.
 docsUrl: https://docs.taodock.com/en/guide/clients.html#deepchat
 faqItems:
-  - question: Which DeepChat provider type works with TaoDock?
-    answer: Select OpenAI Completions and configure it with the TaoDock OpenAI-compatible base URL and key.
+  - question: Which DeepChat provider type works with Taodock?
+    answer: Select OpenAI Completions and configure it with the Taodock OpenAI-compatible base URL and key.
   - question: What base URL should I enter?
     answer: Use https://taodock.com/v1. DeepChat appends the operation path for requests.
   - question: Why do text requests work while an advanced feature fails?
@@ -41,11 +41,11 @@ draft: false
 
 ## What the DeepChat connection provides
 
-DeepChat can send OpenAI Completions-style requests to an OpenAI-compatible service. TaoDock acts as that service and applies the key's model permissions, quota, and configured upstream channel. It also provides request and usage records that help the operator confirm which model handled a conversation.
+DeepChat can send OpenAI Completions-style requests to an OpenAI-compatible service. Taodock acts as that service and applies the key's model permissions, quota, and configured upstream channel. It also provides request and usage records that help the operator confirm which model handled a conversation.
 
-This arrangement avoids entering a collection of upstream provider credentials into DeepChat. It does not erase model differences. Streaming, tools, images, files, context size, and provider-specific options must be supported by the exact model and TaoDock channel. Build confidence with a basic completion, then test each feature your workflow depends on.
+This arrangement avoids entering a collection of upstream provider credentials into DeepChat. It does not erase model differences. Streaming, tools, images, files, context size, and provider-specific options must be supported by the exact model and Taodock channel. Build confidence with a basic completion, then test each feature your workflow depends on.
 
-## Prepare TaoDock
+## Prepare Taodock
 
 Sign in to an account with permission to create keys and confirm that it has usable quota. Create a key dedicated to DeepChat. Restrict its models and set a limit suitable for the user or device. Do not share an unlimited administrative key across desktop applications.
 
@@ -58,7 +58,7 @@ Install or update DeepChat and make sure the device can reach `https://taodock.c
 Open DeepChat's provider or model settings. Select **OpenAI Completions** and enter:
 
 - **Base URL:** `https://taodock.com/v1`
-- **API key:** the restricted TaoDock key
+- **API key:** the restricted Taodock key
 - **Model:** an exact model ID available to that key
 
 The Base URL should not include `/chat/completions`; DeepChat constructs the request path. Save the provider and select it in a new conversation. Keep custom request parameters at their defaults until a standard request has succeeded.
@@ -67,7 +67,7 @@ When multiple OpenAI-compatible connections exist, name this configuration clear
 
 ## Test and verify the request
 
-Send: `Reply with exactly: DeepChat connected to TaoDock.` Confirm that the response matches. Then open TaoDock's request records and find the event at the same timestamp. Verify the dedicated key, model, successful status, and token usage.
+Send: `Reply with exactly: DeepChat connected to Taodock.` Confirm that the response matches. Then open Taodock's request records and find the event at the same timestamp. Verify the dedicated key, model, successful status, and token usage.
 
 A client-visible answer plus a server-side usage record establishes the complete path. Next, test the normal streaming mode with a longer prompt. If DeepChat will use tools, images, files, or long context, run a small sanitized test for each. Record request identifiers and errors, but never copy the API key into support material.
 
@@ -75,7 +75,7 @@ A client-visible answer plus a server-side usage record establishes the complete
 
 ### DeepChat reports an invalid key
 
-Remove quotes, spaces, and line breaks from the copied value. Confirm that the key remains active and belongs to TaoDock. Check that the DeepChat provider is not sending it to a different saved Base URL. Rotate the key immediately if it has been disclosed.
+Remove quotes, spaces, and line breaks from the copied value. Confirm that the key remains active and belongs to Taodock. Check that the DeepChat provider is not sending it to a different saved Base URL. Rotate the key immediately if it has been disclosed.
 
 ### The request path returns 404
 
@@ -83,7 +83,7 @@ Use `https://taodock.com/v1` as the Base URL. A root URL may not point to the AP
 
 ### The model is unavailable
 
-Copy the exact ID returned for the dedicated key. Ensure the key's group has permission and TaoDock has a usable channel. If another model succeeds, preserve the working base URL and key while investigating that one model. Avoid changing several settings at once.
+Copy the exact ID returned for the dedicated key. Ensure the key's group has permission and Taodock has a usable channel. If another model succeeds, preserve the working base URL and key while investigating that one model. Avoid changing several settings at once.
 
 ### Quota is exhausted
 
@@ -101,4 +101,4 @@ Verify capability support for the exact model and channel. OpenAI-compatible tex
 
 Use separate keys for separate DeepChat users or installations when practical. A compromised or retired device can then be revoked without affecting other clients. Keep quotas conservative, review unexpected models, and rotate credentials during ownership changes.
 
-Document the Base URL, intended model IDs, key owner, quota policy, and validation prompt without recording the secret. After major client upgrades, rerun the basic prompt, streaming test, and one representative advanced feature. Use the official TaoDock DeepChat guide as the current reference for screen-specific configuration.
+Document the Base URL, intended model IDs, key owner, quota policy, and validation prompt without recording the secret. After major client upgrades, rerun the basic prompt, streaming test, and one representative advanced feature. Use the official Taodock DeepChat guide as the current reference for screen-specific configuration.

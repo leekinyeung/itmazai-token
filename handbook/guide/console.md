@@ -1,11 +1,11 @@
 ---
 title: "控制台使用与 API 请求记录查询"
-description: "了解众妙之门 TaoDock 控制台的常用入口，查看模型、API 密钥、体验中心和请求记录，并定位一次 API 调用。"
+description: "了解Taodock 控制台的常用入口，查看模型、API 密钥、体验中心和请求记录，并定位一次 API 调用。"
 ---
 
 # 控制台使用
 
-登录 [众妙之门 TaoDock](https://taodock.com/sign-in) 后，可通过以下入口完成日常操作。首次使用建议按「钱包 → API 密钥 → 模型广场 → 客户端接入 → 使用日志」的顺序操作。
+登录 [Taodock](https://taodock.com/sign-in) 后，可通过以下入口完成日常操作。首次使用建议按「钱包 → API 密钥 → 模型广场 → 客户端接入 → 使用日志」的顺序操作。
 
 ## 常用入口 {#navigation}
 

@@ -1,15 +1,15 @@
 ---
 title: "Choosing AI Models, Model IDs and API Protocols"
-description: "Choose available TaoDock AI models, understand exact model IDs and groups, and match API protocols to your client."
+description: "Choose available Taodock AI models, understand exact model IDs and groups, and match API protocols to your client."
 ---
 
 # Choose a model and protocol
 
-Browse the current catalog in [TaoDock Model Square](https://taodock.com/pricing). Check the **model ID, supported protocols, available groups, and price** together, rather than relying on a display name.
+Browse the current catalog in [Taodock Model Square](https://taodock.com/pricing). Check the **model ID, supported protocols, available groups, and price** together, rather than relying on a display name.
 
 ## Models in the current catalog {#catalog}
 
-These IDs were checked against the TaoDock catalog on October 27, 2026.
+These IDs were checked against the Taodock catalog on October 27, 2026.
 
 | Goal | IDs to find in Model Square | Connection |
 | --- | --- | --- |
@@ -27,7 +27,7 @@ Establish a simple text conversation before enabling tools, long context, or oth
 
 ## Groups and API keys {#groups}
 
-TaoDock groups distinguish model access and service configuration. The key creation form lists the groups your account can choose.
+Taodock groups distinguish model access and service configuration. The key creation form lists the groups your account can choose.
 
 - Start with the default group offered for your account.
 - Check that the key's group permits a specific model before using it.
@@ -38,7 +38,7 @@ Choose a group from the provided list rather than entering an arbitrary name to 
 
 ## Match the model to the protocol {#protocol}
 
-| Protocol | TaoDock endpoint | Applications |
+| Protocol | Taodock endpoint | Applications |
 | --- | --- | --- |
 | OpenAI-compatible chat | `https://taodock.com/v1/chat/completions` | Most chat clients and general applications |
 | Anthropic Messages | `https://taodock.com/v1/messages` | Applications requiring Claude's native message protocol |
