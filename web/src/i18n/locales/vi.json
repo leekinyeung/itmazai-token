@@ -2920,6 +2920,7 @@
     "Filter Dashboard Models": "Lọc Mô hình Bảng điều khiển",
     "Filter mappings": "Lọc ánh xạ",
     "Filter models by provider, discount, type, endpoint, and tags.": "Lọc mô hình theo nhà cung cấp, giảm giá, loại, điểm cuối và thẻ.",
+    "Filter models by provider, endpoint, and tags.": "Lọc mô hình theo nhà cung cấp, điểm cuối và thẻ.",
     "Filter models by provider, group, type, endpoint, and tags.": "Lọc mô hình theo nhà cung cấp, nhóm, loại, endpoint và thẻ.",
     "Filter models by type, endpoint, vendor, group and tags": "Lọc mô hình theo loại, endpoint, nhà cung cấp, nhóm và thẻ",
     "Filter models...": "Lọc mô hình...",

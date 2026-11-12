@@ -2920,6 +2920,7 @@
     "Filter Dashboard Models": "Filter Dashboard Models",
     "Filter mappings": "Filter mappings",
     "Filter models by provider, discount, type, endpoint, and tags.": "Filter models by provider, discount, type, endpoint, and tags.",
+    "Filter models by provider, endpoint, and tags.": "Filter models by provider, endpoint, and tags.",
     "Filter models by provider, group, type, endpoint, and tags.": "Filter models by provider, group, type, endpoint, and tags.",
     "Filter models by type, endpoint, vendor, group and tags": "Filter models by type, endpoint, vendor, group and tags",
     "Filter models...": "Filter models...",

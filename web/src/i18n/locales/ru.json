@@ -2920,6 +2920,7 @@
     "Filter Dashboard Models": "Фильтровать модели панели управления",
     "Filter mappings": "Фильтр сопоставлений",
     "Filter models by provider, discount, type, endpoint, and tags.": "Фильтруйте модели по поставщику, скидке, типу, конечной точке и тегам.",
+    "Filter models by provider, endpoint, and tags.": "Фильтруйте модели по поставщику, конечной точке и тегам.",
     "Filter models by provider, group, type, endpoint, and tags.": "Фильтруйте модели по поставщику, группе, типу, endpoint и тегам.",
     "Filter models by type, endpoint, vendor, group and tags": "Фильтровать модели по типу, точке доступа, поставщику, группе и тегам",
     "Filter models...": "Фильтровать модели...",

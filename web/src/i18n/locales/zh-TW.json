@@ -2920,6 +2920,7 @@
     "Filter Dashboard Models": "篩選儀表板模型",
     "Filter mappings": "篩選映射",
     "Filter models by provider, discount, type, endpoint, and tags.": "依供應商、折扣、類型、端點和標籤篩選模型。",
+    "Filter models by provider, endpoint, and tags.": "依供應商、端點和標籤篩選模型。",
     "Filter models by provider, group, type, endpoint, and tags.": "按供應商、分組、類型、端點和標籤篩選模型。",
     "Filter models by type, endpoint, vendor, group and tags": "按類型、端點、供應商、分組和標籤篩選模型",
     "Filter models...": "篩選模型...",

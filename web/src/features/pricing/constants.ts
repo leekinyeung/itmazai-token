@@ -52,38 +52,6 @@ export function getSortLabels(t: TFunction): Record<SortOption, string> {
 /** Filter values */
 export const FILTER_ALL = 'all'
 
-/** Model discount filter options */
-export const MODEL_DISCOUNT_FILTERS = {
-  ALL: FILTER_ALL,
-  DISCOUNTED: 'discounted',
-  STANDARD: 'standard',
-} as const
-
-export type ModelDiscountFilter =
-  (typeof MODEL_DISCOUNT_FILTERS)[keyof typeof MODEL_DISCOUNT_FILTERS]
-
-/** Quota type options */
-export const QUOTA_TYPES = {
-  ALL: 'all',
-  TOKEN: 'token',
-  REQUEST: 'request',
-  TASK: 'task',
-} as const
-
-export type QuotaTypeOption = (typeof QUOTA_TYPES)[keyof typeof QUOTA_TYPES]
-
-/** Quota type labels */
-export function getQuotaTypeLabels(
-  t: TFunction
-): Record<QuotaTypeOption, string> {
-  return {
-    [QUOTA_TYPES.ALL]: t('All Models'),
-    [QUOTA_TYPES.TOKEN]: t('Token-based'),
-    [QUOTA_TYPES.REQUEST]: t('Per Request'),
-    [QUOTA_TYPES.TASK]: t('Task billing'),
-  }
-}
-
 /** Endpoint type options */
 export const ENDPOINT_TYPES = {
   ALL: 'all',
@@ -119,8 +87,6 @@ export function getEndpointTypeLabels(
 
 /** Filter section keys */
 export const FILTER_SECTIONS = {
-  PRICING_TYPE: 'pricingType',
-  MODEL_DISCOUNT: 'modelDiscount',
   ENDPOINT_TYPE: 'endpointType',
   VENDOR: 'vendor',
   TAG: 'tag',

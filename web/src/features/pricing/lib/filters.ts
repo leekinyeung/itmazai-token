@@ -19,9 +19,6 @@ For commercial licensing, please contact support@quantumnous.com
 import {
   SORT_OPTIONS,
   FILTER_ALL,
-  MODEL_DISCOUNT_FILTERS,
-  QUOTA_TYPES,
-  QUOTA_TYPE_VALUES,
   ENDPOINT_TYPES,
   type SortOption,
 } from '../constants'
@@ -29,10 +26,9 @@ import type { PricingModel } from '../types'
 import {
   getCardExamplePrice,
   getDynamicPricingSummary,
-  hasTaskUsageSchema,
   isUnconfiguredTaskUsageModel,
 } from './dynamic-price'
-import { getModelDiscount, isTokenBasedModel } from './model-helpers'
+import { isTokenBasedModel } from './model-helpers'
 import { calculateTokenPrice } from './price'
 
 // ----------------------------------------------------------------------------
@@ -67,43 +63,6 @@ export function filterByVendor(
 ): PricingModel[] {
   if (vendor === FILTER_ALL) return models
   return models.filter((m) => m.vendor_name === vendor)
-}
-
-/**
- * Filter models by their independent model discount.
- */
-export function filterByModelDiscount(
-  models: PricingModel[],
-  discount: string
-): PricingModel[] {
-  if (discount === MODEL_DISCOUNT_FILTERS.DISCOUNTED) {
-    return models.filter((model) => getModelDiscount(model) < 1)
-  }
-  if (discount === MODEL_DISCOUNT_FILTERS.STANDARD) {
-    return models.filter((model) => getModelDiscount(model) === 1)
-  }
-  return models
-}
-
-/**
- * Filter models by quota type
- */
-export function filterByQuotaType(
-  models: PricingModel[],
-  quotaType: string
-): PricingModel[] {
-  if (quotaType === QUOTA_TYPES.ALL) return models
-  // Task-usage models form their own bucket, disjoint from token/request.
-  if (quotaType === QUOTA_TYPES.TASK) {
-    return models.filter((m) => hasTaskUsageSchema(m))
-  }
-  const targetType =
-    quotaType === QUOTA_TYPES.TOKEN
-      ? QUOTA_TYPE_VALUES.TOKEN
-      : QUOTA_TYPE_VALUES.REQUEST
-  return models.filter(
-    (m) => m.quota_type === targetType && !hasTaskUsageSchema(m)
-  )
 }
 
 /**
@@ -212,8 +171,6 @@ export function filterAndSortModels(
   filters: {
     search: string
     vendor: string
-    discount: string
-    quotaType: string
     endpointType: string
     tag: string
     sortBy: string
@@ -221,8 +178,6 @@ export function filterAndSortModels(
 ): PricingModel[] {
   let result = filterBySearch(models, filters.search)
   result = filterByVendor(result, filters.vendor)
-  result = filterByModelDiscount(result, filters.discount)
-  result = filterByQuotaType(result, filters.quotaType)
   result = filterByEndpointType(result, filters.endpointType)
   result = filterByTag(result, filters.tag)
   result = sortModels(result, filters.sortBy)

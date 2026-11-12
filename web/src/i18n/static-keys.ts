@@ -303,7 +303,6 @@ export const STATIC_I18N_KEYS = [
   'Output Price: High to Low',
   'Per-request Price: Low to High',
   'Per-request Price: High to Low',
-  'All Models',
   'Token-based',
   'Per Request',
   'Task billing',

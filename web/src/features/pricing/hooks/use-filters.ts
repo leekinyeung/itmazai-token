@@ -24,9 +24,7 @@ import { useDebounce } from '@/hooks/use-debounce'
 import {
   FILTER_ALL,
   SORT_OPTIONS,
-  QUOTA_TYPES,
   ENDPOINT_TYPES,
-  MODEL_DISCOUNT_FILTERS,
   DEFAULT_TOKEN_UNIT,
   VIEW_MODES,
   type ViewMode,
@@ -38,8 +36,6 @@ type FilterState = {
   search?: string
   sort?: string
   vendor?: string
-  discount?: string
-  quotaType?: string
   endpointType?: string
   tag?: string
   tokenUnit?: TokenUnit
@@ -60,8 +56,6 @@ export function useFilters(models: PricingModel[]) {
     search: search.search,
     sort: search.sort,
     vendor: search.vendor,
-    discount: search.discount,
-    quotaType: search.quotaType,
     endpointType: search.endpointType,
     tag: search.tag,
     tokenUnit: search.tokenUnit,
@@ -73,8 +67,6 @@ export function useFilters(models: PricingModel[]) {
   const debouncedSearchInput = useDebounce(searchInput, 200)
   const sortBy = filterState.sort || SORT_OPTIONS.NAME
   const vendorFilter = filterState.vendor || FILTER_ALL
-  const discountFilter = filterState.discount || MODEL_DISCOUNT_FILTERS.ALL
-  const quotaTypeFilter = filterState.quotaType || QUOTA_TYPES.ALL
   const endpointTypeFilter = filterState.endpointType || ENDPOINT_TYPES.ALL
   const tagFilter = filterState.tag || FILTER_ALL
   const tokenUnit: TokenUnit =
@@ -105,18 +97,6 @@ export function useFilters(models: PricingModel[]) {
   )
   const setVendorFilter = useCallback(
     (v: string) => updateFilters({ vendor: v === FILTER_ALL ? undefined : v }),
-    [updateFilters]
-  )
-  const setDiscountFilter = useCallback(
-    (v: string) =>
-      updateFilters({
-        discount: v === MODEL_DISCOUNT_FILTERS.ALL ? undefined : v,
-      }),
-    [updateFilters]
-  )
-  const setQuotaTypeFilter = useCallback(
-    (v: string) =>
-      updateFilters({ quotaType: v === QUOTA_TYPES.ALL ? undefined : v }),
     [updateFilters]
   )
   const setEndpointTypeFilter = useCallback(
@@ -156,8 +136,6 @@ export function useFilters(models: PricingModel[]) {
     return filterAndSortModels(models, {
       search: debouncedSearchInput,
       vendor: vendorFilter,
-      discount: discountFilter,
-      quotaType: quotaTypeFilter,
       endpointType: endpointTypeFilter,
       tag: tagFilter,
       sortBy,
@@ -166,50 +144,24 @@ export function useFilters(models: PricingModel[]) {
     models,
     debouncedSearchInput,
     vendorFilter,
-    discountFilter,
-    quotaTypeFilter,
     endpointTypeFilter,
     tagFilter,
     sortBy,
   ])
 
-  const hasActiveFilters = useMemo(
-    () =>
-      vendorFilter !== FILTER_ALL ||
-      discountFilter !== MODEL_DISCOUNT_FILTERS.ALL ||
-      quotaTypeFilter !== QUOTA_TYPES.ALL ||
-      endpointTypeFilter !== ENDPOINT_TYPES.ALL ||
-      tagFilter !== FILTER_ALL,
-    [
-      vendorFilter,
-      discountFilter,
-      quotaTypeFilter,
-      endpointTypeFilter,
-      tagFilter,
-    ]
-  )
+  const hasActiveFilters =
+    vendorFilter !== FILTER_ALL ||
+    endpointTypeFilter !== ENDPOINT_TYPES.ALL ||
+    tagFilter !== FILTER_ALL
 
-  const activeFilterCount = useMemo(
-    () =>
-      (vendorFilter !== FILTER_ALL ? 1 : 0) +
-      (discountFilter !== MODEL_DISCOUNT_FILTERS.ALL ? 1 : 0) +
-      (quotaTypeFilter !== QUOTA_TYPES.ALL ? 1 : 0) +
-      (endpointTypeFilter !== ENDPOINT_TYPES.ALL ? 1 : 0) +
-      (tagFilter !== FILTER_ALL ? 1 : 0),
-    [
-      vendorFilter,
-      discountFilter,
-      quotaTypeFilter,
-      endpointTypeFilter,
-      tagFilter,
-    ]
-  )
+  const activeFilterCount =
+    (vendorFilter !== FILTER_ALL ? 1 : 0) +
+    (endpointTypeFilter !== ENDPOINT_TYPES.ALL ? 1 : 0) +
+    (tagFilter !== FILTER_ALL ? 1 : 0)
 
   const clearFilters = useCallback(() => {
     updateFilters({
       vendor: undefined,
-      discount: undefined,
-      quotaType: undefined,
       endpointType: undefined,
       tag: undefined,
     })
@@ -223,8 +175,6 @@ export function useFilters(models: PricingModel[]) {
     searchInput,
     sortBy,
     vendorFilter,
-    discountFilter,
-    quotaTypeFilter,
     endpointTypeFilter,
     tagFilter,
     tokenUnit,
@@ -233,8 +183,6 @@ export function useFilters(models: PricingModel[]) {
     setSearchInput,
     setSortBy,
     setVendorFilter,
-    setDiscountFilter,
-    setQuotaTypeFilter,
     setEndpointTypeFilter,
     setTagFilter,
     setTokenUnit,

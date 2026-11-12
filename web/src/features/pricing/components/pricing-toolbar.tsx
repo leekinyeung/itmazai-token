@@ -67,15 +67,11 @@ export interface PricingToolbarProps {
   onRechargePriceChange: (value: boolean) => void
   viewMode: ViewMode
   onViewModeChange: (value: ViewMode) => void
-  quotaTypeFilter: string
   endpointTypeFilter: string
   vendorFilter: string
-  discountFilter: string
   tagFilter: string
-  onQuotaTypeChange: (value: string) => void
   onEndpointTypeChange: (value: string) => void
   onVendorChange: (value: string) => void
-  onDiscountChange: (value: string) => void
   onTagChange: (value: string) => void
   vendors: PricingVendor[]
   tags: string[]
@@ -226,22 +222,16 @@ export function PricingToolbar(props: PricingToolbarProps) {
           <SheetHeader className={sideDrawerHeaderClassName()}>
             <SheetTitle>{t('Filter')}</SheetTitle>
             <SheetDescription>
-              {t(
-                'Filter models by provider, discount, type, endpoint, and tags.'
-              )}
+              {t('Filter models by provider, endpoint, and tags.')}
             </SheetDescription>
           </SheetHeader>
           <div className={sideDrawerFormClassName('gap-0')}>
             <PricingSidebar
-              quotaTypeFilter={props.quotaTypeFilter}
               endpointTypeFilter={props.endpointTypeFilter}
               vendorFilter={props.vendorFilter}
-              discountFilter={props.discountFilter}
               tagFilter={props.tagFilter}
-              onQuotaTypeChange={props.onQuotaTypeChange}
               onEndpointTypeChange={props.onEndpointTypeChange}
               onVendorChange={props.onVendorChange}
-              onDiscountChange={props.onDiscountChange}
               onTagChange={props.onTagChange}
               vendors={props.vendors}
               tags={props.tags}

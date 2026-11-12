@@ -41,8 +41,6 @@ export function Pricing() {
     searchInput,
     sortBy,
     vendorFilter,
-    discountFilter,
-    quotaTypeFilter,
     endpointTypeFilter,
     tagFilter,
     tokenUnit,
@@ -51,8 +49,6 @@ export function Pricing() {
     setSearchInput,
     setSortBy,
     setVendorFilter,
-    setDiscountFilter,
-    setQuotaTypeFilter,
     setEndpointTypeFilter,
     setTagFilter,
     setTokenUnit,
@@ -115,15 +111,11 @@ export function Pricing() {
             <h1 className='sr-only'>{t('AI Models & API Pricing')}</h1>
             <div className='grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]'>
               <PricingSidebar
-                quotaTypeFilter={quotaTypeFilter}
                 endpointTypeFilter={endpointTypeFilter}
                 vendorFilter={vendorFilter}
-                discountFilter={discountFilter}
                 tagFilter={tagFilter}
-                onQuotaTypeChange={setQuotaTypeFilter}
                 onEndpointTypeChange={setEndpointTypeFilter}
                 onVendorChange={setVendorFilter}
-                onDiscountChange={setDiscountFilter}
                 onTagChange={setTagFilter}
                 vendors={vendors || []}
                 tags={availableTags}
@@ -152,15 +144,11 @@ export function Pricing() {
                     onRechargePriceChange={setShowRechargePrice}
                     viewMode={viewMode}
                     onViewModeChange={setViewMode}
-                    quotaTypeFilter={quotaTypeFilter}
                     endpointTypeFilter={endpointTypeFilter}
                     vendorFilter={vendorFilter}
-                    discountFilter={discountFilter}
                     tagFilter={tagFilter}
-                    onQuotaTypeChange={setQuotaTypeFilter}
                     onEndpointTypeChange={setEndpointTypeFilter}
                     onVendorChange={setVendorFilter}
-                    onDiscountChange={setDiscountFilter}
                     onTagChange={setTagFilter}
                     vendors={vendors || []}
                     tags={availableTags}

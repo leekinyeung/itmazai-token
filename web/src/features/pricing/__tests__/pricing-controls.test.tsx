@@ -39,19 +39,15 @@ function toolbarProps(): PricingToolbarProps {
     tokenUnit: 'M',
     showRechargePrice: false,
     viewMode: 'card',
-    quotaTypeFilter: 'all',
     endpointTypeFilter: 'all',
     vendorFilter: 'all',
-    discountFilter: 'all',
     tagFilter: 'all',
     onSortChange: vi.fn(),
     onTokenUnitChange: vi.fn(),
     onRechargePriceChange: vi.fn(),
     onViewModeChange: vi.fn(),
-    onQuotaTypeChange: vi.fn(),
     onEndpointTypeChange: vi.fn(),
     onVendorChange: vi.fn(),
-    onDiscountChange: vi.fn(),
     onTagChange: vi.fn(),
     vendors: [],
     tags: [],
@@ -86,7 +82,7 @@ describe('pricing controls', () => {
     expect(props.onClearSearch).toHaveBeenCalledOnce()
   })
 
-  it('counts each model once per filter and updates counts when the catalog changes', () => {
+  it('counts each model once for remaining filters and updates when the catalog changes', () => {
     const props = toolbarProps()
     const base: PricingModel = {
       id: 1,
@@ -141,21 +137,6 @@ describe('pricing controls', () => {
     expect(screen.getByRole('button', { name: /^Vendor B\s*1$/ })).toBeVisible()
     expect(screen.getByRole('button', { name: /^Chat\s*2$/ })).toBeVisible()
     expect(screen.getByRole('button', { name: /^Chat\s*1$/ })).toBeVisible()
-    expect(
-      screen.getByRole('button', { name: /^Token-based\s*1$/ })
-    ).toBeVisible()
-    expect(
-      screen.getByRole('button', { name: /^Per Request\s*1$/ })
-    ).toBeVisible()
-    expect(
-      screen.getByRole('button', { name: /^Task billing\s*1$/ })
-    ).toBeVisible()
-    expect(
-      screen.getByRole('button', { name: /^Discounted models\s*2$/ })
-    ).toBeVisible()
-    expect(
-      screen.getByRole('button', { name: /^No model discount\s*1$/ })
-    ).toBeVisible()
 
     rerender(<PricingSidebar {...sidebarProps} models={[models[1]]} />)
     expect(
@@ -165,28 +146,16 @@ describe('pricing controls', () => {
     expect(screen.queryByRole('button', { name: /^Vendor B\s*1$/ })).toBeNull()
     expect(screen.getByRole('button', { name: /^Chat\s*1$/ })).toBeVisible()
     expect(screen.getByRole('button', { name: /^Chat\s*0$/ })).toBeVisible()
-    expect(
-      screen.getByRole('button', { name: /^Token-based\s*0$/ })
-    ).toBeVisible()
-    expect(
-      screen.getByRole('button', { name: /^Task billing\s*0$/ })
-    ).toBeVisible()
-    expect(
-      screen.getByRole('button', { name: /^Discounted models\s*0$/ })
-    ).toBeVisible()
-    expect(
-      screen.getByRole('button', { name: /^No model discount\s*1$/ })
-    ).toBeVisible()
   })
 
-  it('selects discounted models from the existing filter sidebar', async () => {
+  it('omits discount status and pricing type from the filter sidebar', () => {
     const props = toolbarProps()
-    const user = userEvent.setup()
     render(<PricingSidebar {...props} />)
 
-    await user.click(screen.getByRole('button', { name: /Discounted models/ }))
-
-    expect(props.onDiscountChange).toHaveBeenCalledWith('discounted')
+    expect(screen.queryByText('Discount status')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pricing Type')).not.toBeInTheDocument()
+    expect(screen.queryByText('Discounted models')).not.toBeInTheDocument()
+    expect(screen.queryByText('Token-based')).not.toBeInTheDocument()
   })
 
   it('changes the token unit and keeps the selected unit pressed when clicked again', async () => {
@@ -256,6 +225,15 @@ describe('pricing controls', () => {
     expect(dialog).toHaveAttribute('data-side', 'left')
     expect(within(dialog).getByRole('button', { name: 'Reset' })).toBeDisabled()
     expect(within(dialog).queryByText('Groups')).not.toBeInTheDocument()
+    expect(
+      within(dialog).queryByText('Discount status')
+    ).not.toBeInTheDocument()
+    expect(within(dialog).queryByText('Pricing Type')).not.toBeInTheDocument()
+    expect(
+      within(dialog).getAllByText(
+        'Filter models by provider, endpoint, and tags.'
+      )
+    ).toHaveLength(2)
     rerender(<PricingToolbar {...props} />)
     await user.keyboard('{Escape}')
     expect(await screen.findByRole('button', { name: /Filter/ })).toHaveFocus()

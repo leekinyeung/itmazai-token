@@ -30,17 +30,8 @@ import {
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
-import {
-  ENDPOINT_TYPES,
-  FILTER_ALL,
-  MODEL_DISCOUNT_FILTERS,
-  QUOTA_TYPES,
-  getEndpointTypeLabels,
-  getQuotaTypeLabels,
-} from '../constants'
-import { hasTaskUsageSchema } from '../lib/dynamic-price'
+import { ENDPOINT_TYPES, FILTER_ALL, getEndpointTypeLabels } from '../constants'
 import { parseTags } from '../lib/filters'
-import { getModelDiscount } from '../lib/model-helpers'
 import type { PricingModel, PricingVendor } from '../types'
 
 type FilterOption = {
@@ -59,15 +50,11 @@ type FilterSectionProps = {
 }
 
 export interface PricingSidebarProps {
-  quotaTypeFilter: string
   endpointTypeFilter: string
   vendorFilter: string
-  discountFilter: string
   tagFilter: string
-  onQuotaTypeChange: (value: string) => void
   onEndpointTypeChange: (value: string) => void
   onVendorChange: (value: string) => void
-  onDiscountChange: (value: string) => void
   onTagChange: (value: string) => void
   vendors: PricingVendor[]
   tags: string[]
@@ -148,8 +135,6 @@ export const PricingSidebar = memo(function PricingSidebar(
     const vendors = new Map<string, number>()
     const tags = new Map<string, number>()
     const endpoints = new Map<string, number>()
-    const quotas = { token: 0, request: 0, task: 0 }
-    const discounts = { discounted: 0, standard: 0 }
     for (const model of props.models) {
       if (model.vendor_name) {
         vendors.set(
@@ -165,22 +150,9 @@ export const PricingSidebar = memo(function PricingSidebar(
       for (const endpoint of new Set(model.supported_endpoint_types ?? [])) {
         endpoints.set(endpoint, (endpoints.get(endpoint) ?? 0) + 1)
       }
-      if (hasTaskUsageSchema(model)) {
-        quotas.task++
-      } else if (model.quota_type === 0) {
-        quotas.token++
-      } else if (model.quota_type === 1) {
-        quotas.request++
-      }
-      if (getModelDiscount(model) < 1) {
-        discounts.discounted++
-      } else {
-        discounts.standard++
-      }
     }
-    return { vendors, tags, endpoints, quotas, discounts }
+    return { vendors, tags, endpoints }
   }, [props.models])
-  const quotaTypeLabels = getQuotaTypeLabels(t)
   const endpointTypeLabels = getEndpointTypeLabels(t)
 
   const vendorOptions: FilterOption[] = [
@@ -197,47 +169,6 @@ export const PricingSidebar = memo(function PricingSidebar(
         icon: vendor.icon ? getLobeIcon(vendor.icon, 14) : undefined,
       }))
       .filter((vendor) => vendor.count > 0),
-  ]
-
-  const quotaOptions: FilterOption[] = [
-    {
-      value: QUOTA_TYPES.ALL,
-      label: quotaTypeLabels[QUOTA_TYPES.ALL],
-      count: props.models.length,
-    },
-    {
-      value: QUOTA_TYPES.TOKEN,
-      label: quotaTypeLabels[QUOTA_TYPES.TOKEN],
-      count: counts.quotas.token,
-    },
-    {
-      value: QUOTA_TYPES.REQUEST,
-      label: quotaTypeLabels[QUOTA_TYPES.REQUEST],
-      count: counts.quotas.request,
-    },
-    {
-      value: QUOTA_TYPES.TASK,
-      label: quotaTypeLabels[QUOTA_TYPES.TASK],
-      count: counts.quotas.task,
-    },
-  ]
-
-  const discountOptions: FilterOption[] = [
-    {
-      value: MODEL_DISCOUNT_FILTERS.ALL,
-      label: t('All discount statuses'),
-      count: props.models.length,
-    },
-    {
-      value: MODEL_DISCOUNT_FILTERS.DISCOUNTED,
-      label: t('Discounted models'),
-      count: counts.discounts.discounted,
-    },
-    {
-      value: MODEL_DISCOUNT_FILTERS.STANDARD,
-      label: t('No model discount'),
-      count: counts.discounts.standard,
-    },
   ]
 
   const tagOptions: FilterOption[] = [
@@ -274,7 +205,7 @@ export const PricingSidebar = memo(function PricingSidebar(
         <div>
           <h2 className='text-foreground text-sm font-bold'>{t('Filter')}</h2>
           <p className='text-muted-foreground mt-1 text-xs'>
-            {t('Refine models by provider, discount, type, and tags.')}
+            {t('Filter models by provider, endpoint, and tags.')}
           </p>
         </div>
         <Button
@@ -308,18 +239,6 @@ export const PricingSidebar = memo(function PricingSidebar(
           value={props.tagFilter}
           options={tagOptions}
           onChange={props.onTagChange}
-        />
-        <FilterSection
-          title={t('Discount status')}
-          value={props.discountFilter}
-          options={discountOptions}
-          onChange={props.onDiscountChange}
-        />
-        <FilterSection
-          title={t('Pricing Type')}
-          value={props.quotaTypeFilter}
-          options={quotaOptions}
-          onChange={props.onQuotaTypeChange}
         />
         <FilterSection
           title={t('Endpoint Type')}

@@ -2920,6 +2920,7 @@
     "Filter Dashboard Models": "ダッシュボードモデルをフィルタリング",
     "Filter mappings": "マッピングを絞り込む",
     "Filter models by provider, discount, type, endpoint, and tags.": "プロバイダー、割引、種類、エンドポイント、タグでモデルを絞り込みます。",
+    "Filter models by provider, endpoint, and tags.": "プロバイダー、エンドポイント、タグでモデルを絞り込みます。",
     "Filter models by provider, group, type, endpoint, and tags.": "プロバイダー、グループ、タイプ、エンドポイント、タグでモデルを絞り込みます。",
     "Filter models by type, endpoint, vendor, group and tags": "タイプ、エンドポイント、ベンダー、グループ、タグでモデルをフィルタリング",
     "Filter models...": "モデルをフィルタリング...",

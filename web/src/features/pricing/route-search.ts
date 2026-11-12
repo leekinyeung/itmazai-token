@@ -24,15 +24,12 @@ import {
 
 const TOKEN_UNITS = new Set(['M', 'K'] as const)
 const VIEW_MODES = new Set(['card', 'table'] as const)
-const DISCOUNT_FILTERS = new Set(['discounted', 'standard'] as const)
 
 export type PricingRouteSearch = {
   search?: string
   sort?: string
   vendor?: string
   group?: string
-  discount?: 'discounted' | 'standard'
-  quotaType?: string
   endpointType?: string
   tag?: string
   tokenUnit?: 'M' | 'K'
@@ -48,8 +45,6 @@ export function parsePricingSearch(
     sort: optionalSearchString(search.sort),
     vendor: optionalSearchString(search.vendor),
     group: optionalSearchString(search.group),
-    discount: optionalSearchEnum(search.discount, DISCOUNT_FILTERS),
-    quotaType: optionalSearchString(search.quotaType),
     endpointType: optionalSearchString(search.endpointType),
     tag: optionalSearchString(search.tag),
     tokenUnit: optionalSearchEnum(search.tokenUnit, TOKEN_UNITS),
