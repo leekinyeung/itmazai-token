@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/internal/marketsim"
 	"github.com/QuantumNous/new-api/model"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/relaykit/types"
@@ -18,9 +19,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSimulatedPerformanceIsStableBoundedAndComplete(t *testing.T) {
+func TestSimulatedPerformanceUsesMarketSnapshotAndStaysConsistent(t *testing.T) {
 	now := time.Date(2026, 10, 26, 12, 30, 0, 0, time.UTC)
-	params := QueryParams{Model: "idle-model", Hours: 24, AllowedGroups: []string{"b", "a", "a"}}
+	params := QueryParams{Model: "deepSeek-v4.1-flash", Hours: 24, AllowedGroups: []string{"b", "a", "a"}}
 	result := SimulatedQuery(params, now)
 	require.NotNil(t, result.Summary)
 	require.Len(t, result.Groups, 2)
@@ -29,22 +30,29 @@ func TestSimulatedPerformanceIsStableBoundedAndComplete(t *testing.T) {
 	assert.Equal(t, now.Unix(), result.WindowEnd)
 	assert.Equal(t, result.Series, SimulatedQuery(params, now.Add(time.Minute)).Series)
 	assert.Equal(t, result.Summary, SimulatedQuery(params, now.Add(time.Minute)).Summary)
+	nextHour := SimulatedQuery(params, now.Add(time.Hour))
+	assert.NotEqual(t, result.Series[len(result.Series)-1].AvgTps, nextHour.Series[len(nextHour.Series)-1].AvgTps)
+	profile := marketsim.ResolveModel(params.Model)
+	require.Equal(t, marketsim.MatchExact, profile.Match)
+	assert.Equal(t, "deepseek-v4-1-flash", profile.Canonical)
+	assert.Equal(t, int64(607), profile.TtftMs)
+	assert.InDelta(t, 117.201868533171, profile.ThroughputTPS, 0.000001)
 	var latency, count int64
-	var tps float64
+	var tps, success float64
 	for _, group := range result.Groups {
 		require.Len(t, group.Series, 24)
-		assert.Equal(t, 100.0, group.SuccessRate)
+		assert.GreaterOrEqual(t, group.SuccessRate, 99.0)
+		assert.LessOrEqual(t, group.SuccessRate, 100.0)
 		for i, point := range group.Series {
 			assert.Equal(t, result.WindowStart+int64(i)*3600, point.Ts)
-			assert.Equal(t, 100.0, point.SuccessRate)
-			assert.GreaterOrEqual(t, point.AvgTtftMs, int64(150))
-			assert.LessOrEqual(t, point.AvgTtftMs, int64(250))
-			assert.GreaterOrEqual(t, point.AvgLatencyMs, int64(600))
-			assert.LessOrEqual(t, point.AvgLatencyMs, int64(1200))
-			assert.GreaterOrEqual(t, point.AvgTps, 80.0)
-			assert.LessOrEqual(t, point.AvgTps, 160.0)
+			assert.GreaterOrEqual(t, point.SuccessRate, 96.8)
+			assert.LessOrEqual(t, point.SuccessRate, 100.0)
+			assert.InDelta(t, profile.TtftMs, point.AvgTtftMs, float64(profile.TtftMs)*0.3)
+			assert.Greater(t, point.AvgLatencyMs, point.AvgTtftMs)
+			assert.InDelta(t, profile.ThroughputTPS, point.AvgTps, profile.ThroughputTPS*0.3)
 			latency += point.AvgLatencyMs
 			tps += point.AvgTps
+			success += point.SuccessRate
 			count++
 		}
 	}
@@ -52,18 +60,66 @@ func TestSimulatedPerformanceIsStableBoundedAndComplete(t *testing.T) {
 	assert.NotEqual(t, result.Series[0].AvgTps, result.Series[1].AvgTps)
 	assert.Equal(t, latency/count, result.Summary.AvgLatencyMs)
 	assert.Equal(t, math.Round(tps/float64(count)*100)/100, result.Summary.AvgTps)
-	summary := SimulatedSummary(map[string][]string{"idle-model": {"a", "b"}}, 24, []string{"idle-model"}, now)
+	assert.Equal(t, math.Round(success/float64(count)*100)/100, result.Summary.SuccessRate)
+	summary := SimulatedSummary(map[string][]string{params.Model: {"a", "b"}}, 24, []string{params.Model}, now)
 	assert.Equal(t, result.Summary, summary.Summary)
 	require.Len(t, summary.Models, 1)
 	assert.Equal(t, result.Summary.AvgLatencyMs, summary.Models[0].AvgLatencyMs)
 	assert.Equal(t, result.Summary.AvgTps, summary.Models[0].AvgTps)
-	assert.Len(t, summary.RecentSuccessSeries["idle-model"], 24)
+	assert.Equal(t, result.Summary.SuccessRate, summary.Models[0].SuccessRate)
+	assert.Len(t, summary.RecentSuccessSeries[params.Model], 24)
+	assert.Equal(t, result.Series[0].SuccessRate, summary.RecentSuccessSeries[params.Model][0].SuccessRate)
 	params.Group = "a"
 	filtered := SimulatedQuery(params, now)
 	require.Len(t, filtered.Groups, 1)
 	assert.Equal(t, result.Groups[0], filtered.Groups[0])
 	params.Group = "private"
 	assert.Nil(t, SimulatedQuery(params, now).Summary)
+
+	slow := SimulatedQuery(QueryParams{Model: "gpt-6.1-sol", Hours: 24, AllowedGroups: []string{"a"}}, now)
+	require.NotNil(t, slow.Summary)
+	assert.Greater(t, slow.Summary.AvgLatencyMs, result.Summary.AvgLatencyMs*5)
+	assert.Less(t, slow.Summary.AvgTps, result.Summary.AvgTps/2)
+
+	weekly := SimulatedQuery(QueryParams{Model: "idle-model", Hours: 168, AllowedGroups: []string{"a"}}, now)
+	degraded := 0
+	degradedByDay := map[int64]int{}
+	for _, point := range weekly.Series {
+		if point.SuccessRate == 100 {
+			continue
+		}
+		degraded++
+		degradedByDay[(point.Ts+8*3600)/(24*3600)]++
+	}
+	assert.Positive(t, degraded)
+	for _, count := range degradedByDay {
+		assert.LessOrEqual(t, count, 1)
+	}
+}
+
+func TestMarketSnapshotCoversPublicCatalogAndFallbacks(t *testing.T) {
+	require.NoError(t, marketsim.ValidateSnapshot())
+	models := []string{
+		"claude-fable-5", "claude-fable-5-1", "claude-fable-5-2", "claude-haiku-4-5", "claude-haiku-5-5",
+		"claude-opus-4-6", "claude-opus-4-7", "claude-opus-4-8", "claude-opus-5", "claude-opus-5-5",
+		"claude-sonnet-5", "claude-sonnet-5-5", "deepSeek-v4.1-flash", "deepSeek-v4.1-flash-1017", "deepseek-v4-flash",
+		"deepseek-v4-flash-0731", "deepseek-v4-pro", "deepseek-v4-pro-0813", "deepseek-v4.1-flash", "deepseek-v4.1-flash-1017",
+		"gemini-3.1-flash-image", "gemini-3.8-flash-high", "gemini-4-argon", "gemini-4-argon-medium", "glm-5.1", "glm-5.2",
+		"glm-5.3", "glm-5.3-flash", "glm-5.3-flashx", "gpt-5.6-luna", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-6-astra",
+		"gpt-6-luna", "gpt-6-sol", "gpt-6.1-sol", "hy3", "kimi-k2.7-code", "kimi-k2.8", "kimi-k3", "kimi-k3.1-pro",
+		"mimo-v2.5", "mimo-v2.5-pro", "mimo-v2.6-flash", "mimo-v2.6-pro", "minimax-m3", "minimax-m3.1-flash",
+		"qwen3.7-max", "qwen3.8-flash", "qwen3.8-max",
+	}
+	for _, name := range models {
+		profile := marketsim.ResolveModel(name)
+		assert.NotEqual(t, marketsim.MatchDefault, profile.Match, name)
+		assert.NotEmpty(t, profile.Vendor, name)
+		assert.Positive(t, profile.TtftMs, name)
+		assert.Positive(t, profile.ThroughputTPS, name)
+	}
+	alias := marketsim.ResolveModel("deepseek/deepseek-v4.1-flash-1017")
+	assert.Equal(t, marketsim.ResolveModel("deepSeek-v4.1-flash").Canonical, alias.Canonical)
+	assert.Equal(t, marketsim.MatchDefault, marketsim.ResolveModel("future-unknown-model").Match)
 }
 
 func TestSimulatedPerformanceWindowsAndEmptyCatalog(t *testing.T) {

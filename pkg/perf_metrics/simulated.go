@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strconv"
 	"time"
+
+	"github.com/QuantumNous/new-api/internal/marketsim"
 )
 
 // SimulatedQuery builds a presentation-only view without reading performance
@@ -19,33 +21,30 @@ func SimulatedQuery(params QueryParams, now time.Time) QueryResult {
 	}
 	groups := slices.Sorted(slices.Values(params.AllowedGroups))
 	groups = slices.Compact(groups)
+	profile := marketsim.ResolveModel(params.Model)
 	var total simulatedTotals
 	for _, group := range groups {
 		if params.Group != "" && params.Group != group {
 			continue
 		}
-		row := GroupResult{Group: group, SuccessRate: 100, Series: []BucketPoint{}}
+		row := GroupResult{Group: group, Series: []BucketPoint{}}
 		var groupTotal simulatedTotals
 		for ts := start; ts <= end; ts += 3600 {
-			point := BucketPoint{
-				Ts: ts, SuccessRate: 100,
-				AvgTtftMs:    int64(simulatedValue(params.Model, group, "ttft", ts, 150, 250)),
-				AvgLatencyMs: int64(simulatedValue(params.Model, group, "latency", ts, 600, 1200)),
-				AvgTps:       simulatedValue(params.Model, group, "tps", ts, 80, 160),
-			}
+			point := simulatedPoint(profile, params.Model, group, ts)
 			row.Series = append(row.Series, point)
 			groupTotal.add(point)
 			total.add(point)
 		}
 		average := groupTotal.point(0)
-		row.AvgTtftMs, row.AvgLatencyMs, row.AvgTps = average.AvgTtftMs, average.AvgLatencyMs, average.AvgTps
+		row.AvgTtftMs, row.AvgLatencyMs = average.AvgTtftMs, average.AvgLatencyMs
+		row.SuccessRate, row.AvgTps = average.SuccessRate, average.AvgTps
 		result.Groups = append(result.Groups, row)
 	}
 	if total.count == 0 {
 		return result
 	}
 	average := total.point(0)
-	result.Summary = &Summary{SuccessRate: 100, AvgLatencyMs: average.AvgLatencyMs, AvgTps: average.AvgTps}
+	result.Summary = &Summary{SuccessRate: average.SuccessRate, AvgLatencyMs: average.AvgLatencyMs, AvgTps: average.AvgTps}
 	for i := range result.Groups[0].Series {
 		var hour simulatedTotals
 		for _, group := range result.Groups {
@@ -74,10 +73,10 @@ func SimulatedSummary(models map[string][]string, hours int, recentModels []stri
 		}
 		series := make([]SuccessRatePoint, 0, min(len(metrics.Series), recentSuccessSampleLimit))
 		for _, point := range metrics.Series[max(0, len(metrics.Series)-recentSuccessSampleLimit):] {
-			series = append(series, SuccessRatePoint{Ts: point.Ts, SuccessRate: 100})
+			series = append(series, SuccessRatePoint{Ts: point.Ts, SuccessRate: point.SuccessRate})
 		}
 		result.Models = append(result.Models, ModelSummary{
-			ModelName: name, SuccessRate: 100,
+			ModelName: name, SuccessRate: metrics.Summary.SuccessRate,
 			AvgLatencyMs: metrics.Summary.AvgLatencyMs, AvgTps: metrics.Summary.AvgTps,
 			RecentSuccessSeries: series,
 		})
@@ -95,46 +94,87 @@ func SimulatedSummary(models map[string][]string, hours int, recentModels []stri
 	}
 	if total.count > 0 {
 		average := total.point(0)
-		result.Summary = &Summary{SuccessRate: 100, AvgLatencyMs: average.AvgLatencyMs, AvgTps: average.AvgTps}
+		result.Summary = &Summary{SuccessRate: average.SuccessRate, AvgLatencyMs: average.AvgLatencyMs, AvgTps: average.AvgTps}
 	}
 	return result
 }
 
-func simulatedValue(model, group, metric string, ts int64, low, high float64) float64 {
-	seed := model + "\x00" + group + "\x00" + metric
-	hash := fnv.New64a()
-	_, _ = hash.Write([]byte(seed))
-	// Leave room for the full jitter so boundary clipping does not flatten
-	// otherwise distinct hourly samples.
-	baseLow, baseHigh := low/0.95, high/1.05
-	base := baseLow + float64(hash.Sum64()%10001)/10000*(baseHigh-baseLow)
-	_, _ = hash.Write([]byte(strconv.FormatInt(ts/3600, 10)))
-	jitter := float64(hash.Sum64()%1001)/10000 - 0.05
-	precision := 1.0
-	if metric == "tps" {
-		precision = 100
+func simulatedPoint(profile marketsim.Profile, model, group string, ts int64) BucketPoint {
+	groupFactor := 0.94 + stableUnit(profile.Canonical, group, "group")*0.12
+	localHour := time.Unix(ts, 0).UTC().Add(8 * time.Hour).Hour()
+	peakLoad := 0.5 + 0.5*math.Sin(2*math.Pi*(float64(localHour)-8)/24)
+	latencyLoad := 0.92 + 0.18*peakLoad
+	throughputLoad := 1.08 - 0.16*peakLoad
+	hour := strconv.FormatInt(ts/3600, 10)
+	ttftJitter := 0.96 + stableUnit(profile.Canonical, group, "ttft", hour)*0.08
+	tpsJitter := 0.96 + stableUnit(profile.Canonical, group, "tps", hour)*0.08
+	ttft := int64(math.Round(float64(profile.TtftMs) * groupFactor * latencyLoad * ttftJitter))
+	tps := profile.ThroughputTPS * (2 - groupFactor) * throughputLoad * tpsJitter
+	tps = max(1, math.Round(tps*100)/100)
+	latency := ttft + int64(math.Round(float64(profile.RepresentativeOutputTokens)/tps*1000))
+	return BucketPoint{
+		Ts:           ts,
+		AvgTtftMs:    max(1, ttft),
+		AvgLatencyMs: max(1, latency),
+		SuccessRate:  simulatedSuccessRate(profile, model, ts),
+		AvgTps:       tps,
 	}
-	// Keep rounding inside both the display range and the baseline's ±5% band.
-	minimum := math.Ceil(max(low, base*0.95) * precision)
-	maximum := math.Floor(min(high, base*1.05) * precision)
-	value := math.Round(base * (1 + jitter) * precision)
-	return min(maximum, max(minimum, value)) / precision
+}
+
+func simulatedSuccessRate(profile marketsim.Profile, model string, ts int64) float64 {
+	if profile.MaxIncidentHours == 0 {
+		return 100
+	}
+	const daySeconds int64 = 24 * 3600
+	localTs := ts + 8*3600
+	day := localTs / daySeconds
+	dayKey := strconv.FormatInt(day, 10)
+	incidentCount := int(stableHash(profile.Canonical, model, "incident-count", dayKey) % uint64(profile.MaxIncidentHours+1))
+	if incidentCount == 0 {
+		return 100
+	}
+	hour := int(localTs % daySeconds / 3600)
+	first := int(stableHash(profile.Canonical, "incident-hour", dayKey) % 24)
+	incident := hour == first
+	if incidentCount == 2 {
+		second := (first + 7 + int(stableHash(profile.Canonical, "incident-hour-2", dayKey)%11)) % 24
+		incident = incident || hour == second
+	}
+	if !incident {
+		return 100
+	}
+	severity := 96.8 + stableUnit(profile.Canonical, "incident-severity", dayKey, strconv.Itoa(hour))*2.5
+	return math.Round(severity*100) / 100
+}
+
+func stableUnit(parts ...string) float64 {
+	return float64(stableHash(parts...)%10001) / 10000
+}
+
+func stableHash(parts ...string) uint64 {
+	hash := fnv.New64a()
+	for _, part := range parts {
+		_, _ = hash.Write([]byte(part))
+		_, _ = hash.Write([]byte{0})
+	}
+	return hash.Sum64()
 }
 
 type simulatedTotals struct {
 	ttft, latency, count int64
-	tps                  float64
+	tps, success         float64
 }
 
 func (total *simulatedTotals) add(point BucketPoint) {
 	total.ttft += point.AvgTtftMs
 	total.latency += point.AvgLatencyMs
 	total.tps += point.AvgTps
+	total.success += point.SuccessRate
 	total.count++
 }
 
 func (total simulatedTotals) point(ts int64) BucketPoint {
-	return BucketPoint{Ts: ts, SuccessRate: 100,
+	return BucketPoint{Ts: ts, SuccessRate: math.Round(total.success/float64(total.count)*100) / 100,
 		AvgTtftMs: total.ttft / total.count, AvgLatencyMs: total.latency / total.count,
 		AvgTps: math.Round(total.tps/float64(total.count)*100) / 100,
 	}

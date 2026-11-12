@@ -207,20 +207,30 @@ describe('model cards', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('shows a complete green status strip and populated simulated metrics for an idle model', async () => {
+  it('shows distinct market-calibrated metrics and degraded status samples', async () => {
     vi.spyOn(api, 'get').mockResolvedValue({
       data: {
         success: true,
         data: {
           models: [
             {
-              model_name: 'example-model',
-              success_rate: 100,
-              avg_latency_ms: 800,
-              avg_tps: 120,
+              model_name: 'fast-model',
+              success_rate: 99.88,
+              avg_latency_ms: 1426,
+              avg_tps: 117.2,
               recent_success_series: Array.from({ length: 24 }, (_, hour) => ({
                 ts: hour * 3600,
-                success_rate: 100,
+                success_rate: hour === 9 ? 98.4 : 100,
+              })),
+            },
+            {
+              model_name: 'reasoning-model',
+              success_rate: 99.73,
+              avg_latency_ms: 13248,
+              avg_tps: 30.75,
+              recent_success_series: Array.from({ length: 24 }, (_, hour) => ({
+                ts: hour * 3600,
+                success_rate: hour === 5 || hour === 18 ? 97.2 : 100,
               })),
             },
           ],
@@ -229,17 +239,33 @@ describe('model cards', () => {
     })
     render(
       <QueryClientProvider client={queryClient}>
-        <ModelCardGrid models={[pricingModel()]} />
+        <ModelCardGrid
+          models={[
+            pricingModel({ model_name: 'fast-model' }),
+            pricingModel({ id: 2, model_name: 'reasoning-model' }),
+          ]}
+        />
       </QueryClientProvider>
     )
-    await screen.findByText('100.00%')
-    const strip = screen.getByRole('img', { name: 'Success rate' })
-    expect(strip.children).toHaveLength(24)
-    for (const bar of strip.children) {
-      expect(bar).toHaveClass('bg-emerald-500')
-    }
-    expect(screen.getByText('800ms')).toBeVisible()
-    expect(screen.getByText('120.0t/s')).toBeVisible()
+    await screen.findByText('99.88%')
+    expect(screen.getByText('99.73%')).toBeVisible()
+    const strips = screen.getAllByRole('img', { name: 'Success rate' })
+    expect(strips).toHaveLength(2)
+    expect(strips[0].children).toHaveLength(24)
+    expect(
+      [...strips[0].children].filter((bar) =>
+        bar.classList.contains('bg-emerald-400')
+      )
+    ).toHaveLength(1)
+    expect(
+      [...strips[1].children].filter((bar) =>
+        bar.classList.contains('bg-emerald-400')
+      )
+    ).toHaveLength(2)
+    expect(screen.getByText('1.43s')).toBeVisible()
+    expect(screen.getByText('117.2t/s')).toBeVisible()
+    expect(screen.getByText('13.25s')).toBeVisible()
+    expect(screen.getByText('30.8t/s')).toBeVisible()
   })
   it('shows separate generic and image cache prices including a free image cache', () => {
     render(

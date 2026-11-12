@@ -128,7 +128,8 @@ func TestRankingsUsesAuthenticatedRoleAndSession(t *testing.T) {
 			if tc.role >= common.RoleAdminUser && tc.state == "" {
 				assert.EqualValues(t, 12345, data.Models[0].TotalTokens)
 			} else {
-				assert.Greater(t, data.Models[0].TotalTokens, int64(365_000_000_000))
+				assert.Greater(t, data.Models[0].TotalTokens, int64(365*30_000_000))
+				assert.Less(t, data.Models[0].TotalTokens, int64(365*80_000_000))
 			}
 		})
 	}
@@ -227,9 +228,11 @@ func TestSimulatedRankingsConsistentAcrossPeriods(t *testing.T) {
 				assert.Equal(t, previousModels[row.ModelName].Rank, *row.PreviousRank)
 				expectedGrowth := float64(row.TotalTokens-previousModels[row.ModelName].TotalTokens) / float64(previousModels[row.ModelName].TotalTokens) * 100
 				assert.InDelta(t, expectedGrowth, row.GrowthPct, 0.000051)
+				assert.LessOrEqual(t, math.Abs(row.GrowthPct), 30.0)
 				total += row.TotalTokens
 			}
-			assert.InDelta(t, 2_000_000_000*tc.days, total, float64(1_000_000_000*tc.days))
+			assert.GreaterOrEqual(t, total, tc.days*30_000_000)
+			assert.LessOrEqual(t, total, tc.days*80_000_000)
 			for _, point := range data.ModelsHistory.Points {
 				historyTotal += point.Tokens
 			}
@@ -261,6 +264,38 @@ func TestSimulatedRankingsConsistentAcrossPeriods(t *testing.T) {
 	for _, row := range week.Models {
 		assert.Equal(t, row.TotalTokens, dailyTotals[row.ModelName])
 	}
+}
+
+func TestSimulatedRankingsUseMarketPopularityAndSplitAliases(t *testing.T) {
+	now := time.Date(2026, 11, 11, 12, 35, 0, 0, time.UTC)
+	catalog := []model.Pricing{
+		{ModelName: "deepSeek-v4.1-flash"},
+		{ModelName: "deepseek-v4.1-flash-1017"},
+		{ModelName: "gpt-6.1-sol"},
+		{ModelName: "glm-5.2"},
+		{ModelName: "qwen3.8-max"},
+		{ModelName: "future-unknown-model"},
+	}
+	data, err := service.SimulatedRankingsSnapshot("today", catalog, nil, now)
+	require.NoError(t, err)
+	require.Len(t, data.Models, len(catalog))
+	byName := make(map[string]service.RankedModel, len(data.Models))
+	for _, row := range data.Models {
+		byName[row.ModelName] = row
+	}
+	assert.Less(t, byName["gpt-6.1-sol"].Rank, byName["future-unknown-model"].Rank)
+	assert.Less(t, byName["glm-5.2"].Rank, byName["future-unknown-model"].Rank)
+	assert.InDelta(t, byName["deepSeek-v4.1-flash"].TotalTokens, byName["deepseek-v4.1-flash-1017"].TotalTokens, 1)
+	assert.Greater(t, byName["deepSeek-v4.1-flash"].TotalTokens+byName["deepseek-v4.1-flash-1017"].TotalTokens, byName["future-unknown-model"].TotalTokens)
+	assert.Equal(t, "DeepSeek", byName["deepSeek-v4.1-flash"].Vendor)
+	assert.Equal(t, "DeepSeek.Color", byName["deepSeek-v4.1-flash"].VendorIcon)
+	assert.Equal(t, "OpenAI", byName["gpt-6.1-sol"].Vendor)
+	var total int64
+	for _, vendor := range data.Vendors {
+		total += vendor.TotalTokens
+	}
+	assert.GreaterOrEqual(t, total, int64(30_000_000))
+	assert.LessOrEqual(t, total, int64(80_000_000))
 }
 
 func TestSimulatedRankingsLimitsAndEmptyCatalog(t *testing.T) {

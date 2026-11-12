@@ -8,6 +8,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/QuantumNous/new-api/internal/marketsim"
 	"github.com/QuantumNous/new-api/model"
 )
 
@@ -26,14 +27,30 @@ func SimulatedRankingsSnapshot(period string, catalog []model.Pricing, vendors [
 	weights := make([]float64, len(names))
 	baseWeights := make([]float64, len(names))
 	phases := make([]float64, len(names))
+	profiles := make([]marketsim.Profile, len(names))
+	canonicalProfiles := make(map[string]marketsim.Profile, len(names))
+	aliasCounts := make(map[string]int, len(names))
 	for i, name := range names {
-		hash := fnv.New64a()
-		_, _ = hash.Write([]byte("rankings\x00" + name))
-		seed := hash.Sum64()
-		baseWeights[i] = 0.25 + 8*math.Pow(float64(seed%10000)/10000, 3)
-		phases[i] = float64(seed%6283) / 1000
+		profile := marketsim.ResolveModel(name)
+		profiles[i] = profile
+		canonicalProfiles[profile.Canonical] = profile
+		aliasCounts[profile.Canonical]++
+		item := meta[name]
+		if item.vendor == rankingUnknownVendor && profile.Vendor != "" {
+			item.vendor, item.vendorIcon = profile.Vendor, profile.VendorIcon
+		} else if item.vendorIcon == "" && item.vendor == profile.Vendor {
+			item.vendorIcon = profile.VendorIcon
+		}
+		meta[name] = item
 		currentTotals[i].ModelName = name
 		previousTotals[i].ModelName = name
+	}
+	canonicalWeights := rankingPopularityWeights(canonicalProfiles)
+	for i, profile := range profiles {
+		baseWeights[i] = canonicalWeights[profile.Canonical] / float64(aliasCounts[profile.Canonical])
+		hash := fnv.New64a()
+		_, _ = hash.Write([]byte("rankings\x00" + profile.Canonical))
+		phases[i] = float64(hash.Sum64()%6283) / 1000
 	}
 
 	// Every period integrates the same daily budgets and intraday curve. The
@@ -48,12 +65,10 @@ func SimulatedRankingsSnapshot(period string, catalog []model.Pricing, vendors [
 		day := float64(dayStart / daySeconds)
 		weightSum := 0.0
 		for i := range names {
-			weights[i] = baseWeights[i] * (1 + 0.38*math.Sin(day/5+phases[i]) + 0.22*math.Sin(day/19+2*phases[i]))
+			weights[i] = baseWeights[i] * (1 + 0.055*math.Sin(day/13+phases[i]) + 0.025*math.Sin(day/41+2*phases[i]))
 			weightSum += weights[i]
 		}
-		// Bounded to 1.44–2.56 billion tokens per complete UTC day, with
-		// gradual growth and independent weekly/monthly fluctuations.
-		dailyTotal := int64(2_000_000_000 * (1 + 0.12*math.Sin(day/17) + 0.08*math.Cos(day/53) + 0.08*math.Tanh((day-20454)/365)))
+		dailyTotal := rankingDailyTokenTotal(dayStart)
 		remaining := dailyTotal
 		dailyTokens := make([]int64, len(names))
 		for i := range names {
@@ -102,6 +117,70 @@ func SimulatedRankingsSnapshot(period string, catalog []model.Pricing, vendors [
 	slices.SortFunc(currentTotals, compareTotals)
 	slices.SortFunc(previousTotals, compareTotals)
 	return buildRankingsResponse(currentTotals, currentBuckets, previousTotals, meta, config), nil
+}
+
+func rankingPopularityWeights(profiles map[string]marketsim.Profile) map[string]float64 {
+	openRouterScores := make(map[string]float64, len(profiles))
+	aiHubMixScores := make(map[string]float64, len(profiles))
+	openRouterTotal, aiHubMixTotal := 0.0, 0.0
+	for canonical, profile := range profiles {
+		if profile.OpenRouterRank > 0 {
+			score := 1 / math.Pow(float64(profile.OpenRouterRank), 0.85)
+			openRouterScores[canonical] = score
+			openRouterTotal += score
+		}
+		if profile.AIHubMixRank > 0 {
+			score := 1 / math.Pow(float64(profile.AIHubMixRank), 0.85)
+			aiHubMixScores[canonical] = score
+			aiHubMixTotal += score
+		}
+	}
+	weights := make(map[string]float64, len(profiles))
+	familyTotals := make(map[string]float64)
+	familyCounts := make(map[string]int)
+	minimumListed := math.MaxFloat64
+	for canonical, profile := range profiles {
+		weight := 0.0
+		if openRouterTotal > 0 {
+			weight += 0.6 * openRouterScores[canonical] / openRouterTotal
+		}
+		if aiHubMixTotal > 0 {
+			weight += 0.4 * aiHubMixScores[canonical] / aiHubMixTotal
+		}
+		if weight == 0 {
+			continue
+		}
+		weights[canonical] = weight
+		familyTotals[profile.Family] += weight
+		familyCounts[profile.Family]++
+		minimumListed = min(minimumListed, weight)
+	}
+	if minimumListed == math.MaxFloat64 {
+		for canonical := range profiles {
+			weights[canonical] = 1
+		}
+		return weights
+	}
+	for canonical, profile := range profiles {
+		if weights[canonical] > 0 {
+			continue
+		}
+		weight := minimumListed * 0.25
+		if familyCounts[profile.Family] > 0 {
+			familyAverage := familyTotals[profile.Family] / float64(familyCounts[profile.Family])
+			weight = max(weight, familyAverage*0.12)
+		}
+		weights[canonical] = weight
+	}
+	return weights
+}
+
+func rankingDailyTokenTotal(dayStart int64) int64 {
+	weekdayFactor := [...]float64{0.86, 1, 1.03, 1.05, 1.04, 0.98, 0.88}
+	weekday := time.Unix(dayStart, 0).UTC().Weekday()
+	day := float64(dayStart / (24 * 3600))
+	longCycle := 1 + 0.055*math.Sin(day/37) + 0.035*math.Cos(day/91)
+	return int64(math.Round(50_000_000 * weekdayFactor[weekday] * longCycle))
 }
 
 // rankingIntradayFraction is the cumulative daily usage curve (0..1).
