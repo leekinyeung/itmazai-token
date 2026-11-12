@@ -104,7 +104,7 @@ func TestDodoCurrency(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestDodoCheckoutRequestUsesMinimalAddressAndWeChatPay(t *testing.T) {
+func TestDodoCheckoutRequestUsesMinimalAddressAndAllPaymentMethods(t *testing.T) {
 	request := newDodoCheckoutRequest("DODO-test", 100, "USD", &model.User{
 		Id:       7,
 		Username: "buyer",
@@ -119,7 +119,21 @@ func TestDodoCheckoutRequestUsesMinimalAddressAndWeChatPay(t *testing.T) {
 		MinimalAddress            bool     `json:"minimal_address"`
 	}
 	require.NoError(t, common.Unmarshal(payload, &encoded))
-	assert.Equal(t, []string{"we_chat_pay", "credit", "debit"}, encoded.AllowedPaymentMethodTypes)
+	assert.Equal(t, dodoAllowedPaymentMethodTypes, encoded.AllowedPaymentMethodTypes)
+	assert.Len(t, encoded.AllowedPaymentMethodTypes, 105)
+	assert.Contains(t, encoded.AllowedPaymentMethodTypes, "credit")
+	assert.Contains(t, encoded.AllowedPaymentMethodTypes, "debit")
+	assert.Contains(t, encoded.AllowedPaymentMethodTypes, "we_chat_pay")
+	assert.Contains(t, encoded.AllowedPaymentMethodTypes, "ali_pay")
+	assert.Contains(t, encoded.AllowedPaymentMethodTypes, "apple_pay")
+	assert.Contains(t, encoded.AllowedPaymentMethodTypes, "google_pay")
+	assert.Contains(t, encoded.AllowedPaymentMethodTypes, "paypal")
+	assert.Contains(t, encoded.AllowedPaymentMethodTypes, "crypto_currency")
+	uniqueMethods := make(map[string]struct{}, len(encoded.AllowedPaymentMethodTypes))
+	for _, method := range encoded.AllowedPaymentMethodTypes {
+		uniqueMethods[method] = struct{}{}
+	}
+	assert.Len(t, uniqueMethods, len(encoded.AllowedPaymentMethodTypes))
 	assert.True(t, encoded.MinimalAddress)
 }
 
