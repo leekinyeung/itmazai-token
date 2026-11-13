@@ -18,6 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import type { TFunction } from 'i18next'
 
+import {
+  formatCurrencyFromUSD,
+  getCurrencyDisplay,
+  type CurrencyFormatOptions,
+} from '@/lib/currency'
+import { formatNumber } from '@/lib/format'
+
 import { DEFAULT_DISCOUNT_RATE } from '../constants'
 
 // ============================================================================
@@ -48,19 +55,35 @@ export function formatQuotaShort(quota: number): string {
   return quota.toString()
 }
 
-/**
- * Format currency amount that is already in local currency.
- * This is used for payment amounts that have been calculated via priceRatio.
- */
-export function formatCurrency(amount: number | string): string {
-  const numeric =
-    typeof amount === 'number' ? amount : Number.parseFloat(String(amount))
-  if (!Number.isFinite(numeric)) return '-'
+/** Format the wallet credit represented by a top-up request amount. */
+export function formatTopupAmount(
+  amount: number,
+  t: TFunction,
+  options?: CurrencyFormatOptions
+): string {
+  if (!Number.isFinite(amount)) return '-'
 
-  return new Intl.NumberFormat(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: Math.abs(numeric) >= 1 ? 2 : 4,
-  }).format(numeric)
+  const { meta } = getCurrencyDisplay()
+  if (meta.kind === 'tokens') {
+    return `${formatNumber(amount, options?.locale)} ${t('Tokens')}`
+  }
+
+  return formatCurrencyFromUSD(amount, options)
+}
+
+/** Return the unit accepted by the top-up amount API. */
+export function getTopupRequestUnit(t: TFunction): string {
+  const { meta } = getCurrencyDisplay()
+  return meta.kind === 'tokens' ? t('Tokens') : t('USD')
+}
+
+/** Format a minimum or validation value in the top-up request unit. */
+export function formatTopupRequestAmount(
+  amount: number,
+  t: TFunction,
+  locale?: Intl.LocalesArgument
+): string {
+  return `${formatNumber(amount, locale)} ${getTopupRequestUnit(t)}`
 }
 
 /**
@@ -80,17 +103,14 @@ export function getDiscountLabel(discount: number, t: TFunction): string {
 export function calculatePresetPricing(
   presetValue: number,
   priceRatio: number,
-  discount: number,
-  usdExchangeRate: number = 1
+  discount: number
 ) {
   const originalPrice = presetValue * priceRatio
   const actualPrice = originalPrice * discount
   const savedAmount = originalPrice - actualPrice
   const hasDiscount = discount < 1.0
-  const displayValue = presetValue * usdExchangeRate
 
   return {
-    displayValue,
     originalPrice,
     actualPrice,
     savedAmount,

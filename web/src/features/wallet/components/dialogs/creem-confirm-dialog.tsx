@@ -21,7 +21,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
-import { formatNumber } from '@/lib/format'
+import { formatQuota } from '@/lib/format'
 
 import { formatCreemPrice } from '../../lib/format'
 import type { CreemProduct } from '../../types'
@@ -84,7 +84,7 @@ export function CreemConfirmDialog({
         </div>
         <div className='flex items-center justify-between'>
           <span className='text-muted-foreground'>{t('Quota')}</span>
-          <span className='font-medium'>{formatNumber(product.quota)}</span>
+          <span className='font-medium'>{formatQuota(product.quota)}</span>
         </div>
       </div>
     </Dialog>
