@@ -24,15 +24,9 @@ export const modelEvaluationFormSchema = z.object({
     .trim()
     .min(1, 'Base URL is required')
     .url('Enter a valid Base URL')
-    .refine((value) => ['http:', 'https:'].includes(new URL(value).protocol), {
+    .refine((value) => /^https?:\/\//i.test(value), {
       message: 'Enter a valid Base URL',
-    })
-    .refine(
-      (value) => new URL(value).pathname.replace(/\/+$/, '').endsWith('/v1'),
-      {
-        message: 'Base URL must include the /v1 path',
-      }
-    ),
+    }),
   apiKey: z.string().trim().min(1, 'API key is required'),
   targetModel: z.string().trim().min(1, 'Target model is required').max(512),
   judgeModel: z.string().trim().min(1, 'Judge model is required').max(512),

@@ -7196,6 +7196,7 @@
     "URL is required": "URL обязателен",
     "URL must start with http:// or https://": "URL должен начинаться с http:// или https://",
     "URL to your logo image (optional)": "URL изображения вашего логотипа (необязательно)",
+    "URLs without a path use /v1 automatically. Custom API paths are preserved.": "Для URL без пути автоматически используется /v1. Указанные пути API сохраняются.",
     "US dollar (USD)": "Доллар США (USD)",
     "Usage": "Использование",
     "Usage · {{price}}": "Объём · {{price}}",

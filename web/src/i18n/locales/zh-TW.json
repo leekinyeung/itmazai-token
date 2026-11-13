@@ -7196,6 +7196,7 @@
     "URL is required": "URL 為必填項",
     "URL must start with http:// or https://": "URL 必須以 http:// 或 https:// 開頭",
     "URL to your logo image (optional)": "您的徽標圖片 URL（可選）",
+    "URLs without a path use /v1 automatically. Custom API paths are preserved.": "未填寫路徑時會自動使用 /v1，已填寫的 API 路徑會保留",
     "US dollar (USD)": "美元（USD）",
     "Usage": "用量",
     "Usage · {{price}}": "用量 · {{price}}",

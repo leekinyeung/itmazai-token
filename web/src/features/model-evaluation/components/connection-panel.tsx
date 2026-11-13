@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -74,10 +75,15 @@ export function ConnectionPanel(props: ConnectionPanelProps) {
                   autoComplete='off'
                   spellCheck={false}
                   disabled={props.disabled}
-                  placeholder='https://api.openai.com/v1'
+                  placeholder='https://api.openai.com'
                   className='h-11'
                 />
               </FormControl>
+              <FormDescription>
+                {t(
+                  'URLs without a path use /v1 automatically. Custom API paths are preserved.'
+                )}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

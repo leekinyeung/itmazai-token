@@ -7196,6 +7196,7 @@
     "URL is required": "L'URL est requise",
     "URL must start with http:// or https://": "L’URL doit commencer par http:// ou https://",
     "URL to your logo image (optional)": "URL de votre image de logo (facultatif)",
+    "URLs without a path use /v1 automatically. Custom API paths are preserved.": "Les URL sans chemin utilisent automatiquement /v1. Les chemins d’API personnalisés sont conservés.",
     "US dollar (USD)": "Dollar américain (USD)",
     "Usage": "Utilisation",
     "Usage · {{price}}": "Usage · {{price}}",

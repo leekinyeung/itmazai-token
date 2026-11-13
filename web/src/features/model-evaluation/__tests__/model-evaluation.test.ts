@@ -89,14 +89,27 @@ describe('model evaluation inputs', () => {
     expect(message).not.toHaveProperty('baseUrl')
   })
 
-  it('accepts a compatible v1 URL with trailing slashes', () => {
-    const result = modelEvaluationFormSchema.safeParse({
-      ...values,
-      baseUrl: 'https://models.example/v1///',
-    })
-
-    expect(result.success).toBe(true)
+  it.each([
+    'https://models.example',
+    'https://models.example///',
+    'https://models.example/v1///',
+    'https://models.example/proxy/v1',
+    'https://models.example/api/v4',
+    'https://models.example/v1beta/openai',
+  ])('accepts a Base URL without requiring a v1 suffix: %s', (baseUrl) => {
+    expect(
+      modelEvaluationFormSchema.safeParse({ ...values, baseUrl }).success
+    ).toBe(true)
   })
+
+  it.each(['', 'not a URL', '/v1', 'ftp://models.example/v1'])(
+    'rejects an invalid Base URL without throwing: %s',
+    (baseUrl) => {
+      expect(
+        modelEvaluationFormSchema.safeParse({ ...values, baseUrl }).success
+      ).toBe(false)
+    }
+  )
 })
 
 describe('built-in benchmark panel', () => {
@@ -134,7 +147,10 @@ describe('built-in benchmark panel', () => {
     const baseUrl = screen.getByRole('textbox', { name: /^Base URL/ })
     expect(baseUrl).toHaveValue('')
     expect(baseUrl).toHaveAttribute('autocomplete', 'off')
-    expect(baseUrl).toHaveAttribute('placeholder', 'https://api.openai.com/v1')
+    expect(baseUrl).toHaveAttribute('placeholder', 'https://api.openai.com')
+    expect(baseUrl).toHaveAccessibleDescription(
+      'URLs without a path use /v1 automatically. Custom API paths are preserved.'
+    )
     expect(screen.getByLabelText(/^API Key/)).toHaveValue('')
   })
 
@@ -152,6 +168,88 @@ describe('built-in benchmark panel', () => {
 })
 
 describe('OpenAI-compatible browser requests', () => {
+  it.each([
+    {
+      baseUrl: 'https://models.example',
+      modelsUrl: 'https://models.example/v1/models',
+      completionUrl: 'https://models.example/v1/chat/completions',
+    },
+    {
+      baseUrl: '  https://models.example///  ',
+      modelsUrl: 'https://models.example/v1/models',
+      completionUrl: 'https://models.example/v1/chat/completions',
+    },
+    {
+      baseUrl: 'https://models.example/v1///',
+      modelsUrl: 'https://models.example/v1/models',
+      completionUrl: 'https://models.example/v1/chat/completions',
+    },
+    {
+      baseUrl: 'https://models.example/proxy/v1/',
+      modelsUrl: 'https://models.example/proxy/v1/models',
+      completionUrl: 'https://models.example/proxy/v1/chat/completions',
+    },
+    {
+      baseUrl: 'https://models.example/api/v4/',
+      modelsUrl: 'https://models.example/api/v4/models',
+      completionUrl: 'https://models.example/api/v4/chat/completions',
+    },
+    {
+      baseUrl: 'https://models.example/v1beta/openai/',
+      modelsUrl: 'https://models.example/v1beta/openai/models',
+      completionUrl: 'https://models.example/v1beta/openai/chat/completions',
+    },
+    {
+      baseUrl: 'https://models.example/?tenant=demo#settings',
+      modelsUrl: 'https://models.example/v1/models?tenant=demo',
+      completionUrl: 'https://models.example/v1/chat/completions?tenant=demo',
+    },
+  ])(
+    'uses the same API prefix for model loading and completion: $baseUrl',
+    async (testCase) => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ data: [{ id: 'target-model' }] }), {
+            status: 200,
+          })
+        )
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({
+              choices: [{ message: { content: 'Target output' } }],
+            }),
+            { status: 200 }
+          )
+        )
+      vi.stubGlobal('fetch', fetchMock)
+
+      await expect(
+        loadOpenAIModels(testCase.baseUrl, 'sk-browser-only')
+      ).resolves.toEqual([{ label: 'target-model', value: 'target-model' }])
+      await expect(
+        generateOpenAICompletion({
+          baseUrl: testCase.baseUrl,
+          apiKey: 'sk-browser-only',
+          model: 'target-model',
+          prompt: 'Question',
+          signal: new AbortController().signal,
+        })
+      ).resolves.toBe('Target output')
+
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        1,
+        testCase.modelsUrl,
+        expect.objectContaining({ method: 'GET' })
+      )
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        2,
+        testCase.completionUrl,
+        expect.objectContaining({ method: 'POST' })
+      )
+    }
+  )
+
   it('loads and sorts models without persisting the API key', async () => {
     const fetchMock = vi
       .fn()

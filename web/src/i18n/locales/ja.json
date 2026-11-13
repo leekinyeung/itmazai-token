@@ -7196,6 +7196,7 @@
     "URL is required": "URL は必須です",
     "URL must start with http:// or https://": "URL は http:// または https:// で始まる必要があります",
     "URL to your logo image (optional)": "ロゴ画像のURL (オプション)",
+    "URLs without a path use /v1 automatically. Custom API paths are preserved.": "パスのない URL には自動的に /v1 を使用します。指定した API パスはそのまま保持されます。",
     "US dollar (USD)": "米ドル（USD）",
     "Usage": "使用量",
     "Usage · {{price}}": "使用量 · {{price}}",

@@ -32,8 +32,15 @@ export class ModelEndpointError extends Error {
   }
 }
 
-function normalizedBaseUrl(baseUrl: string): string {
-  return baseUrl.trim().replace(/\/+$/, '')
+function modelEndpointUrl(
+  baseUrl: string,
+  resource: 'models' | 'chat/completions'
+): string {
+  const url = new URL(baseUrl.trim())
+  const prefix = url.pathname.replace(/\/+$/, '') || '/v1'
+  url.pathname = `${prefix}/${resource}`
+  url.hash = ''
+  return url.toString()
 }
 
 export function assertBrowserCompatibleUrl(
@@ -111,7 +118,7 @@ export async function loadOpenAIModels(
   signal?: AbortSignal
 ): Promise<ModelOption[]> {
   assertBrowserCompatibleUrl(baseUrl)
-  const response = await checkedFetch(`${normalizedBaseUrl(baseUrl)}/models`, {
+  const response = await checkedFetch(modelEndpointUrl(baseUrl, 'models'), {
     method: 'GET',
     headers: requestHeaders(apiKey),
     signal,
@@ -145,7 +152,7 @@ export async function generateOpenAICompletion(params: {
 }): Promise<string> {
   assertBrowserCompatibleUrl(params.baseUrl)
   const response = await checkedFetch(
-    `${normalizedBaseUrl(params.baseUrl)}/chat/completions`,
+    modelEndpointUrl(params.baseUrl, 'chat/completions'),
     {
       method: 'POST',
       headers: requestHeaders(params.apiKey),
