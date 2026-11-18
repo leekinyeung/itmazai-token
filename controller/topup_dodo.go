@@ -435,6 +435,7 @@ func newDodoCheckoutRequest(tradeNo string, amountInMinorUnits int64, currency s
 		FeatureFlags: map[string]bool{
 			"allow_discount_code":      false,
 			"allow_currency_selection": false,
+			"single_page":              true,
 		},
 	}
 }

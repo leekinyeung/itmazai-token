@@ -104,7 +104,7 @@ func TestDodoCurrency(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestDodoCheckoutRequestUsesMinimalAddressAndAllPaymentMethods(t *testing.T) {
+func TestDodoCheckoutRequestUsesSinglePageAndAllPaymentMethods(t *testing.T) {
 	request := newDodoCheckoutRequest("DODO-test", 100, "USD", &model.User{
 		Id:       7,
 		Username: "buyer",
@@ -117,6 +117,9 @@ func TestDodoCheckoutRequestUsesMinimalAddressAndAllPaymentMethods(t *testing.T)
 	var encoded struct {
 		AllowedPaymentMethodTypes []string `json:"allowed_payment_method_types"`
 		MinimalAddress            bool     `json:"minimal_address"`
+		FeatureFlags              struct {
+			SinglePage bool `json:"single_page"`
+		} `json:"feature_flags"`
 	}
 	require.NoError(t, common.Unmarshal(payload, &encoded))
 	assert.Equal(t, dodoAllowedPaymentMethodTypes, encoded.AllowedPaymentMethodTypes)
@@ -135,6 +138,7 @@ func TestDodoCheckoutRequestUsesMinimalAddressAndAllPaymentMethods(t *testing.T)
 	}
 	assert.Len(t, uniqueMethods, len(encoded.AllowedPaymentMethodTypes))
 	assert.True(t, encoded.MinimalAddress)
+	assert.True(t, encoded.FeatureFlags.SinglePage)
 }
 
 func TestDodoPayMoneyAppliesUnitPriceAndGroupRatio(t *testing.T) {
