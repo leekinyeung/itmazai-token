@@ -190,21 +190,25 @@ test('the blog hub lists published articles newest first', async () => {
   const cards = screen.getAllByRole('heading', { level: 3 })
   expect(cards).toHaveLength(getPublicContentPages('blog').length)
   expect(cards[0]).toHaveTextContent(
-    'How to Handle OpenAI Rate Limits in 2026: A Production Runbook'
+    'How TaoDock Offers AI Model API Access at 20% of the Official Price'
   )
   expect(cards[1]).toHaveTextContent(
-    'How to Reduce OpenAI API Costs in 2026: A Practical Playbook'
+    'How to Handle OpenAI Rate Limits in 2026: A Production Runbook'
   )
   expect(cards[2]).toHaveTextContent(
+    'How to Reduce OpenAI API Costs in 2026: A Practical Playbook'
+  )
+  expect(cards[3]).toHaveTextContent(
     'How to Choose an AI Gateway in 2026: A Practical Checklist'
   )
+  expect(screen.getByText('Published 2026-11-18')).toBeVisible()
   expect(screen.getByText('Published 2026-11-10')).toBeVisible()
   expect(screen.getByText('Published 2026-11-09')).toBeVisible()
   expect(screen.getByText('Published 2026-11-08')).toBeVisible()
   const readButtons = screen.getAllByRole('button', { name: 'Read article' })
   expect(readButtons[0]).toHaveAttribute(
     'href',
-    '/blog/handle-openai-rate-limits'
+    '/blog/why-taodock-model-prices-are-lower'
   )
   expect(
     screen.getByRole('button', { name: /create an account/i })

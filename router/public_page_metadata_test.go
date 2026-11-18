@@ -45,6 +45,7 @@ func TestPublicPageMetadataBeforeJavaScript(t *testing.T) {
 		{path: "/blog/how-to-choose-ai-gateway", title: "How to Choose an AI Gateway in 2026: A Practical Checklist | Taodock", canonical: "https://taodock.com/blog/how-to-choose-ai-gateway"},
 		{path: "/blog/reduce-openai-api-costs", title: "How to Reduce OpenAI API Costs in 2026: A Practical Playbook | Taodock", canonical: "https://taodock.com/blog/reduce-openai-api-costs"},
 		{path: "/blog/handle-openai-rate-limits", title: "How to Handle OpenAI Rate Limits in 2026: A Production Runbook | Taodock", canonical: "https://taodock.com/blog/handle-openai-rate-limits"},
+		{path: "/blog/why-taodock-model-prices-are-lower", title: "How TaoDock Offers AI Model API Access at 20% of the Official Price | Taodock", canonical: "https://taodock.com/blog/why-taodock-model-prices-are-lower"},
 		{path: "/compare/taodock-vs-openrouter", title: "Taodock vs OpenRouter: Choosing a Unified AI API Gateway | Taodock", canonical: "https://taodock.com/compare/taodock-vs-openrouter"},
 		{path: "/integrations/openai-sdk", title: "Use the OpenAI SDK with Taodock's Compatible API | Taodock", canonical: "https://taodock.com/integrations/openai-sdk"},
 		{path: "/faq", title: "Taodock AI API Frequently Asked Questions | Taodock", canonical: "https://taodock.com/faq"},
@@ -225,6 +226,7 @@ func TestGeneratedPublicContentAssetsStayIndexableAndSafe(t *testing.T) {
 	indexableContentPaths := []string{
 		"/compare", "/blog", "/faq",
 		"/blog/how-to-choose-ai-gateway", "/blog/reduce-openai-api-costs", "/blog/handle-openai-rate-limits",
+		"/blog/why-taodock-model-prices-are-lower",
 		"/compare/taodock-vs-openrouter", "/compare/taodock-vs-litellm", "/compare/taodock-vs-portkey", "/compare/taodock-vs-requesty", "/compare/taodock-vs-siliconflow",
 		"/integrations/cherry-studio", "/integrations/workbuddy", "/integrations/open-webui", "/integrations/aionui", "/integrations/deepchat", "/integrations/openai-sdk",
 	}
