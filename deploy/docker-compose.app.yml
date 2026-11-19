@@ -1,4 +1,4 @@
-# 生产应用栈：new-api 与可选的 GEO Worker（geo profile）。
+# 生产应用栈：只包含 new-api 本体，一次部署只替换这一个容器。
 # 数据库与 Redis 由 docker-compose.infra.yml 独立管理，部署流程不会触碰它们的卷。
 #
 # 这个文件由 CI 每次部署自动同步到服务器 <DEPLOY_PATH>/.deploy/ 下，不要在服务器上手工改。
@@ -17,8 +17,6 @@ services:
     environment:
       TZ: ${TZ:-Asia/Shanghai}
       NODE_NAME: ${NODE_NAME:-itmazai-prod-1}
-      GEO_WORKER_ARTIFACT_PROXY: ${GEO_WORKER_ARTIFACT_PROXY:-${GEO_WORKER_TOKEN:+true}}
-      GEO_WORKER_TOKEN: ""
     # 只监听回环地址，由宿主机上的 Nginx/Caddy 负责 TLS 与对外暴露。
     ports:
       - "127.0.0.1:${APP_PORT:-3000}:3000"
@@ -27,7 +25,6 @@ services:
       - ./logs:/app/logs
     networks:
       - default
-      - geo
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:3000/api/status | grep -q '\"success\" *: *true'"]
       interval: 15s
@@ -48,39 +45,9 @@ services:
         limits:
           memory: ${APP_MEMORY_LIMIT:-2g}
 
-  geo-worker:
-    profiles: [geo]
-    image: ${GEO_WORKER_IMAGE:-taodock-geo-worker:local}
-    hostname: geo-worker
-    init: true
-    restart: unless-stopped
-    environment:
-      GEO_CAPTURE_SOURCE: ${GEO_CAPTURE_SOURCE:-deepseek_web}
-      GEO_WORKER_HOST: 0.0.0.0
-      GEO_WORKER_TOKEN: ${GEO_WORKER_TOKEN:-}
-    volumes:
-      - deepseek_profile:/var/lib/geo-worker
-    networks:
-      - geo
-    healthcheck:
-      test: ["CMD", "node", "-e", "const s = require('node:net').connect(3031, '127.0.0.1'); s.on('connect', () => s.end()); s.on('error', () => process.exit(1));"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    shm_size: 512m
-    stop_grace_period: 30s
-    security_opt:
-      - no-new-privileges:true
-
-volumes:
-  deepseek_profile:
-
 # APP_NETWORK 默认 itmazai-net（由 infra 栈创建）；接管已有栈时在 .env 里
 # 指向已有网络（如 new-api_new-api-network），应用即可直连既有的 postgres/redis。
 networks:
   default:
     name: ${APP_NETWORK:-itmazai-net}
     external: true
-  geo:
-    driver: bridge

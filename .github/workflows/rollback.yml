@@ -1,6 +1,6 @@
 name: Rollback production
 
-# 一键回滚：直接恢复指定 tag 及其发布时记录的 Worker 镜像（留空＝上一个成功版本）。
+# 一键回滚：不重新构建，直接把线上容器切回指定 tag（留空＝上一个成功版本）。
 # 与 Deploy production 共用 concurrency 组，不会与发布并发执行。
 
 on:
@@ -44,10 +44,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - name: Validate rollback tag
-        run: |
-          [[ -z "$TAG" || "$TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]] || { echo "::error::无效的镜像 tag"; exit 1; }
-
       - name: Prepare SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -81,14 +77,12 @@ jobs:
 
       - name: Summary
         if: always()
-        env:
-          REASON: ${{ inputs.reason }}
         run: |
           {
             echo "### 回滚：${{ job.status }}"
             echo '```'
             echo "target: ${TAG:-上一个成功版本}"
-            echo "reason: $REASON"
+            echo "reason: ${{ inputs.reason }}"
             echo "actor:  ${{ github.actor }}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"

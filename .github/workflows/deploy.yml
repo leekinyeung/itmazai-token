@@ -1,6 +1,6 @@
 name: Deploy production
 
-# main 合入 → 质量门禁 → 构建 TaoDock 和 GEO Worker 镜像（同一个 sha tag）→ 容器冒烟 → SSH 发布
+# main 合入 → 质量门禁 → 构建镜像（不可变 sha tag）→ 容器冒烟 → SSH 发布 → 提升 latest
 # 发布失败时服务器端脚本会自动回滚到上一个成功版本，本流水线随后报红。
 #
 # 手工重发历史版本：Actions → Deploy production → Run workflow，填 image_tag。
@@ -14,10 +14,6 @@ on:
         description: '已存在的镜像 tag（留空＝从当前提交重新构建），例如 sha-1a2b3c4d5e6f'
         required: false
         type: string
-      legacy_app_only:
-        description: '仅重发尚无配套 GEO Worker 镜像的旧版本时勾选'
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -122,58 +118,16 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-  build-geo-worker:
-    name: Build & push GEO Worker
-    needs: [build]
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
-
-      - name: Log in to registry
-        uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4 # v4.3.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build & push Worker image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
-        with:
-          context: tools/geo-worker
-          platforms: ${{ env.PLATFORM }}
-          push: true
-          tags: ${{ env.IMAGE_NAME }}:geo-worker-${{ needs.build.outputs.tag }}
-          labels: |
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.version=${{ needs.build.outputs.version }}
-            org.opencontainers.image.revision=${{ github.sha }}
-          cache-from: type=gha,scope=geo-worker
-          cache-to: type=gha,scope=geo-worker,mode=max
-          provenance: mode=max
-          sbom: true
-
   smoke:
-    name: Smoke test images
-    needs: [build, build-geo-worker]
+    name: Smoke test image
+    needs: [build]
+    if: ${{ needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      IMAGE_TAG: ${{ needs.build.outputs.tag }}
-      GEO_CAPTURE_SOURCE: fixture
-      APP_PORT: 3111
-      APP_NETWORK: smoke-itmazai-infra
-      COMPOSE_PROJECT_NAME: smoke-itmazai
-      COMPOSE_FILE: deploy/docker-compose.app.yml
+      TAG: ${{ needs.build.outputs.tag }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
       - name: Log in to GHCR
         uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4 # v4.3.0
         with:
@@ -181,60 +135,29 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Start both services with SQLite and mock GEO capture
+      - name: Run container on SQLite
         run: |
-          export APP_ENV_FILE="$RUNNER_TEMP/smoke-itmazai.env"
-          export GEO_WORKER_IMAGE="$IMAGE_NAME:geo-worker-$IMAGE_TAG"
-          printf '%s\n' SQLITE_PATH=/data/one-api.db ERROR_LOG_ENABLED=true > "$APP_ENV_FILE"
-          printf 'APP_ENV_FILE=%s\nGEO_WORKER_IMAGE=%s\n' "$APP_ENV_FILE" "$GEO_WORKER_IMAGE" >> "$GITHUB_ENV"
-          GEO_WORKER_TOKEN="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '=')"
-          echo "::add-mask::$GEO_WORKER_TOKEN"
-          export GEO_WORKER_TOKEN
-          docker network create "$APP_NETWORK"
-          docker compose --profile geo pull
-          docker compose --profile geo up -d --wait --wait-timeout 120 --pull never
+          docker pull "$IMAGE_NAME:$TAG"
+          # 冒烟用 SQLite，不依赖任何外部数据库，验证二进制、迁移与内嵌前端都能起来。
+          docker run -d --name smoke-new-api \
+            -p 3111:3000 \
+            -e SQLITE_PATH=/data/one-api.db \
+            -e ERROR_LOG_ENABLED=true \
+            "$IMAGE_NAME:$TAG"
 
-      - name: Verify GEO answer, citations, and screenshot
+      - name: Wait for /api/status
         run: |
-          docker compose --profile geo exec -T geo-worker node --input-type=module - <<'NODE'
-          import assert from 'node:assert/strict';
-          import { setTimeout as delay } from 'node:timers/promises';
-
-          const endpoint = 'http://127.0.0.1:3031/internal/v1/tasks';
-          const headers = { Authorization: 'Bearer ' + process.env.GEO_WORKER_TOKEN };
-          const taskID = 'task_ci_smoke';
-          const question = 'CI GEO capture';
-          const taskURL = endpoint + '/' + taskID;
-          assert.equal((await fetch(taskURL)).status, 401);
-          const submission = await fetch(endpoint, {
-            method: 'POST',
-            headers: { ...headers, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ task_id: taskID, question, platform: 'deepseek' }),
-          });
-          assert.equal(submission.status, 202);
-
-          let task;
-          for (let attempt = 0; attempt < 40; attempt++) {
-            const response = await fetch(taskURL, { headers });
-            assert.equal(response.status, 200);
-            task = await response.json();
-            if (task.status === 'completed' || task.status === 'failed') break;
-            await delay(500);
-          }
-          assert.equal(task.status, 'completed');
-          assert.equal(task.result.source, 'fixture');
-          assert.ok(task.result.answer.includes(question));
-          assert.equal(task.result.citations.length, 2);
-          const screenshot = await fetch(taskURL + '/screenshot', { headers });
-          assert.equal(screenshot.status, 200);
-          assert.equal(screenshot.headers.get('content-type'), 'image/png');
-          const png = Buffer.from(await screenshot.arrayBuffer());
-          assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
-          NODE
+          for i in $(seq 1 40); do
+            if curl -fsS --max-time 3 http://127.0.0.1:3111/api/status | grep -q '"success" *: *true'; then
+              echo "第 $i 次探测通过"
+              break
+            fi
+            [ "$i" -eq 40 ] && { echo "::error::容器 120 秒内未就绪"; exit 1; }
+            sleep 3
+          done
 
       - name: Verify embedded frontend
         run: |
-          curl -fsS --max-time 5 http://127.0.0.1:3111/api/status | grep -q '"success" *: *true'
           code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3111/)
           size=$(curl -sL http://127.0.0.1:3111/ | wc -c)
           echo "index: HTTP $code, ${size} bytes"
@@ -244,13 +167,11 @@ jobs:
 
       - name: Dump container logs
         if: failure() || cancelled()
-        run: docker compose --profile geo logs --tail 150 || true
+        run: docker logs --tail 150 smoke-new-api || true
 
       - name: Cleanup
         if: always()
-        run: |
-          docker compose --profile geo down -v || true
-          docker network rm "$APP_NETWORK" || true
+        run: docker rm -f smoke-new-api || true
 
   deploy:
     name: Deploy to production
@@ -264,7 +185,6 @@ jobs:
     env:
       # tag 优先取本次构建产物，手工重发时取输入
       TAG: ${{ needs.build.outputs.tag || inputs.image_tag }}
-      DEPLOY_GEO_WORKER: ${{ (inputs.image_tag != '' && inputs.legacy_app_only) && '0' || '1' }}
       SSH_HOST: ${{ vars.SSH_HOST || secrets.SSH_HOST }}
       SSH_USER: ${{ vars.SSH_USER || secrets.SSH_USER }}
       SSH_PORT: ${{ vars.SSH_PORT || '22' }}
@@ -282,7 +202,6 @@ jobs:
           for name in TAG SSH_HOST SSH_USER DEPLOY_PATH; do
             if [ -z "${!name}" ]; then echo "::error::缺少 ${name}（vars 或 secrets）"; missing=1; fi
           done
-          [[ "$TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]] || { echo "::error::无效的镜像 tag"; exit 1; }
           [ -n "$SSH_PRIVATE_KEY" ] || { echo "::error::缺少 secret SSH_PRIVATE_KEY"; missing=1; }
           echo "将部署 $IMAGE_NAME:$TAG 到 $SSH_USER@$SSH_HOST:$DEPLOY_PATH"
           exit "$missing"
@@ -319,7 +238,7 @@ jobs:
         run: |
           SSH_OPTS="-i $HOME/.ssh/deploy_key -p $SSH_PORT -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
           ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" \
-            "cd '$DEPLOY_PATH' && IMAGE_NAME='$IMAGE_NAME' IMAGE_TAG='$TAG' DEPLOY_GEO_WORKER='$DEPLOY_GEO_WORKER' bash .deploy/deploy-remote.sh"
+            "cd '$DEPLOY_PATH' && IMAGE_NAME='$IMAGE_NAME' IMAGE_TAG='$TAG' bash .deploy/deploy-remote.sh"
 
       - name: Summary
         if: always()
@@ -328,14 +247,11 @@ jobs:
             echo "### 发布结果：${{ job.status }}"
             echo '```'
             echo "image:  $IMAGE_NAME:$TAG"
-            if [ "$DEPLOY_GEO_WORKER" = "1" ]; then
-              echo "worker: $IMAGE_NAME:geo-worker-$TAG"
-            fi
             echo "sha:    ${{ github.sha }}"
             echo "actor:  ${{ github.actor }}"
             echo "target: $SSH_USER@$SSH_HOST:$DEPLOY_PATH"
             echo '```'
-            echo "发布失败时，请查看服务器脚本的健康检查及回滚结果。"
+            echo "失败时服务器已自动回滚到上一个成功版本，可用 Rollback production 手动指定版本。"
           } >> "$GITHUB_STEP_SUMMARY"
 
   promote:
