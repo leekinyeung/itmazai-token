@@ -11,6 +11,9 @@ docs
 /web/dist
 /tools/model-evaluation-worker/node_modules
 /tools/model-evaluation-worker/dist
+/tools/geo-worker/.profiles
+/tools/geo-worker/node_modules
+/.env
 /output
 !THIRD-PARTY-LICENSES.md
 

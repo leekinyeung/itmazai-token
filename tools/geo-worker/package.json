@@ -1,0 +1,15 @@
+{
+  "name": "taodock-geo-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node start.js",
+    "login:deepseek": "node login-deepseek.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "playwright": "1.57.0"
+  }
+}

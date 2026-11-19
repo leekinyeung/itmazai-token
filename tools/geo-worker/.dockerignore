@@ -1,0 +1,11 @@
+*
+!Dockerfile
+!package.json
+!package-lock.json
+!docker-entrypoint.sh
+!capture.js
+!deepseek.js
+!fixture.html
+!login-deepseek.js
+!server.js
+!start.js

@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -549,6 +550,98 @@ func TestProxyTaskMediaForwardsRangeAndFiltersResponseHeaders(t *testing.T) {
 	assert.Empty(t, recorder.Header().Get("Set-Cookie"))
 	assert.Empty(t, recorder.Header().Get("WWW-Authenticate"))
 	assert.Empty(t, recorder.Header().Get("X-Provider-Secret"))
+}
+
+func TestProxyTaskMediaScopesGEOComposeAccessToItsScreenshot(t *testing.T) {
+	task := setupGenericTaskTest(t)
+	task.PrivateData.Execution = &model.TaskExecutionSnapshot{
+		TaskPlugin: &model.TaskPluginSnapshot{Key: "geo"},
+	}
+	task.PrivateData.UpstreamTaskID = "task_worker_1"
+	require.NoError(t, model.DB.Model(&model.Channel{}).Where("id = ?", task.ChannelId).Updates(map[string]any{
+		"type":     constant.ChannelTypeTaskPlugin,
+		"base_url": geoWorkerOrigin,
+		"setting":  `{"task_plugin_key":"geo"}`,
+	}).Error)
+
+	fetchSettings := system_setting.GetFetchSetting()
+	savedFetchSettings := *fetchSettings
+	t.Cleanup(func() { *fetchSettings = savedFetchSettings })
+	fetchSettings.EnableSSRFProtection = true
+	fetchSettings.AllowPrivateIp = false
+	fetchSettings.AllowedPorts = []string{"80", "443"}
+	t.Setenv("GEO_WORKER_ARTIFACT_PROXY", "true")
+
+	screenshotPath := "/internal/v1/tasks/task_worker_1/screenshot"
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, screenshotPath, r.URL.RequestURI())
+		assert.Equal(t, "Bearer worker-token", r.Header.Get("Authorization"))
+		if r.Header.Get("If-None-Match") == `"redirect"` {
+			http.Redirect(w, r, "/other", http.StatusFound)
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		w.Header().Set("Content-Length", "3")
+		if r.Method == http.MethodGet {
+			_, _ = io.WriteString(w, "PNG")
+		}
+	}))
+	t.Cleanup(upstream.Close)
+	dialer := net.Dialer{}
+	transport := &http.Transport{
+		DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+			assert.Equal(t, geoWorkerAddress, address)
+			return dialer.DialContext(ctx, network, upstream.Listener.Addr().String())
+		},
+	}
+	t.Cleanup(transport.CloseIdleConnections)
+	originalClient := geoWorkerArtifactClient
+	client := *originalClient
+	client.Transport = transport
+	geoWorkerArtifactClient = &client
+	t.Cleanup(func() { geoWorkerArtifactClient = originalClient })
+
+	for _, tc := range []struct {
+		name, method, path, pluginKey string
+		disableProxy, redirect        bool
+		wantBody                      string
+	}{
+		{name: "download", method: http.MethodGet, path: screenshotPath, pluginKey: "geo", wantBody: "PNG"},
+		{name: "headers", method: http.MethodHead, path: screenshotPath, pluginKey: "geo"},
+		{name: "redirect", method: http.MethodGet, path: screenshotPath, pluginKey: "geo", redirect: true},
+		{name: "different task", method: http.MethodGet, path: "/internal/v1/tasks/task_other/screenshot", pluginKey: "geo"},
+		{name: "unexpected query", method: http.MethodGet, path: screenshotPath + "?extra=1", pluginKey: "geo"},
+		{name: "unrelated plugin", method: http.MethodGet, path: screenshotPath, pluginKey: "other"},
+		{name: "incorrect method", method: http.MethodPost, path: screenshotPath, pluginKey: "geo"},
+		{name: "disabled", method: http.MethodGet, path: screenshotPath, pluginKey: "geo", disableProxy: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			task.PrivateData.Execution.TaskPlugin.Key = tc.pluginKey
+			if tc.disableProxy {
+				t.Setenv("GEO_WORKER_ARTIFACT_PROXY", "")
+			}
+			recorder := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(recorder)
+			c.Request = httptest.NewRequest(tc.method, "/v1/tasks/task_generic/artifacts/screenshot/content", nil)
+			if tc.redirect {
+				c.Request.Header.Set("If-None-Match", `"redirect"`)
+			}
+			err := proxyTaskMedia(c, task, &relaychannel.TaskContentRequest{
+				URL:     geoWorkerOrigin + tc.path,
+				Headers: map[string]string{"Authorization": "Bearer worker-token"},
+			})
+			if tc.name == "download" || tc.name == "headers" {
+				require.NoError(t, err)
+				assert.Equal(t, http.StatusOK, recorder.Code)
+				assert.Equal(t, "image/png", recorder.Header().Get("Content-Type"))
+				assert.Equal(t, tc.wantBody, recorder.Body.String())
+				return
+			}
+			var proxyErr *taskMediaProxyError
+			require.ErrorAs(t, err, &proxyErr)
+			assert.Equal(t, "artifact_request_rejected", proxyErr.code)
+		})
+	}
 }
 
 func TestProxyTaskMediaPassesThroughUnsatisfiedRange(t *testing.T) {

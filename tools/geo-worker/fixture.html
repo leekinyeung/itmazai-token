@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>本地 GEO 采集模拟页面</title>
+<style>
+  body { font: 16px/1.6 system-ui, sans-serif; margin: 2rem auto; max-width: 42rem; }
+  main { background: #f4f6fb; border-radius: 12px; padding: 1rem 1.5rem; }
+  textarea { display: block; width: 100%; }
+</style>
+<h1>本地 GEO 采集模拟页面</h1>
+<form>
+  <label for="question">Question</label>
+  <textarea id="question" required></textarea>
+  <button type="submit">Search</button>
+</form>
+<p data-testid="response-complete" hidden>回答已生成</p>
+<main data-testid="evidence" hidden>
+  <p data-testid="answer"></p>
+  <button type="button" aria-controls="references" aria-expanded="false">References</button>
+  <ul id="references" data-testid="references" hidden>
+    <li><a href="https://example.com/gateway">网关公开资料（模拟）</a></li>
+    <li><a href="https://example.com/gateway">重复引用（模拟）</a></li>
+    <li><a href="https://example.org/models">模型公开资料（模拟）</a></li>
+  </ul>
+</main>
+<script>
+  const evidence = document.querySelector('main');
+  const answer = evidence.querySelector('p');
+  document.querySelector('form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    evidence.hidden = false;
+    answer.textContent = `本地模拟回答。收到的问题：${document.querySelector('#question').value}`;
+    requestAnimationFrame(() => {
+      answer.textContent += '\n已从模拟页面提取回答和引用。';
+      document.querySelector('[data-testid="response-complete"]').hidden = false;
+    });
+  });
+  evidence.querySelector('button')?.addEventListener('click', (event) => {
+    event.currentTarget.setAttribute('aria-expanded', 'true');
+    document.querySelector('#references').hidden = false;
+  });
+</script>
+</html>

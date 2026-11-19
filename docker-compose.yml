@@ -16,7 +16,7 @@ version: '3.4' # For compatibility with older Docker versions
 
 services:
   new-api:
-    image: calciumion/new-api:latest
+    image: ${TAODOCK_IMAGE:-calciumion/new-api:latest}
     container_name: new-api
     restart: always
     command: --log-dir /app/logs
@@ -26,6 +26,7 @@ services:
       - ./data:/data
       - ./logs:/app/logs
     environment:
+      - GEO_WORKER_ARTIFACT_PROXY=${GEO_WORKER_TOKEN:+true}
       - SQL_DSN=postgresql://root:123456@postgres:5432/new-api # ⚠️ IMPORTANT: Change the password in production!
 #      - SQL_DSN=root:123456@tcp(mysql:3306)/new-api  # Point to the mysql service, uncomment if using MySQL
 #      - LOG_SQL_DSN=postgresql://root:123456@postgres:5432/new-api-log # OPTIONAL: If you want a separate database for logging, uncomment and set this
@@ -60,11 +61,38 @@ services:
 #      - clickhouse  # Uncomment if using ClickHouse for LOG_SQL_DSN
     networks:
       - new-api-network
+      - geo
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+  geo-worker:
+    profiles: [geo]
+    image: ${GEO_WORKER_IMAGE:-taodock-geo-worker:local}
+    build: ./tools/geo-worker
+    hostname: geo-worker
+    init: true
+    restart: unless-stopped
+    environment:
+      GEO_CAPTURE_SOURCE: ${GEO_CAPTURE_SOURCE:-deepseek_web}
+      GEO_WORKER_HOST: 0.0.0.0
+      GEO_WORKER_TOKEN: ${GEO_WORKER_TOKEN:-}
+    volumes:
+      - deepseek_profile:/var/lib/geo-worker
+    networks:
+      - geo
+    healthcheck:
+      test: ["CMD", "node", "-e", "const s = require('node:net').connect(3031, '127.0.0.1'); s.on('connect', () => s.end()); s.on('error', () => process.exit(1));"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    shm_size: 512m
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
 
   redis:
     image: redis:latest
@@ -125,9 +153,12 @@ services:
 volumes:
   pg_data:
   redis_data:
+  deepseek_profile:
 #  mysql_data:
 #  clickhouse_data:
 
 networks:
   new-api-network:
+    driver: bridge
+  geo:
     driver: bridge

@@ -10,12 +10,14 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/pkg/jsplugin"
@@ -30,6 +32,40 @@ var errTaskMediaRequestRejected = errors.New("task media request rejected")
 
 var taskMediaResponseHeaderTimeout = 60 * time.Second
 var taskMediaDataURLMaxEncodedBytes = 64 << 20
+
+const geoWorkerAddress = "geo-worker:3031"
+const geoWorkerOrigin = "http://" + geoWorkerAddress
+
+var geoWorkerTaskID = regexp.MustCompile(`^task_[A-Za-z0-9_-]{1,128}$`)
+var geoWorkerArtifactClient = &http.Client{
+	Transport: &http.Transport{
+		// Resolve once and dial only private addresses on the Compose bridge.
+		DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+			if address != geoWorkerAddress {
+				return nil, errTaskMediaRequestRejected
+			}
+			ips, err := net.DefaultResolver.LookupNetIP(ctx, "ip", "geo-worker")
+			if err != nil {
+				return nil, err
+			}
+			dialer := net.Dialer{Timeout: 5 * time.Second}
+			for _, ip := range ips {
+				if !ip.Unmap().IsPrivate() {
+					continue
+				}
+				conn, err := dialer.DialContext(ctx, network, net.JoinHostPort(ip.String(), "3031"))
+				if err == nil {
+					return conn, nil
+				}
+			}
+			return nil, errors.New("GEO Worker is unavailable on the private network")
+		},
+		IdleConnTimeout: 30 * time.Second,
+	},
+	CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+		return errTaskMediaRequestRejected
+	},
+}
 
 type taskMediaProxyError struct {
 	status  int
@@ -217,25 +253,40 @@ func proxyTaskMedia(c *gin.Context, task *model.Task, descriptor *relaychannel.T
 	}
 	setting := channel.GetSetting()
 	proxy := strings.TrimSpace(setting.Proxy)
-	if err := validateTaskMediaURL(rawURL, proxy); err != nil {
-		return &taskMediaProxyError{
-			status: http.StatusBadGateway, code: "artifact_request_rejected",
-			message: "Artifact request was rejected", err: err,
-		}
-	}
 
-	client := service.GetSSRFProtectedHTTPClient()
-	if proxy != "" {
-		client, err = service.GetHttpClientWithProxySettings(proxy, setting)
-		if err != nil {
+	// The Compose worker may serve this GEO task's own screenshot on the private bridge.
+	// Every other descriptor goes through the normal SSRF and redirect checks.
+	var client *http.Client
+	useGeoWorker := common.GetEnvOrDefaultString("GEO_WORKER_ARTIFACT_PROXY", "") == "true" &&
+		taskHasPluginExecution(task) && task.PrivateData.Execution.TaskPlugin.Key == "geo" &&
+		channel.Type == constant.ChannelTypeTaskPlugin && setting.TaskPluginKey == "geo" &&
+		channel.GetBaseURL() == geoWorkerOrigin && proxy == "" &&
+		!descriptor.Credentialless && len(descriptor.Body) == 0 &&
+		(method == http.MethodGet || method == http.MethodHead) &&
+		geoWorkerTaskID.MatchString(task.GetUpstreamTaskID()) &&
+		rawURL == geoWorkerOrigin+"/internal/v1/tasks/"+task.GetUpstreamTaskID()+"/screenshot"
+	if useGeoWorker {
+		client = geoWorkerArtifactClient
+	} else {
+		if err := validateTaskMediaURL(rawURL, proxy); err != nil {
 			return &taskMediaProxyError{
-				status: http.StatusInternalServerError, code: "artifact_internal_error",
-				message: "Failed to create artifact proxy client", err: err,
+				status: http.StatusBadGateway, code: "artifact_request_rejected",
+				message: "Artifact request was rejected", err: err,
 			}
 		}
-	}
-	if client == nil {
-		client = http.DefaultClient
+		client = service.GetSSRFProtectedHTTPClient()
+		if proxy != "" {
+			client, err = service.GetHttpClientWithProxySettings(proxy, setting)
+			if err != nil {
+				return &taskMediaProxyError{
+					status: http.StatusInternalServerError, code: "artifact_internal_error",
+					message: "Failed to create artifact proxy client", err: err,
+				}
+			}
+		}
+		if client == nil {
+			client = http.DefaultClient
+		}
 	}
 
 	req, err := http.NewRequestWithContext(c.Request.Context(), method, parsedURL.String(), bytes.NewReader(descriptor.Body))
@@ -256,7 +307,9 @@ func proxyTaskMedia(c *gin.Context, task *model.Task, descriptor *relaychannel.T
 		req.Header.Set(name, value)
 	}
 
-	client = taskMediaRedirectClient(client, proxy, c, clientHeaders, descriptor.Credentialless)
+	if !useGeoWorker {
+		client = taskMediaRedirectClient(client, proxy, c, clientHeaders, descriptor.Credentialless)
+	}
 	clientWithoutBodyTimeout := *client
 	clientWithoutBodyTimeout.Timeout = 0
 	resp, err := doTaskMediaRequest(&clientWithoutBodyTimeout, req, taskMediaResponseHeaderTimeout)
